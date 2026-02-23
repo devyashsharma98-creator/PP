@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp,
@@ -269,13 +269,6 @@ export default function Dashboard() {
                       />
                     </PopoverContent>
                   </Popover>
-                  {/* Hidden input for automation fallback */}
-                  <input 
-                    type="hidden" 
-                    id="hidden-date-input" 
-                    value={selectedDate ? selectedDate.toISOString() : ''} 
-                    onChange={(e) => setSelectedDate(e.target.value ? parseISO(e.target.value) : undefined)}
-                  />
                 </div>
                 <div>
                   <Label>Unit</Label>
