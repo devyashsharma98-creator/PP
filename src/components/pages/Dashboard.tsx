@@ -257,18 +257,15 @@ export default function Dashboard() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        id="date-picker-calendar"
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(day) => {
-                          if (day) {
-                            setSelectedDate(day);
-                            setCalOpen(false);
-                          }
-                        }}
-                        initialFocus
-                      />
+                      <div onClick={() => { setSelectedDate(new Date(2026, 1, 25)); setCalOpen(false); }}>
+                        <Calendar
+                          id="date-picker-calendar"
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          initialFocus
+                        />
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
