@@ -1,9 +1,11 @@
 "use client";
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, Globe, Target, Users, Search, Megaphone, MessagesSquare, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Flame, Globe, Target, Users, Search, Megaphone, MessagesSquare, BookOpen, Network, ArrowRight } from 'lucide-react';
 
 const aayams = [
   {
@@ -148,6 +150,54 @@ export default function Parichay() {
             </motion.div>
           ))}
         </div>
+      </div>
+
+      {/* Navigation CTAs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <Link href="/dayitv" className="block">
+          <Card className="glass-card hover-lift cursor-pointer border-info/30 hover:border-info/60 transition-colors h-full">
+            <CardContent className="py-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--info)/.12)] flex items-center justify-center shrink-0">
+                <Network className="w-5 h-5 text-info" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Dayitv</p>
+                <p className="text-[10px] text-muted-foreground font-devanagari">संगठन संरचना देखें</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/vimarsh" className="block">
+          <Card className="glass-card hover-lift cursor-pointer border-warning/30 hover:border-warning/60 transition-colors h-full">
+            <CardContent className="py-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--warning)/.12)] flex items-center justify-center shrink-0">
+                <MessagesSquare className="w-5 h-5 text-warning" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Vimarsh</p>
+                <p className="text-[10px] text-muted-foreground font-devanagari">15 विमर्श विषय खोजें</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/library" className="block">
+          <Card className="glass-card hover-lift cursor-pointer border-success/30 hover:border-success/60 transition-colors h-full">
+            <CardContent className="py-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--success)/.12)] flex items-center justify-center shrink-0">
+                <BookOpen className="w-5 h-5 text-success" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">E-Library</p>
+                <p className="text-[10px] text-muted-foreground font-devanagari">IKS पुस्तकें पढ़ें</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </motion.div>
   );

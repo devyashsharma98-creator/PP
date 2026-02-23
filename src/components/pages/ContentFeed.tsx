@@ -1,11 +1,12 @@
 "use client";
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, CalendarDays, MapPin, BookOpen } from 'lucide-react';
+import { Share2, CalendarDays, MapPin, BookOpen, ArrowRight, MessagesSquare } from 'lucide-react';
 
 const mockArticles = [
   {
@@ -87,6 +88,25 @@ export default function ContentFeed() {
           </motion.div>
         ))}
       </div>
+
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+        <Card className="glass-card border-primary/20 bg-primary/5">
+          <CardContent className="py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <MessagesSquare className="w-8 h-8 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold text-sm">विमर्श — Explore 15 Discourse Topics</p>
+                <p className="text-xs text-muted-foreground">Identify narratives, study counter-arguments, मंडन और खंडन</p>
+              </div>
+            </div>
+            <Link href="/vimarsh">
+              <Button size="sm" className="shrink-0 w-full sm:w-auto">
+                Explore Vimarsh <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }

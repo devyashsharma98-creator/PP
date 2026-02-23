@@ -1,11 +1,13 @@
 "use client";
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, ChevronDown, ChevronRight, ExternalLink, Youtube, BookOpen } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, ExternalLink, Youtube, BookOpen, Library } from 'lucide-react';
 
 const topics = [
   {
@@ -213,9 +215,18 @@ export default function Vimarsh() {
                           </h4>
                           <div className="space-y-1.5">
                             {topic.books.map((b, j) => (
-                              <Badge key={j} variant="outline" className="text-[10px] block w-fit">{b}</Badge>
+                              <Link key={j} href="/library">
+                                <Badge variant="outline" className="text-[10px] block w-fit cursor-pointer hover:border-success/60 hover:bg-success/5 hover:text-success transition-colors">
+                                  <Library className="w-2.5 h-2.5 inline mr-1 opacity-70" />{b}
+                                </Badge>
+                              </Link>
                             ))}
                           </div>
+                          <Link href="/library">
+                            <Button variant="ghost" size="sm" className="text-[10px] h-6 px-2 mt-1 text-success hover:text-success">
+                              Open E-Library →
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </div>

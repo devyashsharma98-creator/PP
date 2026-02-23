@@ -1,67 +1,74 @@
 "use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext } from '@/context/AppContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { format, parseISO, isValid } from 'date-fns';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAppContext } from "@/context/AppContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { format, parseISO, isValid } from "date-fns";
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
-  ArrowRight, BarChart3, Users, TrendingUp,
-} from 'lucide-react';
+  ArrowRight, BarChart3, Users, TrendingUp, X,
+} from "lucide-react";
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
-    Draft: 'status-draft',
-    'Pending Aayam Review': 'status-pending-review',
-    'Pending Final Approval': 'status-pending-approval',
-    Published: 'status-published',
+    Draft: "status-draft",
+    "Pending Aayam Review": "status-pending-review",
+    "Pending Final Approval": "status-pending-approval",
+    Published: "status-published",
   };
-  return map[status] || '';
+  return map[status] || "";
 };
 
 export default function Dashboard() {
   const { role, events, addEvent, updateEventStatus } = useAppContext();
+  const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [formTab, setFormTab] = useState('pre');
-  const [dateValue, setDateValue] = useState('');
+  const [formTab, setFormTab] = useState("pre");
+  const [dateValue, setDateValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
-    title: '', description: '', unit: '',
+    title: "", description: "", unit: "",
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
-    report: '', fileName: '', videoUrl: '', posterName: '',
+    report: "", fileName: "", videoUrl: "", posterName: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const selectedDate = parseISO(dateValue);
     if (!form.title || !isValid(selectedDate)) return;
-    
+
     addEvent({
       title: form.title,
       description: form.description,
-      date: format(selectedDate, 'dd MMM yyyy'),
-      unit: form.unit || 'Bhopal',
-      submittedBy: 'Current User',
+      date: format(selectedDate, "dd MMM yyyy"),
+      unit: form.unit || "Bhopal",
+      submittedBy: "Current User",
       checklist: form.checklist,
       report: form.report,
-      imageUrl: '',
+      imageUrl: "",
     });
     setForm({
-      title: '', description: '', unit: '',
+      title: "", description: "", unit: "",
       checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
-      report: '', fileName: '', videoUrl: '', posterName: '',
+      report: "", fileName: "", videoUrl: "", posterName: "",
     });
-    setDateValue('');
-    setFormTab('pre');
+    setDateValue("");
+    setFormTab("pre");
     setDialogOpen(false);
+    setSubmitted(true);
+    router.push("/");
   };
 
   const toggleChecklist = (key: keyof typeof form.checklist) => {
@@ -69,11 +76,12 @@ export default function Dashboard() {
   };
 
   // Role-specific content
-  if (role === 'vibhag_pramukh') {
+  if (role === "vibhag_pramukh") {
     const totalEvents = events.length;
-    const published = events.filter(e => e.status === 'Published').length;
-    const pending = events.filter(e => e.status === 'Pending Final Approval');
+    const published = events.filter(e => e.status === "Published").length;
+    const pending = events.filter(e => e.status === "Pending Final Approval");
     const units = new Set(events.map(e => e.unit)).size;
+    const [lastPublished, setLastPublished] = useState<string | null>(null);
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -84,10 +92,10 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Events', value: totalEvents, icon: BarChart3, color: 'text-primary' },
-            { label: 'Published', value: published, icon: CheckCircle2, color: 'text-success' },
-            { label: 'Pending Approval', value: pending.length, icon: Clock, color: 'text-warning' },
-            { label: 'Active Units', value: units, icon: Users, color: 'text-info' },
+            { label: "Total Events", value: totalEvents, icon: BarChart3, color: "text-primary" },
+            { label: "Published", value: published, icon: CheckCircle2, color: "text-success" },
+            { label: "Pending Approval", value: pending.length, icon: Clock, color: "text-warning" },
+            { label: "Active Units", value: units, icon: Users, color: "text-info" },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Card className="glass-card hover-lift">
@@ -122,12 +130,53 @@ export default function Dashboard() {
                       <p className="font-medium">{event.title}</p>
                       <p className="text-sm text-muted-foreground">{event.unit} · {event.date}</p>
                     </div>
-                    <Button size="sm" onClick={() => updateEventStatus(event.id, 'Published')}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        updateEventStatus(event.id, "Published");
+                        setLastPublished(event.title);
+                      }}
+                    >
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Publish to Feed
                     </Button>
                   </motion.div>
                 ))}
               </div>
+            )}
+
+            {lastPublished && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4"
+              >
+                <Card className="border border-green-500/40 bg-green-500/10">
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                            <span className="font-semibold">{lastPublished}</span> published! Do not forget to update Prachar.
+                          </p>
+                          <Link href="/prachar">
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-green-700 dark:text-green-400 hover:text-green-900">
+                              Go to Prachar <ArrowRight className="w-3 h-3 ml-1" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setLastPublished(null)}
+                        className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                        aria-label="Dismiss"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
           </CardContent>
         </Card>
@@ -135,9 +184,9 @@ export default function Dashboard() {
     );
   }
 
-  if (role === 'aayam_pramukh') {
-    const pendingReview = events.filter(e => e.status === 'Pending Aayam Review');
-    const forwarded = events.filter(e => e.status === 'Pending Final Approval' || e.status === 'Published');
+  if (role === "aayam_pramukh") {
+    const pendingReview = events.filter(e => e.status === "Pending Aayam Review");
+    const forwarded = events.filter(e => e.status === "Pending Final Approval" || e.status === "Published");
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -171,9 +220,14 @@ export default function Dashboard() {
                       <Badge className={statusBadge(event.status)}>{event.status}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
-                    <Button size="sm" onClick={() => updateEventStatus(event.id, 'Pending Final Approval')}>
-                      Review & Forward <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <div className="space-y-1">
+                      <Button size="sm" onClick={() => updateEventStatus(event.id, "Pending Final Approval")}>
+                        Review &amp; Forward <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                      <p className="text-xs text-muted-foreground pl-0.5">
+                        Forwarded events are visible to Vibhag Pramukh for final approval.
+                      </p>
+                    </div>
                   </motion.div>
                 ))
               )}
@@ -205,17 +259,17 @@ export default function Dashboard() {
   }
 
   // Unit Head View
-  const myEvents = events.filter(e => e.submittedBy === 'Current User' || true); // show all for demo
+  const myEvents = events.filter(e => e.submittedBy === "Current User" || true); // show all for demo
   const checklistItems: { key: keyof typeof form.checklist; label: string }[] = [
-    { key: 'designing', label: 'Designing (डिज़ाइनिंग)' },
-    { key: 'food', label: 'Food (भोजन)' },
-    { key: 'seating', label: 'Sitting & Place (बैठक व स्थान)' },
-    { key: 'transport', label: 'Transport (परिवहन)' },
-    { key: 'accommodation', label: 'Accommodation (आवास)' },
-    { key: 'soundMic', label: 'Sound + Music (ध्वनि)' },
-    { key: 'camera', label: 'Camera (कैमरा)' },
-    { key: 'screen', label: 'Screen (स्क्रीन)' },
-    { key: 'lights', label: 'Lights (रोशनी)' },
+    { key: "designing", label: "Designing (डिज़ाइनिंग)" },
+    { key: "food", label: "Food (भोजन)" },
+    { key: "seating", label: "Sitting & Place (बैठक व स्थान)" },
+    { key: "transport", label: "Transport (परिवहन)" },
+    { key: "accommodation", label: "Accommodation (आवास)" },
+    { key: "soundMic", label: "Sound + Music (ध्वनि)" },
+    { key: "camera", label: "Camera (कैमरा)" },
+    { key: "screen", label: "Screen (स्क्रीन)" },
+    { key: "lights", label: "Lights (रोशनी)" },
   ];
 
   return (
@@ -241,11 +295,11 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <Label>Date</Label>
-                  <Input 
-                    type="date" 
-                    value={dateValue} 
-                    onChange={e => setDateValue(e.target.value)} 
-                    required 
+                  <Input
+                    type="date"
+                    value={dateValue}
+                    onChange={e => setDateValue(e.target.value)}
+                    required
                     className="w-full"
                   />
                 </div>
@@ -285,22 +339,22 @@ export default function Dashboard() {
                     <div>
                       <Label>Upload Photos</Label>
                       <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => setForm(p => ({ ...p, fileName: 'photos_event.zip' }))}>
+                        onClick={() => setForm(p => ({ ...p, fileName: "photos_event.zip" }))}>
                         {form.fileName ? (
-                          <p className="text-foreground font-medium text-xs">📷 {form.fileName}</p>
+                          <p className="text-foreground font-medium text-xs">ð· {form.fileName}</p>
                         ) : (
-                          <p className="text-xs">📷 Photos (simulated)</p>
+                          <p className="text-xs">ð· Photos (simulated)</p>
                         )}
                       </div>
                     </div>
                     <div>
                       <Label>Upload Video</Label>
                       <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => setForm(p => ({ ...p, videoUrl: 'event_video.mp4' }))}>
+                        onClick={() => setForm(p => ({ ...p, videoUrl: "event_video.mp4" }))}>
                         {form.videoUrl ? (
-                          <p className="text-foreground font-medium text-xs">🎥 {form.videoUrl}</p>
+                          <p className="text-foreground font-medium text-xs">ð¥ {form.videoUrl}</p>
                         ) : (
-                          <p className="text-xs">🎥 Video (simulated)</p>
+                          <p className="text-xs">ð¥ Video (simulated)</p>
                         )}
                       </div>
                     </div>
@@ -308,11 +362,11 @@ export default function Dashboard() {
                   <div>
                     <Label>Upload Poster</Label>
                     <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => setForm(p => ({ ...p, posterName: 'event_poster.jpg' }))}>
+                      onClick={() => setForm(p => ({ ...p, posterName: "event_poster.jpg" }))}>
                       {form.posterName ? (
-                        <p className="text-foreground font-medium text-xs">🖼️ {form.posterName}</p>
+                        <p className="text-foreground font-medium text-xs">ð¼ï¸ {form.posterName}</p>
                       ) : (
-                        <p className="text-xs">🖼️ Upload Poster (simulated)</p>
+                        <p className="text-xs">ð¼ï¸ Upload Poster (simulated)</p>
                       )}
                     </div>
                   </div>
@@ -324,6 +378,27 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Success alert after submission */}
+      {submitted && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <Alert className="border-green-500/40 bg-green-500/10">
+            <CheckCircle2 className="w-4 h-4 text-green-600" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-green-800 dark:text-green-300 text-sm">
+                Event submitted for Aayam review! It will appear in the list below.
+              </span>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="ml-4 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                aria-label="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       {/* Event List */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -350,6 +425,15 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <User className="w-3 h-3" /> {event.submittedBy}
                   </div>
+                  {event.status === "Published" && (
+                    <div className="pt-1">
+                      <Link href="/feed">
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
+                          View in Feed <ArrowRight className="w-3 h-3 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

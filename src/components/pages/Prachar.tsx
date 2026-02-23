@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -154,6 +155,14 @@ export default function Prachar() {
                         Mark all platforms above to clear the pending alert for this event.
                       </p>
                     )}
+
+                    {done && (
+                      <Link href="/feed">
+                        <Button variant="outline" size="sm" className="text-xs text-success border-success/40 hover:bg-success/5 w-full sm:w-auto">
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> View Published in Feed →
+                        </Button>
+                      </Link>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -186,6 +195,9 @@ export default function Prachar() {
             </motion.div>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground text-center pt-2">
+          Need content ideas? <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">Explore Vimarsh topics →</Link>
+        </p>
       </div>
     </motion.div>
   );
