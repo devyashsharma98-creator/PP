@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp,
@@ -242,33 +242,40 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <Label>Date</Label>
-                  <div className="relative">
-                    <Button
-                      id="date-picker-trigger"
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                      type="button"
-                      onClick={() => setCalOpen(!calOpen)}
-                    >
-                      <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
-                    </Button>
-                    {calOpen && (
-                      <div className="absolute z-[100] mt-2 bg-popover border rounded-md shadow-md p-0">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            if (date) {
-                              setSelectedDate(date);
-                              setCalOpen(false);
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </div>
-                    )}
-                  </div>
+                  <Popover open={calOpen} onOpenChange={setCalOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="date-picker-trigger"
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                        type="button"
+                      >
+                        <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        id="date-picker-calendar"
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          if (date) {
+                            setSelectedDate(date);
+                            setCalOpen(false);
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {/* Hidden input for automation fallback */}
+                  <input 
+                    type="hidden" 
+                    id="hidden-date-input" 
+                    value={selectedDate ? selectedDate.toISOString() : ''} 
+                    onChange={(e) => setSelectedDate(e.target.value ? parseISO(e.target.value) : undefined)}
+                  />
                 </div>
                 <div>
                   <Label>Unit</Label>
