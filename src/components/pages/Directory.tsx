@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Phone, Mail, User } from 'lucide-react';
+import { Search, Phone, MapPin, User } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 const members = [
@@ -35,14 +35,12 @@ export default function Directory() {
   const [selectedAayam, setSelectedAayam] = useState<string | null>(null);
 
   const filtered = members.filter(m => {
-    const matchesSearch = 
+    const matchesSearch =
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.role.toLowerCase().includes(search.toLowerCase()) ||
       m.aayam.toLowerCase().includes(search.toLowerCase()) ||
       m.unit.toLowerCase().includes(search.toLowerCase());
-    
     const matchesAayam = selectedAayam ? m.aayam === selectedAayam : true;
-    
     return matchesSearch && matchesAayam;
   });
 
@@ -50,33 +48,32 @@ export default function Directory() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Sampark Directory</h1>
           <p className="text-muted-foreground text-sm font-devanagari">सम्पर्क सूची - Member contacts across all units</p>
         </div>
-        <div className="relative w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search members..." className="pl-10" />
         </div>
       </div>
 
+      {/* Aayam filters */}
       <div className="flex flex-wrap gap-2">
-        <Badge 
+        <Badge
           variant={selectedAayam === null ? 'default' : 'outline'}
           className="cursor-pointer"
           onClick={() => setSelectedAayam(null)}
         >
-          All Ayam
+          All Aayam
         </Badge>
         {aayams.map(aayam => (
-          <Badge 
+          <Badge
             key={aayam}
             variant={selectedAayam === aayam ? 'default' : 'outline'}
-            className={cn(
-              "cursor-pointer",
-              selectedAayam !== aayam && (aayamColors[aayam] || '')
-            )}
+            className={cn('cursor-pointer', selectedAayam !== aayam && (aayamColors[aayam] || ''))}
             onClick={() => setSelectedAayam(aayam)}
           >
             {aayam}
@@ -84,7 +81,44 @@ export default function Directory() {
         ))}
       </div>
 
-      <Card className="glass-card overflow-hidden">
+      {/* Mobile card view (hidden on sm+) */}
+      <div className="sm:hidden space-y-3">
+        {filtered.map((member, i) => (
+          <motion.div
+            key={member.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+          >
+            <Card className="glass-card">
+              <CardContent className="pt-4 pb-4 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm leading-tight">{member.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{member.role}</p>
+                    </div>
+                  </div>
+                  <Badge className={`${aayamColors[member.aayam] || ''} text-[10px] shrink-0`}>{member.aayam}</Badge>
+                </div>
+                <div className="flex items-center gap-4 pl-[46px] text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{member.unit}</span>
+                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{member.contact}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground text-sm">No members found.</div>
+        )}
+      </div>
+
+      {/* Desktop table view (hidden on mobile) */}
+      <Card className="glass-card overflow-hidden hidden sm:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

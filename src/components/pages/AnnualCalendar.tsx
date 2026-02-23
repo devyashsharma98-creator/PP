@@ -106,7 +106,7 @@ export default function AnnualCalendar() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Calendar grid */}
         <div className="lg:col-span-2">
           <Card className="glass-card">
@@ -123,53 +123,58 @@ export default function AnnualCalendar() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              {/* Day names */}
-              <div className="grid grid-cols-7 mb-1">
-                {DAYS.map(d => (
-                  <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">{d}</div>
-                ))}
-              </div>
-              {/* Date cells */}
-              <div className="grid grid-cols-7 gap-px">
-                {Array.from({ length: offset }).map((_, i) => <div key={`e${i}`} className="min-h-[54px]" />)}
-                {Array.from({ length: days }).map((_, i) => {
-                  const d = i + 1;
-                  const dayEvts = forDay(d);
-                  const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
-                  return (
-                    <div
-                      key={d}
-                      className={cn(
-                        'min-h-[54px] p-1 rounded-md border border-transparent hover:border-border/50 transition-colors',
-                        isToday && 'bg-primary/5 border-primary/30'
-                      )}
-                    >
-                      <p className={cn('text-[11px] font-medium text-center mb-0.5', isToday && 'text-primary font-bold')}>{d}</p>
-                      <div className="space-y-0.5">
-                        {dayEvts.slice(0, 2).map(e => (
-                          <div
-                            key={e.id}
-                            className={cn('text-[9px] px-1 py-0.5 rounded truncate leading-tight', aayamLight[e.aayam] || 'bg-muted text-muted-foreground')}
-                          >
-                            {e.title}
+            <CardContent className="px-2 sm:px-6">
+              {/* Horizontal scroll wrapper for mobile */}
+              <div className="overflow-x-auto -mx-2 sm:mx-0">
+                <div className="min-w-[300px]">
+                  {/* Day names */}
+                  <div className="grid grid-cols-7 mb-1">
+                    {DAYS.map(d => (
+                      <div key={d} className="text-center text-[9px] sm:text-[10px] font-semibold text-muted-foreground py-1">{d}</div>
+                    ))}
+                  </div>
+                  {/* Date cells */}
+                  <div className="grid grid-cols-7 gap-px">
+                    {Array.from({ length: offset }).map((_, i) => <div key={`e${i}`} className="min-h-[38px] sm:min-h-[54px]" />)}
+                    {Array.from({ length: days }).map((_, i) => {
+                      const d = i + 1;
+                      const dayEvts = forDay(d);
+                      const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
+                      return (
+                        <div
+                          key={d}
+                          className={cn(
+                            'min-h-[38px] sm:min-h-[54px] p-0.5 sm:p-1 rounded-sm border border-transparent hover:border-border/50 transition-colors',
+                            isToday && 'bg-primary/5 border-primary/30'
+                          )}
+                        >
+                          <p className={cn('text-[10px] sm:text-[11px] font-medium text-center mb-0.5', isToday && 'text-primary font-bold')}>{d}</p>
+                          <div className="space-y-0.5">
+                            {dayEvts.slice(0, 1).map(e => (
+                              <div
+                                key={e.id}
+                                className={cn('text-[7px] sm:text-[9px] px-0.5 sm:px-1 py-0.5 rounded truncate leading-tight', aayamLight[e.aayam] || 'bg-muted text-muted-foreground')}
+                              >
+                                {e.title}
+                              </div>
+                            ))}
+                            {dayEvts.length > 1 && (
+                              <div className="text-[7px] sm:text-[9px] text-muted-foreground text-center">+{dayEvts.length - 1}</div>
+                            )}
                           </div>
-                        ))}
-                        {dayEvts.length > 2 && (
-                          <div className="text-[9px] text-muted-foreground text-center">+{dayEvts.length - 2}</div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {/* Legend */}
-              <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-border/40">
+              <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 pt-3 border-t border-border/40">
                 {Object.entries(aayamLight).map(([aayam, cls]) => (
                   <div key={aayam} className="flex items-center gap-1">
-                    <div className={cn('w-2.5 h-2.5 rounded-sm', cls.split(' ')[0])} />
-                    <span className="text-[10px] text-muted-foreground">{aayam}</span>
+                    <div className={cn('w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-sm', cls.split(' ')[0])} />
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">{aayam}</span>
                   </div>
                 ))}
               </div>

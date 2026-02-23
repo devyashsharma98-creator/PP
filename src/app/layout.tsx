@@ -1,12 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ClientProviders } from "@/components/ClientProviders";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Navbar } from "@/components/Navbar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pragya Pravah - Bhopal Vibhag",
   description: "Pragya Pravah Management System - Bhopal Vibhag",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -22,11 +30,12 @@ export default function RootLayout({
             <AppSidebar />
             <div className="flex-1 flex flex-col min-w-0">
               <Navbar />
-              <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+              <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto">
                 {children}
               </main>
             </div>
           </div>
+          <MobileBottomNav />
         </ClientProviders>
       </body>
     </html>

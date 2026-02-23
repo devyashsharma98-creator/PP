@@ -125,19 +125,19 @@ export default function Vimarsh() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">
             Vimarsh <span className="font-devanagari text-muted-foreground text-lg">विमर्श</span>
           </h1>
           <p className="text-muted-foreground text-sm">15 Core Discourse Topics — मंडन और खंडन की रणनीति</p>
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search topics..."
+            placeholder="Search topics... / खोजें"
             className="pl-10"
           />
         </div>
@@ -182,7 +182,7 @@ export default function Vimarsh() {
                   >
                     <div className="border-t border-border/50 px-4 py-4 bg-muted/20 space-y-4">
                       <p className="text-sm text-muted-foreground leading-relaxed">{topic.desc}</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                           <h4 className="text-xs font-semibold mb-2 flex items-center gap-1">
                             <ExternalLink className="w-3 h-3 text-primary" /> Articles

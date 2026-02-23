@@ -145,16 +145,14 @@ export default function Dayitv() {
                           {vibhag.aayams.map(aayam => (
                             <div
                               key={aayam.name}
-                              className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/40"
+                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 px-3 rounded-lg bg-muted/40"
                             >
                               <div className="flex items-center gap-2">
-                                <User className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-xs">{aayam.name} Aayam Pramukh</span>
+                                <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                <Badge className={`text-[9px] ${aayamColors[aayam.name]} shrink-0`}>{aayam.name}</Badge>
+                                <span className="text-xs font-medium">{aayam.pramukh}</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">{aayam.pramukh}</span>
-                                <Badge className={`text-[9px] ${aayamColors[aayam.name]}`}>{aayam.name}</Badge>
-                              </div>
+                              <span className="text-[11px] text-muted-foreground pl-6 sm:pl-0">{aayam.contact}</span>
                             </div>
                           ))}
                         </div>
