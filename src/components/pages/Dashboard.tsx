@@ -12,9 +12,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
-  ArrowRight, BarChart3, Users, Activity, TrendingUp,
+  ArrowRight, BarChart3, Users, TrendingUp,
 } from 'lucide-react';
 
 const statusBadge = (status: string) => {
@@ -31,19 +34,21 @@ export default function Dashboard() {
   const { role, events, addEvent, updateEventStatus } = useAppContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState('pre');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [calOpen, setCalOpen] = useState(false);
   const [form, setForm] = useState({
-    title: '', description: '', date: '', unit: '',
+    title: '', description: '', unit: '',
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
     report: '', fileName: '', videoUrl: '', posterName: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.date) return;
+    if (!form.title || !selectedDate) return;
     addEvent({
       title: form.title,
       description: form.description,
-      date: form.date,
+      date: format(selectedDate, 'dd MMM yyyy'),
       unit: form.unit || 'Bhopal',
       submittedBy: 'Current User',
       checklist: form.checklist,
@@ -51,10 +56,11 @@ export default function Dashboard() {
       imageUrl: '',
     });
     setForm({
-      title: '', description: '', date: '', unit: '',
+      title: '', description: '', unit: '',
       checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
       report: '', fileName: '', videoUrl: '', posterName: '',
     });
+    setSelectedDate(undefined);
     setFormTab('pre');
     setDialogOpen(false);
   };
@@ -236,7 +242,26 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <Label>Date</Label>
-                  <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
+                  <Popover open={calOpen} onOpenChange={setCalOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                        type="button"
+                      >
+                        <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(d) => { setSelectedDate(d); setCalOpen(false); }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label>Unit</Label>

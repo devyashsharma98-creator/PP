@@ -9,15 +9,15 @@ import { Search, BookOpen, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const books = [
-  { id: '1', title: 'Arthashastra - Kautilya', category: 'Rajneeti', description: 'Ancient treatise on statecraft, economic policy, and military strategy.', pages: 420 },
-  { id: '2', title: 'Rasaratna Samucchaya', category: 'Rasashastra', description: 'Classical text on Indian alchemy and metallurgy - preparation of metals and minerals.', pages: 310 },
-  { id: '3', title: 'Vastu Shastra Vimarsh', category: 'Vastu', description: 'Comprehensive analysis of ancient Indian architecture and spatial sciences.', pages: 280 },
-  { id: '4', title: 'Surya Siddhanta', category: 'Jyotish', description: 'Astronomical treatise covering planetary positions, eclipses, and cosmography.', pages: 350 },
-  { id: '5', title: 'Charaka Samhita', category: 'Ayurveda', description: 'Foundational text of Ayurvedic medicine covering diagnosis and treatment.', pages: 620 },
-  { id: '6', title: 'Shulba Sutras', category: 'Ganit', description: 'Ancient mathematical texts containing geometry for altar construction.', pages: 190 },
-  { id: '7', title: 'Brihat Samhita - Varahamihira', category: 'Vigyan', description: 'Encyclopedic work on astronomy, weather, architecture, and gemology.', pages: 480 },
-  { id: '8', title: 'Yoga Sutras - Patanjali', category: 'Darshan', description: 'Classical text on the theory and practice of yoga philosophy.', pages: 150 },
-  { id: '9', title: 'Natyashastra - Bharata', category: 'Kala', description: 'Ancient treatise on performing arts including drama, dance, and music.', pages: 540 },
+  { id: '1', title: 'Arthashastra - Kautilya', hindiTitle: 'अर्थशास्त्र - कौटिल्य', category: 'Rajneeti', hindiCategory: 'राजनीति', description: 'Ancient treatise on statecraft, economic policy, and military strategy.', hindiDesc: 'राजनीति, अर्थनीति और सैन्य रणनीति पर प्राचीन ग्रंथ।', tags: ['कौटिल्य', 'चाणक्य', 'भारत', 'नीति'], pages: 420 },
+  { id: '2', title: 'Rasaratna Samucchaya', hindiTitle: 'रसरत्न समुच्चय', category: 'Rasashastra', hindiCategory: 'रसशास्त्र', description: 'Classical text on Indian alchemy and metallurgy - preparation of metals and minerals.', hindiDesc: 'भारतीय रसायन और धातुविज्ञान पर शास्त्रीय ग्रंथ।', tags: ['रसायन', 'धातु', 'भारतीय विज्ञान'], pages: 310 },
+  { id: '3', title: 'Vastu Shastra Vimarsh', hindiTitle: 'वास्तु शास्त्र विमर्श', category: 'Vastu', hindiCategory: 'वास्तु', description: 'Comprehensive analysis of ancient Indian architecture and spatial sciences.', hindiDesc: 'प्राचीन भारतीय स्थापत्य और स्थान-विज्ञान का विश्लेषण।', tags: ['वास्तु', 'स्थापत्य', 'भारत'], pages: 280 },
+  { id: '4', title: 'Surya Siddhanta', hindiTitle: 'सूर्य सिद्धांत', category: 'Jyotish', hindiCategory: 'ज्योतिष', description: 'Astronomical treatise covering planetary positions, eclipses, and cosmography.', hindiDesc: 'ग्रह स्थिति, ग्रहण और ब्रह्मांड विज्ञान पर खगोलीय ग्रंथ।', tags: ['सूर्य', 'ज्योतिष', 'खगोल', 'भारत'], pages: 350 },
+  { id: '5', title: 'Charaka Samhita', hindiTitle: 'चरक संहिता', category: 'Ayurveda', hindiCategory: 'आयुर्वेद', description: 'Foundational text of Ayurvedic medicine covering diagnosis and treatment.', hindiDesc: 'आयुर्वेदिक चिकित्सा का मूलभूत ग्रंथ।', tags: ['आयुर्वेद', 'चरक', 'चिकित्सा', 'भारत'], pages: 620 },
+  { id: '6', title: 'Shulba Sutras', hindiTitle: 'शुल्ब सूत्र', category: 'Ganit', hindiCategory: 'गणित', description: 'Ancient mathematical texts containing geometry for altar construction.', hindiDesc: 'यज्ञ-वेदी निर्माण हेतु ज्यामिति पर प्राचीन गणितीय ग्रंथ।', tags: ['गणित', 'ज्यामिति', 'भारत', 'वेद'], pages: 190 },
+  { id: '7', title: 'Brihat Samhita - Varahamihira', hindiTitle: 'बृहत् संहिता - वराहमिहिर', category: 'Vigyan', hindiCategory: 'विज्ञान', description: 'Encyclopedic work on astronomy, weather, architecture, and gemology.', hindiDesc: 'खगोल, मौसम, स्थापत्य और रत्न-विज्ञान पर विश्वकोश।', tags: ['विज्ञान', 'खगोल', 'भारत', 'वराहमिहिर'], pages: 480 },
+  { id: '8', title: 'Yoga Sutras - Patanjali', hindiTitle: 'योग सूत्र - पतंजलि', category: 'Darshan', hindiCategory: 'दर्शन', description: 'Classical text on the theory and practice of yoga philosophy.', hindiDesc: 'योग दर्शन के सिद्धांत और अभ्यास पर शास्त्रीय ग्रंथ।', tags: ['योग', 'पतंजलि', 'दर्शन', 'भारत'], pages: 150 },
+  { id: '9', title: 'Natyashastra - Bharata', hindiTitle: 'नाट्यशास्त्र - भरत', category: 'Kala', hindiCategory: 'कला', description: 'Ancient treatise on performing arts including drama, dance, and music.', hindiDesc: 'नाट्य, नृत्य और संगीत सहित प्रदर्शन कलाओं पर प्राचीन ग्रंथ।', tags: ['नाट्य', 'कला', 'संगीत', 'भारत', 'भरत'], pages: 540 },
 ];
 
 const categoryColors: Record<string, string> = {
@@ -35,10 +35,16 @@ const categoryColors: Record<string, string> = {
 export default function ELibrary() {
   const [search, setSearch] = useState('');
 
+  const q = search.toLowerCase().trim();
   const filtered = books.filter(b =>
-    b.title.toLowerCase().includes(search.toLowerCase()) ||
-    b.category.toLowerCase().includes(search.toLowerCase()) ||
-    b.description.toLowerCase().includes(search.toLowerCase())
+    !q ||
+    b.title.toLowerCase().includes(q) ||
+    b.hindiTitle.includes(search.trim()) ||
+    b.category.toLowerCase().includes(q) ||
+    b.hindiCategory.includes(search.trim()) ||
+    b.description.toLowerCase().includes(q) ||
+    b.hindiDesc.includes(search.trim()) ||
+    b.tags.some(t => t.includes(search.trim()) || t.toLowerCase().includes(q))
   );
 
   return (
@@ -53,7 +59,7 @@ export default function ELibrary() {
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search books, topics..."
+            placeholder="Search books / पुस्तक खोजें..."
             className="pl-10"
           />
         </div>
@@ -76,8 +82,9 @@ export default function ELibrary() {
                 <BookOpen className="w-10 h-10 text-primary-foreground/80" />
               </div>
               <CardContent className="pt-4 flex-1 flex flex-col space-y-2">
-                <Badge className={`${categoryColors[book.category] || ''} w-fit text-[10px]`}>{book.category}</Badge>
+                <Badge className={`${categoryColors[book.category] || ''} w-fit text-[10px]`}>{book.category} · {book.hindiCategory}</Badge>
                 <h3 className="font-semibold text-sm leading-snug">{book.title}</h3>
+                <p className="text-[11px] text-muted-foreground font-devanagari">{book.hindiTitle}</p>
                 <p className="text-xs text-muted-foreground flex-1">{book.description}</p>
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1">
