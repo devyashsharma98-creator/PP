@@ -10,21 +10,41 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { navItems } from '@/components/AppSidebar';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Navbar() {
-  const { role, setRole, events } = useAppContext();
+  const { role, setRole, events, articles } = useAppContext();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [bellBounce, setBellBounce] = useState(false);
+  const prevCountRef = useRef(0);
 
-  const pendingCount = role === 'aayam_pramukh'
+  const pendingEvents = role === 'aayam_pramukh'
     ? events.filter(e => e.status === 'Pending Aayam Review').length
     : role === 'vibhag_pramukh'
     ? events.filter(e => e.status === 'Pending Final Approval').length
     : 0;
 
+  const pendingArticles = role === 'unit_head'
+    ? articles.filter(a => a.status === 'Pending Unit Head Review').length
+    : role === 'aayam_pramukh'
+    ? articles.filter(a => a.status === 'Pending Aayam Review').length
+    : 0;
+
+  const totalPending = pendingEvents + pendingArticles;
+
+  // Animate bell whenever count increases
+  useEffect(() => {
+    if (totalPending > prevCountRef.current) {
+      setBellBounce(true);
+      const t = setTimeout(() => setBellBounce(false), 600);
+      return () => clearTimeout(t);
+    }
+    prevCountRef.current = totalPending;
+  }, [totalPending]);
+
   return (
-    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
+    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-3">
         {/* Mobile Menu Trigger */}
         <Sheet open={open} onOpenChange={setOpen}>
@@ -70,31 +90,49 @@ export function Navbar() {
           </SheetContent>
         </Sheet>
 
-        <h2 className="text-lg font-semibold text-foreground hidden md:block">प्रज्ञा प्रवाह</h2>
-        <h2 className="text-base font-semibold text-foreground md:hidden">Pragya Pravah</h2>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden">
+            <Flame className="w-3.5 h-3.5 text-white" />
+          </div>
+          <h2 className="text-base font-bold text-foreground tracking-tight hidden md:block">प्रज्ञा प्रवाह</h2>
+          <h2 className="text-sm font-bold text-foreground md:hidden">Pragya Pravah</h2>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Notifications */}
-        {pendingCount > 0 && (
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Animated Notification Bell */}
+        {totalPending > 0 && (
           <div className="relative">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-primary text-primary-foreground">
-              {pendingCount}
-            </Badge>
+            <div
+              className={cn(
+                'relative p-1.5 rounded-lg transition-colors hover:bg-muted cursor-default',
+                bellBounce && 'animate-badge-bounce'
+              )}
+            >
+              <Bell className="w-5 h-5 text-muted-foreground" />
+              {/* Ping ring */}
+              <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+              </span>
+            </div>
+            {/* Count badge */}
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1 shadow-md shadow-primary/30">
+              {totalPending}
+            </span>
           </div>
         )}
 
         {/* Role Switcher */}
-        <div className="flex items-center gap-2 bg-muted rounded-lg px-2 py-1 md:px-3 md:py-1.5">
-          <Shield className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+        <div className="flex items-center gap-1.5 bg-muted/80 border border-border/60 rounded-lg px-2 py-1 md:px-3 md:py-1.5">
+          <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
           <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-            <SelectTrigger className="border-0 bg-transparent shadow-none h-auto p-0 text-xs md:text-sm font-medium w-[100px] md:w-[160px] focus:ring-0">
+            <SelectTrigger className="border-0 bg-transparent shadow-none h-auto p-0 text-xs md:text-sm font-medium w-[100px] md:w-[170px] focus:ring-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border shadow-lg z-50">
               {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
+                <SelectItem key={key} value={key} className="text-sm">{label}</SelectItem>
               ))}
             </SelectContent>
           </Select>

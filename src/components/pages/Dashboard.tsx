@@ -20,6 +20,7 @@ import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X,
 } from "lucide-react";
+import { useToast } from '@/components/ToastProvider';
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -34,6 +35,7 @@ const statusBadge = (status: string) => {
 export default function Dashboard() {
   const { role, events, addEvent, updateEventStatus } = useAppContext();
   const router = useRouter();
+  const { addToast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState("pre");
   const [dateValue, setDateValue] = useState("");
@@ -68,6 +70,7 @@ export default function Dashboard() {
     setFormTab("pre");
     setDialogOpen(false);
     setSubmitted(true);
+    addToast('Event submitted for review!', 'success', 'आयाम समीक्षा के लिए भेजा गया');
     router.push("/");
   };
 
@@ -135,6 +138,7 @@ export default function Dashboard() {
                       onClick={() => {
                         updateEventStatus(event.id, "Published");
                         setLastPublished(event.title);
+                        addToast('Published to Feed!', 'success', 'प्रचार अद्यतन करें');
                       }}
                     >
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Publish to Feed
@@ -221,7 +225,10 @@ export default function Dashboard() {
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
-                      <Button size="sm" onClick={() => updateEventStatus(event.id, "Pending Final Approval")}>
+                      <Button size="sm" onClick={() => {
+                        updateEventStatus(event.id, "Pending Final Approval");
+                        addToast('Forwarded for final approval', 'info', 'विभाग प्रमुख की समीक्षा के लिए भेजा');
+                      }}>
                         Review &amp; Forward <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                       <p className="text-xs text-muted-foreground pl-0.5">

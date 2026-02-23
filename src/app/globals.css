@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -58,9 +58,9 @@
     --info: 210 80% 55%;
     --info-foreground: 0 0% 100%;
 
-    --font-display: 'Outfit', sans-serif;
-    --font-body: 'Outfit', sans-serif;
-    --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+    --font-display: 'Poppins', sans-serif;
+    --font-body: 'Poppins', sans-serif;
+    --font-devanagari: 'Baloo 2', 'Noto Sans Devanagari', sans-serif;
   }
 
   .dark {
@@ -91,43 +91,227 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+    letter-spacing: -0.01em;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 }
+
+/* ── Keyframes ─────────────────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(27 100% 50% / 0.4); }
+  50%       { box-shadow: 0 0 18px 6px hsl(27 100% 50% / 0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
+@keyframes badge-bounce {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.45); }
+  40%  { transform: scale(0.88); }
+  60%  { transform: scale(1.22); }
+  80%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ping-soft {
+  0%         { transform: scale(1); opacity: 0.9; }
+  75%, 100%  { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes progress-bar {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ── Animation utilities ────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--primary) / 0.09) 40%,
+      hsl(var(--primary) / 0.14) 50%,
+      hsl(var(--primary) / 0.09) 60%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.2s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2.8s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3.5s ease-in-out infinite;
+  }
+
+  .animate-badge-bounce {
+    animation: badge-bounce 0.55s ease-out;
+  }
+
+  .animate-ping-soft {
+    animation: ping-soft 1.8s ease-out infinite;
+  }
+
+  .animate-gradient-flow {
+    background-size: 200% 200%;
+    animation: gradient-flow 4s ease infinite;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.45s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.35s ease-out forwards;
+  }
+
+  .animate-progress-bar {
+    animation: progress-bar 4s linear forwards;
+  }
+
+  /* Stagger helpers */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.10s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.20s; }
+  .stagger-5 { animation-delay: 0.25s; }
+}
+
+/* ── Component classes ─────────────────────────────────────────────────────── */
 
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-sm border border-border/50 shadow-sm;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   }
+
+  .glass-card:hover {
+    border-color: hsl(var(--primary) / 0.18);
+    box-shadow: 0 4px 24px -8px hsl(var(--primary) / 0.15),
+                0 2px 8px -4px hsl(var(--foreground) / 0.06);
+  }
+
   .saffron-gradient {
     background: linear-gradient(135deg, hsl(var(--saffron)) 0%, hsl(var(--saffron-glow)) 100%);
   }
+
+  .saffron-gradient-animated {
+    background: linear-gradient(270deg, hsl(var(--saffron)), hsl(var(--saffron-glow)), hsl(27 100% 45%));
+    background-size: 200% 200%;
+    animation: gradient-flow 3s ease infinite;
+  }
+
   .navy-gradient {
     background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy-light)) 100%);
   }
-  .devanagari {
-    font-family: var(--font-devanagari);
+
+  /* Hindi text — Baloo 2 for warmth and cultural feel */
+  .devanagari, .font-devanagari {
+    font-family: 'Baloo 2', 'Noto Sans Devanagari', sans-serif;
+    line-height: 1.7;
   }
+
+  /* Fine body Hindi text */
+  .devanagari-body {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    line-height: 1.8;
+  }
+
+  /* Status badges */
   .status-draft {
-    @apply bg-muted text-muted-foreground;
+    @apply bg-muted text-muted-foreground border border-border;
   }
   .status-pending-review {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-accent text-accent-foreground border border-primary/20;
+    position: relative;
   }
   .status-pending-approval {
-    @apply bg-[hsl(var(--warning)/.15)] text-[hsl(var(--warning))];
+    @apply bg-[hsl(var(--warning)/.15)] text-[hsl(var(--warning))] border border-[hsl(var(--warning)/.3)];
   }
   .status-published {
-    @apply bg-[hsl(var(--success)/.15)] text-[hsl(var(--success))];
+    @apply bg-[hsl(var(--success)/.15)] text-[hsl(var(--success))] border border-[hsl(var(--success)/.3)];
+  }
+
+  /* Saffron ring glow on focus */
+  .saffron-ring {
+    @apply ring-2 ring-primary/40 ring-offset-2 ring-offset-background;
+  }
+
+  /* Subtle Om / mandala watermark for page backgrounds */
+  .cultural-bg {
+    background-image: radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 20% 80%, hsl(var(--navy) / 0.04) 0%, transparent 50%);
   }
 }
 
+/* ── Hover lift with saffron glow ──────────────────────────────────────────── */
+
 @layer utilities {
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease;
   }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px -8px hsl(var(--primary) / 0.22),
+                0 4px 12px -4px hsl(var(--foreground) / 0.08);
+  }
+
+  /* Pending pulse ring for notification badges */
+  .pulse-ring {
+    position: relative;
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid hsl(var(--primary) / 0.6);
+    animation: ping-soft 1.8s ease-out infinite;
+    pointer-events: none;
+  }
+}
+
+/* ── Scrollbar styling ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
 }

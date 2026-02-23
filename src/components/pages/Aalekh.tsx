@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
+import { useToast } from '@/components/ToastProvider';
 import type { AalekhaArticle, ArticleStatus } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -262,6 +263,7 @@ function EditForwardDialog({
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Aalekh() {
   const { role, articles, addArticle, updateArticleStatus } = useAppContext();
+  const { addToast } = useToast();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
 
   const handleSubmit = (form: typeof emptyForm) => {
@@ -275,6 +277,7 @@ export default function Aalekh() {
       socialUrl: form.socialUrl || undefined,
       valuesChecklist: form.valuesChecklist,
     });
+    addToast('Article submitted!', 'success', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया');
   };
 
   // ── Karyakarta View ──────────────────────────────────────────────────────
@@ -342,13 +345,19 @@ export default function Aalekh() {
                           article={a}
                           targetStatus="Pending Aayam Review"
                           actionLabel="Edit & Forward to Aayam Pramukh"
-                          onDone={(edits) => updateArticleStatus(a.id, "Pending Aayam Review", edits)}
+                          onDone={(edits) => {
+                            updateArticleStatus(a.id, "Pending Aayam Review", edits);
+                            addToast('Article forwarded!', 'info', 'आयाम प्रमुख की समीक्षा के लिए');
+                          }}
                         />
                         <Button
                           variant="outline"
                           size="sm"
                           className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
-                          onClick={() => updateArticleStatus(a.id, "Draft")}
+                          onClick={() => {
+                            updateArticleStatus(a.id, "Draft");
+                            addToast('Returned to writer', 'warning', 'संशोधन के लिए वापस भेजा');
+                          }}
                         >
                           <RotateCcw className="w-3 h-3 mr-1" /> Return to Writer
                         </Button>
@@ -439,12 +448,14 @@ export default function Aalekh() {
                           onDone={(edits) => {
                             updateArticleStatus(a.id, "Published", edits);
                             setLastPublished(edits.title ?? a.title);
+                            addToast('Article Published!', 'success', 'आलेख प्रकाशित! Feed में उपलब्ध है');
                           }}
                         />
                         <Button size="sm" className="h-7 text-xs"
                           onClick={() => {
                             updateArticleStatus(a.id, "Published");
                             setLastPublished(a.title);
+                            addToast('Article Published!', 'success', 'आलेख प्रकाशित! Feed में उपलब्ध है');
                           }}
                         >
                           <CheckCircle2 className="w-3 h-3 mr-1" /> Approve & Publish
@@ -452,7 +463,10 @@ export default function Aalekh() {
                         <Button
                           variant="outline" size="sm"
                           className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
-                          onClick={() => updateArticleStatus(a.id, "Draft")}
+                          onClick={() => {
+                            updateArticleStatus(a.id, "Draft");
+                            addToast('Returned for revision', 'warning', 'संशोधन के लिए वापस भेजा गया');
+                          }}
                         >
                           <RotateCcw className="w-3 h-3 mr-1" /> Return for Revision
                         </Button>

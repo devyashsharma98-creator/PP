@@ -3,6 +3,7 @@ import { ClientProviders } from "@/components/ClientProviders";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Navbar } from "@/components/Navbar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { ToastProvider } from "@/components/ToastProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,16 +27,18 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ClientProviders>
-          <div className="flex min-h-screen w-full bg-background">
-            <AppSidebar />
-            <div className="flex-1 flex flex-col min-w-0">
-              <Navbar />
-              <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto">
-                {children}
-              </main>
+          <ToastProvider>
+            <div className="flex min-h-screen w-full bg-background cultural-bg">
+              <AppSidebar />
+              <div className="flex-1 flex flex-col min-w-0">
+                <Navbar />
+                <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto">
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-          <MobileBottomNav />
+            <MobileBottomNav />
+          </ToastProvider>
         </ClientProviders>
       </body>
     </html>
