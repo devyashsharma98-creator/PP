@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [formTab, setFormTab] = useState('pre');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [calOpen, setCalOpen] = useState(false);
+  console.log('Dashboard Selected Date:', selectedDate);
   const [form, setForm] = useState({
     title: '', description: '', unit: '',
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -245,6 +246,7 @@ export default function Dashboard() {
                   <Popover open={calOpen} onOpenChange={setCalOpen}>
                     <PopoverTrigger asChild>
                       <Button
+                        id="date-picker-trigger"
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                         type="button"
@@ -255,9 +257,15 @@ export default function Dashboard() {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
+                        id="date-picker-calendar"
                         mode="single"
                         selected={selectedDate}
-                        onSelect={(d) => { setSelectedDate(d); setCalOpen(false); }}
+                        onSelect={(day) => {
+                          if (day) {
+                            setSelectedDate(day);
+                            setCalOpen(false);
+                          }
+                        }}
                         initialFocus
                       />
                     </PopoverContent>
