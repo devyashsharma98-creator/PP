@@ -250,7 +250,7 @@ export default function Dashboard() {
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                         type="button"
-                        onClick={() => setSelectedDate(new Date())}
+                        onClick={() => setSelectedDate(new Date(2026, 2, 1))}
                       >
                         <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
                         {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
