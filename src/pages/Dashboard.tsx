@@ -31,8 +31,8 @@ export default function Dashboard() {
   const [formTab, setFormTab] = useState('pre');
   const [form, setForm] = useState({
     title: '', description: '', date: '', unit: '',
-    checklist: { food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false },
-    report: '', fileName: '',
+    checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
+    report: '', fileName: '', videoUrl: '', posterName: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,8 +50,8 @@ export default function Dashboard() {
     });
     setForm({
       title: '', description: '', date: '', unit: '',
-      checklist: { food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false },
-      report: '', fileName: '',
+      checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
+      report: '', fileName: '', videoUrl: '', posterName: '',
     });
     setFormTab('pre');
     setDialogOpen(false);
@@ -200,12 +200,15 @@ export default function Dashboard() {
   // Unit Head View
   const myEvents = events.filter(e => e.submittedBy === 'Current User' || true); // show all for demo
   const checklistItems: { key: keyof typeof form.checklist; label: string }[] = [
+    { key: 'designing', label: 'Designing (डिज़ाइनिंग)' },
     { key: 'food', label: 'Food (भोजन)' },
-    { key: 'seating', label: 'Seating (बैठक)' },
+    { key: 'seating', label: 'Sitting & Place (बैठक व स्थान)' },
     { key: 'transport', label: 'Transport (परिवहन)' },
     { key: 'accommodation', label: 'Accommodation (आवास)' },
-    { key: 'soundMic', label: 'Sound / Mic (ध्वनि)' },
+    { key: 'soundMic', label: 'Sound + Music (ध्वनि)' },
     { key: 'camera', label: 'Camera (कैमरा)' },
+    { key: 'screen', label: 'Screen (स्क्रीन)' },
+    { key: 'lights', label: 'Lights (रोशनी)' },
   ];
 
   return (
@@ -262,17 +265,41 @@ export default function Dashboard() {
                 </TabsContent>
                 <TabsContent value="post" className="space-y-3 pt-2">
                   <div>
-                    <Label>Event Report</Label>
-                    <Textarea value={form.report} onChange={e => setForm(p => ({ ...p, report: e.target.value }))} rows={3} placeholder="Write the post-event report..." />
+                    <Label>Vritt - Event Report (विस्तृत)</Label>
+                    <Textarea value={form.report} onChange={e => setForm(p => ({ ...p, report: e.target.value }))} rows={3} placeholder="Write the detailed post-event report..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Upload Photos</Label>
+                      <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
+                        onClick={() => setForm(p => ({ ...p, fileName: 'photos_event.zip' }))}>
+                        {form.fileName ? (
+                          <p className="text-foreground font-medium text-xs">📷 {form.fileName}</p>
+                        ) : (
+                          <p className="text-xs">📷 Photos (simulated)</p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Upload Video</Label>
+                      <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
+                        onClick={() => setForm(p => ({ ...p, videoUrl: 'event_video.mp4' }))}>
+                        {form.videoUrl ? (
+                          <p className="text-foreground font-medium text-xs">🎥 {form.videoUrl}</p>
+                        ) : (
+                          <p className="text-xs">🎥 Video (simulated)</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div>
-                    <Label>Upload Photos</Label>
-                    <div className="mt-1 border-2 border-dashed border-border rounded-lg p-6 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => setForm(p => ({ ...p, fileName: 'photos_event.zip' }))}>
-                      {form.fileName ? (
-                        <p className="text-foreground font-medium">📎 {form.fileName}</p>
+                    <Label>Upload Poster</Label>
+                    <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => setForm(p => ({ ...p, posterName: 'event_poster.jpg' }))}>
+                      {form.posterName ? (
+                        <p className="text-foreground font-medium text-xs">🖼️ {form.posterName}</p>
                       ) : (
-                        <p>Click to upload photos (simulated)</p>
+                        <p className="text-xs">🖼️ Upload Poster (simulated)</p>
                       )}
                     </div>
                   </div>

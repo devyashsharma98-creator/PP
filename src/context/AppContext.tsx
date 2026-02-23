@@ -13,15 +13,20 @@ export interface GatividhiEvent {
   submittedBy: string;
   status: EventStatus;
   checklist: {
+    designing: boolean;
     food: boolean;
     seating: boolean;
     transport: boolean;
     accommodation: boolean;
     soundMic: boolean;
     camera: boolean;
+    screen: boolean;
+    lights: boolean;
   };
   report?: string;
   photos?: string[];
+  poster?: string;
+  videoUrl?: string;
   imageUrl?: string;
 }
 
@@ -50,7 +55,7 @@ const initialEvents: GatividhiEvent[] = [
     unit: 'Bhopal Shahar',
     submittedBy: 'Ramesh Sharma',
     status: 'Published',
-    checklist: { food: true, seating: true, transport: true, accommodation: false, soundMic: true, camera: true },
+    checklist: { designing: true, food: true, seating: true, transport: true, accommodation: false, soundMic: true, camera: true, screen: true, lights: true },
     report: 'The event was a great success with 250+ attendees participating in various workshops.',
     imageUrl: '',
   },
@@ -62,7 +67,7 @@ const initialEvents: GatividhiEvent[] = [
     unit: 'Vidisha',
     submittedBy: 'Priya Patel',
     status: 'Pending Aayam Review',
-    checklist: { food: true, seating: true, transport: false, accommodation: false, soundMic: true, camera: true },
+    checklist: { designing: false, food: true, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: false, lights: false },
     imageUrl: '',
   },
   {
@@ -73,7 +78,7 @@ const initialEvents: GatividhiEvent[] = [
     unit: 'Sehore',
     submittedBy: 'Anil Verma',
     status: 'Pending Final Approval',
-    checklist: { food: true, seating: true, transport: true, accommodation: true, soundMic: true, camera: true },
+    checklist: { designing: true, food: true, seating: true, transport: true, accommodation: true, soundMic: true, camera: true, screen: true, lights: true },
     report: 'Event included panel discussions, cultural performances, and community dialogue sessions.',
     imageUrl: '',
   },
@@ -85,7 +90,7 @@ const initialEvents: GatividhiEvent[] = [
     unit: 'Raisen',
     submittedBy: 'Kavita Singh',
     status: 'Published',
-    checklist: { food: false, seating: true, transport: false, accommodation: false, soundMic: true, camera: true },
+    checklist: { designing: false, food: false, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: true, lights: false },
     report: 'Over 100 exhibits displayed covering astronomy, medicine, mathematics and engineering.',
     imageUrl: '',
   },
@@ -97,7 +102,7 @@ const initialEvents: GatividhiEvent[] = [
     unit: 'Hoshangabad',
     submittedBy: 'Suresh Yadav',
     status: 'Draft',
-    checklist: { food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false },
+    checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
     imageUrl: '',
   },
 ];
