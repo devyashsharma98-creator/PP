@@ -242,31 +242,33 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <Label>Date</Label>
-                  <Popover open={calOpen} onOpenChange={setCalOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id="date-picker-trigger"
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                        type="button"
-                      >
-                        <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        id="date-picker-calendar"
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => {
-                          setSelectedDate(date);
-                          setCalOpen(false);
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <div className="relative">
+                    <Button
+                      id="date-picker-trigger"
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                      type="button"
+                      onClick={() => setCalOpen(!calOpen)}
+                    >
+                      <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                      {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
+                    </Button>
+                    {calOpen && (
+                      <div className="absolute z-[100] mt-2 bg-popover border rounded-md shadow-md p-0">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              setSelectedDate(date);
+                              setCalOpen(false);
+                            }
+                          }}
+                          initialFocus
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label>Unit</Label>
