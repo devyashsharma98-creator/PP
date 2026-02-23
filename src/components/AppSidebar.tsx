@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navItems = [
+export const navItems = [
   { label: 'Dashboard', sublabel: 'गतिविधियाँ', icon: LayoutDashboard, path: '/' },
   { label: 'Parichay', sublabel: 'परिचय', icon: UserCircle, path: '/parichay' },
   { label: 'Dayitv', sublabel: 'दायित्व', icon: Network, path: '/dayitv' },
@@ -42,7 +42,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        'h-screen sticky top-0 flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 z-30',
+        'hidden md:flex h-screen sticky top-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 z-30',
         collapsed ? 'w-[68px]' : 'w-[240px]'
       )}
     >
