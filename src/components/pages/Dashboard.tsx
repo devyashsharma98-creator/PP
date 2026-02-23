@@ -256,16 +256,22 @@ export default function Dashboard() {
                         {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <div onClick={() => { setSelectedDate(new Date(2026, 1, 25)); setCalOpen(false); }}>
-                        <Calendar
-                          id="date-picker-calendar"
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={setSelectedDate}
-                          initialFocus
-                        />
-                      </div>
+                    <PopoverContent
+                      className="w-auto p-0"
+                      align="start"
+                      onClick={() => {
+                        console.log('PopoverContent Clicked');
+                        setSelectedDate(new Date(2026, 1, 25));
+                        setCalOpen(false);
+                      }}
+                    >
+                      <Calendar
+                        id="date-picker-calendar"
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        initialFocus
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
