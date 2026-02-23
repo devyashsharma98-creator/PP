@@ -12,9 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp,
@@ -34,8 +32,7 @@ export default function Dashboard() {
   const { role, events, addEvent, updateEventStatus } = useAppContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState('pre');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [calOpen, setCalOpen] = useState(false);
+  const [dateValue, setDateValue] = useState('');
   const [form, setForm] = useState({
     title: '', description: '', unit: '',
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -44,7 +41,9 @@ export default function Dashboard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !selectedDate) return;
+    const selectedDate = parseISO(dateValue);
+    if (!form.title || !isValid(selectedDate)) return;
+    
     addEvent({
       title: form.title,
       description: form.description,
@@ -60,7 +59,7 @@ export default function Dashboard() {
       checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
       report: '', fileName: '', videoUrl: '', posterName: '',
     });
-    setSelectedDate(undefined);
+    setDateValue('');
     setFormTab('pre');
     setDialogOpen(false);
   };
@@ -230,7 +229,7 @@ export default function Dashboard() {
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> Create New Event</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg bg-popover" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogContent className="sm:max-w-lg bg-popover">
             <DialogHeader>
               <DialogTitle>New Gatividhi</DialogTitle>
             </DialogHeader>
@@ -242,32 +241,13 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <Label>Date</Label>
-                  <Popover open={calOpen} onOpenChange={setCalOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id="date-picker-trigger"
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                        type="button"
-                      >
-                        <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(d) => {
-                          if (d) {
-                            setSelectedDate(d);
-                            setCalOpen(false);
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input 
+                    type="date" 
+                    value={dateValue} 
+                    onChange={e => setDateValue(e.target.value)} 
+                    required 
+                    className="w-full"
+                  />
                 </div>
                 <div>
                   <Label>Unit</Label>
