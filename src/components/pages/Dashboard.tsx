@@ -36,7 +36,6 @@ export default function Dashboard() {
   const [formTab, setFormTab] = useState('pre');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [calOpen, setCalOpen] = useState(false);
-  console.log('Dashboard Selected Date:', selectedDate);
   const [form, setForm] = useState({
     title: '', description: '', unit: '',
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -250,26 +249,20 @@ export default function Dashboard() {
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                         type="button"
-                        onClick={() => setSelectedDate(new Date(2026, 2, 1))}
                       >
                         <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
                         {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0"
-                      align="start"
-                      onClick={() => {
-                        console.log('PopoverContent Clicked');
-                        setSelectedDate(new Date(2026, 1, 25));
-                        setCalOpen(false);
-                      }}
-                    >
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         id="date-picker-calendar"
                         mode="single"
                         selected={selectedDate}
-                        onSelect={setSelectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date);
+                          setCalOpen(false);
+                        }}
                         initialFocus
                       />
                     </PopoverContent>
