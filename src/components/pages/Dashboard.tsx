@@ -260,6 +260,7 @@ export default function Dashboard() {
                         mode="single"
                         selected={selectedDate}
                         onSelect={(date) => {
+                          console.log('Calendar onSelect triggered with:', date);
                           if (date) {
                             setSelectedDate(date);
                             setCalOpen(false);
