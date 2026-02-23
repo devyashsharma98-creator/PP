@@ -1,0 +1,192 @@
+"use client";
+
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Megaphone, CheckCircle2, AlertCircle, MessageCircle,
+  Globe, Camera, Navigation, Layout, Palette,
+} from 'lucide-react';
+import { useAppContext, type PracharPlatform } from '@/context/AppContext';
+import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
+
+interface Platform {
+  key: PracharPlatform;
+  label: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+const platforms: Platform[] = [
+  { key: 'whatsapp', label: 'WhatsApp Groups', icon: MessageCircle, color: 'text-success' },
+  { key: 'facebook', label: 'Facebook Page', icon: Globe, color: 'text-info' },
+  { key: 'instagram', label: 'Instagram', icon: Camera, color: 'text-destructive' },
+  { key: 'telegram', label: 'Telegram Channel', icon: Navigation, color: 'text-primary' },
+];
+
+const templates = [
+  { id: 't1', name: 'Event Poster', desc: 'Standard event announcement', icon: Layout },
+  { id: 't2', name: 'Vimarsh Quote Card', desc: 'Quote card for discourse topics', icon: Palette },
+  { id: 't3', name: 'Book Discussion', desc: 'Book review announcement', icon: Layout },
+  { id: 't4', name: 'Youth Program', desc: 'Yuva aayam event template', icon: Palette },
+];
+
+export default function Prachar() {
+  const { events, pracharStatuses, updatePracharPlatform } = useAppContext();
+  const publishedEvents = events.filter(e => e.status === 'Published');
+
+  const getStatus = (eventId: string) =>
+    pracharStatuses.find(p => p.eventId === eventId) ??
+    { eventId, platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false } };
+
+  const isDone = (eventId: string) => {
+    const s = getStatus(eventId);
+    return Object.values(s.platforms).every(Boolean);
+  };
+
+  const incompleteCount = publishedEvents.filter(e => !isDone(e.id)).length;
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
+      <div>
+        <h1 className="text-2xl font-bold">
+          Prachar Aayam <span className="font-devanagari text-muted-foreground text-lg">प्रचार आयाम</span>
+        </h1>
+        <p className="text-muted-foreground text-sm">Multi-platform publication workflow</p>
+      </div>
+
+      {/* Incomplete alert */}
+      {incompleteCount > 0 && (
+        <Alert className="border-warning/40 bg-[hsl(var(--warning)/.06)]">
+          <AlertCircle className="h-4 w-4 text-warning" />
+          <AlertDescription className="text-sm">
+            <strong>{incompleteCount} published event{incompleteCount > 1 ? 's' : ''}</strong> pending complete
+            platform distribution. All 4 platforms must be marked before this alert clears.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Publication Queue */}
+      <div className="space-y-4">
+        <h2 className="text-base font-semibold flex items-center gap-2">
+          <Megaphone className="w-4 h-4 text-primary" /> Publication Queue
+        </h2>
+
+        {publishedEvents.length === 0 ? (
+          <Card className="glass-card">
+            <CardContent className="py-10 text-center text-muted-foreground text-sm">
+              No published events yet. Approve events from the Dashboard to see them here.
+            </CardContent>
+          </Card>
+        ) : (
+          publishedEvents.map((event, i) => {
+            const status = getStatus(event.id);
+            const done = isDone(event.id);
+            const completedCount = Object.values(status.platforms).filter(Boolean).length;
+
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+              >
+                <Card className={cn('glass-card overflow-hidden', done ? 'border-success/30' : 'border-warning/30')}>
+                  <div className={cn('h-1', done ? 'bg-success' : 'bg-warning')} />
+                  <CardContent className="pt-4 space-y-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-semibold text-sm">{event.title}</h3>
+                        <p className="text-xs text-muted-foreground">{event.unit} · {event.date}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-muted-foreground">{completedCount}/4</span>
+                        {done
+                          ? <Badge className="bg-[hsl(var(--success)/.15)] text-success text-xs">
+                              <CheckCircle2 className="w-3 h-3 mr-1" /> All Done
+                            </Badge>
+                          : <Badge className="bg-[hsl(var(--warning)/.15)] text-warning text-xs">
+                              <AlertCircle className="w-3 h-3 mr-1" /> Pending
+                            </Badge>
+                        }
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {platforms.map(platform => {
+                        const checked = status.platforms[platform.key];
+                        return (
+                          <div
+                            key={platform.key}
+                            className={cn(
+                              'flex items-center gap-2 p-2.5 rounded-lg border transition-all cursor-pointer',
+                              checked ? 'border-success/40 bg-[hsl(var(--success)/.06)]' : 'border-border/50 bg-muted/30 hover:border-border'
+                            )}
+                            onClick={() => updatePracharPlatform(event.id, platform.key, !checked)}
+                          >
+                            <Checkbox
+                              id={`${event.id}-${platform.key}`}
+                              checked={checked}
+                              onCheckedChange={v => updatePracharPlatform(event.id, platform.key, !!v)}
+                            />
+                            <div className="min-w-0">
+                              <platform.icon className={cn('w-3.5 h-3.5', platform.color)} />
+                              <Label
+                                htmlFor={`${event.id}-${platform.key}`}
+                                className="text-[10px] cursor-pointer block mt-0.5 leading-tight"
+                              >
+                                {platform.label}
+                              </Label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {!done && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3 text-warning" />
+                        Mark all platforms above to clear the pending alert for this event.
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Templates */}
+      <div className="space-y-3">
+        <h2 className="text-base font-semibold">Design Templates</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {templates.map((tmpl, i) => (
+            <motion.div
+              key={tmpl.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.07 }}
+            >
+              <Card className="glass-card hover-lift cursor-pointer">
+                <CardContent className="pt-4 pb-4 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                    <tmpl.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="text-sm font-medium">{tmpl.name}</h3>
+                  <p className="text-[10px] text-muted-foreground">{tmpl.desc}</p>
+                  <Button variant="outline" size="sm" className="text-xs h-7 w-full">Use Template</Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}

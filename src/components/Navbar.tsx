@@ -1,3 +1,5 @@
+"use client";
+
 import { useAppContext, roleLabels, type Role } from '@/context/AppContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shield, Bell } from 'lucide-react';

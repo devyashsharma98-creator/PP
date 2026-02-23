@@ -1,8 +1,17 @@
+"use client";
+
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh';
 
 export type EventStatus = 'Draft' | 'Pending Aayam Review' | 'Pending Final Approval' | 'Published';
+
+export type PracharPlatform = 'whatsapp' | 'facebook' | 'instagram' | 'telegram';
+
+export interface PracharStatus {
+  eventId: string;
+  platforms: Record<PracharPlatform, boolean>;
+}
 
 export interface GatividhiEvent {
   id: string;
@@ -36,6 +45,8 @@ interface AppState {
   events: GatividhiEvent[];
   addEvent: (event: Omit<GatividhiEvent, 'id' | 'status'>) => void;
   updateEventStatus: (id: string, status: EventStatus) => void;
+  pracharStatuses: PracharStatus[];
+  updatePracharPlatform: (eventId: string, platform: PracharPlatform, done: boolean) => void;
 }
 
 const roleLabels: Record<Role, string> = {
@@ -107,11 +118,17 @@ const initialEvents: GatividhiEvent[] = [
   },
 ];
 
+const initialPracharStatuses: PracharStatus[] = [
+  { eventId: '1', platforms: { whatsapp: true, facebook: false, instagram: false, telegram: true } },
+  { eventId: '4', platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false } },
+];
+
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<Role>('unit_head');
   const [events, setEvents] = useState<GatividhiEvent[]>(initialEvents);
+  const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>(initialPracharStatuses);
 
   const addEvent = useCallback((event: Omit<GatividhiEvent, 'id' | 'status'>) => {
     const newEvent: GatividhiEvent = {
@@ -124,10 +141,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateEventStatus = useCallback((id: string, status: EventStatus) => {
     setEvents(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+    if (status === 'Published') {
+      setPracharStatuses(prev => {
+        if (prev.find(p => p.eventId === id)) return prev;
+        return [...prev, { eventId: id, platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false } }];
+      });
+    }
+  }, []);
+
+  const updatePracharPlatform = useCallback((eventId: string, platform: PracharPlatform, done: boolean) => {
+    setPracharStatuses(prev =>
+      prev.map(p => p.eventId === eventId ? { ...p, platforms: { ...p.platforms, [platform]: done } } : p)
+    );
   }, []);
 
   return (
-    <AppContext.Provider value={{ role, setRole, events, addEvent, updateEventStatus }}>
+    <AppContext.Provider value={{ role, setRole, events, addEvent, updateEventStatus, pracharStatuses, updatePracharPlatform }}>
       {children}
     </AppContext.Provider>
   );

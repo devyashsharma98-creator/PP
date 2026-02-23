@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
@@ -248,8 +250,8 @@ export default function Dashboard() {
 
               <Tabs value={formTab} onValueChange={setFormTab}>
                 <TabsList className="w-full">
-                  <TabsTrigger value="pre" className="flex-1">Pre-Event Checklist</TabsTrigger>
-                  <TabsTrigger value="post" className="flex-1">Post-Event Vritt</TabsTrigger>
+                  <TabsTrigger value="pre" className="flex-1">Vyavastha (व्यवस्थाएं)</TabsTrigger>
+                  <TabsTrigger value="post" className="flex-1">Vritt (विस्तृत)</TabsTrigger>
                 </TabsList>
                 <TabsContent value="pre" className="space-y-3 pt-2">
                   {checklistItems.map(item => (
@@ -265,7 +267,7 @@ export default function Dashboard() {
                 </TabsContent>
                 <TabsContent value="post" className="space-y-3 pt-2">
                   <div>
-                    <Label>Vritt - Event Report (विस्तृत)</Label>
+                    <Label>Vritt (विस्तृत)</Label>
                     <Textarea value={form.report} onChange={e => setForm(p => ({ ...p, report: e.target.value }))} rows={3} placeholder="Write the detailed post-event report..." />
                   </div>
                   <div className="grid grid-cols-2 gap-3">

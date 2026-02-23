@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -5,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Phone, Mail, User } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const members = [
   { id: '1', name: 'Ramesh Sharma', role: 'Unit Head', aayam: 'Prachar', contact: '98261XXXXX', email: 'ramesh@example.com', unit: 'Bhopal Shahar' },
@@ -29,25 +32,56 @@ const aayamColors: Record<string, string> = {
 
 export default function Directory() {
   const [search, setSearch] = useState('');
+  const [selectedAayam, setSelectedAayam] = useState<string | null>(null);
 
-  const filtered = members.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
-    m.role.toLowerCase().includes(search.toLowerCase()) ||
-    m.aayam.toLowerCase().includes(search.toLowerCase()) ||
-    m.unit.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = members.filter(m => {
+    const matchesSearch = 
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.role.toLowerCase().includes(search.toLowerCase()) ||
+      m.aayam.toLowerCase().includes(search.toLowerCase()) ||
+      m.unit.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesAayam = selectedAayam ? m.aayam === selectedAayam : true;
+    
+    return matchesSearch && matchesAayam;
+  });
+
+  const aayams = ['Yuva', 'Mahila', 'Shodh', 'Prachar', 'Vimarsh'];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold">Sampark Directory</h1>
-          <p className="text-muted-foreground text-sm">सम्पर्क सूची - Member contacts across all units</p>
+          <p className="text-muted-foreground text-sm font-devanagari">सम्पर्क सूची - Member contacts across all units</p>
         </div>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search members..." className="pl-10" />
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Badge 
+          variant={selectedAayam === null ? 'default' : 'outline'}
+          className="cursor-pointer"
+          onClick={() => setSelectedAayam(null)}
+        >
+          All Ayam
+        </Badge>
+        {aayams.map(aayam => (
+          <Badge 
+            key={aayam}
+            variant={selectedAayam === aayam ? 'default' : 'outline'}
+            className={cn(
+              "cursor-pointer",
+              selectedAayam !== aayam && (aayamColors[aayam] || '')
+            )}
+            onClick={() => setSelectedAayam(aayam)}
+          >
+            {aayam}
+          </Badge>
+        ))}
       </div>
 
       <Card className="glass-card overflow-hidden">

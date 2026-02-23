@@ -1,9 +1,11 @@
+"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, BookOpen, Download, FileText, MessageSquare } from 'lucide-react';
+import { Search, BookOpen, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const books = [
@@ -44,7 +46,7 @@ export default function ELibrary() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold">E-Library</h1>
-          <p className="text-muted-foreground text-sm">Indian Knowledge System (IKS) - भारतीय ज्ञान परम्परा</p>
+          <p className="text-muted-foreground text-sm">Indian Knowledge System (IKS) - भारतीय ज्ञान परंपरा</p>
         </div>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -98,30 +100,6 @@ export default function ELibrary() {
         </div>
       )}
 
-      {/* Vimarsh - 15 Discussion Topics */}
-      <div className="pt-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-          <MessageSquare className="w-5 h-5 text-primary" /> विमर्श - Discussion Topics
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {[
-            'भारतीय शिक्षा पद्धति', 'स्वदेशी अर्थव्यवस्था', 'वैदिक गणित',
-            'आयुर्वेद एवं स्वास्थ्य', 'पर्यावरण संरक्षण', 'ग्राम स्वराज',
-            'भारतीय विज्ञान परंपरा', 'सामाजिक समरसता', 'राष्ट्रीय सुरक्षा',
-            'सांस्कृतिक विरासत', 'युवा नेतृत्व विकास', 'महिला सशक्तिकरण',
-            'डिजिटल भारत', 'कृषि एवं जल संरक्षण', 'भारतीय भाषाओं का संवर्धन',
-          ].map((topic, i) => (
-            <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
-              <Card className="glass-card hover-lift cursor-pointer">
-                <CardContent className="py-3 px-4 flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">{i + 1}</span>
-                  <span className="text-sm font-medium font-devanagari">{topic}</span>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
     </motion.div>
   );
 }
