@@ -2,9 +2,11 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
-export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh';
+export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh' | 'karyakarta';
 
 export type EventStatus = 'Draft' | 'Pending Aayam Review' | 'Pending Final Approval' | 'Published';
+
+export type ArticleStatus = 'Draft' | 'Pending Unit Head Review' | 'Pending Aayam Review' | 'Published';
 
 export type PracharPlatform = 'whatsapp' | 'facebook' | 'instagram' | 'telegram';
 
@@ -39,6 +41,25 @@ export interface GatividhiEvent {
   imageUrl?: string;
 }
 
+export interface AalekhaArticle {
+  id: string;
+  title: string;
+  content: string;
+  summary: string;
+  author: string;
+  date: string;
+  category: string;
+  status: ArticleStatus;
+  socialUrl?: string;
+  imageUrl?: string;
+  valuesChecklist: {
+    rashtraPratham: boolean;
+    culturallyGrounded: boolean;
+    balancedTone: boolean;
+    noDivisiveContent: boolean;
+  };
+}
+
 interface AppState {
   role: Role;
   setRole: (role: Role) => void;
@@ -47,12 +68,20 @@ interface AppState {
   updateEventStatus: (id: string, status: EventStatus) => void;
   pracharStatuses: PracharStatus[];
   updatePracharPlatform: (eventId: string, platform: PracharPlatform, done: boolean) => void;
+  articles: AalekhaArticle[];
+  addArticle: (article: Omit<AalekhaArticle, 'id' | 'status'>) => void;
+  updateArticleStatus: (
+    id: string,
+    status: ArticleStatus,
+    edits?: Partial<Pick<AalekhaArticle, 'title' | 'content' | 'summary'>>
+  ) => void;
 }
 
 const roleLabels: Record<Role, string> = {
   unit_head: 'Unit Head',
   aayam_pramukh: 'Aayam Pramukh',
   vibhag_pramukh: 'Vibhag Pramukh',
+  karyakarta: 'Karyakarta (Writer)',
 };
 
 export { roleLabels };
@@ -123,12 +152,50 @@ const initialPracharStatuses: PracharStatus[] = [
   { eventId: '4', platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false } },
 ];
 
+const initialArticles: AalekhaArticle[] = [
+  {
+    id: 'art1',
+    title: 'भारतीय ज्ञान परंपरा और आधुनिक शिक्षा',
+    content: 'भारत की प्राचीन ज्ञान परंपरा — गुरुकुल, वेद, उपनिषद — आधुनिक शिक्षा को एक नई दिशा दे सकती है। NEP 2020 इसी दिशा में एक महत्वपूर्ण कदम है। मैकाले की शिक्षा प्रणाली ने हमारी आत्मविश्वास को चोट पहुंचाई, लेकिन आज भारत अपनी जड़ों की ओर लौट रहा है। यह आलेख इस विषय पर विस्तार से विचार करता है।',
+    summary: 'How ancient Indian knowledge systems can inform modern educational practices and curriculum design.',
+    author: 'Dr. Meera Joshi',
+    date: '2026-02-10',
+    category: 'Shodh',
+    status: 'Published',
+    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
+  },
+  {
+    id: 'art2',
+    title: 'Swadeshi Movement: Lessons for Atmanirbhar Bharat',
+    content: 'The historical Swadeshi movement of the early 20th century carries profound lessons for modern India. Atmanirbhar Bharat draws directly from the tradition of self-reliance rooted in Deendayal Upadhyaya\'s Integral Humanism. This article explores the parallels and what we can learn today.',
+    summary: 'Drawing parallels between the historical Swadeshi movement and modern self-reliance initiatives.',
+    author: 'Current User',
+    date: '2026-02-18',
+    category: 'Vimarsh',
+    status: 'Pending Unit Head Review',
+    socialUrl: 'https://facebook.com/pragya.pravah/posts/example',
+    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
+  },
+  {
+    id: 'art3',
+    title: 'Vedic Mathematics in Competitive Exams',
+    content: 'Vedic Math sutras, rediscovered by Swami Bharati Krishna Tirtha, provide powerful shortcuts for competitive exams. These techniques are rooted in ancient Vedic traditions and prove remarkably effective for JEE and banking exam preparation. This article covers key sutras with worked examples.',
+    summary: 'Practical application of Vedic Math sutras for faster calculation in JEE and banking exams.',
+    author: 'Ravi Shankar Tiwari',
+    date: '2026-02-20',
+    category: 'Shodh',
+    status: 'Pending Aayam Review',
+    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
+  },
+];
+
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<Role>('unit_head');
   const [events, setEvents] = useState<GatividhiEvent[]>(initialEvents);
   const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>(initialPracharStatuses);
+  const [articles, setArticles] = useState<AalekhaArticle[]>(initialArticles);
 
   const addEvent = useCallback((event: Omit<GatividhiEvent, 'id' | 'status'>) => {
     const newEvent: GatividhiEvent = {
@@ -155,8 +222,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   }, []);
 
+  const addArticle = useCallback((article: Omit<AalekhaArticle, 'id' | 'status'>) => {
+    const newArticle: AalekhaArticle = {
+      ...article,
+      id: `art${Date.now()}`,
+      status: 'Pending Unit Head Review',
+    };
+    setArticles(prev => [newArticle, ...prev]);
+  }, []);
+
+  const updateArticleStatus = useCallback((
+    id: string,
+    status: ArticleStatus,
+    edits?: Partial<Pick<AalekhaArticle, 'title' | 'content' | 'summary'>>
+  ) => {
+    setArticles(prev => prev.map(a =>
+      a.id === id ? { ...a, status, ...(edits ?? {}) } : a
+    ));
+  }, []);
+
   return (
-    <AppContext.Provider value={{ role, setRole, events, addEvent, updateEventStatus, pracharStatuses, updatePracharPlatform }}>
+    <AppContext.Provider value={{
+      role, setRole,
+      events, addEvent, updateEventStatus,
+      pracharStatuses, updatePracharPlatform,
+      articles, addArticle, updateArticleStatus,
+    }}>
       {children}
     </AppContext.Provider>
   );

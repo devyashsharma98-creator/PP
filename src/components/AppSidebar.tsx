@@ -19,6 +19,7 @@ import {
   MessagesSquare,
   Calendar,
   Megaphone,
+  PenLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +29,7 @@ export const navItems = [
   { label: 'Dayitv', sublabel: 'दायित्व', icon: Network, path: '/dayitv' },
   { label: 'Vimarsh', sublabel: 'विमर्श', icon: MessagesSquare, path: '/vimarsh' },
   { label: 'Aalekh & Shodh', sublabel: 'आलेख एवं शोध', icon: Newspaper, path: '/feed' },
+  { label: 'Aalekh Likhna', sublabel: 'आलेख लिखें', icon: PenLine, path: '/aalekh' },
   { label: 'E-Library', sublabel: 'ई-पुस्तकालय', icon: BookOpen, path: '/library' },
   { label: 'Calendar', sublabel: 'वार्षिक पंचांग', icon: Calendar, path: '/calendar' },
   { label: 'Prachar', sublabel: 'प्रचार आयाम', icon: Megaphone, path: '/prachar' },
