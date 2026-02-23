@@ -230,7 +230,7 @@ export default function Dashboard() {
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> Create New Event</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg bg-popover">
+          <DialogContent className="sm:max-w-lg bg-popover" onPointerDownOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>New Gatividhi</DialogTitle>
             </DialogHeader>
@@ -254,15 +254,13 @@ export default function Dashboard() {
                         {selectedDate ? format(selectedDate, 'dd MMM yyyy') : <span className="text-muted-foreground">Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom">
                       <Calendar
-                        id="date-picker-calendar"
                         mode="single"
                         selected={selectedDate}
-                        onSelect={(date) => {
-                          console.log('Calendar onSelect triggered with:', date);
-                          if (date) {
-                            setSelectedDate(date);
+                        onSelect={(d) => {
+                          if (d) {
+                            setSelectedDate(d);
                             setCalOpen(false);
                           }
                         }}
