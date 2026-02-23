@@ -71,7 +71,7 @@ export function Navbar() {
         </Sheet>
 
         <h2 className="text-lg font-semibold text-foreground hidden md:block">प्रज्ञा प्रवाह</h2>
-        <h2 className="text-base font-semibold text-foreground md:hidden">Pragya Pravah</h2>
+        <h2 className="text-base font-semibold text-foreground md:hidden">Pragya Pravah (Mobile)</h2>
       </div>
 
       <div className="flex items-center gap-3">
