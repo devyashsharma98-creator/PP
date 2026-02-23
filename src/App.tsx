@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/context/AppContext";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
+import Parichay from "@/pages/Parichay";
+import AapKaItihas from "@/pages/AapKaItihas";
 import ContentFeed from "@/pages/ContentFeed";
 import ELibrary from "@/pages/ELibrary";
 import Directory from "@/pages/Directory";
@@ -23,8 +25,10 @@ const App = () => (
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/parichay" element={<Parichay />} />
               <Route path="/feed" element={<ContentFeed />} />
               <Route path="/library" element={<ELibrary />} />
+              <Route path="/history" element={<AapKaItihas />} />
               <Route path="/directory" element={<Directory />} />
             </Route>
             <Route path="*" element={<NotFound />} />

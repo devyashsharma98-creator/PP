@@ -9,13 +9,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
+  UserCircle,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Dashboard', sublabel: 'गतिविधि', icon: LayoutDashboard, path: '/' },
+  { label: 'Parichay', sublabel: 'परिचय', icon: UserCircle, path: '/parichay' },
   { label: 'Aalekh & Shodh', sublabel: 'आलेख एवं शोध', icon: Newspaper, path: '/feed' },
   { label: 'E-Library', sublabel: 'ई-पुस्तकालय', icon: BookOpen, path: '/library' },
+  { label: 'Aap ka Itihas', sublabel: 'आप का इतिहास', icon: History, path: '/history' },
   { label: 'Sampark', sublabel: 'सम्पर्क', icon: Users, path: '/directory' },
 ];
 
