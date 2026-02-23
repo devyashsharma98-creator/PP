@@ -28,3 +28,14 @@ dist-ssr
 .next/
 out/
 next-env.d.ts
+
+# QA test artifacts — never commit these
+*.png
+*.m4a
+*.mp4
+*.mp3
+*_check.txt
+*_snapshot.txt
+*_sync*.txt
+public/recording.*
+public/wa_image.*
