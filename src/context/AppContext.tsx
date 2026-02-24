@@ -16,6 +16,17 @@ export interface PracharStatus {
   platforms: Record<PracharPlatform, boolean>;
 }
 
+export interface EventRegistration {
+  id: string;
+  name: string;
+  phone: string;
+  city: string;
+  attendingCount: number;
+  hasSpecialNeeds: boolean;
+  notes?: string;
+  submittedAt: string;
+}
+
 export interface GatividhiEvent {
   id: string;
   title: string;
@@ -40,6 +51,7 @@ export interface GatividhiEvent {
   poster?: string;
   videoUrl?: string;
   imageUrl?: string;
+  registrations?: EventRegistration[];
 }
 
 export interface AalekhaArticle {
@@ -69,6 +81,7 @@ interface AppState {
   events: GatividhiEvent[];
   addEvent: (event: Omit<GatividhiEvent, 'id' | 'status'>) => void;
   updateEventStatus: (id: string, status: EventStatus) => void;
+  addRegistration: (eventId: string, reg: Omit<EventRegistration, 'id' | 'submittedAt'>) => void;
   pracharStatuses: PracharStatus[];
   updatePracharPlatform: (eventId: string, platform: PracharPlatform, done: boolean) => void;
   articles: AalekhaArticle[];
@@ -101,6 +114,12 @@ const initialEvents: GatividhiEvent[] = [
     checklist: { designing: true, food: true, seating: true, transport: true, accommodation: false, soundMic: true, camera: true, screen: true, lights: true },
     report: 'The event was a great success with 250+ attendees participating in various workshops.',
     imageUrl: '',
+    registrations: [
+      { id: 'r1', name: 'Priya Sharma', phone: '9876543210', city: 'Bhopal', attendingCount: 1, hasSpecialNeeds: false, submittedAt: '2026-02-10' },
+      { id: 'r2', name: 'Rahul Mishra', phone: '9812345678', city: 'Vidisha', attendingCount: 2, hasSpecialNeeds: false, submittedAt: '2026-02-12' },
+      { id: 'r3', name: 'Anita Verma', phone: '9898765432', city: 'Sehore', attendingCount: 1, hasSpecialNeeds: true, notes: 'Wheelchair access needed', submittedAt: '2026-02-13' },
+      { id: 'r4', name: 'Suresh Patel', phone: '9754321098', city: 'Bhopal', attendingCount: 3, hasSpecialNeeds: false, submittedAt: '2026-02-14' },
+    ],
   },
   {
     id: '2',
@@ -136,6 +155,10 @@ const initialEvents: GatividhiEvent[] = [
     checklist: { designing: false, food: false, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: true, lights: false },
     report: 'Over 100 exhibits displayed covering astronomy, medicine, mathematics and engineering.',
     imageUrl: '',
+    registrations: [
+      { id: 'r5', name: 'Deepak Tiwari', phone: '9754399999', city: 'Raisen', attendingCount: 3, hasSpecialNeeds: false, submittedAt: '2026-03-05' },
+      { id: 'r6', name: 'Sunita Gupta', phone: '9867890123', city: 'Bhopal', attendingCount: 1, hasSpecialNeeds: false, notes: 'Vegetarian food please', submittedAt: '2026-03-07' },
+    ],
   },
   {
     id: '5',
@@ -226,6 +249,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   }, []);
 
+  const addRegistration = useCallback((eventId: string, reg: Omit<EventRegistration, 'id' | 'submittedAt'>) => {
+    const newReg: EventRegistration = {
+      ...reg,
+      id: `reg${Date.now()}`,
+      submittedAt: new Date().toISOString().slice(0, 10),
+    };
+    setEvents(prev => prev.map(e =>
+      e.id === eventId
+        ? { ...e, registrations: [...(e.registrations ?? []), newReg] }
+        : e
+    ));
+  }, []);
+
   const addArticle = useCallback((article: Omit<AalekhaArticle, 'id' | 'status'>) => {
     const newArticle: AalekhaArticle = {
       ...article,
@@ -249,7 +285,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider value={{
       role, setRole,
       lang, setLang,
-      events, addEvent, updateEventStatus,
+      events, addEvent, updateEventStatus, addRegistration,
       pracharStatuses, updatePracharPlatform,
       articles, addArticle, updateArticleStatus,
     }}>

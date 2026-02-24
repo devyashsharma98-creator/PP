@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext, GatividhiEvent } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +19,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format, parseISO, isValid } from "date-fns";
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
-  ArrowRight, BarChart3, Users, TrendingUp, X,
+  ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
+  Phone, Building2,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
@@ -49,6 +51,8 @@ export default function Dashboard() {
   const [formTab, setFormTab] = useState("pre");
   const [dateValue, setDateValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [responseEvent, setResponseEvent] = useState<GatividhiEvent | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "", description: "", unit: "",
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -87,6 +91,14 @@ export default function Dashboard() {
 
   const toggleChecklist = (key: keyof typeof form.checklist) => {
     setForm(prev => ({ ...prev, checklist: { ...prev.checklist, [key]: !prev.checklist[key] } }));
+  };
+
+  const copyFormLink = (eventId: string) => {
+    const url = `${window.location.origin}/form/${eventId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(eventId);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
   };
 
   // Role-specific content
@@ -422,21 +434,140 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <User className="w-3 h-3" /> {event.submittedBy}
                   </div>
-                  {event.status === "Published" && (
-                    <div className="pt-1">
+                  {/* Form link + Responses */}
+                  <div className="pt-1 flex flex-wrap gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => copyFormLink(event.id)}
+                    >
+                      {copiedId === event.id
+                        ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />{t('Copied!', 'कॉपी!')}</>
+                        : <><Link2 className="w-3 h-3 mr-1" />{t('Form Link', 'फॉर्म लिंक')}</>
+                      }
+                    </Button>
+                    {(event.registrations?.length ?? 0) > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-primary hover:text-primary/80"
+                        onClick={() => setResponseEvent(event)}
+                      >
+                        <ClipboardCheck className="w-3 h-3 mr-1" />
+                        {t(`Responses (${event.registrations!.length})`, `प्रतिक्रियाएं (${event.registrations!.length})`)}
+                      </Button>
+                    )}
+                    {event.status === "Published" && (
                       <Link href="/feed">
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
-                          {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
+                          {t('Feed', 'फ़ीड')} <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       </Link>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
+
+      {/* ── Response Viewer Sheet ── */}
+      <Sheet open={!!responseEvent} onOpenChange={open => !open && setResponseEvent(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          {responseEvent && (
+            <>
+              <SheetHeader className="mb-5">
+                <SheetTitle className="text-base leading-snug font-devanagari">
+                  {t('Registrations', 'पंजीकरण')} — {responseEvent.title}
+                </SheetTitle>
+                <p className="text-xs text-muted-foreground">{responseEvent.date} · {responseEvent.unit}</p>
+              </SheetHeader>
+
+              {/* Summary stats */}
+              {(() => {
+                const regs = responseEvent.registrations ?? [];
+                const totalPeople = regs.reduce((sum, r) => sum + r.attendingCount, 0);
+                const specialCount = regs.filter(r => r.hasSpecialNeeds).length;
+                const cities = new Set(regs.map(r => r.city)).size;
+                return (
+                  <div className="grid grid-cols-3 gap-3 mb-5">
+                    {[
+                      { label: t('Registrations', 'पंजीकरण'), value: regs.length, icon: ClipboardCheck, color: 'text-primary' },
+                      { label: t('Total People', 'कुल लोग'), value: totalPeople, icon: Users, color: 'text-info' },
+                      { label: t('Cities', 'शहर'), value: cities, icon: Building2, color: 'text-success' },
+                    ].map(stat => (
+                      <div key={stat.label} className="rounded-xl border border-border/60 bg-card p-3 text-center">
+                        <stat.icon className={`w-4 h-4 mx-auto mb-1 ${stat.color}`} />
+                        <p className="text-xl font-bold">{stat.value}</p>
+                        <p className="text-[10px] text-muted-foreground font-devanagari leading-tight">{stat.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Action row */}
+              <div className="flex items-center gap-2 mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => copyFormLink(responseEvent.id)}
+                >
+                  {copiedId === responseEvent.id
+                    ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />{t('Copied!', 'कॉपी!')}</>
+                    : <><Link2 className="w-3 h-3 mr-1" />{t('Copy Form Link', 'फॉर्म लिंक कॉपी करें')}</>
+                  }
+                </Button>
+              </div>
+
+              {/* Registration list */}
+              <div className="space-y-3">
+                {(responseEvent.registrations ?? []).map((reg, i) => (
+                  <motion.div
+                    key={reg.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full saffron-gradient flex items-center justify-center shrink-0">
+                          <span className="text-[10px] text-white font-bold">{reg.name.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold leading-none">{reg.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{reg.submittedAt}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          <Users className="w-2.5 h-2.5 mr-1" />{reg.attendingCount}
+                        </Badge>
+                        {reg.hasSpecialNeeds && (
+                          <Badge className="text-[10px] px-1.5 py-0 bg-warning/20 text-warning border-warning/30">
+                            {t('Special', 'विशेष')}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground pl-9">
+                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{reg.phone}</span>
+                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{reg.city}</span>
+                    </div>
+                    {reg.notes && (
+                      <p className="text-xs text-foreground/70 pl-9 italic">"{reg.notes}"</p>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </motion.div>
   );
 }
