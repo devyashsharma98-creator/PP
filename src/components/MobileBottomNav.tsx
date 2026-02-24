@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessagesSquare, Calendar, Megaphone, Users } from 'lucide-react';
+import { Home, MessagesSquare, Calendar, Megaphone, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
 
 const primaryNav = [
-  { label: 'Home', sublabel: 'डैशबोर्ड', icon: LayoutDashboard, path: '/dashboard' },
+  { label: 'Home', sublabel: 'मुख्य पृष्ठ', icon: Home, path: '/' },
   { label: 'Vimarsh', sublabel: 'विमर्श', icon: MessagesSquare, path: '/vimarsh' },
   { label: 'Calendar', sublabel: 'पंचांग', icon: Calendar, path: '/calendar' },
   { label: 'Prachar', sublabel: 'प्रचार', icon: Megaphone, path: '/prachar' },

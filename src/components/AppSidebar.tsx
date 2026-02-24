@@ -20,12 +20,14 @@ import {
   Calendar,
   Megaphone,
   PenLine,
+  Home,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 
 export const navItems = [
+  { label: 'Home', sublabel: 'मुख्य पृष्ठ', icon: Home, path: '/' },
   { label: 'Dashboard', sublabel: 'गतिविधियाँ', icon: LayoutDashboard, path: '/dashboard' },
   { label: 'Parichay', sublabel: 'परिचय', icon: UserCircle, path: '/parichay' },
   { label: 'Dayitv', sublabel: 'दायित्व', icon: Network, path: '/dayitv' },
