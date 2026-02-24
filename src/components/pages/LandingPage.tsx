@@ -21,7 +21,7 @@ function Mandala({ className }: { className?: string }) {
       {/* Outer 12-dot ring */}
       {dots12.map((angle, i) => {
         const rad = (angle - 90) * (Math.PI / 180);
-        return <circle key={i} cx={120 + 108 * Math.cos(rad)} cy={120 + 108 * Math.sin(rad)} r="1.5" fill="currentColor" fillOpacity="0.3" />;
+        return <circle key={i} cx={+(120 + 108 * Math.cos(rad)).toFixed(4)} cy={+(120 + 108 * Math.sin(rad)).toFixed(4)} r="1.5" fill="currentColor" fillOpacity="0.3" />;
       })}
 
       {/* Outer lotus petals ×8 */}
@@ -49,8 +49,8 @@ function Mandala({ className }: { className?: string }) {
       {/* Inner sun rays ×16 */}
       {rays16.map((angle, i) => {
         const rad = (angle - 90) * (Math.PI / 180);
-        const x1 = 120 + 30 * Math.cos(rad), y1 = 120 + 30 * Math.sin(rad);
-        const x2 = 120 + 43 * Math.cos(rad), y2 = 120 + 43 * Math.sin(rad);
+        const x1 = +(120 + 30 * Math.cos(rad)).toFixed(4), y1 = +(120 + 30 * Math.sin(rad)).toFixed(4);
+        const x2 = +(120 + 43 * Math.cos(rad)).toFixed(4), y2 = +(120 + 43 * Math.sin(rad)).toFixed(4);
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.2" />;
       })}
 
@@ -84,8 +84,8 @@ function OuterRing({ className }: { className?: string }) {
         const r1 = 138, r2 = r1 - len;
         return (
           <line key={i}
-            x1={150 + r1 * Math.cos(rad)} y1={150 + r1 * Math.sin(rad)}
-            x2={150 + r2 * Math.cos(rad)} y2={150 + r2 * Math.sin(rad)}
+            x1={+(150 + r1 * Math.cos(rad)).toFixed(4)} y1={+(150 + r1 * Math.sin(rad)).toFixed(4)}
+            x2={+(150 + r2 * Math.cos(rad)).toFixed(4)} y2={+(150 + r2 * Math.sin(rad)).toFixed(4)}
             stroke="currentColor" strokeOpacity={i % 6 === 0 ? 0.5 : 0.2} strokeWidth={i % 6 === 0 ? 1.2 : 0.6} />
         );
       })}
