@@ -30,13 +30,20 @@ const statusColors: Record<ArticleStatus, string> = {
   Published: "bg-green-500/15 text-green-700 border-green-500/30 dark:text-green-400",
 };
 
+const statusHi: Record<ArticleStatus, string> = {
+  Draft: "प्रारूप",
+  "Pending Unit Head Review": "यूनिट समीक्षा प्रतीक्षित",
+  "Pending Aayam Review": "आयाम समीक्षा प्रतीक्षित",
+  Published: "प्रकाशित",
+};
+
 const categories = ["Shodh", "Vimarsh", "Yuva", "Mahila", "Prachar", "Aalekh"];
 
 const valuesItems = [
-  { key: "rashtraPratham" as const, label: "राष्ट्र प्रथम", sublabel: "Rashtra Pratham — Nation First" },
-  { key: "culturallyGrounded" as const, label: "सांस्कृतिक आधार", sublabel: "Culturally Grounded in Indian tradition" },
-  { key: "balancedTone" as const, label: "संतुलित स्वर", sublabel: "Balanced Tone — no extreme language" },
-  { key: "noDivisiveContent" as const, label: "अविभाजनकारी नहीं", sublabel: "No divisive or inflammatory content" },
+  { key: "rashtraPratham" as const, label: "राष्ट्र प्रथम", sublabel: "Rashtra Pratham — Nation First", sublabelHi: "राष्ट्र सर्वोपरि" },
+  { key: "culturallyGrounded" as const, label: "सांस्कृतिक आधार", sublabel: "Culturally Grounded in Indian tradition", sublabelHi: "भारतीय परंपरा में आधारित" },
+  { key: "balancedTone" as const, label: "संतुलित स्वर", sublabel: "Balanced Tone — no extreme language", sublabelHi: "संतुलित भाषा — कोई चरम शब्द नहीं" },
+  { key: "noDivisiveContent" as const, label: "अविभाजनकारी नहीं", sublabel: "No divisive or inflammatory content", sublabelHi: "कोई विभाजनकारी सामग्री नहीं" },
 ];
 
 const emptyValues = { rashtraPratham: false, culturallyGrounded: false, balancedTone: false, noDivisiveContent: false };
@@ -51,6 +58,9 @@ function ArticleCard({
   actions?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const { lang } = useAppContext();
+  const t = useT();
+
   return (
     <Card className="glass-card overflow-hidden">
       <button className="w-full text-left" onClick={() => setOpen(o => !o)}>
@@ -58,7 +68,7 @@ function ArticleCard({
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className={`text-[10px] border ${statusColors[article.status]}`}>
-                {article.status}
+                {lang === 'hi' ? statusHi[article.status] : article.status}
               </Badge>
               <Badge variant="outline" className="text-[10px]">{article.category}</Badge>
             </div>
@@ -74,7 +84,7 @@ function ArticleCard({
                   onClick={e => e.stopPropagation()}
                   className="flex items-center gap-0.5 text-primary hover:underline"
                 >
-                  <ExternalLink className="w-3 h-3" /> Source
+                  <ExternalLink className="w-3 h-3" /> {t('Source', 'स्रोत')}
                 </a>
               )}
             </p>
@@ -101,7 +111,7 @@ function ArticleCard({
                 {valuesItems.map(v => (
                   <span
                     key={v.key}
-                    className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 ${article.valuesChecklist[v.key] ? "border-green-500/40 text-green-700 dark:text-green-400 bg-green-500/10" : "border-red-500/40 text-red-600 bg-red-500/10"}`}
+                    className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-devanagari ${article.valuesChecklist[v.key] ? "border-green-500/40 text-green-700 dark:text-green-400 bg-green-500/10" : "border-red-500/40 text-red-600 bg-red-500/10"}`}
                   >
                     {article.valuesChecklist[v.key] ? "✓" : "✗"} {v.label}
                   </span>
@@ -119,6 +129,7 @@ function ArticleCard({
 // ─── Write Article Form ───────────────────────────────────────────────────────
 function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) => void }) {
   const t = useT();
+  const { lang } = useAppContext();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -179,8 +190,8 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
 
           {/* Values Checklist */}
           <div className="rounded-lg border border-border/60 p-3 space-y-2.5 bg-muted/30">
-            <p className="text-xs font-semibold text-foreground/80">
-              संगठन मूल्य अनुपालन <span className="text-muted-foreground font-normal">(all required to submit)</span>
+            <p className="text-xs font-semibold text-foreground/80 font-devanagari">
+              {t('Organisational Values Compliance', 'संगठन मूल्य अनुपालन')} <span className="text-muted-foreground font-normal">({t('all required to submit', 'सभी अनिवार्य')})</span>
             </p>
             {valuesItems.map(v => (
               <div key={v.key} className="flex items-start gap-2.5">
@@ -192,7 +203,7 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
                 />
                 <Label htmlFor={v.key} className="text-sm cursor-pointer leading-snug">
                   <span className="font-medium font-devanagari">{v.label}</span>
-                  <span className="block text-[10px] text-muted-foreground">{v.sublabel}</span>
+                  <span className="block text-[10px] text-muted-foreground">{lang === 'hi' ? v.sublabelHi : v.sublabel}</span>
                 </Label>
               </div>
             ))}
@@ -220,6 +231,7 @@ function EditForwardDialog({
   actionLabel: string;
   onDone: (edits: Partial<Pick<AalekhaArticle, "title" | "content" | "summary">>) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(article.title);
   const [content, setContent] = useState(article.content);
@@ -237,24 +249,24 @@ function EditForwardDialog({
           <DialogTitle>{actionLabel}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-xs text-muted-foreground">Review and optionally edit before forwarding.</p>
+          <p className="text-xs text-muted-foreground font-devanagari">{t('Review and optionally edit before forwarding.', 'आगे भेजने से पहले समीक्षा करें और आवश्यकतानुसार संपादित करें।')}</p>
           <div>
-            <Label>Title</Label>
+            <Label>{t('Title', 'शीर्षक')}</Label>
             <Input value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           <div>
-            <Label>Summary</Label>
+            <Label>{t('Summary', 'सारांश')}</Label>
             <Textarea value={summary} onChange={e => setSummary(e.target.value)} rows={2} />
           </div>
           <div>
-            <Label>Content</Label>
+            <Label>{t('Content', 'सामग्री')}</Label>
             <Textarea value={content} onChange={e => setContent(e.target.value)} rows={6} />
           </div>
           <Button
             className="w-full"
             onClick={() => { onDone({ title, content, summary }); setOpen(false); }}
           >
-            <ArrowRight className="w-4 h-4 mr-2" /> Confirm &amp; Forward
+            <ArrowRight className="w-4 h-4 mr-2" /> {t('Confirm & Forward', 'पुष्टि करें और आगे भेजें')}
           </Button>
         </div>
       </DialogContent>
@@ -280,7 +292,7 @@ export default function Aalekh() {
       socialUrl: form.socialUrl || undefined,
       valuesChecklist: form.valuesChecklist,
     });
-    addToast('Article submitted!', 'success', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया');
+    addToast(t('Article submitted!', 'आलेख भेजा गया!'), 'success', t('Sent for Unit Head review', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया'));
   };
 
   // ── Karyakarta View ──────────────────────────────────────────────────────
@@ -331,12 +343,12 @@ export default function Aalekh() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="w-4 h-4 text-amber-500" /> Pending Your Review ({queue.length})
+              <Clock className="w-4 h-4 text-amber-500" /> {t(`Pending Your Review (${queue.length})`, `आपकी समीक्षा प्रतीक्षित (${queue.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4 text-center">All clear! No articles pending review.</p>
+              <p className="text-muted-foreground text-sm py-4 text-center">{t('All clear! No articles pending review.', 'सब ठीक है! कोई आलेख समीक्षा प्रतीक्षित नहीं।')}</p>
             ) : (
               queue.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -347,10 +359,10 @@ export default function Aalekh() {
                         <EditForwardDialog
                           article={a}
                           targetStatus="Pending Aayam Review"
-                          actionLabel="Edit & Forward to Aayam Pramukh"
+                          actionLabel={t("Edit & Forward to Aayam Pramukh", "संपादित करें और आयाम प्रमुख को भेजें")}
                           onDone={(edits) => {
                             updateArticleStatus(a.id, "Pending Aayam Review", edits);
-                            addToast('Article forwarded!', 'info', 'आयाम प्रमुख की समीक्षा के लिए');
+                            addToast(t('Article forwarded!', 'आलेख आगे भेजा!'), 'info', t('Sent for Aayam Pramukh review', 'आयाम प्रमुख की समीक्षा के लिए'));
                           }}
                         />
                         <Button
@@ -359,10 +371,10 @@ export default function Aalekh() {
                           className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
                           onClick={() => {
                             updateArticleStatus(a.id, "Draft");
-                            addToast('Returned to writer', 'warning', 'संशोधन के लिए वापस भेजा');
+                            addToast(t('Returned to writer', 'लेखक को वापस भेजा'), 'warning', t('Sent back for revision', 'संशोधन के लिए वापस भेजा'));
                           }}
                         >
-                          <RotateCcw className="w-3 h-3 mr-1" /> Return to Writer
+                          <RotateCcw className="w-3 h-3 mr-1" /> {t('Return to Writer', 'लेखक को वापस करें')}
                         </Button>
                       </div>
                     }
@@ -377,7 +389,7 @@ export default function Aalekh() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Eye className="w-4 h-4 text-muted-foreground" /> All Articles ({rest.length})
+                <Eye className="w-4 h-4 text-muted-foreground" /> {t(`All Articles (${rest.length})`, `सभी आलेख (${rest.length})`)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -401,8 +413,8 @@ export default function Aalekh() {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Final Aalekh Approval <span className="font-devanagari text-muted-foreground text-lg">अंतिम अनुमोदन</span></h1>
-          <p className="text-muted-foreground text-sm">Review forwarded articles — approve to publish in the feed</p>
+          <h1 className="text-2xl font-bold font-devanagari">{t('Final Aalekh Approval', 'अंतिम आलेख अनुमोदन')}</h1>
+          <p className="text-muted-foreground text-sm">{t('Review forwarded articles — approve to publish in the feed', 'अग्रेषित आलेखों की समीक्षा करें — फ़ीड में प्रकाशित करने के लिए अनुमोदित करें')}</p>
         </div>
 
         {lastPublished && (
@@ -410,13 +422,13 @@ export default function Aalekh() {
             <Alert className="border-green-500/40 bg-green-500/10">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
               <AlertDescription className="flex items-center justify-between">
-                <span className="text-green-800 dark:text-green-300 text-sm">
-                  <strong>{lastPublished}</strong> published to feed!
+                <span className="text-green-800 dark:text-green-300 text-sm font-devanagari">
+                  <strong>{lastPublished}</strong> {t('published to feed!', 'फ़ीड में प्रकाशित!')}
                 </span>
                 <div className="flex items-center gap-2 ml-3">
                   <Link href="/feed">
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-700 dark:text-green-400">
-                      View in Feed <ArrowRight className="w-3 h-3 ml-1" />
+                      {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   </Link>
                   <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground">
@@ -431,12 +443,12 @@ export default function Aalekh() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="w-4 h-4 text-blue-500" /> Awaiting Final Approval ({queue.length})
+              <Clock className="w-4 h-4 text-blue-500" /> {t(`Awaiting Final Approval (${queue.length})`, `अंतिम अनुमोदन प्रतीक्षित (${queue.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4 text-center">No articles pending approval.</p>
+              <p className="text-muted-foreground text-sm py-4 text-center">{t('No articles pending approval.', 'अनुमोदन प्रतीक्षित कोई आलेख नहीं।')}</p>
             ) : (
               queue.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -447,31 +459,31 @@ export default function Aalekh() {
                         <EditForwardDialog
                           article={a}
                           targetStatus="Published"
-                          actionLabel="Edit & Approve to Publish"
+                          actionLabel={t("Edit & Approve to Publish", "संपादित करें और प्रकाशित करें")}
                           onDone={(edits) => {
                             updateArticleStatus(a.id, "Published", edits);
                             setLastPublished(edits.title ?? a.title);
-                            addToast('Article Published!', 'success', 'आलेख प्रकाशित! Feed में उपलब्ध है');
+                            addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
                           }}
                         />
                         <Button size="sm" className="h-7 text-xs"
                           onClick={() => {
                             updateArticleStatus(a.id, "Published");
                             setLastPublished(a.title);
-                            addToast('Article Published!', 'success', 'आलेख प्रकाशित! Feed में उपलब्ध है');
+                            addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
                           }}
                         >
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> Approve & Publish
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> {t('Approve & Publish', 'अनुमोदित करें और प्रकाशित करें')}
                         </Button>
                         <Button
                           variant="outline" size="sm"
                           className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
                           onClick={() => {
                             updateArticleStatus(a.id, "Draft");
-                            addToast('Returned for revision', 'warning', 'संशोधन के लिए वापस भेजा गया');
+                            addToast(t('Returned for revision', 'संशोधन के लिए वापस भेजा'), 'warning', t('Sent back for revision', 'संशोधन के लिए वापस भेजा गया'));
                           }}
                         >
-                          <RotateCcw className="w-3 h-3 mr-1" /> Return for Revision
+                          <RotateCcw className="w-3 h-3 mr-1" /> {t('Return for Revision', 'संशोधन के लिए वापस करें')}
                         </Button>
                       </div>
                     }
@@ -486,7 +498,7 @@ export default function Aalekh() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" /> Published ({published.length})
+                <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published (${published.length})`, `प्रकाशित (${published.length})`)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -511,15 +523,15 @@ export default function Aalekh() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Aalekh Overview <span className="font-devanagari text-muted-foreground text-lg">आलेख अवलोकन</span></h1>
-        <p className="text-muted-foreground text-sm">Published articles across all aayams — Bhopal Vibhag</p>
+        <h1 className="text-2xl font-bold font-devanagari">{t('Aalekh Overview', 'आलेख अवलोकन')}</h1>
+        <p className="text-muted-foreground text-sm">{t('Published articles across all aayams — Bhopal Vibhag', 'सभी आयामों के प्रकाशित आलेख — भोपाल विभाग')}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Total Articles", value: total, icon: BarChart3, color: "text-primary" },
-          { label: "Published", value: published, icon: CheckCircle2, color: "text-green-600" },
-          { label: "In Review", value: pending, icon: Clock, color: "text-amber-500" },
+          { label: t("Total Articles", "कुल आलेख"), value: total, icon: BarChart3, color: "text-primary" },
+          { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-green-600" },
+          { label: t("In Review", "समीक्षाधीन"), value: pending, icon: Clock, color: "text-amber-500" },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <Card className="glass-card hover-lift">
@@ -540,12 +552,12 @@ export default function Aalekh() {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Users className="w-4 h-4 text-primary" /> Published Articles
+            <Users className="w-4 h-4 text-primary" /> {t('Published Articles', 'प्रकाशित आलेख')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {publishedList.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">No published articles yet.</p>
+            <p className="text-muted-foreground text-sm py-4 text-center">{t('No published articles yet.', 'अभी कोई प्रकाशित आलेख नहीं।')}</p>
           ) : (
             publishedList.map((a, i) => (
               <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>

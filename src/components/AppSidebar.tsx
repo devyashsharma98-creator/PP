@@ -22,6 +22,8 @@ import {
   PenLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
+import { useT } from '@/lib/useT';
 
 export const navItems = [
   { label: 'Dashboard', sublabel: 'गतिविधियाँ', icon: LayoutDashboard, path: '/dashboard' },
@@ -40,6 +42,8 @@ export const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const { lang } = useAppContext();
+  const t = useT();
 
   return (
     <aside
@@ -61,8 +65,8 @@ export function AppSidebar() {
               exit={{ opacity: 0, width: 0 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground">Pragya Pravah</h1>
-              <p className="text-[10px] text-sidebar-foreground/60 font-devanagari">भोपाल विभाग</p>
+              <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h1>
+              <p className="text-[10px] text-sidebar-foreground/60 font-devanagari">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -92,8 +96,7 @@ export function AppSidebar() {
                     exit={{ opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <span className="text-xs">{item.label}</span>
-                    <span className="block text-[9px] font-devanagari opacity-60">{item.sublabel}</span>
+                    <span className={cn('text-xs', lang === 'hi' && 'font-devanagari')}>{t(item.label, item.sublabel)}</span>
                   </motion.div>
                 )}
               </AnimatePresence>

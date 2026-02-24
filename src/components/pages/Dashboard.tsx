@@ -33,8 +33,15 @@ const statusBadge = (status: string) => {
   return map[status] || "";
 };
 
+const eventStatusHi: Record<string, string> = {
+  Draft: "प्रारूप",
+  "Pending Aayam Review": "आयाम समीक्षा प्रतीक्षित",
+  "Pending Final Approval": "अंतिम अनुमोदन प्रतीक्षित",
+  Published: "प्रकाशित",
+};
+
 export default function Dashboard() {
-  const { role, events, addEvent, updateEventStatus } = useAppContext();
+  const { role, lang, events, addEvent, updateEventStatus } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
   const t = useT();
@@ -47,6 +54,8 @@ export default function Dashboard() {
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
     report: "", fileName: "", videoUrl: "", posterName: "",
   });
+
+  const statusLabel = (status: string) => lang === 'hi' ? (eventStatusHi[status] ?? status) : status;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +81,7 @@ export default function Dashboard() {
     setFormTab("pre");
     setDialogOpen(false);
     setSubmitted(true);
-    addToast('Event submitted for review!', 'success', 'आयाम समीक्षा के लिए भेजा गया');
+    addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
     router.push("/dashboard");
   };
 
@@ -97,10 +106,10 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Events", value: totalEvents, icon: BarChart3, color: "text-primary" },
-            { label: "Published", value: published, icon: CheckCircle2, color: "text-success" },
-            { label: "Pending Approval", value: pending.length, icon: Clock, color: "text-warning" },
-            { label: "Active Units", value: units, icon: Users, color: "text-info" },
+            { label: t("Total Events", "कुल कार्यक्रम"), value: totalEvents, icon: BarChart3, color: "text-primary" },
+            { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-success" },
+            { label: t("Pending Approval", "अनुमोदन प्रतीक्षित"), value: pending.length, icon: Clock, color: "text-warning" },
+            { label: t("Active Units", "सक्रिय इकाइयाँ"), value: units, icon: Users, color: "text-info" },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Card className="glass-card hover-lift">
@@ -121,12 +130,12 @@ export default function Dashboard() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" /> Final Approvals Queue
+              <Eye className="w-5 h-5 text-primary" /> {t('Final Approvals Queue', 'अंतिम अनुमोदन कतार')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {pending.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-8 text-center">No events pending final approval.</p>
+              <p className="text-muted-foreground text-sm py-8 text-center">{t('No events pending final approval.', 'अंतिम अनुमोदन प्रतीक्षित कोई कार्यक्रम नहीं।')}</p>
             ) : (
               <div className="space-y-3">
                 {pending.map(event => (
@@ -140,10 +149,10 @@ export default function Dashboard() {
                       onClick={() => {
                         updateEventStatus(event.id, "Published");
                         setLastPublished(event.title);
-                        addToast('Published to Feed!', 'success', 'प्रचार अद्यतन करें');
+                        addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
                       }}
                     >
-                      <CheckCircle2 className="w-4 h-4 mr-1" /> Publish to Feed
+                      <CheckCircle2 className="w-4 h-4 mr-1" /> {t('Publish to Feed', 'फ़ीड में प्रकाशित करें')}
                     </Button>
                   </motion.div>
                 ))}
@@ -151,32 +160,24 @@ export default function Dashboard() {
             )}
 
             {lastPublished && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4"
-              >
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
                 <Card className="border border-green-500/40 bg-green-500/10">
                   <CardContent className="pt-4 pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-green-800 dark:text-green-300">
-                            <span className="font-semibold">{lastPublished}</span> published! Do not forget to update Prachar.
+                          <p className="text-sm font-medium text-green-800 dark:text-green-300 font-devanagari">
+                            <span className="font-semibold">{lastPublished}</span> {t('published! Update Prachar now.', 'प्रकाशित! प्रचार अद्यतन करना न भूलें।')}
                           </p>
                           <Link href="/prachar">
                             <Button variant="ghost" size="sm" className="h-7 px-2 text-green-700 dark:text-green-400 hover:text-green-900">
-                              Go to Prachar <ArrowRight className="w-3 h-3 ml-1" />
+                              {t('Go to Prachar', 'प्रचार पर जाएं')} <ArrowRight className="w-3 h-3 ml-1" />
                             </Button>
                           </Link>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setLastPublished(null)}
-                        className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                        aria-label="Dismiss"
-                      >
+                      <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -206,12 +207,12 @@ export default function Dashboard() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" /> Pending Reviews ({pendingReview.length})
+                <Clock className="w-4 h-4 text-primary" /> {t(`Pending Reviews (${pendingReview.length})`, `समीक्षा प्रतीक्षित (${pendingReview.length})`)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {pendingReview.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-6 text-center">All caught up! No pending reviews.</p>
+                <p className="text-muted-foreground text-sm py-6 text-center">{t('All caught up! No pending reviews.', 'सब ठीक है! कोई समीक्षा प्रतीक्षित नहीं।')}</p>
               ) : (
                 pendingReview.map(event => (
                   <motion.div key={event.id} layout className="p-4 rounded-lg bg-accent/50 border border-border/50 space-y-3">
@@ -223,18 +224,18 @@ export default function Dashboard() {
                           <CalendarDays className="w-3 h-3 ml-2" />{event.date}
                         </p>
                       </div>
-                      <Badge className={statusBadge(event.status)}>{event.status}</Badge>
+                      <Badge className={statusBadge(event.status)}>{statusLabel(event.status)}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
                       <Button size="sm" onClick={() => {
                         updateEventStatus(event.id, "Pending Final Approval");
-                        addToast('Forwarded for final approval', 'info', 'विभाग प्रमुख की समीक्षा के लिए भेजा');
+                        addToast(t('Forwarded for final approval', 'अंतिम अनुमोदन के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
                       }}>
-                        Review &amp; Forward <ArrowRight className="w-4 h-4 ml-1" />
+                        {t('Review & Forward', 'समीक्षा करें और भेजें')} <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
-                      <p className="text-xs text-muted-foreground pl-0.5">
-                        Forwarded events are visible to Vibhag Pramukh for final approval.
+                      <p className="text-xs text-muted-foreground pl-0.5 font-devanagari">
+                        {t('Forwarded events are visible to Vibhag Pramukh for final approval.', 'अग्रेषित कार्यक्रम विभाग प्रमुख को अंतिम अनुमोदन के लिए दिखाई देंगे।')}
                       </p>
                     </div>
                   </motion.div>
@@ -247,7 +248,7 @@ export default function Dashboard() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-success" /> Forwarded ({forwarded.length})
+                <TrendingUp className="w-4 h-4 text-success" /> {t(`Forwarded (${forwarded.length})`, `अग्रेषित (${forwarded.length})`)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -255,7 +256,7 @@ export default function Dashboard() {
                 <div key={event.id} className="p-4 rounded-lg bg-muted/30 border border-border/30">
                   <div className="flex justify-between items-start">
                     <p className="font-medium text-sm">{event.title}</p>
-                    <Badge className={statusBadge(event.status)}>{event.status}</Badge>
+                    <Badge className={statusBadge(event.status)}>{statusLabel(event.status)}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{event.unit} · {event.date}</p>
                 </div>
@@ -267,18 +268,19 @@ export default function Dashboard() {
     );
   }
 
-  // Unit Head View
-  const myEvents = events.filter(e => e.submittedBy === "Current User" || true); // show all for demo
-  const checklistItems: { key: keyof typeof form.checklist; label: string }[] = [
-    { key: "designing", label: "Designing (डिज़ाइनिंग)" },
-    { key: "food", label: "Food (भोजन)" },
-    { key: "seating", label: "Sitting & Place (बैठक व स्थान)" },
-    { key: "transport", label: "Transport (परिवहन)" },
-    { key: "accommodation", label: "Accommodation (आवास)" },
-    { key: "soundMic", label: "Sound + Music (ध्वनि)" },
-    { key: "camera", label: "Camera (कैमरा)" },
-    { key: "screen", label: "Screen (स्क्रीन)" },
-    { key: "lights", label: "Lights (रोशनी)" },
+  // Unit Head & Karyakarta View
+  const myEvents = events.filter(e => e.submittedBy === "Current User" || true);
+
+  const checklistItems: { key: keyof typeof form.checklist; en: string; hi: string }[] = [
+    { key: "designing", en: "Designing", hi: "डिज़ाइनिंग" },
+    { key: "food", en: "Food", hi: "भोजन" },
+    { key: "seating", en: "Sitting & Place", hi: "बैठक व स्थान" },
+    { key: "transport", en: "Transport", hi: "परिवहन" },
+    { key: "accommodation", en: "Accommodation", hi: "आवास" },
+    { key: "soundMic", en: "Sound + Music", hi: "ध्वनि एवं संगीत" },
+    { key: "camera", en: "Camera", hi: "कैमरा" },
+    { key: "screen", en: "Screen", hi: "स्क्रीन" },
+    { key: "lights", en: "Lights", hi: "रोशनी" },
   ];
 
   return (
@@ -294,95 +296,85 @@ export default function Dashboard() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg bg-popover">
             <DialogHeader>
-              <DialogTitle>New Gatividhi</DialogTitle>
+              <DialogTitle className="font-devanagari">{t('New Gatividhi', 'नई गतिविधि')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <Label>Event Title</Label>
-                  <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Enter event name" required />
+                  <Label>{t('Event Title', 'कार्यक्रम का नाम')}</Label>
+                  <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder={t('Enter event name', 'कार्यक्रम का नाम दर्ज करें')} required />
                 </div>
                 <div>
-                  <Label>Date</Label>
-                  <Input
-                    type="date"
-                    value={dateValue}
-                    onChange={e => setDateValue(e.target.value)}
-                    required
-                    className="w-full"
-                  />
+                  <Label>{t('Date', 'दिनांक')}</Label>
+                  <Input type="date" value={dateValue} onChange={e => setDateValue(e.target.value)} required className="w-full" />
                 </div>
                 <div>
-                  <Label>Unit</Label>
-                  <Input value={form.unit} onChange={e => setForm(p => ({ ...p, unit: e.target.value }))} placeholder="e.g. Bhopal" />
+                  <Label>{t('Unit', 'इकाई')}</Label>
+                  <Input value={form.unit} onChange={e => setForm(p => ({ ...p, unit: e.target.value }))} placeholder={t('e.g. Bhopal', 'जैसे भोपाल')} />
                 </div>
                 <div className="col-span-2">
-                  <Label>Description</Label>
+                  <Label>{t('Description', 'विवरण')}</Label>
                   <Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} />
                 </div>
               </div>
 
               <Tabs value={formTab} onValueChange={setFormTab}>
                 <TabsList className="w-full">
-                  <TabsTrigger value="pre" className="flex-1">Vyavastha (व्यवस्थाएं)</TabsTrigger>
-                  <TabsTrigger value="post" className="flex-1">Vritt (विस्तृत)</TabsTrigger>
+                  <TabsTrigger value="pre" className="flex-1 font-devanagari">{t('Vyavastha', 'व्यवस्थाएं')}</TabsTrigger>
+                  <TabsTrigger value="post" className="flex-1 font-devanagari">{t('Vritt', 'वृत्त')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="pre" className="space-y-3 pt-2">
                   {checklistItems.map(item => (
                     <div key={item.key} className="flex items-center gap-3">
-                      <Checkbox
-                        checked={form.checklist[item.key]}
-                        onCheckedChange={() => toggleChecklist(item.key)}
-                        id={item.key}
-                      />
-                      <Label htmlFor={item.key} className="text-sm cursor-pointer">{item.label}</Label>
+                      <Checkbox checked={form.checklist[item.key]} onCheckedChange={() => toggleChecklist(item.key)} id={item.key} />
+                      <Label htmlFor={item.key} className="text-sm cursor-pointer font-devanagari">{t(item.en, item.hi)}</Label>
                     </div>
                   ))}
                 </TabsContent>
                 <TabsContent value="post" className="space-y-3 pt-2">
                   <div>
-                    <Label>Vritt (विस्तृत)</Label>
-                    <Textarea value={form.report} onChange={e => setForm(p => ({ ...p, report: e.target.value }))} rows={3} placeholder="Write the detailed post-event report..." />
+                    <Label className="font-devanagari">{t('Vritt (Detailed Report)', 'वृत्त (विस्तृत विवरण)')}</Label>
+                    <Textarea value={form.report} onChange={e => setForm(p => ({ ...p, report: e.target.value }))} rows={3} placeholder={t('Write the detailed post-event report...', 'कार्यक्रम के बाद का विस्तृत विवरण लिखें...')} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label>Upload Photos</Label>
+                      <Label>{t('Upload Photos', 'फ़ोटो अपलोड करें')}</Label>
                       <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => setForm(p => ({ ...p, fileName: "photos_event.zip" }))}>
                         {form.fileName ? (
-                          <p className="text-foreground font-medium text-xs">ð· {form.fileName}</p>
+                          <p className="text-foreground font-medium text-xs">📷 {form.fileName}</p>
                         ) : (
-                          <p className="text-xs">ð· Photos (simulated)</p>
+                          <p className="text-xs">📷 {t('Photos (simulated)', 'फ़ोटो (अनुकरण)')}</p>
                         )}
                       </div>
                     </div>
                     <div>
-                      <Label>Upload Video</Label>
+                      <Label>{t('Upload Video', 'वीडियो अपलोड करें')}</Label>
                       <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => setForm(p => ({ ...p, videoUrl: "event_video.mp4" }))}>
                         {form.videoUrl ? (
-                          <p className="text-foreground font-medium text-xs">ð¥ {form.videoUrl}</p>
+                          <p className="text-foreground font-medium text-xs">🎥 {form.videoUrl}</p>
                         ) : (
-                          <p className="text-xs">ð¥ Video (simulated)</p>
+                          <p className="text-xs">🎥 {t('Video (simulated)', 'वीडियो (अनुकरण)')}</p>
                         )}
                       </div>
                     </div>
                   </div>
                   <div>
-                    <Label>Upload Poster</Label>
+                    <Label>{t('Upload Poster', 'पोस्टर अपलोड करें')}</Label>
                     <div className="mt-1 border-2 border-dashed border-border rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => setForm(p => ({ ...p, posterName: "event_poster.jpg" }))}>
                       {form.posterName ? (
-                        <p className="text-foreground font-medium text-xs">ð¼ï¸ {form.posterName}</p>
+                        <p className="text-foreground font-medium text-xs">🖼️ {form.posterName}</p>
                       ) : (
-                        <p className="text-xs">ð¼ï¸ Upload Poster (simulated)</p>
+                        <p className="text-xs">🖼️ {t('Upload Poster (simulated)', 'पोस्टर अपलोड करें (अनुकरण)')}</p>
                       )}
                     </div>
                   </div>
                 </TabsContent>
               </Tabs>
 
-              <Button type="submit" className="w-full">Submit for Review</Button>
+              <Button type="submit" className="w-full">{t('Submit for Review', 'समीक्षा के लिए भेजें')}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -394,14 +386,10 @@ export default function Dashboard() {
           <Alert className="border-green-500/40 bg-green-500/10">
             <CheckCircle2 className="w-4 h-4 text-green-600" />
             <AlertDescription className="flex items-center justify-between">
-              <span className="text-green-800 dark:text-green-300 text-sm">
-                Event submitted for Aayam review! It will appear in the list below.
+              <span className="text-green-800 dark:text-green-300 text-sm font-devanagari">
+                {t('Event submitted for Aayam review! It will appear in the list below.', 'कार्यक्रम आयाम समीक्षा के लिए भेजा गया! यह नीचे सूची में दिखाई देगा।')}
               </span>
-              <button
-                onClick={() => setSubmitted(false)}
-                className="ml-4 text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                aria-label="Dismiss"
-              >
+              <button onClick={() => setSubmitted(false)} className="ml-4 text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
                 <X className="w-4 h-4" />
               </button>
             </AlertDescription>
@@ -424,7 +412,7 @@ export default function Dashboard() {
                 <CardContent className="pt-5 space-y-3">
                   <div className="flex items-start justify-between">
                     <h3 className="font-semibold text-sm leading-snug flex-1 mr-2">{event.title}</h3>
-                    <Badge className={`${statusBadge(event.status)} text-[10px] shrink-0`}>{event.status}</Badge>
+                    <Badge className={`${statusBadge(event.status)} text-[10px] shrink-0`}>{statusLabel(event.status)}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
@@ -438,7 +426,7 @@ export default function Dashboard() {
                     <div className="pt-1">
                       <Link href="/feed">
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
-                          View in Feed <ArrowRight className="w-3 h-3 ml-1" />
+                          {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       </Link>
                     </div>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, MessagesSquare, Calendar, Megaphone, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/useT';
 
 const primaryNav = [
   { label: 'Home', sublabel: 'डैशबोर्ड', icon: LayoutDashboard, path: '/dashboard' },
@@ -15,6 +16,7 @@ const primaryNav = [
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-sidebar border-t border-sidebar-border safe-area-bottom">
@@ -34,7 +36,7 @@ export function MobileBottomNav() {
             >
               <item.icon className={cn('w-5 h-5', active && 'text-primary drop-shadow-sm')} />
               <span className={cn('text-[10px] font-devanagari leading-none', active ? 'text-primary font-semibold' : '')}>
-                {item.sublabel}
+                {t(item.label, item.sublabel)}
               </span>
             </Link>
           );

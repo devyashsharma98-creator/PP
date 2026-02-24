@@ -10,11 +10,20 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { navItems } from '@/components/AppSidebar';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef } from 'react';
+
+const roleLabelsHi: Record<Role, string> = {
+  unit_head: 'यूनिट प्रमुख',
+  aayam_pramukh: 'आयाम प्रमुख',
+  vibhag_pramukh: 'विभाग प्रमुख',
+  karyakarta: 'कार्यकर्ता',
+};
 
 export function Navbar() {
   const { role, setRole, lang, setLang, events, articles } = useAppContext();
   const pathname = usePathname();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [bellBounce, setBellBounce] = useState(false);
   const prevCountRef = useRef(0);
@@ -37,8 +46,8 @@ export function Navbar() {
   useEffect(() => {
     if (totalPending > prevCountRef.current) {
       setBellBounce(true);
-      const t = setTimeout(() => setBellBounce(false), 600);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setBellBounce(false), 600);
+      return () => clearTimeout(timer);
     }
     prevCountRef.current = totalPending;
   }, [totalPending]);
@@ -59,8 +68,8 @@ export function Navbar() {
                 <Flame className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight text-foreground">Pragya Pravah</h1>
-                <p className="text-[10px] text-muted-foreground font-devanagari">भोपाल विभाग</p>
+                <h1 className="text-sm font-bold tracking-tight text-foreground font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h1>
+                <p className="text-[10px] text-muted-foreground font-devanagari">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
               </div>
             </div>
             <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -79,10 +88,9 @@ export function Navbar() {
                     )}
                   >
                     <item.icon className={cn('w-4 h-4 shrink-0', active && 'text-primary')} />
-                    <div>
-                      <span className="block leading-none">{item.label}</span>
-                      <span className="block text-[10px] font-devanagari opacity-70 mt-0.5">{item.sublabel}</span>
-                    </div>
+                    <span className={cn('block leading-none', lang === 'hi' && 'font-devanagari')}>
+                      {t(item.label, item.sublabel)}
+                    </span>
                   </Link>
                 );
               })}
@@ -94,8 +102,7 @@ export function Navbar() {
           <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden">
             <Flame className="w-3.5 h-3.5 text-white" />
           </div>
-          <h2 className="text-base font-bold text-foreground tracking-tight hidden md:block">प्रज्ञा प्रवाह</h2>
-          <h2 className="text-sm font-bold text-foreground md:hidden">Pragya Pravah</h2>
+          <h2 className="text-base font-bold text-foreground tracking-tight font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h2>
         </div>
       </div>
 
@@ -148,7 +155,9 @@ export function Navbar() {
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border shadow-lg z-50">
               {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
-                <SelectItem key={key} value={key} className="text-sm">{label}</SelectItem>
+                <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
+                  {lang === 'hi' ? roleLabelsHi[key] : label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

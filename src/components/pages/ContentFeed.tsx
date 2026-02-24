@@ -40,7 +40,7 @@ export default function ContentFeed() {
               <CardContent className="pt-5 space-y-3">
                 <div className="flex items-start justify-between">
                   <Badge variant="outline" className="text-[10px]">
-                    {item.type === 'event' ? 'Gatividhi' : (item as any).category || 'Aalekh'}
+                    {item.type === 'event' ? t('Gatividhi', 'गतिविधि') : ((item as any).category || t('Aalekh', 'आलेख'))}
                   </Badge>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => handleShare(item.title)}>
                     <Share2 className="w-4 h-4" />
@@ -56,7 +56,7 @@ export default function ContentFeed() {
                   {item.type === 'article' && <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{(item as any).author}</span>}
                   {item.type === 'article' && (item as any).socialUrl && (
                     <a href={(item as any).socialUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                      <ExternalLink className="w-3 h-3" /> Source
+                      <ExternalLink className="w-3 h-3" /> {t('Source', 'स्रोत')}
                     </a>
                   )}
                 </div>
@@ -68,7 +68,7 @@ export default function ContentFeed() {
         {allItems.length === 0 && (
           <Card className="glass-card">
             <CardContent className="py-10 text-center text-muted-foreground text-sm">
-              No published content yet.
+              {t('No published content yet.', 'अभी कोई प्रकाशित सामग्री नहीं।')}
             </CardContent>
           </Card>
         )}
@@ -80,13 +80,13 @@ export default function ContentFeed() {
             <div className="flex items-center gap-3">
               <MessagesSquare className="w-8 h-8 text-primary shrink-0" />
               <div>
-                <p className="font-semibold text-sm">विमर्श — Explore 15 Discourse Topics</p>
-                <p className="text-xs text-muted-foreground">Identify narratives, study counter-arguments, मंडन और खंडन</p>
+                <p className="font-semibold text-sm font-devanagari">{t('Vimarsh — Explore 15 Discourse Topics', 'विमर्श — 15 विमर्श विषयों का अन्वेषण')}</p>
+                <p className="text-xs text-muted-foreground font-devanagari">{t('Identify narratives, study counter-arguments — Mandan aur Khandan', 'विचारों की पहचान करें, प्रति-तर्क अध्ययन करें — मंडन और खंडन')}</p>
               </div>
             </div>
             <Link href="/vimarsh">
               <Button size="sm" className="shrink-0 w-full sm:w-auto">
-                Explore Vimarsh <ArrowRight className="w-4 h-4 ml-1" />
+                {t('Explore Vimarsh', 'विमर्श खोजें')} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </CardContent>

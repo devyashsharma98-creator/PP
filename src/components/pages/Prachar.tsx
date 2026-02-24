@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,22 +20,23 @@ import type { LucideIcon } from 'lucide-react';
 interface Platform {
   key: PracharPlatform;
   label: string;
+  labelHi: string;
   icon: LucideIcon;
   color: string;
 }
 
 const platforms: Platform[] = [
-  { key: 'whatsapp', label: 'WhatsApp Groups', icon: MessageCircle, color: 'text-success' },
-  { key: 'facebook', label: 'Facebook Page', icon: Globe, color: 'text-info' },
-  { key: 'instagram', label: 'Instagram', icon: Camera, color: 'text-destructive' },
-  { key: 'telegram', label: 'Telegram Channel', icon: Navigation, color: 'text-primary' },
+  { key: 'whatsapp', label: 'WhatsApp Groups', labelHi: 'WhatsApp ग्रुप', icon: MessageCircle, color: 'text-success' },
+  { key: 'facebook', label: 'Facebook Page', labelHi: 'Facebook पेज', icon: Globe, color: 'text-info' },
+  { key: 'instagram', label: 'Instagram', labelHi: 'Instagram', icon: Camera, color: 'text-destructive' },
+  { key: 'telegram', label: 'Telegram Channel', labelHi: 'Telegram चैनल', icon: Navigation, color: 'text-primary' },
 ];
 
 const templates = [
-  { id: 't1', name: 'Event Poster', desc: 'Standard event announcement', icon: Layout },
-  { id: 't2', name: 'Vimarsh Quote Card', desc: 'Quote card for discourse topics', icon: Palette },
-  { id: 't3', name: 'Book Discussion', desc: 'Book review announcement', icon: Layout },
-  { id: 't4', name: 'Youth Program', desc: 'Yuva aayam event template', icon: Palette },
+  { id: 't1', name: 'Event Poster', nameHi: 'कार्यक्रम पोस्टर', desc: 'Standard event announcement', descHi: 'कार्यक्रम की मानक घोषणा', icon: Layout },
+  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'विमर्श उद्धरण कार्ड', desc: 'Quote card for discourse topics', descHi: 'विमर्श विषयों के लिए उद्धरण कार्ड', icon: Palette },
+  { id: 't3', name: 'Book Discussion', nameHi: 'पुस्तक चर्चा', desc: 'Book review announcement', descHi: 'पुस्तक समीक्षा घोषणा', icon: Layout },
+  { id: 't4', name: 'Youth Program', nameHi: 'युवा कार्यक्रम', desc: 'Yuva aayam event template', descHi: 'युवा आयाम कार्यक्रम टेम्पलेट', icon: Palette },
 ];
 
 export default function Prachar() {
@@ -67,9 +68,11 @@ export default function Prachar() {
       {incompleteCount > 0 && (
         <Alert className="border-warning/40 bg-[hsl(var(--warning)/.06)]">
           <AlertCircle className="h-4 w-4 text-warning" />
-          <AlertDescription className="text-sm">
-            <strong>{incompleteCount} published event{incompleteCount > 1 ? 's' : ''}</strong> pending complete
-            platform distribution. All 4 platforms must be marked before this alert clears.
+          <AlertDescription className="text-sm font-devanagari">
+            {t(
+              `${incompleteCount} published event${incompleteCount > 1 ? 's' : ''} pending complete platform distribution. All 4 platforms must be marked before this alert clears.`,
+              `${incompleteCount} प्रकाशित कार्यक्रम${incompleteCount > 1 ? '' : ''} सभी मंचों पर वितरण प्रतीक्षित है। अलर्ट हटाने के लिए सभी 4 मंच चिह्नित करें।`
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -83,7 +86,7 @@ export default function Prachar() {
         {publishedEvents.length === 0 ? (
           <Card className="glass-card">
             <CardContent className="py-10 text-center text-muted-foreground text-sm">
-              No published events yet. Approve events from the Dashboard to see them here.
+              {t('No published events yet. Approve events from the Dashboard to see them here.', 'अभी कोई प्रकाशित कार्यक्रम नहीं। डैशबोर्ड से कार्यक्रम अनुमोदित करें।')}
             </CardContent>
           </Card>
         ) : (
@@ -111,10 +114,10 @@ export default function Prachar() {
                         <span className="text-[10px] text-muted-foreground">{completedCount}/4</span>
                         {done
                           ? <Badge className="bg-[hsl(var(--success)/.15)] text-success text-xs">
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> All Done
+                              <CheckCircle2 className="w-3 h-3 mr-1" /> {t('All Done', 'पूर्ण')}
                             </Badge>
                           : <Badge className="bg-[hsl(var(--warning)/.15)] text-warning text-xs">
-                              <AlertCircle className="w-3 h-3 mr-1" /> Pending
+                              <AlertCircle className="w-3 h-3 mr-1" /> {t('Pending', 'प्रतीक्षित')}
                             </Badge>
                         }
                       </div>
@@ -143,7 +146,7 @@ export default function Prachar() {
                                 htmlFor={`${event.id}-${platform.key}`}
                                 className="text-[10px] cursor-pointer block mt-0.5 leading-tight"
                               >
-                                {platform.label}
+                                {t(platform.label, platform.labelHi)}
                               </Label>
                             </div>
                           </div>
@@ -152,16 +155,16 @@ export default function Prachar() {
                     </div>
 
                     {!done && (
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3 text-warning" />
-                        Mark all platforms above to clear the pending alert for this event.
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 font-devanagari">
+                        <AlertCircle className="w-3 h-3 text-warning shrink-0" />
+                        {t('Mark all platforms above to clear the pending alert for this event.', 'इस कार्यक्रम का अलर्ट हटाने के लिए सभी मंच चिह्नित करें।')}
                       </p>
                     )}
 
                     {done && (
                       <Link href="/feed">
                         <Button variant="outline" size="sm" className="text-xs text-success border-success/40 hover:bg-success/5 w-full sm:w-auto">
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> View Published in Feed →
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> {t('View Published in Feed →', 'फ़ीड में देखें →')}
                         </Button>
                       </Link>
                     )}
@@ -189,16 +192,16 @@ export default function Prachar() {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                     <tmpl.icon className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="text-sm font-medium">{tmpl.name}</h3>
-                  <p className="text-[10px] text-muted-foreground">{tmpl.desc}</p>
-                  <Button variant="outline" size="sm" className="text-xs h-7 w-full">Use Template</Button>
+                  <h3 className="text-sm font-medium">{t(tmpl.name, tmpl.nameHi)}</h3>
+                  <p className="text-[10px] text-muted-foreground">{t(tmpl.desc, tmpl.descHi)}</p>
+                  <Button variant="outline" size="sm" className="text-xs h-7 w-full">{t('Use Template', 'टेम्पलेट उपयोग करें')}</Button>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground text-center pt-2">
-          Need content ideas? <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">Explore Vimarsh topics →</Link>
+        <p className="text-xs text-muted-foreground text-center pt-2 font-devanagari">
+          {t('Need content ideas?', 'विषय चाहिए?')} <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">{t('Explore Vimarsh topics →', 'विमर्श विषय देखें →')}</Link>
         </p>
       </div>
     </motion.div>
