@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, ChevronDown, ChevronRight, ExternalLink, Youtube, BookOpen, Library } from 'lucide-react';
+import { useT } from '@/lib/useT';
 
 const topics = [
   {
@@ -118,6 +119,7 @@ const topics = [
 ];
 
 export default function Vimarsh() {
+  const tr = useT();
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
 
@@ -129,17 +131,15 @@ export default function Vimarsh() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">
-            Vimarsh <span className="font-devanagari text-muted-foreground text-lg">विमर्श</span>
-          </h1>
-          <p className="text-muted-foreground text-sm">15 Core Discourse Topics — मंडन और खंडन की रणनीति</p>
+          <h1 className="text-2xl font-bold">{tr("Vimarsh", "विमर्श")}</h1>
+          <p className="text-muted-foreground text-sm">{tr("15 Core Discourse Topics — Strategy of Assertion & Counter", "15 मूल विचार विषय — मंडन और खंडन की रणनीति")}</p>
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search topics... / खोजें"
+            placeholder={tr("Search topics...", "विषय खोजें...")}
             className="pl-10"
           />
         </div>
@@ -163,8 +163,8 @@ export default function Vimarsh() {
                     {topic.id}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm font-devanagari">{topic.title}</h3>
-                    <p className="text-[10px] text-muted-foreground">{topic.english}</p>
+                    <h3 className="font-medium text-sm">{tr(topic.english, topic.title)}</h3>
+                    <p className="text-[10px] text-muted-foreground font-devanagari">{tr(topic.english, topic.title) === topic.english ? topic.title : topic.english}</p>
                   </div>
                   {expanded === topic.id
                     ? <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -187,7 +187,7 @@ export default function Vimarsh() {
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                           <h4 className="text-xs font-semibold mb-2 flex items-center gap-1">
-                            <ExternalLink className="w-3 h-3 text-primary" /> Articles
+                            <ExternalLink className="w-3 h-3 text-primary" /> {tr("Articles", "लेख")}
                           </h4>
                           <div className="space-y-1.5">
                             {topic.links.map((link, j) => (
@@ -199,7 +199,7 @@ export default function Vimarsh() {
                         </div>
                         <div>
                           <h4 className="text-xs font-semibold mb-2 flex items-center gap-1">
-                            <Youtube className="w-3 h-3 text-destructive" /> Videos
+                            <Youtube className="w-3 h-3 text-destructive" /> {tr("Videos", "वीडियो")}
                           </h4>
                           <div className="space-y-1.5">
                             {topic.videos.map((v, j) => (

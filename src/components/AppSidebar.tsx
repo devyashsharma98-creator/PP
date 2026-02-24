@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export const navItems = [
-  { label: 'Dashboard', sublabel: 'गतिविधियाँ', icon: LayoutDashboard, path: '/' },
+  { label: 'Dashboard', sublabel: 'गतिविधियाँ', icon: LayoutDashboard, path: '/dashboard' },
   { label: 'Parichay', sublabel: 'परिचय', icon: UserCircle, path: '/parichay' },
   { label: 'Dayitv', sublabel: 'दायित्व', icon: Network, path: '/dayitv' },
   { label: 'Vimarsh', sublabel: 'विमर्श', icon: MessagesSquare, path: '/vimarsh' },

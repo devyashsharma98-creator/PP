@@ -7,9 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Share2, CalendarDays, MapPin, BookOpen, ArrowRight, MessagesSquare, ExternalLink } from 'lucide-react';
+import { useT } from '@/lib/useT';
 
 export default function ContentFeed() {
   const { events, articles } = useAppContext();
+  const t = useT();
   const publishedEvents = events.filter(e => e.status === 'Published');
   const publishedArticles = articles.filter(a => a.status === 'Published');
 
@@ -26,8 +28,8 @@ export default function ContentFeed() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Aalekh & Shodh</h1>
-        <p className="text-muted-foreground text-sm">Published events and research articles</p>
+        <h1 className="text-2xl font-bold">{t("Aalekh & Shodh", "आलेख एवं शोध")}</h1>
+        <p className="text-muted-foreground text-sm">{t("Published events and research articles", "प्रकाशित कार्यक्रम एवं शोध आलेख")}</p>
       </div>
 
       <div className="space-y-4">

@@ -1,3 +1,3 @@
 "use client";
-import Dashboard from "@/components/pages/Dashboard";
-export default function Page() { return <Dashboard />; }
+import LandingPage from "@/components/pages/LandingPage";
+export default function Page() { return <LandingPage />; }

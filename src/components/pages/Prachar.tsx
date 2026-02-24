@@ -13,6 +13,7 @@ import {
   Globe, Camera, Navigation, Layout, Palette,
 } from 'lucide-react';
 import { useAppContext, type PracharPlatform } from '@/context/AppContext';
+import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
@@ -39,6 +40,7 @@ const templates = [
 
 export default function Prachar() {
   const { events, pracharStatuses, updatePracharPlatform } = useAppContext();
+  const t = useT();
   const publishedEvents = events.filter(e => e.status === 'Published');
 
   const getStatus = (eventId: string) =>
@@ -56,9 +58,9 @@ export default function Prachar() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
       <div>
         <h1 className="text-2xl font-bold">
-          Prachar Aayam <span className="font-devanagari text-muted-foreground text-lg">प्रचार आयाम</span>
+          {t("Prachar Aayam", "प्रचार आयाम")}
         </h1>
-        <p className="text-muted-foreground text-sm">Multi-platform publication workflow</p>
+        <p className="text-muted-foreground text-sm">{t("Multi-platform publication workflow", "बहु-मंच प्रकाशन कार्यप्रवाह")}</p>
       </div>
 
       {/* Incomplete alert */}
@@ -75,7 +77,7 @@ export default function Prachar() {
       {/* Publication Queue */}
       <div className="space-y-4">
         <h2 className="text-base font-semibold flex items-center gap-2">
-          <Megaphone className="w-4 h-4 text-primary" /> Publication Queue
+          <Megaphone className="w-4 h-4 text-primary" /> {t("Publication Queue", "प्रकाशन कतार")}
         </h2>
 
         {publishedEvents.length === 0 ? (
@@ -173,7 +175,7 @@ export default function Prachar() {
 
       {/* Templates */}
       <div className="space-y-3">
-        <h2 className="text-base font-semibold">Design Templates</h2>
+        <h2 className="text-base font-semibold">{t("Design Templates", "डिज़ाइन टेम्पलेट")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {templates.map((tmpl, i) => (
             <motion.div

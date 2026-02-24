@@ -8,6 +8,7 @@ import { Search, Phone, MapPin, User } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/useT';
 
 const members = [
   { id: '1', name: 'Ramesh Sharma', role: 'Unit Head', aayam: 'Prachar', contact: '98261XXXXX', email: 'ramesh@example.com', unit: 'Bhopal Shahar' },
@@ -31,6 +32,7 @@ const aayamColors: Record<string, string> = {
 };
 
 export default function Directory() {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [selectedAayam, setSelectedAayam] = useState<string | null>(null);
 
@@ -51,12 +53,12 @@ export default function Directory() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Sampark Directory</h1>
-          <p className="text-muted-foreground text-sm font-devanagari">सम्पर्क सूची - Member contacts across all units</p>
+          <h1 className="text-2xl font-bold">{t("Sampark Directory", "सम्पर्क सूची")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Member contacts across all units", "सभी इकाइयों के सदस्य संपर्क")}</p>
         </div>
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search members..." className="pl-10" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Search members...", "सदस्य खोजें...")} className="pl-10" />
         </div>
       </div>
 
@@ -67,7 +69,7 @@ export default function Directory() {
           className="cursor-pointer"
           onClick={() => setSelectedAayam(null)}
         >
-          All Aayam
+          {t("All Aayam", "सभी आयाम")}
         </Badge>
         {aayams.map(aayam => (
           <Badge

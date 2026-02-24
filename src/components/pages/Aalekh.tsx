@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from '@/components/ToastProvider';
+import { useT } from '@/lib/useT';
 import type { AalekhaArticle, ArticleStatus } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -117,6 +118,7 @@ function ArticleCard({
 
 // ─── Write Article Form ───────────────────────────────────────────────────────
 function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -136,19 +138,19 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><PenLine className="w-4 h-4 mr-2" /> Write New Article</Button>
+        <Button><PenLine className="w-4 h-4 mr-2" /> {t("Write New Article", "नया आलेख लिखें")}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg bg-popover max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Aalekh (आलेख)</DialogTitle>
+          <DialogTitle>{t("New Aalekh", "नया आलेख")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Title</Label>
-            <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Article title (Hindi or English)" required />
+            <Label>{t("Title", "शीर्षक")}</Label>
+            <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder={t("Article title (Hindi or English)", "आलेख का शीर्षक (हिन्दी या अंग्रेज़ी)")} required />
           </div>
           <div>
-            <Label>Category</Label>
+            <Label>{t("Category", "श्रेणी")}</Label>
             <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-popover">
@@ -157,21 +159,21 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
             </Select>
           </div>
           <div>
-            <Label>Content (Full Article)</Label>
+            <Label>{t("Content (Full Article)", "सामग्री (पूर्ण आलेख)")}</Label>
             <Textarea
               value={form.content}
               onChange={e => setForm(p => ({ ...p, content: e.target.value, summary: e.target.value.slice(0, 150) }))}
-              placeholder="Write your full article here..."
+              placeholder={t("Write your full article here...", "यहाँ अपना पूर्ण आलेख लिखें...")}
               rows={6}
               required
             />
           </div>
           <div>
-            <Label>Summary <span className="text-muted-foreground text-xs">(auto-filled, editable)</span></Label>
-            <Textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))} rows={2} placeholder="Short excerpt for the feed..." />
+            <Label>{t("Summary", "सारांश")} <span className="text-muted-foreground text-xs">({t("auto-filled, editable", "स्वतः भरा, संपादन योग्य")})</span></Label>
+            <Textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))} rows={2} placeholder={t("Short excerpt for the feed...", "फ़ीड के लिए संक्षिप्त विवरण...")} />
           </div>
           <div>
-            <Label>Social Media URL <span className="text-muted-foreground text-xs">(optional — paste FB/WhatsApp/Instagram link)</span></Label>
+            <Label>{t("Social Media URL", "सोशल मीडिया लिंक")} <span className="text-muted-foreground text-xs">({t("optional", "वैकल्पिक")})</span></Label>
             <Input value={form.socialUrl} onChange={e => setForm(p => ({ ...p, socialUrl: e.target.value }))} placeholder="https://facebook.com/..." type="url" />
           </div>
 
@@ -198,7 +200,7 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
 
           <Button type="submit" className="w-full" disabled={!allValuesChecked}>
             <Send className="w-4 h-4 mr-2" />
-            {allValuesChecked ? "Submit for Unit Head Review" : "Check all values to submit"}
+            {allValuesChecked ? t("Submit for Unit Head Review", "यूनिट प्रमुख समीक्षा के लिए भेजें") : t("Check all values to submit", "सभी मूल्यों की जांच करें")}
           </Button>
         </form>
       </DialogContent>
@@ -264,6 +266,7 @@ function EditForwardDialog({
 export default function Aalekh() {
   const { role, articles, addArticle, updateArticleStatus } = useAppContext();
   const { addToast } = useToast();
+  const t = useT();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
 
   const handleSubmit = (form: typeof emptyForm) => {
@@ -287,8 +290,8 @@ export default function Aalekh() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">My Articles <span className="font-devanagari text-muted-foreground text-lg">मेरे आलेख</span></h1>
-            <p className="text-muted-foreground text-sm">Write articles — submit for Unit Head review before publishing</p>
+            <h1 className="text-2xl font-bold">{t("My Articles", "मेरे आलेख")}</h1>
+            <p className="text-muted-foreground text-sm">{t("Write articles — submit for Unit Head review before publishing", "आलेख लिखें — प्रकाशन से पहले यूनिट प्रमुख की समीक्षा के लिए भेजें")}</p>
           </div>
           <WriteArticleDialog onSubmit={handleSubmit} />
         </div>
@@ -297,7 +300,7 @@ export default function Aalekh() {
           <Card className="glass-card">
             <CardContent className="py-10 text-center text-muted-foreground text-sm space-y-3">
               <PenLine className="w-8 h-8 mx-auto opacity-40" />
-              <p>No articles yet. Write your first article!</p>
+              <p>{t("No articles yet. Write your first article!", "अभी कोई आलेख नहीं। अपना पहला आलेख लिखें!")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -321,8 +324,8 @@ export default function Aalekh() {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Aalekh Review <span className="font-devanagari text-muted-foreground text-lg">आलेख समीक्षा</span></h1>
-          <p className="text-muted-foreground text-sm">Review articles submitted by Karyakartas — edit if needed, then forward to Aayam Pramukh</p>
+          <h1 className="text-2xl font-bold">{t("Aalekh Review", "आलेख समीक्षा")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Review articles submitted by Karyakartas — edit if needed, then forward to Aayam Pramukh", "कार्यकर्ताओं के आलेखों की समीक्षा करें — जरूरत हो तो संपादित करें, फिर आयाम प्रमुख को भेजें")}</p>
         </div>
 
         <Card className="glass-card">

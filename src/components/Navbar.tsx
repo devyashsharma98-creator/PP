@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
 
 export function Navbar() {
-  const { role, setRole, events, articles } = useAppContext();
+  const { role, setRole, lang, setLang, events, articles } = useAppContext();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [bellBounce, setBellBounce] = useState(false);
@@ -122,6 +122,22 @@ export function Navbar() {
             </span>
           </div>
         )}
+
+        {/* Language Toggle */}
+        <button
+          onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
+          className="relative flex items-center gap-0 bg-muted/80 border border-border/60 rounded-lg overflow-hidden h-8 text-xs font-bold transition-all hover:border-primary/40"
+          title={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
+        >
+          <span className={cn(
+            'px-2 py-1 transition-all duration-200',
+            lang === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+          )}>EN</span>
+          <span className={cn(
+            'px-2 py-1 font-devanagari transition-all duration-200',
+            lang === 'hi' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+          )}>हि</span>
+        </button>
 
         {/* Role Switcher */}
         <div className="flex items-center gap-1.5 bg-muted/80 border border-border/60 rounded-lg px-2 py-1 md:px-3 md:py-1.5">

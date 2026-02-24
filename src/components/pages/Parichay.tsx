@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Flame, Globe, Target, Users, Search, Megaphone, MessagesSquare, BookOpen, Network, ArrowRight } from 'lucide-react';
+import { useT } from '@/lib/useT';
 
 const aayams = [
   {
@@ -51,6 +52,7 @@ const vibhags = [
 ];
 
 export default function Parichay() {
+  const t = useT();
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 max-w-3xl mx-auto pb-10">
 
@@ -64,8 +66,8 @@ export default function Parichay() {
             <h1 className="text-2xl font-bold text-white tracking-tight">Pragya Pravah</h1>
             <p className="text-white/80 text-sm font-devanagari mt-0.5">प्रज्ञा प्रवाह</p>
             <div className="flex gap-2 mt-2">
-              <Badge className="bg-white/20 text-white border-white/30 text-[10px]">Global Network</Badge>
-              <Badge className="bg-white/20 text-white border-white/30 text-[10px]">Think Tank Umbrella</Badge>
+              <Badge className="bg-white/20 text-white border-white/30 text-[10px]">{t("Global Network", "वैश्विक नेटवर्क")}</Badge>
+              <Badge className="bg-white/20 text-white border-white/30 text-[10px]">{t("Think Tank Umbrella", "थिंक टैंक")}</Badge>
             </div>
           </div>
         </div>

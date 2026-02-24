@@ -6,7 +6,7 @@ import { LayoutDashboard, MessagesSquare, Calendar, Megaphone, Users } from 'luc
 import { cn } from '@/lib/utils';
 
 const primaryNav = [
-  { label: 'Home', sublabel: 'डैशबोर्ड', icon: LayoutDashboard, path: '/' },
+  { label: 'Home', sublabel: 'डैशबोर्ड', icon: LayoutDashboard, path: '/dashboard' },
   { label: 'Vimarsh', sublabel: 'विमर्श', icon: MessagesSquare, path: '/vimarsh' },
   { label: 'Calendar', sublabel: 'पंचांग', icon: Calendar, path: '/calendar' },
   { label: 'Prachar', sublabel: 'प्रचार', icon: Megaphone, path: '/prachar' },

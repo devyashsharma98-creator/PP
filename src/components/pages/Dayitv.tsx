@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight, Network, Crown, Shield, User } from 'lucide-react';
+import { useT } from '@/lib/useT';
 
 const aayamColors: Record<string, string> = {
   Yuva: 'bg-[hsl(var(--info)/.15)] text-info',
@@ -37,6 +38,7 @@ const vibhags = [
 ];
 
 export default function Dayitv() {
+  const t = useT();
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['Bhopal Vibhag']));
 
   const toggle = (name: string) => {
@@ -51,10 +53,8 @@ export default function Dayitv() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
       <div>
-        <h1 className="text-2xl font-bold">
-          Dayitv <span className="font-devanagari text-muted-foreground text-lg">दायित्व</span>
-        </h1>
-        <p className="text-muted-foreground text-sm">संगठन संरचना — Organizational Structure</p>
+        <h1 className="text-2xl font-bold">{t("Dayitv", "दायित्व")}</h1>
+        <p className="text-muted-foreground text-sm">{t("Organizational Structure", "संगठन संरचना")}</p>
       </div>
 
       {/* Kshetra */}
@@ -116,7 +116,7 @@ export default function Dayitv() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-medium text-sm">{vibhag.name}</h3>
                             {vibhag.isCurrent && (
-                              <Badge className="text-[9px] bg-primary/10 text-primary px-1.5">Current</Badge>
+                              <Badge className="text-[9px] bg-primary/10 text-primary px-1.5">{t("Current", "वर्तमान")}</Badge>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">

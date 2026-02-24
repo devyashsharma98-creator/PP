@@ -21,6 +21,7 @@ import {
   ArrowRight, BarChart3, Users, TrendingUp, X,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
+import { useT } from '@/lib/useT';
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const { role, events, addEvent, updateEventStatus } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
+  const t = useT();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState("pre");
   const [dateValue, setDateValue] = useState("");
@@ -71,7 +73,7 @@ export default function Dashboard() {
     setDialogOpen(false);
     setSubmitted(true);
     addToast('Event submitted for review!', 'success', 'आयाम समीक्षा के लिए भेजा गया');
-    router.push("/");
+    router.push("/dashboard");
   };
 
   const toggleChecklist = (key: keyof typeof form.checklist) => {
@@ -89,8 +91,8 @@ export default function Dashboard() {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Vibhag Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Overview of all activities across Bhopal Vibhag</p>
+          <h1 className="text-2xl font-bold">{t("Vibhag Dashboard", "विभाग डैशबोर्ड")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Overview of all activities across Bhopal Vibhag", "भोपाल विभाग की सभी गतिविधियों का अवलोकन")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -195,8 +197,8 @@ export default function Dashboard() {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Aayam Review Board</h1>
-          <p className="text-muted-foreground text-sm">Review and forward events submitted by Unit Heads</p>
+          <h1 className="text-2xl font-bold">{t("Aayam Review Board", "आयाम समीक्षा मंडल")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Review and forward events submitted by Unit Heads", "इकाई प्रमुखों द्वारा प्रस्तुत कार्यक्रमों की समीक्षा करें")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -283,12 +285,12 @@ export default function Dashboard() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gatividhi Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Create and track events for your unit</p>
+          <h1 className="text-2xl font-bold">{t("Gatividhi Dashboard", "गतिविधि डैशबोर्ड")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Create and track events for your unit", "अपनी इकाई के लिए कार्यक्रम बनाएं और ट्रैक करें")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="w-4 h-4 mr-2" /> Create New Event</Button>
+            <Button><Plus className="w-4 h-4 mr-2" /> {t("Create New Event", "नया कार्यक्रम बनाएं")}</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg bg-popover">
             <DialogHeader>

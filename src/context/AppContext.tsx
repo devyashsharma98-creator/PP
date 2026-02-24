@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh' | 'karyakarta';
+export type Lang = 'en' | 'hi';
 
 export type EventStatus = 'Draft' | 'Pending Aayam Review' | 'Pending Final Approval' | 'Published';
 
@@ -63,6 +64,8 @@ export interface AalekhaArticle {
 interface AppState {
   role: Role;
   setRole: (role: Role) => void;
+  lang: Lang;
+  setLang: (lang: Lang) => void;
   events: GatividhiEvent[];
   addEvent: (event: Omit<GatividhiEvent, 'id' | 'status'>) => void;
   updateEventStatus: (id: string, status: EventStatus) => void;
@@ -193,6 +196,7 @@ const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<Role>('unit_head');
+  const [lang, setLang] = useState<Lang>('en');
   const [events, setEvents] = useState<GatividhiEvent[]>(initialEvents);
   const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>(initialPracharStatuses);
   const [articles, setArticles] = useState<AalekhaArticle[]>(initialArticles);
@@ -244,6 +248,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{
       role, setRole,
+      lang, setLang,
       events, addEvent, updateEventStatus,
       pracharStatuses, updatePracharPlatform,
       articles, addArticle, updateArticleStatus,

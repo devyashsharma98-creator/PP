@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { History, CalendarDays, MapPin, CheckCircle2, Activity } from 'lucide-react';
+import { useT } from '@/lib/useT';
 
 const historyItems = [
   { date: '2026-02-15', title: 'Yuva Sangam organized', unit: 'Bhopal Shahar', type: 'Event' },
@@ -25,15 +26,16 @@ const typeColors: Record<string, string> = {
 };
 
 export default function AapKaItihas() {
+  const t = useT();
   const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 max-w-2xl mx-auto pb-10">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <History className="w-6 h-6 text-primary" /> Aaj ka Itihas
+          <History className="w-6 h-6 text-primary" /> {t("Aaj ka Itihas", "आज का इतिहास")}
         </h1>
-        <p className="text-muted-foreground text-sm font-devanagari">आज का इतिहास - {today} | Today in History</p>
+        <p className="text-muted-foreground text-sm">{today} · {t("Today in History", "इतिहास में आज")}</p>
       </div>
 
       {/* Historical Facts Section */}

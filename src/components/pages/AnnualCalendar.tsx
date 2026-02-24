@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar, Bell } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/useT';
 
 const aayamLight: Record<string, string> = {
   Yuva: 'bg-[hsl(var(--info)/.2)] text-info',
@@ -51,6 +52,7 @@ export default function AnnualCalendar() {
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const { events } = useAppContext();
+  const t = useT();
 
   const allEvents: CalEvent[] = [
     ...extraEvents,
@@ -80,10 +82,8 @@ export default function AnnualCalendar() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
       <div>
-        <h1 className="text-2xl font-bold">
-          Calendar <span className="font-devanagari text-muted-foreground text-lg">वार्षिक पंचांग</span>
-        </h1>
-        <p className="text-muted-foreground text-sm">Annual event calendar across all aayams</p>
+        <h1 className="text-2xl font-bold">{t("Annual Calendar", "वार्षिक पंचांग")}</h1>
+        <p className="text-muted-foreground text-sm">{t("Annual event calendar across all aayams", "सभी आयामों का वार्षिक कार्यक्रम पंचांग")}</p>
       </div>
 
       {/* Reminders */}

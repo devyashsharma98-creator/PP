@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, BookOpen, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAppContext } from '@/context/AppContext';
+import { useT } from '@/lib/useT';
 
 const books = [
   { id: '1', title: 'Arthashastra - Kautilya', hindiTitle: 'अर्थशास्त्र - कौटिल्य', category: 'Rajneeti', hindiCategory: 'राजनीति', description: 'Ancient treatise on statecraft, economic policy, and military strategy.', hindiDesc: 'राजनीति, अर्थनीति और सैन्य रणनीति पर प्राचीन ग्रंथ।', tags: ['कौटिल्य', 'चाणक्य', 'भारत', 'नीति'], pages: 420 },
@@ -33,6 +35,8 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function ELibrary() {
+  const { lang } = useAppContext();
+  const t = useT();
   const [search, setSearch] = useState('');
 
   const q = search.toLowerCase().trim();
@@ -51,8 +55,8 @@ export default function ELibrary() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">E-Library</h1>
-          <p className="text-muted-foreground text-sm">Indian Knowledge System (IKS) - भारतीय ज्ञान परंपरा</p>
+          <h1 className="text-2xl font-bold">{t("E-Library", "ई-पुस्तकालय")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Indian Knowledge System (IKS)", "भारतीय ज्ञान परंपरा")}</p>
         </div>
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -83,12 +87,11 @@ export default function ELibrary() {
               </div>
               <CardContent className="pt-4 flex-1 flex flex-col space-y-2">
                 <Badge className={`${categoryColors[book.category] || ''} w-fit text-[10px]`}>{book.category} · {book.hindiCategory}</Badge>
-                <h3 className="font-semibold text-sm leading-snug">{book.title}</h3>
-                <p className="text-[11px] text-muted-foreground font-devanagari">{book.hindiTitle}</p>
-                <p className="text-xs text-muted-foreground flex-1">{book.description}</p>
+                <h3 className="font-semibold text-sm leading-snug">{lang === 'hi' ? book.hindiTitle : book.title}</h3>
+                <p className="text-xs text-muted-foreground flex-1">{lang === 'hi' ? book.hindiDesc : book.description}</p>
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <FileText className="w-3 h-3" /> {book.pages} pages
+                    <FileText className="w-3 h-3" /> {book.pages} {t("pages", "पृष्ठ")}
                   </span>
                   <Button variant="ghost" size="sm" className="text-xs h-7 text-primary hover:text-primary">
                     <Download className="w-3 h-3 mr-1" /> PDF

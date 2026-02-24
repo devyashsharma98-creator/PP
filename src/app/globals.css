@@ -152,6 +152,21 @@
   to   { width: 0%; }
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spin-slow-reverse {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { filter: drop-shadow(0 0 8px hsl(27 100% 50% / 0.5)); }
+  50%       { filter: drop-shadow(0 0 24px hsl(27 100% 60% / 0.9)); }
+}
+
 /* ── Animation utilities ────────────────────────────────────────────────────── */
 
 @layer utilities {
@@ -199,6 +214,18 @@
 
   .animate-progress-bar {
     animation: progress-bar 4s linear forwards;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 22s linear infinite;
+  }
+
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 30s linear infinite;
+  }
+
+  .animate-glow-breathe {
+    animation: glow-breathe 3s ease-in-out infinite;
   }
 
   /* Stagger helpers */
