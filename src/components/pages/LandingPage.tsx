@@ -332,9 +332,9 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h3 className={`font-semibold font-devanagari text-sm ${a.color}`}>{a.name}</h3>
-                    <p className="text-[10px] text-muted-foreground/60">{a.en}</p>
+                    <p className="text-[10px] text-muted-foreground">{a.en}</p>
                   </div>
-                  <p className={`text-xs text-muted-foreground leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
+                  <p className={`text-xs text-foreground/70 leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
                     {a.desc[lang]}
                   </p>
                 </div>
@@ -411,7 +411,7 @@ export default function LandingPage() {
             <h2 className={`text-2xl sm:text-3xl font-bold ${isHi ? "font-devanagari" : ""}`}>
               {isHi ? "प्रज्ञा प्रवाह में प्रवेश करें" : "Enter Pragya Pravah"}
             </h2>
-            <p className={`text-sm text-muted-foreground ${isHi ? "font-devanagari" : ""}`}>
+            <p className={`text-sm text-foreground/65 ${isHi ? "font-devanagari" : ""}`}>
               {isHi ? "डैशबोर्ड खोलें और अपनी इकाई की गतिविधियाँ प्रबंधित करें।"
                 : "Open the dashboard and manage your unit's activities."}
             </p>
