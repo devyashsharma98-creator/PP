@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppContext, GatividhiEvent } from "@/context/AppContext";
+import { useAppContext, GatividhiEvent, FormConfig, VotePoll } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, isValid } from "date-fns";
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
-  Phone, Building2,
+  Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
@@ -43,7 +45,7 @@ const eventStatusHi: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  const { role, lang, events, addEvent, updateEventStatus } = useAppContext();
+  const { role, lang, events, addEvent, updateEventStatus, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
   const t = useT();
@@ -52,7 +54,21 @@ export default function Dashboard() {
   const [dateValue, setDateValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [responseEvent, setResponseEvent] = useState<GatividhiEvent | null>(null);
+  const [pollResultsEvent, setPollResultsEvent] = useState<GatividhiEvent | null>(null);
+  const [pollCreateEvent, setPollCreateEvent] = useState<GatividhiEvent | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [localFormConfig, setLocalFormConfig] = useState<FormConfig>({
+    fields: { phone: true, city: true, attendingCount: true, specialNeeds: true },
+    customQuestions: [],
+  });
+  const [newCustomQ, setNewCustomQ] = useState('');
+  const [newCustomQHi, setNewCustomQHi] = useState('');
+  const [newCustomQType, setNewCustomQType] = useState<'text' | 'yesno'>('yesno');
+  const [showAddQ, setShowAddQ] = useState(false);
+  const [newPollQuestion, setNewPollQuestion] = useState('');
+  const [newPollQuestionHi, setNewPollQuestionHi] = useState('');
+  const [newPollType, setNewPollType] = useState<'date' | 'general'>('date');
+  const [newPollOptions, setNewPollOptions] = useState(['', '', '']);
   const [form, setForm] = useState({
     title: "", description: "", unit: "",
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -75,6 +91,7 @@ export default function Dashboard() {
       checklist: form.checklist,
       report: form.report,
       imageUrl: "",
+      formConfig: localFormConfig,
     });
     setForm({
       title: "", description: "", unit: "",
@@ -91,6 +108,55 @@ export default function Dashboard() {
 
   const toggleChecklist = (key: keyof typeof form.checklist) => {
     setForm(prev => ({ ...prev, checklist: { ...prev.checklist, [key]: !prev.checklist[key] } }));
+  };
+
+  const SUGGESTIONS: { question: string; questionHi: string; type: 'text' | 'yesno' }[] = [
+    { question: 'T-shirt size?', questionHi: 'टी-शर्ट साइज?', type: 'text' },
+    { question: 'Vegetarian?', questionHi: 'शाकाहारी?', type: 'yesno' },
+    { question: 'Need accommodation?', questionHi: 'आवास चाहिए?', type: 'yesno' },
+    { question: 'Coming from outside city?', questionHi: 'शहर से बाहर से आ रहे हैं?', type: 'yesno' },
+    { question: 'Preferred session time?', questionHi: 'पसंदीदा सत्र समय?', type: 'text' },
+    { question: 'Bringing family?', questionHi: 'परिवार ला रहे हैं?', type: 'yesno' },
+  ];
+
+  const addSuggestion = (s: typeof SUGGESTIONS[0]) => {
+    if (localFormConfig.customQuestions.length >= 5) return;
+    if (localFormConfig.customQuestions.some(q => q.question === s.question)) return;
+    setLocalFormConfig(prev => ({
+      ...prev,
+      customQuestions: [...prev.customQuestions, { id: `cq${Date.now()}`, ...s }],
+    }));
+  };
+
+  const addCustomQuestion = () => {
+    if (!newCustomQ.trim() || localFormConfig.customQuestions.length >= 5) return;
+    setLocalFormConfig(prev => ({
+      ...prev,
+      customQuestions: [...prev.customQuestions, {
+        id: `cq${Date.now()}`, question: newCustomQ.trim(),
+        questionHi: newCustomQHi.trim() || newCustomQ.trim(), type: newCustomQType,
+      }],
+    }));
+    setNewCustomQ(''); setNewCustomQHi(''); setShowAddQ(false);
+  };
+
+  const removeCustomQuestion = (id: string) => {
+    setLocalFormConfig(prev => ({ ...prev, customQuestions: prev.customQuestions.filter(q => q.id !== id) }));
+  };
+
+  const handleCreatePoll = () => {
+    if (!pollCreateEvent || !newPollQuestion.trim()) return;
+    const validOptions = newPollOptions.filter(o => o.trim());
+    if (validOptions.length < 2) return;
+    addPoll(pollCreateEvent.id, {
+      question: newPollQuestion.trim(),
+      questionHi: newPollQuestionHi.trim() || newPollQuestion.trim(),
+      type: newPollType,
+      options: validOptions.map((label, i) => ({ id: `o${i}${Date.now()}`, label: label.trim(), votes: 0 })),
+    });
+    setPollCreateEvent(null);
+    setNewPollQuestion(''); setNewPollQuestionHi(''); setNewPollOptions(['', '', '']);
+    addToast(t('Poll created!', 'मतदान बनाया गया!'), 'success', t('Share the vote link with members', 'सदस्यों को वोट लिंक भेजें'));
   };
 
   const copyFormLink = (eventId: string) => {
@@ -332,8 +398,11 @@ export default function Dashboard() {
 
               <Tabs value={formTab} onValueChange={setFormTab}>
                 <TabsList className="w-full">
-                  <TabsTrigger value="pre" className="flex-1 font-devanagari">{t('Vyavastha', 'व्यवस्थाएं')}</TabsTrigger>
-                  <TabsTrigger value="post" className="flex-1 font-devanagari">{t('Vritt', 'वृत्त')}</TabsTrigger>
+                  <TabsTrigger value="pre" className="flex-1 font-devanagari text-xs">{t('Vyavastha', 'व्यवस्थाएं')}</TabsTrigger>
+                  <TabsTrigger value="post" className="flex-1 font-devanagari text-xs">{t('Vritt', 'वृत्त')}</TabsTrigger>
+                  <TabsTrigger value="form" className="flex-1 font-devanagari text-xs">
+                    <SlidersHorizontal className="w-3 h-3 mr-1" />{t('Form', 'फॉर्म')}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="pre" className="space-y-3 pt-2">
                   {checklistItems.map(item => (
@@ -386,6 +455,97 @@ export default function Dashboard() {
                 </TabsContent>
               </Tabs>
 
+                <TabsContent value="form" className="space-y-4 pt-2">
+                  {/* Field toggles */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('Default Fields', 'डिफ़ॉल्ट फ़ील्ड')}</p>
+                    {([
+                      { key: 'phone' as const, en: 'Mobile Number', hi: 'मोबाइल नंबर' },
+                      { key: 'city' as const, en: 'City', hi: 'शहर' },
+                      { key: 'attendingCount' as const, en: 'Attendee Count', hi: 'उपस्थित संख्या' },
+                      { key: 'specialNeeds' as const, en: 'Special Needs', hi: 'विशेष जरूरत' },
+                    ] as { key: keyof FormConfig['fields']; en: string; hi: string }[]).map(f => (
+                      <div key={f.key} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                        <Label className="font-devanagari text-sm cursor-pointer">{t(f.en, f.hi)}</Label>
+                        <Switch
+                          checked={localFormConfig.fields[f.key]}
+                          onCheckedChange={v => setLocalFormConfig(prev => ({ ...prev, fields: { ...prev.fields, [f.key]: v } }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Custom questions */}
+                  {localFormConfig.customQuestions.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('Custom Questions', 'कस्टम प्रश्न')}</p>
+                      {localFormConfig.customQuestions.map(q => (
+                        <div key={q.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/50 border border-border/40">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{q.question}</p>
+                            <p className="text-[10px] text-muted-foreground">{q.type === 'yesno' ? 'Yes/No' : 'Text'}</p>
+                          </div>
+                          <button onClick={() => removeCustomQuestion(q.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add custom question */}
+                  {localFormConfig.customQuestions.length < 5 && (
+                    showAddQ ? (
+                      <div className="space-y-2 p-3 rounded-lg border border-border/50 bg-muted/30">
+                        <Input value={newCustomQ} onChange={e => setNewCustomQ(e.target.value)} placeholder={t('Question (English)', 'प्रश्न (अंग्रेजी)')} className="text-sm h-8" />
+                        <Input value={newCustomQHi} onChange={e => setNewCustomQHi(e.target.value)} placeholder={t('Question (Hindi, optional)', 'प्रश्न (हिंदी, वैकल्पिक)')} className="text-sm h-8 font-devanagari" />
+                        <div className="flex gap-2">
+                          <Select value={newCustomQType} onValueChange={(v: 'text' | 'yesno') => setNewCustomQType(v)}>
+                            <SelectTrigger className="h-8 text-xs flex-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="yesno">Yes / No</SelectItem>
+                              <SelectItem value="text">Text Answer</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button size="sm" onClick={addCustomQuestion} className="h-8 text-xs">{t('Add', 'जोड़ें')}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setShowAddQ(false)} className="h-8 text-xs">{t('Cancel', 'रद्द')}</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowAddQ(true)}>
+                        <Plus className="w-3 h-3 mr-1" /> {t('Add Custom Question', 'कस्टम प्रश्न जोड़ें')}
+                      </Button>
+                    )
+                  )}
+
+                  {/* Suggestions */}
+                  <div className="space-y-2">
+                    <p className="text-xs flex items-center gap-1 text-muted-foreground font-semibold uppercase tracking-wide">
+                      <Lightbulb className="w-3 h-3 text-warning" />{t('Suggestions', 'सुझाव')}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SUGGESTIONS.map(s => {
+                        const alreadyAdded = localFormConfig.customQuestions.some(q => q.question === s.question);
+                        return (
+                          <button
+                            key={s.question}
+                            type="button"
+                            disabled={alreadyAdded || localFormConfig.customQuestions.length >= 5}
+                            onClick={() => addSuggestion(s)}
+                            className={`text-[11px] px-2 py-1 rounded-full border transition-colors font-devanagari ${
+                              alreadyAdded
+                                ? 'bg-primary/10 border-primary/30 text-primary cursor-default'
+                                : 'border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer'
+                            } disabled:opacity-40`}
+                          >
+                            {alreadyAdded ? '✓ ' : '+ '}{t(s.question, s.questionHi)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </TabsContent>
+
               <Button type="submit" className="w-full">{t('Submit for Review', 'समीक्षा के लिए भेजें')}</Button>
             </form>
           </DialogContent>
@@ -434,11 +594,10 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <User className="w-3 h-3" /> {event.submittedBy}
                   </div>
-                  {/* Form link + Responses */}
+                  {/* Form link + Responses + Matdan */}
                   <div className="pt-1 flex flex-wrap gap-1.5">
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="ghost" size="sm"
                       className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => copyFormLink(event.id)}
                     >
@@ -448,9 +607,7 @@ export default function Dashboard() {
                       }
                     </Button>
                     {(event.registrations?.length ?? 0) > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <Button variant="ghost" size="sm"
                         className="h-7 px-2 text-xs text-primary hover:text-primary/80"
                         onClick={() => setResponseEvent(event)}
                       >
@@ -458,6 +615,23 @@ export default function Dashboard() {
                         {t(`Responses (${event.registrations!.length})`, `प्रतिक्रियाएं (${event.registrations!.length})`)}
                       </Button>
                     )}
+                    {/* Matdan buttons */}
+                    {(event.polls?.length ?? 0) > 0 && (
+                      <Button variant="ghost" size="sm"
+                        className="h-7 px-2 text-xs text-amber-600 hover:text-amber-700"
+                        onClick={() => setPollResultsEvent(event)}
+                      >
+                        <Vote className="w-3 h-3 mr-1" />
+                        {t(`Matdan (${event.polls!.reduce((s, p) => s + p.options.reduce((a, o) => a + o.votes, 0), 0)})`,
+                           `मतदान (${event.polls!.reduce((s, p) => s + p.options.reduce((a, o) => a + o.votes, 0), 0)})`)}
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => setPollCreateEvent(event)}
+                    >
+                      <Vote className="w-3 h-3 mr-1" />{t('+ Poll', '+ मत')}
+                    </Button>
                     {event.status === "Published" && (
                       <Link href="/feed">
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
@@ -472,6 +646,163 @@ export default function Dashboard() {
           ))}
         </AnimatePresence>
       </div>
+
+      {/* ── Poll Creation Dialog ── */}
+      <Dialog open={!!pollCreateEvent} onOpenChange={open => !open && setPollCreateEvent(null)}>
+        <DialogContent className="sm:max-w-md bg-popover">
+          <DialogHeader>
+            <DialogTitle className="font-devanagari flex items-center gap-2">
+              <Vote className="w-4 h-4 text-amber-500" /> {t('Create Poll — Matdan', 'मतदान बनाएं')}
+            </DialogTitle>
+            {pollCreateEvent && <p className="text-xs text-muted-foreground mt-1">{pollCreateEvent.title}</p>}
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm">{t('Question (English)', 'प्रश्न (अंग्रेजी)')}</Label>
+              <Input value={newPollQuestion} onChange={e => setNewPollQuestion(e.target.value)}
+                placeholder={t('e.g. Which date works best?', 'जैसे: कौन सी तारीख उचित है?')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-devanagari">{t('Question (Hindi)', 'प्रश्न (हिंदी)')}</Label>
+              <Input value={newPollQuestionHi} onChange={e => setNewPollQuestionHi(e.target.value)}
+                placeholder="जैसे: कार्यक्रम के लिए कौन सी तारीख उचित है?" className="font-devanagari" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">{t('Poll Type', 'मतदान प्रकार')}</Label>
+              <Select value={newPollType} onValueChange={(v: 'date' | 'general') => setNewPollType(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">📅 {t('Date Selection', 'तारीख चुनाव')}</SelectItem>
+                  <SelectItem value="general">📋 {t('General / Options', 'सामान्य / विकल्प')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{t('Options (min 2)', 'विकल्प (न्यूनतम 2)')}</Label>
+              {newPollOptions.map((opt, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input value={opt}
+                    onChange={e => setNewPollOptions(prev => prev.map((o, j) => j === i ? e.target.value : o))}
+                    placeholder={newPollType === 'date' ? `${t('Date', 'तारीख')} ${i + 1}` : `${t('Option', 'विकल्प')} ${i + 1}`}
+                    className="text-sm" />
+                  {newPollOptions.length > 2 && (
+                    <button onClick={() => setNewPollOptions(prev => prev.filter((_, j) => j !== i))}
+                      className="text-muted-foreground hover:text-destructive shrink-0">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {newPollOptions.length < 5 && (
+                <Button variant="outline" size="sm" className="text-xs w-full"
+                  onClick={() => setNewPollOptions(prev => [...prev, ''])}>
+                  <Plus className="w-3 h-3 mr-1" /> {t('Add Option', 'विकल्प जोड़ें')}
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button onClick={handleCreatePoll} className="flex-1"
+                disabled={!newPollQuestion.trim() || newPollOptions.filter(o => o.trim()).length < 2}>
+                <Vote className="w-4 h-4 mr-2" /> {t('Create Poll', 'मतदान बनाएं')}
+              </Button>
+              <Button variant="outline" onClick={() => setPollCreateEvent(null)}>{t('Cancel', 'रद्द')}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Poll Results Sheet ── */}
+      <Sheet open={!!pollResultsEvent} onOpenChange={open => !open && setPollResultsEvent(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          {pollResultsEvent && (
+            <>
+              <SheetHeader className="mb-5">
+                <SheetTitle className="text-base font-devanagari flex items-center gap-2">
+                  <Vote className="w-4 h-4 text-amber-500" /> {t('Poll Results — Matdan', 'मतदान परिणाम')}
+                </SheetTitle>
+                <p className="text-xs text-muted-foreground">{pollResultsEvent.title}</p>
+              </SheetHeader>
+
+              <div className="space-y-4">
+                {/* Share vote link */}
+                <Button variant="outline" size="sm" className="text-xs w-full"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/vote/${pollResultsEvent.id}`);
+                    addToast(t('Vote link copied!', 'वोट लिंक कॉपी हुआ!'), 'success');
+                  }}>
+                  <Link2 className="w-3 h-3 mr-1" />{t('Copy Vote Link for Members', 'सदस्यों के लिए वोट लिंक कॉपी करें')}
+                </Button>
+
+                {(pollResultsEvent.polls ?? []).map(poll => {
+                  const totalVotes = poll.options.reduce((s, o) => s + o.votes, 0);
+                  const winner = poll.options.reduce((a, b) => b.votes > a.votes ? b : a, poll.options[0]);
+                  return (
+                    <div key={poll.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold">{lang === 'hi' ? poll.questionHi : poll.question}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {poll.type === 'date' ? '📅' : '📋'} {totalVotes} {t('total votes', 'कुल वोट')}
+                            {poll.isFinalized && <span className="ml-2 text-green-600 font-medium">✓ {t('Finalized', 'अंतिम')}</span>}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Bar chart */}
+                      <div className="space-y-2">
+                        {poll.options.map(opt => {
+                          const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                          const isWinner = opt.id === winner?.id && opt.votes > 0;
+                          const isFinWinner = opt.id === poll.winnerOptionId;
+                          return (
+                            <div key={opt.id} className="space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className={`font-medium ${isFinWinner ? 'text-green-600' : ''}`}>
+                                  {isFinWinner ? '✓ ' : ''}{opt.label}
+                                </span>
+                                <span className="text-muted-foreground">{opt.votes} ({pct}%)</span>
+                              </div>
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <motion.div
+                                  className={`h-full rounded-full ${isWinner && !poll.isFinalized ? 'saffron-gradient' : isFinWinner ? 'bg-green-500' : 'bg-muted-foreground/40'}`}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${pct}%` }}
+                                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {/* Finalize button */}
+                      {!poll.isFinalized && totalVotes > 0 && (
+                        <Button size="sm" className="w-full text-xs"
+                          onClick={() => {
+                            finalizePoll(pollResultsEvent.id, poll.id, winner.id);
+                            setPollResultsEvent(prev => prev ? {
+                              ...prev,
+                              polls: (prev.polls ?? []).map(p => p.id === poll.id
+                                ? { ...p, isFinalized: true, winnerOptionId: winner.id } : p)
+                            } : null);
+                            addToast(t(`Finalized: ${winner.label}`, `अंतिम: ${winner.label}`), 'success',
+                              poll.type === 'date' ? t('Event date updated!', 'कार्यक्रम की तारीख अद्यतन हुई!') : '');
+                          }}>
+                          <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                          {t(`Finalize with "${winner.label}"`, `"${winner.label}" से अंतिम करें`)}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <Button variant="outline" size="sm" className="w-full text-xs"
+                  onClick={() => { setPollResultsEvent(null); setPollCreateEvent(pollResultsEvent); }}>
+                  <Plus className="w-3 h-3 mr-1" /> {t('Add Another Poll', 'और मतदान जोड़ें')}
+                </Button>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* ── Response Viewer Sheet ── */}
       <Sheet open={!!responseEvent} onOpenChange={open => !open && setResponseEvent(null)}>

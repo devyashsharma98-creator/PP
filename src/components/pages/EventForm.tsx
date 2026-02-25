@@ -37,6 +37,13 @@ export default function EventForm({ eventId }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const fc = event?.formConfig;
+  const showPhone = fc ? fc.fields.phone : true;
+  const showCity = fc ? fc.fields.city : true;
+  const showAttendingCount = fc ? fc.fields.attendingCount : true;
+  const showSpecialNeeds = fc ? fc.fields.specialNeeds : true;
+  const customQs = fc?.customQuestions ?? [];
+
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -44,14 +51,15 @@ export default function EventForm({ eventId }: Props) {
     attendingCount: 1,
     hasSpecialNeeds: false,
     notes: '',
+    customAnswers: {} as Record<string, string>,
   });
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = t('Name is required', 'नाम आवश्यक है');
-    if (!/^\d{10}$/.test(form.phone.trim()))
+    if (showPhone && !/^\d{10}$/.test(form.phone.trim()))
       e.phone = t('Enter a valid 10-digit number', 'वैध 10 अंकों का नंबर दर्ज करें');
-    if (!form.city.trim()) e.city = t('City is required', 'शहर आवश्यक है');
+    if (showCity && !form.city.trim()) e.city = t('City is required', 'शहर आवश्यक है');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -222,34 +230,38 @@ export default function EventForm({ eventId }: Props) {
                     {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label className="font-devanagari text-sm flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-primary" />
-                      {t('Mobile Number', 'मोबाइल नंबर')} <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={form.phone}
-                      onChange={e => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                      placeholder="10-digit number"
-                      inputMode="numeric"
-                      className={cn(errors.phone && 'border-destructive focus-visible:ring-destructive')}
-                    />
-                    {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
-                  </div>
+                  {showPhone && (
+                    <div className="space-y-1.5">
+                      <Label className="font-devanagari text-sm flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-primary" />
+                        {t('Mobile Number', 'मोबाइल नंबर')} <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        value={form.phone}
+                        onChange={e => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                        placeholder="10-digit number"
+                        inputMode="numeric"
+                        className={cn(errors.phone && 'border-destructive focus-visible:ring-destructive')}
+                      />
+                      {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                    </div>
+                  )}
 
-                  <div className="space-y-1.5">
-                    <Label className="font-devanagari text-sm flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-primary" />
-                      {t('City', 'शहर')} <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={form.city}
-                      onChange={e => setForm(p => ({ ...p, city: e.target.value }))}
-                      placeholder={t('e.g. Bhopal', 'जैसे भोपाल')}
-                      className={cn(errors.city && 'border-destructive focus-visible:ring-destructive')}
-                    />
-                    {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
-                  </div>
+                  {showCity && (
+                    <div className="space-y-1.5">
+                      <Label className="font-devanagari text-sm flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5 text-primary" />
+                        {t('City', 'शहर')} <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        value={form.city}
+                        onChange={e => setForm(p => ({ ...p, city: e.target.value }))}
+                        placeholder={t('e.g. Bhopal', 'जैसे भोपाल')}
+                        className={cn(errors.city && 'border-destructive focus-visible:ring-destructive')}
+                      />
+                      {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -262,51 +274,55 @@ export default function EventForm({ eventId }: Props) {
                   <p className="text-xs text-muted-foreground font-devanagari mt-0.5">{t('How many will be attending?', 'कितने लोग आएंगे?')}</p>
                 </div>
                 <div className="space-y-5">
-                  <div className="space-y-3">
-                    <Label className="font-devanagari text-sm font-medium">
-                      {t('Number of Attendees', 'उपस्थितों की संख्या')}
-                    </Label>
-                    <RadioGroup
-                      value={String(form.attendingCount)}
-                      onValueChange={v => setForm(p => ({ ...p, attendingCount: Number(v) }))}
-                      className="grid grid-cols-4 gap-2"
-                    >
-                      {[1, 2, 3, 4].map(n => (
-                        <div key={n} className="flex">
-                          <RadioGroupItem value={String(n)} id={`count-${n}`} className="sr-only" />
-                          <Label
-                            htmlFor={`count-${n}`}
-                            className={cn(
-                              'flex-1 flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border-2 cursor-pointer transition-all text-center select-none',
-                              form.attendingCount === n
-                                ? 'border-primary bg-primary/10 text-primary font-semibold'
-                                : 'border-border hover:border-primary/40 text-muted-foreground'
-                            )}
-                          >
-                            <Users className="w-4 h-4" />
-                            <span className="text-sm leading-none">{n}{n === 4 ? '+' : ''}</span>
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/40">
-                    <Checkbox
-                      id="special-needs"
-                      checked={form.hasSpecialNeeds}
-                      onCheckedChange={v => setForm(p => ({ ...p, hasSpecialNeeds: !!v }))}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <Label htmlFor="special-needs" className="cursor-pointer font-devanagari text-sm">
-                        {t('Special Assistance Required', 'विशेष सहायता आवश्यक है')}
+                  {showAttendingCount && (
+                    <div className="space-y-3">
+                      <Label className="font-devanagari text-sm font-medium">
+                        {t('Number of Attendees', 'उपस्थितों की संख्या')}
                       </Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t('Wheelchair access, dietary needs, etc.', 'व्हीलचेयर, आहार संबंधी आवश्यकता आदि')}
-                      </p>
+                      <RadioGroup
+                        value={String(form.attendingCount)}
+                        onValueChange={v => setForm(p => ({ ...p, attendingCount: Number(v) }))}
+                        className="grid grid-cols-4 gap-2"
+                      >
+                        {[1, 2, 3, 4].map(n => (
+                          <div key={n} className="flex">
+                            <RadioGroupItem value={String(n)} id={`count-${n}`} className="sr-only" />
+                            <Label
+                              htmlFor={`count-${n}`}
+                              className={cn(
+                                'flex-1 flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border-2 cursor-pointer transition-all text-center select-none',
+                                form.attendingCount === n
+                                  ? 'border-primary bg-primary/10 text-primary font-semibold'
+                                  : 'border-border hover:border-primary/40 text-muted-foreground'
+                              )}
+                            >
+                              <Users className="w-4 h-4" />
+                              <span className="text-sm leading-none">{n}{n === 4 ? '+' : ''}</span>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
                     </div>
-                  </div>
+                  )}
+
+                  {showSpecialNeeds && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/40">
+                      <Checkbox
+                        id="special-needs"
+                        checked={form.hasSpecialNeeds}
+                        onCheckedChange={v => setForm(p => ({ ...p, hasSpecialNeeds: !!v }))}
+                        className="mt-0.5"
+                      />
+                      <div>
+                        <Label htmlFor="special-needs" className="cursor-pointer font-devanagari text-sm">
+                          {t('Special Assistance Required', 'विशेष सहायता आवश्यक है')}
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {t('Wheelchair access, dietary needs, etc.', 'व्हीलचेयर, आहार संबंधी आवश्यकता आदि')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-1.5">
                     <Label className="font-devanagari text-sm">
@@ -320,6 +336,47 @@ export default function EventForm({ eventId }: Props) {
                       rows={2}
                     />
                   </div>
+
+                  {customQs.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        {t('Additional Questions', 'अतिरिक्त प्रश्न')}
+                      </p>
+                      {customQs.map(q => (
+                        <div key={q.id} className="space-y-1.5">
+                          <Label className="font-devanagari text-sm">{t(q.question, q.questionHi)}</Label>
+                          {q.type === 'yesno' ? (
+                            <div className="flex gap-3">
+                              {['Yes', 'No'].map(opt => (
+                                <label key={opt} className={cn(
+                                  'flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all text-sm select-none',
+                                  form.customAnswers[q.id] === opt
+                                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                                    : 'border-border hover:border-primary/40 text-muted-foreground'
+                                )}>
+                                  <input
+                                    type="radio"
+                                    className="sr-only"
+                                    name={`custom-${q.id}`}
+                                    value={opt}
+                                    checked={form.customAnswers[q.id] === opt}
+                                    onChange={() => setForm(p => ({ ...p, customAnswers: { ...p.customAnswers, [q.id]: opt } }))}
+                                  />
+                                  <span className="font-devanagari">{opt === 'Yes' ? t('Yes', 'हाँ') : t('No', 'नहीं')}</span>
+                                </label>
+                              ))}
+                            </div>
+                          ) : (
+                            <Input
+                              value={form.customAnswers[q.id] ?? ''}
+                              onChange={e => setForm(p => ({ ...p, customAnswers: { ...p.customAnswers, [q.id]: e.target.value } }))}
+                              placeholder={t('Your answer…', 'आपका उत्तर…')}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -335,11 +392,12 @@ export default function EventForm({ eventId }: Props) {
                 <div className="rounded-xl overflow-hidden border border-border/60">
                   {([
                     { label: t('Name', 'नाम'), value: form.name },
-                    { label: t('Mobile', 'मोबाइल'), value: form.phone },
-                    { label: t('City', 'शहर'), value: form.city },
-                    { label: t('Attendees', 'उपस्थित'), value: `${form.attendingCount}${form.attendingCount === 4 ? '+' : ''} ${t('person(s)', 'व्यक्ति')}` },
-                    ...(form.hasSpecialNeeds ? [{ label: t('Special Needs', 'विशेष ज़रूरत'), value: t('Yes', 'हाँ') }] : []),
+                    ...(showPhone ? [{ label: t('Mobile', 'मोबाइल'), value: form.phone }] : []),
+                    ...(showCity ? [{ label: t('City', 'शहर'), value: form.city }] : []),
+                    ...(showAttendingCount ? [{ label: t('Attendees', 'उपस्थित'), value: `${form.attendingCount}${form.attendingCount === 4 ? '+' : ''} ${t('person(s)', 'व्यक्ति')}` }] : []),
+                    ...(showSpecialNeeds && form.hasSpecialNeeds ? [{ label: t('Special Needs', 'विशेष ज़रूरत'), value: t('Yes', 'हाँ') }] : []),
                     ...(form.notes ? [{ label: t('Notes', 'टिप्पणी'), value: form.notes }] : []),
+                    ...customQs.map(q => ({ label: t(q.question, q.questionHi), value: form.customAnswers[q.id] ?? '—' })),
                   ] as { label: string; value: string }[]).map((row, i, arr) => (
                     <div
                       key={row.label}

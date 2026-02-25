@@ -16,6 +16,32 @@ export interface PracharStatus {
   platforms: Record<PracharPlatform, boolean>;
 }
 
+export interface FormConfig {
+  fields: {
+    phone: boolean;
+    city: boolean;
+    attendingCount: boolean;
+    specialNeeds: boolean;
+  };
+  customQuestions: { id: string; question: string; questionHi: string; type: 'text' | 'yesno' }[];
+}
+
+export interface VotePollOption {
+  id: string;
+  label: string;
+  votes: number;
+}
+
+export interface VotePoll {
+  id: string;
+  question: string;
+  questionHi: string;
+  type: 'date' | 'general';
+  options: VotePollOption[];
+  isFinalized: boolean;
+  winnerOptionId?: string;
+}
+
 export interface EventRegistration {
   id: string;
   name: string;
@@ -52,6 +78,8 @@ export interface GatividhiEvent {
   videoUrl?: string;
   imageUrl?: string;
   registrations?: EventRegistration[];
+  formConfig?: FormConfig;
+  polls?: VotePoll[];
 }
 
 export interface AalekhaArticle {
@@ -82,6 +110,10 @@ interface AppState {
   addEvent: (event: Omit<GatividhiEvent, 'id' | 'status'>) => void;
   updateEventStatus: (id: string, status: EventStatus) => void;
   addRegistration: (eventId: string, reg: Omit<EventRegistration, 'id' | 'submittedAt'>) => void;
+  updateFormConfig: (eventId: string, config: FormConfig) => void;
+  addPoll: (eventId: string, poll: Omit<VotePoll, 'id' | 'isFinalized'>) => void;
+  castVote: (eventId: string, pollId: string, optionId: string) => void;
+  finalizePoll: (eventId: string, pollId: string, winnerOptionId: string) => void;
   pracharStatuses: PracharStatus[];
   updatePracharPlatform: (eventId: string, platform: PracharPlatform, done: boolean) => void;
   articles: AalekhaArticle[];
@@ -131,6 +163,26 @@ const initialEvents: GatividhiEvent[] = [
     status: 'Pending Aayam Review',
     checklist: { designing: false, food: true, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: false, lights: false },
     imageUrl: '',
+    formConfig: {
+      fields: { phone: true, city: true, attendingCount: true, specialNeeds: false },
+      customQuestions: [
+        { id: 'cq1', question: 'Vegetarian or Non-veg?', questionHi: 'शाकाहारी या मांसाहारी?', type: 'yesno' },
+      ],
+    },
+    polls: [
+      {
+        id: 'poll1',
+        question: 'Which date works best for this workshop?',
+        questionHi: 'कार्यशाला के लिए कौन सी तारीख उचित है?',
+        type: 'date',
+        options: [
+          { id: 'opt1', label: '15 March 2026', votes: 7 },
+          { id: 'opt2', label: '22 March 2026', votes: 4 },
+          { id: 'opt3', label: '29 March 2026', votes: 2 },
+        ],
+        isFinalized: false,
+      },
+    ],
   },
   {
     id: '3',
@@ -262,6 +314,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ));
   }, []);
 
+  const updateFormConfig = useCallback((eventId: string, config: FormConfig) => {
+    setEvents(prev => prev.map(e => e.id === eventId ? { ...e, formConfig: config } : e));
+  }, []);
+
+  const addPoll = useCallback((eventId: string, poll: Omit<VotePoll, 'id' | 'isFinalized'>) => {
+    const newPoll: VotePoll = { ...poll, id: `poll${Date.now()}`, isFinalized: false };
+    setEvents(prev => prev.map(e =>
+      e.id === eventId ? { ...e, polls: [...(e.polls ?? []), newPoll] } : e
+    ));
+  }, []);
+
+  const castVote = useCallback((eventId: string, pollId: string, optionId: string) => {
+    setEvents(prev => prev.map(e => {
+      if (e.id !== eventId) return e;
+      return {
+        ...e,
+        polls: (e.polls ?? []).map(p => {
+          if (p.id !== pollId) return p;
+          return {
+            ...p,
+            options: p.options.map(o =>
+              o.id === optionId ? { ...o, votes: o.votes + 1 } : o
+            ),
+          };
+        }),
+      };
+    }));
+  }, []);
+
+  const finalizePoll = useCallback((eventId: string, pollId: string, winnerOptionId: string) => {
+    setEvents(prev => prev.map(e => {
+      if (e.id !== eventId) return e;
+      const polls = (e.polls ?? []).map(p => {
+        if (p.id !== pollId) return p;
+        return { ...p, isFinalized: true, winnerOptionId };
+      });
+      // If date poll, update event date to winner label
+      const poll = polls.find(p => p.id === pollId);
+      if (poll?.type === 'date') {
+        const winner = poll.options.find(o => o.id === winnerOptionId);
+        if (winner) return { ...e, polls, date: winner.label };
+      }
+      return { ...e, polls };
+    }));
+  }, []);
+
   const addArticle = useCallback((article: Omit<AalekhaArticle, 'id' | 'status'>) => {
     const newArticle: AalekhaArticle = {
       ...article,
@@ -286,6 +384,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       role, setRole,
       lang, setLang,
       events, addEvent, updateEventStatus, addRegistration,
+      updateFormConfig, addPoll, castVote, finalizePoll,
       pracharStatuses, updatePracharPlatform,
       articles, addArticle, updateArticleStatus,
     }}>
