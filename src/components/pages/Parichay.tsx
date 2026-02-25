@@ -94,14 +94,14 @@ const LAKSHYA = [
   },
   {
     num: "०२", icon: Globe, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-l-blue-500",
-    hi: "भारतीयत्व एवं समग्र मानवता में विश्वास रखने वाले विचारशील लोगों एवं प्रबुद्ध विशेषज्ञ मंडलों (Think Tanks) का शक्तिशाली व सक्रिय वैश्विक तंत्र खड़ा करना।",
-    en: "Building a powerful global network of thinkers and enlightened Think Tanks who believe in Bharatiyatva and universal humanity.",
+    hi: "भारतीयत्व एवं समग्र मानवता में विश्वास रखने वाले विचारशील लोगों का, समूहों का एवं प्रबुद्ध विशेषज्ञ मंडलों (Think Tanks) का शक्तिशाली व सक्रिय वैश्विक तंत्र खड़ा करना।",
+    en: "Building a powerful global network of thinkers, groups and enlightened Think Tanks who believe in Bharatiyatva and universal humanity.",
     tag: "वैश्विक तंत्र",
   },
   {
     num: "०३", icon: Sparkles, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-l-amber-500",
-    hi: "भारतीय नागरिकों में 'स्व बोध' जागृत करने हेतु वातावरण तैयार करना।",
-    en: "Creating an environment to awaken 'Swa Bodh' — self-awareness and civilisational consciousness — among Indian citizens.",
+    hi: "भारतीय नागरिकों में 'स्व' बोध जागृत करने हेतु वातावरण तैयार करना।",
+    en: "Creating an environment to awaken 'Swa' Bodh — self-awareness and civilisational consciousness — among Indian citizens.",
     tag: "स्व बोध जागरण",
   },
   {
@@ -205,23 +205,23 @@ const AAYAMS = [
 const PANCH = [
   {
     num: "१", hi: "सामाजिक समरसता", en: "Social Harmony", icon: Heart, color: "text-rose-500", border: "border-rose-500/25", bg: "bg-rose-500/8",
-    desc: { hi: "जाति-भेद और ऊँच-नीच की भावना समाप्त करके समाज में एकता और सद्भाव।", en: "Ending caste discrimination and promoting unity and harmony." },
+    desc: { hi: "जाति-भेद और ऊँच-नीच की भावना को समाप्त करके समाज में सभी वर्गों के बीच एकता और सद्भाव बढ़ाना।", en: "Ending caste discrimination and promoting unity and harmony among all sections of society." },
   },
   {
     num: "२", hi: "कुटुंब प्रबोधन", en: "Family Awakening", icon: Home, color: "text-amber-500", border: "border-amber-500/25", bg: "bg-amber-500/8",
-    desc: { hi: "परिवार के मूल्यों को बढ़ावा, संयुक्त परिवार की परंपरा और बच्चों में संस्कारों का विकास।", en: "Strengthening family values and cultivating good values in children." },
+    desc: { hi: "परिवार के मूल्यों को बढ़ावा देने और संयुक्त परिवार की परंपरा को मजबूत करने पर केंद्रित। बच्चों में संस्कारों का विकास और परिवारों को आधुनिक चुनौतियों से बचाना।", en: "Strengthening family values, joint family traditions and cultivating good values in children. Protecting families from modern challenges." },
   },
   {
     num: "३", hi: "पर्यावरण संरक्षण", en: "Environmental Protection", icon: Leaf, color: "text-emerald-500", border: "border-emerald-500/25", bg: "bg-emerald-500/8",
-    desc: { hi: "प्रकृति को माता मानकर उसकी रक्षा करना, पर्यावरण अनुकूल जीवनशैली।", en: "Treating nature as mother and adopting eco-friendly lifestyles." },
+    desc: { hi: "प्रकृति को माता मानकर उसकी रक्षा। पर्यावरण के अनुकूल जीवनशैली अपनाने और जल, वायु व मिट्टी के संरक्षण के प्रति जागरूक करना।", en: "Treating nature as mother and protecting her. Adopting eco-friendly lifestyles and raising awareness for conserving water, air and soil." },
   },
   {
     num: "४", hi: "नागरिक कर्तव्य", en: "Civic Duty", icon: Shield, color: "text-blue-500", border: "border-blue-500/25", bg: "bg-blue-500/8",
-    desc: { hi: "अधिकारों के साथ कर्तव्य — राष्ट्रहित में योगदान और संविधान का पालन।", en: "Rights alongside responsibilities — contributing to national interest." },
+    desc: { hi: "हर नागरिक अपने अधिकारों के साथ-साथ कर्तव्यों के प्रति सजग रहे। राष्ट्रहित में योगदान देना, सार्वजनिक संपत्ति की रक्षा करना और संविधान का पालन करना।", en: "Every citizen must be aware of duties alongside rights — contributing to national interest, protecting public property and upholding the Constitution." },
   },
   {
     num: "५", hi: "स्व का बोध", en: "Swa Bodh", icon: Zap, color: "text-violet-500", border: "border-violet-500/25", bg: "bg-violet-500/8",
-    desc: { hi: "संस्कृति, सभ्यता और स्वदेशी उत्पादों के प्रति जागरूकता। आत्मनिर्भर भारत।", en: "Awareness about culture, civilisation and indigenous products. Atmanirbharta." },
+    desc: { hi: "अपनी संस्कृति, सभ्यता और स्वदेशी उत्पादों के प्रति जागरूकता बढ़ाना। आत्मनिर्भरता को बढ़ावा और फिजूलखर्ची को कम करना, ताकि देश का पैसा देश में ही रहे।", en: "Raising awareness about one's own culture, civilisation and indigenous products. Promoting self-reliance and reducing wasteful expenditure so the country's wealth stays within." },
   },
 ];
 
