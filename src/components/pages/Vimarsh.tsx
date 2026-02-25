@@ -24,9 +24,9 @@ const ATMA_BODH_BINDU = [
     border: "border-orange-500/25",
     bg: "bg-orange-500/8",
     items: [
-      { hi: "स्व", en: "स्व — Indigenous identity and civilisational self-consciousness" },
+      { hi: "स्वत्व", en: "स्वत्व — Indigenous identity and civilisational self-consciousness" },
       { hi: "हिंदुत्व", en: "हिंदुत्व — Philosophical, cultural and civilisational understanding" },
-      { hi: "भारत शत्रु बोध", en: "Knowing the forces opposed to India and their methods" },
+      { hi: "भारत बोध", en: "भारत बोध — Understanding India's civilisational identity and its global role" },
     ],
   },
   {
@@ -37,10 +37,10 @@ const ATMA_BODH_BINDU = [
     border: "border-red-500/25",
     bg: "bg-red-500/8",
     items: [
-      { hi: "Cultural Marxism", en: "Cultural Marxism — ideological framework targeting Dharmic civilisation" },
-      { hi: "Global Market Forces", en: "Global Market Forces — homogenising cultural and economic pressures" },
-      { hi: "अतिवादी इस्लाम", en: "Radical Islamism — extremist spread targeting Bharatiya social fabric" },
+      { hi: "कट्टरपंथी इस्लाम", en: "Radical Islamism — extremist spread targeting Bharatiya social fabric" },
       { hi: "प्रसारवादी चर्च", en: "Missionary Church — proselytisation targeting tribal and marginalised communities" },
+      { hi: "सांस्कृतिक मार्क्सवाद", en: "Cultural Marxism — ideological framework targeting Dharmic civilisation" },
+      { hi: "वैश्विक बाज़ारवादी शक्तियां", en: "Global Market Forces — homogenising cultural and economic pressures" },
     ],
   },
   {
@@ -51,10 +51,10 @@ const ATMA_BODH_BINDU = [
     border: "border-blue-500/25",
     bg: "bg-blue-500/8",
     items: [
-      { hi: "दलित विमर्श", en: "Dalit discourse — counter divisive anti-India narratives" },
-      { hi: "जनजातीय विमर्श", en: "Tribal discourse — restore connection with Bharatiya identity" },
-      { hi: "युवा विमर्श", en: "Youth discourse — ground youth in civilisational values" },
-      { hi: "महिला विमर्श", en: "Women's discourse — Shakti-centred counter-narrative to western feminism" },
+      { hi: "अनुसूचित जाति", en: "Scheduled Castes — counter divisive anti-India narratives" },
+      { hi: "अनुसूचित जनजाति", en: "Scheduled Tribes — restore connection with Bharatiya identity" },
+      { hi: "महिला वर्ग", en: "Women — Shakti-centred counter-narrative to western feminist frameworks" },
+      { hi: "युवा वर्ग", en: "Youth — ground young Indians in civilisational values" },
     ],
   },
   {
@@ -65,10 +65,10 @@ const ATMA_BODH_BINDU = [
     border: "border-emerald-500/25",
     bg: "bg-emerald-500/8",
     items: [
-      { hi: "पंजाब", en: "Punjab — Sikh-Hindu unity narratives, counter Khalistan propaganda" },
-      { hi: "कश्मीर", en: "Kashmir — restore Kashmiri Pandit history, cultural integration" },
-      { hi: "उत्तर-पूर्व भारत", en: "North-East — tribal integration, counter Christian separatist narratives" },
-      { hi: "उत्तर-दक्षिण विमर्श", en: "North-South divide — counter Dravidian ideology's anti-Hindi/Hindu frames" },
+      { hi: "उत्तर-दक्षिण", en: "North-South divide — counter Dravidian ideology's anti-Hindi/Hindu frames" },
+      { hi: "उत्तर-पूर्व भारत (मणिपुर, नागालैंड)", en: "North-East — tribal integration, counter Christian separatist narratives in Manipur, Nagaland" },
+      { hi: "पंजाब (खालिस्तान)", en: "Punjab — Sikh-Hindu unity narratives, counter Khalistan separatism" },
+      { hi: "जम्मू कश्मीर", en: "Jammu Kashmir — restore Kashmiri Pandit history, cultural reintegration" },
     ],
   },
 ];
