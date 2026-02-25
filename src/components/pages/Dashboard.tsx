@@ -453,7 +453,6 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </TabsContent>
-              </Tabs>
 
                 <TabsContent value="form" className="space-y-4 pt-2">
                   {/* Field toggles */}
@@ -545,6 +544,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </TabsContent>
+              </Tabs>
 
               <Button type="submit" className="w-full">{t('Submit for Review', 'समीक्षा के लिए भेजें')}</Button>
             </form>

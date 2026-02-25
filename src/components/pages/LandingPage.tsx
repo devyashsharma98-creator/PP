@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown, BookOpen, Users, Flame, MessagesSquare } from "lucide-react";
+import {
+  ArrowRight, ChevronDown, BookOpen, Users, Flame, MessagesSquare,
+  Search, Megaphone, Eye, Globe, Compass, Sparkles, Star,
+  Heart, Home, Leaf, Shield, Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
 
@@ -15,57 +19,38 @@ function Mandala({ className }: { className?: string }) {
 
   return (
     <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Outermost dotted ring */}
       <circle cx="120" cy="120" r="116" stroke="currentColor" strokeWidth="0.4" strokeDasharray="3 6" opacity="0.25" />
-
-      {/* Outer 12-dot ring */}
       {dots12.map((angle, i) => {
         const rad = (angle - 90) * (Math.PI / 180);
         return <circle key={i} cx={+(120 + 108 * Math.cos(rad)).toFixed(4)} cy={+(120 + 108 * Math.sin(rad)).toFixed(4)} r="1.5" fill="currentColor" fillOpacity="0.3" />;
       })}
-
-      {/* Outer lotus petals ×8 */}
       {petals8.map((angle, i) => (
         <ellipse key={i} cx="120" cy="62" rx="13" ry="52"
           fill="currentColor" fillOpacity="0.07"
           stroke="currentColor" strokeOpacity="0.3" strokeWidth="0.6"
           transform={`rotate(${angle} 120 120)`} />
       ))}
-
-      {/* Outer ring */}
       <circle cx="120" cy="120" r="68" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
-
-      {/* Mid lotus petals ×8 offset */}
       {petals8offset.map((angle, i) => (
         <ellipse key={i} cx="120" cy="85" rx="8" ry="33"
           fill="currentColor" fillOpacity="0.1"
           stroke="currentColor" strokeOpacity="0.4" strokeWidth="0.5"
           transform={`rotate(${angle} 120 120)`} />
       ))}
-
-      {/* Mid ring */}
       <circle cx="120" cy="120" r="46" stroke="currentColor" strokeWidth="0.5" opacity="0.35" />
-
-      {/* Inner sun rays ×16 */}
       {rays16.map((angle, i) => {
         const rad = (angle - 90) * (Math.PI / 180);
         const x1 = +(120 + 30 * Math.cos(rad)).toFixed(4), y1 = +(120 + 30 * Math.sin(rad)).toFixed(4);
         const x2 = +(120 + 43 * Math.cos(rad)).toFixed(4), y2 = +(120 + 43 * Math.sin(rad)).toFixed(4);
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.2" />;
       })}
-
-      {/* Inner ring */}
       <circle cx="120" cy="120" r="28" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.5" strokeWidth="0.7" />
-
-      {/* Inner 8 triangles */}
       {petals8.map((angle, i) => (
         <ellipse key={i} cx="120" cy="104" rx="4" ry="14"
           fill="currentColor" fillOpacity="0.15"
           stroke="currentColor" strokeOpacity="0.5" strokeWidth="0.5"
           transform={`rotate(${angle} 120 120)`} />
       ))}
-
-      {/* Center circle */}
       <circle cx="120" cy="120" r="14" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeOpacity="0.7" strokeWidth="0.8" />
       <circle cx="120" cy="120" r="4" fill="currentColor" fillOpacity="0.6" />
     </svg>
@@ -93,6 +78,7 @@ function OuterRing({ className }: { className?: string }) {
   );
 }
 
+// ── Data ─────────────────────────────────────────────────────────────────────
 const AAYAMS = [
   {
     name: "युवा आयाम", en: "Yuva Aayam",
@@ -131,6 +117,185 @@ const SHLOKAS = [
   { devanagari: "धर्मो रक्षति रक्षितः", transliteration: "Dharmo rakṣati rakṣitaḥ", translation: "Dharma protects those who protect it", source: "मनुस्मृति · Manusmriti" },
 ];
 
+// Vision words with accent highlighting on "लोक कल्याणकारी"
+const VISION_WORDS_HI = [
+  { text: "प्रज्ञा", accent: false },
+  { text: "आधारित", accent: false },
+  { text: "हिंदू", accent: false },
+  { text: "जीवन", accent: false },
+  { text: "मूल्यों", accent: false },
+  { text: "से", accent: false },
+  { text: "प्रेरित", accent: false },
+  { text: "लोक", accent: true },
+  { text: "कल्याणकारी", accent: true },
+  { text: "वैश्विक", accent: false },
+  { text: "समाज", accent: false },
+  { text: "रचना।", accent: false },
+];
+
+const MISSION_POINTS = [
+  {
+    num: "01",
+    icon: Compass,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    borderClass: "border-l-orange-500",
+    hi: "हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा एवं सूत्रों की खोज करना।",
+    en: "Discovering directions for age-appropriate reconstruction of national life in every sphere based on Hindu values.",
+    tag: { hi: "युगानुकूल पुनर्रचना", en: "Age-appropriate Reconstruction" },
+  },
+  {
+    num: "02",
+    icon: Globe,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    borderClass: "border-l-blue-500",
+    hi: "भारतीयत्व एवं समग्र मानवता में विश्वास रखने वाले विचारशील लोगों एवं प्रबुद्ध विशेषज्ञ मंडलों (Think Tanks) का शक्तिशाली व सक्रिय वैश्विक तंत्र खड़ा करना।",
+    en: "Building a powerful global network of thinkers and enlightened Think Tanks who believe in Bharatiyatva and universal humanity.",
+    tag: { hi: "वैश्विक तंत्र", en: "Global Network" },
+  },
+  {
+    num: "03",
+    icon: Sparkles,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    borderClass: "border-l-amber-500",
+    hi: "भारतीय नागरिकों में 'स्व बोध' जागृत करने हेतु वातावरण तैयार करना।",
+    en: "Creating an environment to awaken 'Swa Bodh' — self-awareness and civilisational consciousness — among Indian citizens.",
+    tag: { hi: "स्व बोध जागरण", en: "Swa Bodh Awakening" },
+  },
+  {
+    num: "04",
+    icon: Star,
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+    borderClass: "border-l-violet-500",
+    hi: "प्रज्ञा के क्षेत्र में वैश्विक नेतृत्व करने की दिशा में भारत को तैयार करना।",
+    en: "Preparing India for global leadership in the field of Pragya — intellectual wisdom and knowledge.",
+    tag: { hi: "वैश्विक नेतृत्व", en: "Global Leadership" },
+  },
+];
+
+const GOALS = [
+  {
+    icon: Search,
+    hi: "शोध",
+    en: "Research",
+    color: "text-blue-400",
+    border: "border-blue-500/20",
+    bg: "bg-blue-500/5",
+    glowColor: "rgba(59,130,246,0.12)",
+    desc: {
+      hi: "भूराजनीति, दर्शन, संस्कृति, इतिहास, पर्यावरण आदि पर गहन शोध एवं विश्लेषण। अध्ययन केंद्र एवं शिक्षण केंद्र।",
+      en: "Deep research on geopolitics, philosophy, culture, history and environment. Study groups and training centers.",
+    },
+  },
+  {
+    icon: BookOpen,
+    hi: "सामग्री निर्माण",
+    en: "Content Creation",
+    color: "text-orange-400",
+    border: "border-orange-500/20",
+    bg: "bg-orange-500/5",
+    glowColor: "rgba(249,115,22,0.12)",
+    desc: {
+      hi: "विश्वस्तरीय पत्रिका, पुस्तकें, शोध प्रबंध, दृश्य/श्रव्य सामग्री एवं पॉडकास्ट का निर्माण।",
+      en: "World-class journals, books, research papers, audio/video content and podcasts for intellectual outreach.",
+    },
+  },
+  {
+    icon: Megaphone,
+    hi: "प्रचार, प्रसार एवं जागरण",
+    en: "Outreach & Awakening",
+    color: "text-emerald-400",
+    border: "border-emerald-500/20",
+    bg: "bg-emerald-500/5",
+    glowColor: "rgba(16,185,129,0.12)",
+    desc: {
+      hi: "संगोष्ठी, कार्यशाला, विचार संगम के माध्यम से व्यापक जन जागरण एवं वैश्विक प्रज्ञावान तंत्र का निर्माण।",
+      en: "Mass awakening through seminars, workshops and Vichar Sangam — building a global network of prajna-minded people.",
+    },
+  },
+];
+
+const PANCH = [
+  {
+    num: "१",
+    hi: "सामाजिक समरसता",
+    en: "Social Harmony",
+    icon: Heart,
+    color: "text-rose-500",
+    border: "border-rose-500/25",
+    bg: "bg-rose-500/8",
+    desc: {
+      hi: "जाति-भेद और ऊँच-नीच की भावना समाप्त करके समाज में एकता और सद्भाव।",
+      en: "Ending caste discrimination and promoting unity and harmony among all sections of society.",
+    },
+  },
+  {
+    num: "२",
+    hi: "कुटुंब प्रबोधन",
+    en: "Family Awakening",
+    icon: Home,
+    color: "text-amber-500",
+    border: "border-amber-500/25",
+    bg: "bg-amber-500/8",
+    desc: {
+      hi: "परिवार के मूल्यों को बढ़ावा, संयुक्त परिवार की परंपरा और बच्चों में संस्कारों का विकास।",
+      en: "Strengthening family values, joint family traditions and cultivating good values in children.",
+    },
+  },
+  {
+    num: "३",
+    hi: "पर्यावरण संरक्षण",
+    en: "Environmental Protection",
+    icon: Leaf,
+    color: "text-emerald-500",
+    border: "border-emerald-500/25",
+    bg: "bg-emerald-500/8",
+    desc: {
+      hi: "प्रकृति को माता मानकर उसकी रक्षा करना, पर्यावरण के अनुकूल जीवनशैली अपनाना।",
+      en: "Treating nature as mother, adopting eco-friendly lifestyles and conserving natural resources.",
+    },
+  },
+  {
+    num: "४",
+    hi: "नागरिक कर्तव्य",
+    en: "Civic Duty",
+    icon: Shield,
+    color: "text-blue-500",
+    border: "border-blue-500/25",
+    bg: "bg-blue-500/8",
+    desc: {
+      hi: "अधिकारों के साथ कर्तव्य — राष्ट्रहित में योगदान और संविधान का पालन।",
+      en: "Rights alongside responsibilities — contributing to national interest and upholding the Constitution.",
+    },
+  },
+  {
+    num: "५",
+    hi: "स्व का बोध",
+    en: "Swa Bodh",
+    icon: Zap,
+    color: "text-violet-500",
+    border: "border-violet-500/25",
+    bg: "bg-violet-500/8",
+    desc: {
+      hi: "संस्कृति, सभ्यता और स्वदेशी उत्पादों के प्रति जागरूकता। आत्मनिर्भर भारत।",
+      en: "Awakening awareness about culture, civilisation and indigenous products. Promoting Atmanirbharta.",
+    },
+  },
+];
+
+// Animation variants for word-by-word vision reveal
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
+};
+const wordVariant = {
+  hidden: { opacity: 0, y: 24, filter: "blur(4px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.55, ease: "easeOut" as const } },
+};
+
 export default function LandingPage() {
   const { lang } = useAppContext();
   const isHi = lang === "hi";
@@ -142,16 +307,10 @@ export default function LandingPage() {
           HERO — dark navy, mandala, Om, shloka, org name
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative min-h-[100svh] flex flex-col items-center justify-center overflow-hidden bg-[hsl(220_32%_7%)] text-white">
-
-        {/* Animated gradient wash */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,_hsl(27_100%_50%_/_0.10)_0%,_transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_70%,_hsl(220_80%_40%_/_0.08)_0%,_transparent_60%)] pointer-events-none" />
-
-        {/* Dot grid */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-
-        {/* Large background mandala */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <OuterRing className="w-[min(90vw,680px)] h-[min(90vw,680px)] text-orange-400 animate-spin-slow-reverse opacity-[0.06]" />
         </div>
@@ -159,10 +318,7 @@ export default function LandingPage() {
           <Mandala className="w-[min(80vw,600px)] h-[min(80vw,600px)] text-orange-300 opacity-[0.05]" />
         </div>
 
-        {/* ── Main content ── */}
         <div className="relative z-10 flex flex-col items-center text-center px-5 space-y-7 max-w-2xl py-20">
-
-          {/* Mandala with Om center */}
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -179,7 +335,6 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Sanskrit shloka */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -194,7 +349,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Ornamental divider */}
           <motion.div
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ scaleX: 1, opacity: 1 }}
@@ -206,7 +360,6 @@ export default function LandingPage() {
             <div className="flex-1 h-px bg-gradient-to-l from-transparent via-orange-500/50 to-orange-500/20" />
           </motion.div>
 
-          {/* Org name */}
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
@@ -225,7 +378,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Description */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -237,7 +389,6 @@ export default function LandingPage() {
               : "Awakening the intellectual consciousness of the nation — a platform for thought, research, and social transformation grounded in Bharatiya values."}
           </motion.p>
 
-          {/* CTA buttons */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -260,7 +411,6 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -281,10 +431,10 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { num: "5",  label: { en: "Aayams",          hi: "आयाम" } },
-              { num: "8",  label: { en: "Vibhags",         hi: "विभाग" } },
-              { num: "15", label: { en: "Vimarsh Topics",  hi: "विमर्श विषय" } },
-              { num: "∞",  label: { en: "Gatividhis",      hi: "गतिविधियाँ" } },
+              { num: "5",  label: { en: "Aayams",         hi: "आयाम" } },
+              { num: "8",  label: { en: "Vibhags",        hi: "विभाग" } },
+              { num: "15", label: { en: "Vimarsh Topics", hi: "विमर्श विषय" } },
+              { num: "∞",  label: { en: "Gatividhis",     hi: "गतिविधियाँ" } },
             ].map((s, i) => (
               <motion.div key={i}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
@@ -296,6 +446,104 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          VISION — प्रज्ञा प्रवाह की दृष्टि
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative py-20 sm:py-28 px-4 bg-[hsl(220_32%_8%)] text-white overflow-hidden">
+        {/* Mandala watermarks */}
+        <div className="absolute -right-20 top-1/2 -translate-y-1/2 pointer-events-none">
+          <Mandala className="w-[480px] h-[480px] text-orange-400 opacity-[0.04] animate-spin-slow" />
+        </div>
+        <div className="absolute -left-28 bottom-0 pointer-events-none">
+          <Mandala className="w-72 h-72 text-orange-400 opacity-[0.03]" />
+        </div>
+        {/* Gradient wash */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,_hsl(27_100%_50%_/_0.06)_0%,_transparent_70%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/25 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/25 to-transparent" />
+
+        <div className="max-w-3xl mx-auto text-center relative z-10 space-y-8">
+
+          {/* Label chip */}
+          <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 text-orange-300 text-xs tracking-[0.2em] uppercase font-medium">
+              <Eye className="w-3.5 h-3.5" />
+              {isHi ? "दृष्टि · विज़न" : "दृष्टि · Vision"}
+            </span>
+          </motion.div>
+
+          {/* Animated word-by-word vision statement (Hindi) */}
+          {isHi ? (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="flex flex-wrap justify-center gap-x-3 gap-y-2"
+            >
+              {VISION_WORDS_HI.map((w, i) => (
+                <motion.span
+                  key={i}
+                  variants={wordVariant}
+                  className={`font-devanagari font-bold leading-tight select-none ${
+                    w.accent ? "text-orange-400" : "text-white"
+                  }`}
+                  style={{ fontSize: "clamp(1.6rem, 4.5vw, 2.6rem)" }}
+                >
+                  {w.text}
+                </motion.span>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="text-2xl sm:text-3xl md:text-4xl font-bold leading-snug"
+            >
+              Building a welfare-oriented{" "}
+              <span className="text-orange-400">global society</span>{" "}
+              inspired by Pragya-based Hindu life values.
+            </motion.h2>
+          )}
+
+          {/* Ornamental divider */}
+          <motion.div
+            initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }}
+            transition={{ delay: 0.9, duration: 0.7 }}
+            className="flex items-center gap-4 max-w-xs mx-auto"
+          >
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-orange-500/40 to-orange-500/20" />
+            <span className="text-orange-500/50 text-sm">✦</span>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent via-orange-500/40 to-orange-500/20" />
+          </motion.div>
+
+          {/* Mahavakya badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+            transition={{ delay: 1.1, duration: 0.6 }}
+            className="inline-block"
+          >
+            <div className="px-6 py-3 rounded-2xl border border-white/10 bg-white/5 space-y-1">
+              <p className="font-devanagari text-2xl text-orange-300/90 tracking-wide">प्रज्ञानं ब्रह्म</p>
+              <p className="text-[11px] text-white/35 italic tracking-wider">
+                Prajñānaṃ Brahma — Consciousness is Brahma · ऋग्वेद
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Hindi subtext in EN mode */}
+          {!isHi && (
+            <motion.p
+              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+              transition={{ delay: 1.2 }}
+              className="text-sm text-white/30 font-devanagari"
+            >
+              प्रज्ञा आधारित हिंदू जीवन मूल्यों से प्रेरित लोक कल्याणकारी वैश्विक समाज रचना।
+            </motion.p>
+          )}
         </div>
       </section>
 
@@ -345,17 +593,142 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════
+          MISSION — लक्ष्य (4 points from document)
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="py-16 sm:py-20 px-4 bg-card">
+        <div className="max-w-3xl mx-auto space-y-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="text-center space-y-2"
+          >
+            <p className="text-[10px] tracking-[0.3em] text-primary uppercase font-medium">
+              {isHi ? "लक्ष्य — चतुर्विध" : "Mission — Four Objectives"}
+            </p>
+            <h2 className={`text-2xl sm:text-3xl font-bold ${isHi ? "font-devanagari" : ""}`}>
+              {isHi ? "प्रज्ञा प्रवाह के चार लक्ष्य" : "Four Mission Objectives"}
+            </h2>
+            <p className={`text-sm text-muted-foreground max-w-lg mx-auto ${isHi ? "font-devanagari" : ""}`}>
+              {isHi
+                ? "अखिल भारतीय चिंतन शिविर (नवंबर २०२४) में निर्धारित प्रज्ञा प्रवाह के चार प्रमुख लक्ष्य।"
+                : "Four core objectives defined at the All-India Chintan Shivir (November 2024)."}
+            </p>
+          </motion.div>
+
+          <div className="space-y-4">
+            {MISSION_POINTS.map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -28 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5, ease: "easeOut" }}
+                className={`relative rounded-xl border-l-4 ${m.borderClass} bg-background p-5 shadow-sm hover:shadow-md transition-shadow group`}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Big number */}
+                  <span className={`font-mono text-4xl sm:text-5xl font-bold ${m.color} opacity-15 group-hover:opacity-35 transition-opacity leading-none shrink-0 select-none`}>
+                    {m.num}
+                  </span>
+                  <div className="flex-1 space-y-2 min-w-0">
+                    {/* Tag badge */}
+                    <span className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full ${m.bg} ${m.color} font-semibold tracking-wide`}>
+                      {isHi ? m.tag.hi : m.tag.en}
+                    </span>
+                    {/* Main text */}
+                    <p className={`text-sm leading-relaxed text-foreground/80 ${isHi ? "font-devanagari" : ""}`}>
+                      {isHi ? m.hi : m.en}
+                    </p>
+                    {isHi && (
+                      <p className="text-xs text-muted-foreground italic">{m.en}</p>
+                    )}
+                  </div>
+                  {/* Icon */}
+                  <div className={`w-9 h-9 rounded-lg ${m.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                    <m.icon className={`w-4 h-4 ${m.color}`} />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          3 PILLARS / GOALS — उद्देश्य के तीन स्तंभ
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="relative py-16 sm:py-20 px-4 bg-background overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_50%,_hsl(27_100%_50%_/_0.04)_0%,_transparent_70%)] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto space-y-10 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="text-center space-y-2"
+          >
+            <p className="text-[10px] tracking-[0.3em] text-primary uppercase font-medium">
+              {isHi ? "उद्देश्य — तीन स्तंभ" : "Goals — Three Pillars"}
+            </p>
+            <h2 className={`text-2xl sm:text-3xl font-bold ${isHi ? "font-devanagari" : ""}`}>
+              {isHi ? "कार्य के तीन स्तंभ" : "Three Pillars of Work"}
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {GOALS.map((g, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.13, duration: 0.55, ease: "easeOut" }}
+                whileHover={{ y: -6, transition: { duration: 0.22 } }}
+                className={`relative rounded-2xl border ${g.border} ${g.bg} p-6 space-y-4 cursor-default group overflow-hidden`}
+                style={{ boxShadow: "none" }}
+              >
+                {/* Glow overlay on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none rounded-2xl"
+                  style={{ boxShadow: `inset 0 0 40px ${g.glowColor}` }}
+                />
+                {/* Bottom accent line */}
+                <div className={`absolute bottom-0 left-4 right-4 h-px ${g.color} opacity-0 group-hover:opacity-20 transition-opacity`} style={{ backgroundColor: "currentColor" }} />
+
+                {/* Icon */}
+                <motion.div
+                  className={`w-12 h-12 rounded-xl ${g.bg} border ${g.border} flex items-center justify-center`}
+                  whileHover={{ rotate: 8, scale: 1.1 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <g.icon className={`w-6 h-6 ${g.color}`} />
+                </motion.div>
+
+                {/* Title */}
+                <div>
+                  <h3 className={`font-bold text-base ${g.color} ${isHi || true ? "font-devanagari" : ""}`}>
+                    {isHi ? g.hi : g.en}
+                  </h3>
+                  {isHi && <p className="text-[10px] text-muted-foreground">{g.en}</p>}
+                </div>
+
+                {/* Description */}
+                <p className={`text-xs text-foreground/65 leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
+                  {isHi ? g.desc.hi : g.desc.en}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
           DHARMA QUOTE SECTION — dark bg, mandala watermarks
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-20 px-4 bg-[hsl(220_32%_9%)] text-white overflow-hidden">
-        {/* Mandala watermarks */}
         <div className="absolute -right-16 top-1/2 -translate-y-1/2 pointer-events-none opacity-[0.06]">
           <Mandala className="w-72 h-72 text-orange-400" />
         </div>
         <div className="absolute -left-20 top-1/2 -translate-y-1/2 pointer-events-none opacity-[0.04]">
           <Mandala className="w-56 h-56 text-orange-400" />
         </div>
-        {/* Top + bottom border lines */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
 
@@ -393,6 +766,70 @@ export default function LandingPage() {
               ? "हमारा कार्य भारत की सनातन धरोहर को आधुनिक संदर्भ में प्रासंगिक बनाना और उसकी सभ्यतागत मूल्यों की रक्षा करना है।"
               : "Our mission is to make India's eternal heritage relevant in the modern context and to protect its civilisational values for future generations."}
           </motion.p>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          PANCH PARIVARTAN — पंच परिवर्तन
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="py-16 sm:py-20 px-4 bg-card">
+        <div className="max-w-4xl mx-auto space-y-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="text-center space-y-2"
+          >
+            <p className="text-[10px] tracking-[0.3em] text-primary uppercase font-medium">
+              {isHi ? "पंच परिवर्तन" : "Pancha Parivartan"}
+            </p>
+            <h2 className={`text-2xl sm:text-3xl font-bold ${isHi ? "font-devanagari" : ""}`}>
+              {isHi ? "पाँच सामाजिक परिवर्तन" : "Five Social Transformations"}
+            </h2>
+            <p className={`text-sm text-muted-foreground max-w-md mx-auto ${isHi ? "font-devanagari" : ""}`}>
+              {isHi
+                ? "समाज में व्यापक परिवर्तन के लिए प्रज्ञा प्रवाह के पाँच प्रमुख कार्यक्षेत्र।"
+                : "Five key domains of social transformation that Pragya Pravah works towards."}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PANCH.map((p, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.92 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.09, duration: 0.5, ease: "easeOut" }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className={`relative rounded-2xl border ${p.border} ${p.bg} p-5 space-y-3 group overflow-hidden cursor-default`}
+              >
+                {/* Rotating mandala watermark */}
+                <div className="absolute -right-5 -top-5 pointer-events-none opacity-[0.07] group-hover:opacity-[0.14] transition-opacity duration-500">
+                  <Mandala className={`w-24 h-24 ${p.color} animate-spin-slow`} />
+                </div>
+
+                {/* Number + icon */}
+                <div className="flex items-center gap-3">
+                  <span className={`font-devanagari text-4xl font-bold ${p.color} opacity-25 group-hover:opacity-60 transition-opacity select-none`}>
+                    {p.num}
+                  </span>
+                  <div className={`w-9 h-9 rounded-lg ${p.bg} border ${p.border} flex items-center justify-center`}>
+                    <p.icon className={`w-4 h-4 ${p.color}`} />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div>
+                  <h3 className={`font-bold font-devanagari text-sm ${p.color}`}>{p.hi}</h3>
+                  <p className="text-[10px] text-muted-foreground">{p.en}</p>
+                </div>
+
+                {/* Description */}
+                <p className={`text-xs text-foreground/65 leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
+                  {isHi ? p.desc.hi : p.desc.en}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
