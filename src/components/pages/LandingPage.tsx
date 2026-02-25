@@ -140,8 +140,8 @@ const MISSION_POINTS = [
     color: "text-orange-500",
     bg: "bg-orange-500/10",
     borderClass: "border-l-orange-500",
-    hi: "हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा एवं सूत्रों की खोज करना।",
-    en: "Discovering directions for age-appropriate reconstruction of national life in every sphere based on Hindu values.",
+    hi: "उदात्त हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा एवं सूत्रों की खोज करना।",
+    en: "Discovering directions for age-appropriate reconstruction of national life in every sphere based on elevated Hindu life values.",
     tag: { hi: "युगानुकूल पुनर्रचना", en: "Age-appropriate Reconstruction" },
   },
   {
@@ -431,10 +431,10 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { num: "5",  label: { en: "Aayams",         hi: "आयाम" } },
-              { num: "8",  label: { en: "Vibhags",        hi: "विभाग" } },
+              { num: "5", label: { en: "Aayams", hi: "आयाम" } },
+              { num: "8", label: { en: "Vibhags", hi: "विभाग" } },
               { num: "15", label: { en: "Vimarsh Topics", hi: "विमर्श विषय" } },
-              { num: "∞",  label: { en: "Gatividhis",     hi: "गतिविधियाँ" } },
+              { num: "∞", label: { en: "Gatividhis", hi: "गतिविधियाँ" } },
             ].map((s, i) => (
               <motion.div key={i}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
@@ -446,6 +446,119 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          SEMANTIC GATEWAY — प्रज्ञा परिचय + Pathway CTAs
+          Purpose: orient first-time visitors with concise meaning of
+          Pragya, what Pragya Pravah is, the Drishti summary, and
+          pathway CTAs into the app aayams.
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="parchment-panel py-12 sm:py-16 px-4 border-b border-border/50">
+        <div className="max-w-4xl mx-auto space-y-10">
+
+          {/* Top row: Pragya meaning + Pragya Pravah definition */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* Pragya क्या है? */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.55 }}
+              className="glass-card hover-lift rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5 space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-devanagari text-2xl text-orange-400">प्र</span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-orange-500/70 font-semibold">प्रज्ञा क्या है?</p>
+                  <p className="text-[9px] text-muted-foreground">What is Pragya?</p>
+                </div>
+              </div>
+              <p className={`text-sm text-foreground/75 leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
+                {isHi
+                  ? "'प्र' (पूर्ण, तीव्र) + 'ज्ञा' (जानना) = गहन, परिष्कृत एवं शुद्ध बौद्धिक चेतना। \"प्रज्ञानं ब्रह्म\" — ऋग्वेद।"
+                  : "'Pra' (complete, forward) + 'jña' (to know) = Deep, refined and pure intellectual consciousness. \"Prajñānaṃ Brahma\" — Rigveda."}
+              </p>
+              <div className="h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
+              <Link href="/parichay">
+                <span className="inline-flex items-center gap-1 text-[10px] text-orange-500 font-semibold hover:text-orange-400 transition-colors">
+                  {isHi ? "विस्तार से पढ़ें" : "Read more"} <ArrowRight className="w-3 h-3" />
+                </span>
+              </Link>
+            </motion.div>
+
+            {/* प्रज्ञा प्रवाह क्या है? */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ delay: 0.1, duration: 0.55 }}
+              className="glass-card hover-lift rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5 space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-400" />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-blue-500/70 font-semibold">प्रज्ञा प्रवाह क्या है?</p>
+                  <p className="text-[9px] text-muted-foreground">What is Pragya Pravah?</p>
+                </div>
+              </div>
+              <p className={`text-sm text-foreground/75 leading-relaxed ${isHi ? "font-devanagari" : ""}`}>
+                {isHi
+                  ? "उदात्त हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा में विचारशील लोगों और थिंकटैंकों का वैश्विक तंत्र।"
+                  : "A global network of thinkers and Think Tanks working for age-appropriate reconstruction of national life, grounded in elevated Hindu life values."}
+              </p>
+              <div className="h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
+              <Link href="/parichay">
+                <span className="inline-flex items-center gap-1 text-[10px] text-blue-500 font-semibold hover:text-blue-400 transition-colors">
+                  {isHi ? "संगठन परिचय" : "Organisation overview"} <ArrowRight className="w-3 h-3" />
+                </span>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Drishti summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ delay: 0.15, duration: 0.5 }}
+            className="rounded-2xl border border-border/60 bg-card/60 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+          >
+            <div className="flex items-center gap-2 shrink-0">
+              <Eye className="w-4 h-4 text-primary" />
+              <span className="text-[10px] uppercase tracking-widest font-semibold text-primary">दृष्टि · Vision</span>
+            </div>
+            <div className="h-px sm:w-px sm:h-8 bg-border/60 hidden sm:block" />
+            <p className={`font-devanagari text-sm text-foreground/70 leading-relaxed ${isHi ? "" : "text-xs"}`}>
+              {isHi
+                ? "प्रज्ञा आधारित हिंदू जीवन मूल्यों से प्रेरित, लोक कल्याणकारी वैश्विक समाज रचना।"
+                : "Building a welfare-oriented global society inspired by Pragya-based Hindu life values."}
+            </p>
+          </motion.div>
+
+          {/* Pathway CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ delay: 0.2, duration: 0.5 }}
+            className="space-y-3"
+          >
+            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-semibold">
+              {isHi ? "अनुभागों में प्रवेश करें" : "Explore sections"}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { href: "/parichay", icon: BookOpen, hi: "परिचय", en: "Parichay", color: "border-orange-500/30 hover:border-orange-500/60 text-orange-500" },
+                { href: "/dayitv", icon: Shield, hi: "दायित्व", en: "Dayitv", color: "border-amber-500/30 hover:border-amber-500/60 text-amber-500" },
+                { href: "/vimarsh", icon: MessagesSquare, hi: "विमर्श", en: "Vimarsh", color: "border-violet-500/30 hover:border-violet-500/60 text-violet-500" },
+                { href: "/dashboard", icon: Compass, hi: "डैशबोर्ड", en: "Dashboard", color: "border-blue-500/30 hover:border-blue-500/60 text-blue-500" },
+              ].map(({ href, icon: Icon, hi, en, color }) => (
+                <Link key={href} href={href}>
+                  <div className={`glass-card hover-lift rounded-xl border ${color} p-4 text-center space-y-1.5 cursor-pointer transition-all group`}>
+                    <Icon className="w-4 h-4 mx-auto opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <p className="font-devanagari text-sm font-medium">{hi}</p>
+                    <p className="text-[9px] text-muted-foreground">{en}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
         </div>
       </section>
 
@@ -488,9 +601,8 @@ export default function LandingPage() {
                 <motion.span
                   key={i}
                   variants={wordVariant}
-                  className={`font-devanagari font-bold leading-tight select-none ${
-                    w.accent ? "text-orange-400" : "text-white"
-                  }`}
+                  className={`font-devanagari font-bold leading-tight select-none ${w.accent ? "text-orange-400" : "text-white"
+                    }`}
                   style={{ fontSize: "clamp(1.6rem, 4.5vw, 2.6rem)" }}
                 >
                   {w.text}
@@ -703,7 +815,7 @@ export default function LandingPage() {
 
                 {/* Title */}
                 <div>
-                  <h3 className={`font-bold text-base ${g.color} ${isHi || true ? "font-devanagari" : ""}`}>
+                  <h3 className={`font-bold text-base ${g.color} font-devanagari`}>
                     {isHi ? g.hi : g.en}
                   </h3>
                   {isHi && <p className="text-[10px] text-muted-foreground">{g.en}</p>}
