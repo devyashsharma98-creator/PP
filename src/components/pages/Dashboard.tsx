@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import CountUp from "react-countup";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext, GatividhiEvent, FormConfig, VotePoll } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -184,20 +185,36 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: t("Total Events", "कुल कार्यक्रम"), value: totalEvents, icon: BarChart3, color: "text-primary" },
-            { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-success" },
-            { label: t("Pending Approval", "अनुमोदन प्रतीक्षित"), value: pending.length, icon: Clock, color: "text-warning" },
-            { label: t("Active Units", "सक्रिय इकाइयाँ"), value: units, icon: Users, color: "text-info" },
+            { label: t("Total Events", "कुल कार्यक्रम"), value: totalEvents, icon: BarChart3, color: "text-primary", barColor: "bg-primary", sparkData: [30, 50, 40, 70, 60, 80, 75] },
+            { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-success", barColor: "bg-green-500", sparkData: [20, 35, 45, 40, 55, 65, 60] },
+            { label: t("Pending Approval", "अनुमोदन प्रतीक्षित"), value: pending.length, icon: Clock, color: "text-warning", barColor: "bg-amber-500", sparkData: [60, 45, 50, 30, 25, 15, 20] },
+            { label: t("Active Units", "सक्रिय इकाइयाँ"), value: units, icon: Users, color: "text-info", barColor: "bg-blue-500", sparkData: [40, 45, 50, 55, 60, 58, 65] },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Card className="glass-card hover-lift">
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 pb-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{stat.label}</p>
-                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                      <p className="text-3xl font-bold mt-1">
+                        <CountUp end={stat.value} duration={1.8} delay={0.2 + i * 0.1} />
+                      </p>
                     </div>
-                    <stat.icon className={`w-8 h-8 ${stat.color} opacity-70`} />
+                    <div className={`w-10 h-10 rounded-xl ${stat.color.replace('text-', 'bg-')}/10 flex items-center justify-center`}>
+                      <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                    </div>
+                  </div>
+                  {/* Mini sparkline bar */}
+                  <div className="flex items-end gap-[3px] h-6 mt-3">
+                    {stat.sparkData.map((v, j) => (
+                      <motion.div
+                        key={j}
+                        className={`flex-1 rounded-sm ${stat.barColor} opacity-60`}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${(v / 100) * 100}%` }}
+                        transition={{ delay: 0.5 + j * 0.05, duration: 0.4, ease: "easeOut" }}
+                      />
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -531,11 +548,10 @@ export default function Dashboard() {
                             type="button"
                             disabled={alreadyAdded || localFormConfig.customQuestions.length >= 5}
                             onClick={() => addSuggestion(s)}
-                            className={`text-[11px] px-2 py-1 rounded-full border transition-colors font-devanagari ${
-                              alreadyAdded
+                            className={`text-[11px] px-2 py-1 rounded-full border transition-colors font-devanagari ${alreadyAdded
                                 ? 'bg-primary/10 border-primary/30 text-primary cursor-default'
                                 : 'border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer'
-                            } disabled:opacity-40`}
+                              } disabled:opacity-40`}
                           >
                             {alreadyAdded ? '✓ ' : '+ '}{t(s.question, s.questionHi)}
                           </button>
@@ -623,7 +639,7 @@ export default function Dashboard() {
                       >
                         <Vote className="w-3 h-3 mr-1" />
                         {t(`Matdan (${event.polls!.reduce((s, p) => s + p.options.reduce((a, o) => a + o.votes, 0), 0)})`,
-                           `मतदान (${event.polls!.reduce((s, p) => s + p.options.reduce((a, o) => a + o.votes, 0), 0)})`)}
+                          `मतदान (${event.polls!.reduce((s, p) => s + p.options.reduce((a, o) => a + o.votes, 0), 0)})`)}
                       </Button>
                     )}
                     <Button variant="ghost" size="sm"
