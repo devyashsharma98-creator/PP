@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import CountUp from "react-countup";
+import { TypeAnimation } from "react-type-animation";
 import {
   ArrowRight, ChevronDown, BookOpen, Users, Flame, MessagesSquare,
   Search, Megaphone, Eye, Globe, Compass, Sparkles, Star,
@@ -368,7 +370,12 @@ export default function LandingPage() {
           >
             <h1 className="font-devanagari font-bold text-white leading-tight"
               style={{ fontSize: "clamp(2.4rem, 9vw, 4.5rem)", textShadow: "0 2px 20px hsl(27 100% 50% / 0.2)" }}>
-              प्रज्ञा प्रवाह
+              <TypeAnimation
+                sequence={[400, "प्रज्ञा", 300, "प्रज्ञा प्रवाह"]}
+                wrapper="span"
+                speed={30}
+                cursor={false}
+              />
             </h1>
             <p className="font-light text-white/45 tracking-[0.3em] uppercase text-xs sm:text-sm">
               Pragya Pravah
@@ -431,17 +438,19 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { num: "5", label: { en: "Aayams", hi: "आयाम" } },
-              { num: "8", label: { en: "Vibhags", hi: "विभाग" } },
-              { num: "15", label: { en: "Vimarsh Topics", hi: "विमर्श विषय" } },
-              { num: "∞", label: { en: "Gatividhis", hi: "गतिविधियाँ" } },
+              { num: 5, label: { en: "Aayams", hi: "आयाम" } },
+              { num: 8, label: { en: "Vibhags", hi: "विभाग" } },
+              { num: 15, label: { en: "Vimarsh Topics", hi: "विमर्श विषय" } },
+              { num: 0, symbol: "∞", label: { en: "Gatividhis", hi: "गतिविधियाँ" } },
             ].map((s, i) => (
               <motion.div key={i}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.09 }}
                 className="space-y-0.5"
               >
-                <p className="text-3xl sm:text-4xl font-bold text-primary">{s.num}</p>
+                <p className="text-3xl sm:text-4xl font-bold text-primary">
+                  {s.symbol ? s.symbol : <CountUp end={s.num} duration={2.2} delay={0.3 + i * 0.15} enableScrollSpy scrollSpyOnce />}
+                </p>
                 <p className={`text-xs text-muted-foreground ${isHi ? "font-devanagari" : ""}`}>{s.label[lang]}</p>
               </motion.div>
             ))}
