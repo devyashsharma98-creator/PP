@@ -83,12 +83,20 @@ export function AppSidebar() {
               key={item.path}
               href={item.path}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group',
+                'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group',
                 active
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
                   : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
             >
+              {/* Animated glow indicator */}
+              {active && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_hsl(27_100%_50%/0.6)]"
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                />
+              )}
               <item.icon className={cn('w-4 h-4 shrink-0', active && 'drop-shadow-sm')} />
               <AnimatePresence>
                 {!collapsed && (

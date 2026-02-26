@@ -4,14 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppContext, roleLabels, type Role } from '@/context/AppContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Bell, Menu, Flame } from 'lucide-react';
+import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { navItems } from '@/components/AppSidebar';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useTheme } from 'next-themes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const roleLabelsHi: Record<Role, string> = {
   unit_head: 'यूनिट प्रमुख',
@@ -24,23 +26,41 @@ export function Navbar() {
   const { role, setRole, lang, setLang, events, articles } = useAppContext();
   const pathname = usePathname();
   const t = useT();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [bellBounce, setBellBounce] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const prevCountRef = useRef(0);
+  const notifRef = useRef<HTMLDivElement>(null);
 
-  const pendingEvents = role === 'aayam_pramukh'
-    ? events.filter(e => e.status === 'Pending Aayam Review').length
-    : role === 'vibhag_pramukh'
-    ? events.filter(e => e.status === 'Pending Final Approval').length
-    : 0;
+  // Hydration guard for theme
+  useEffect(() => setMounted(true), []);
 
-  const pendingArticles = role === 'unit_head'
-    ? articles.filter(a => a.status === 'Pending Unit Head Review').length
-    : role === 'aayam_pramukh'
-    ? articles.filter(a => a.status === 'Pending Aayam Review').length
-    : 0;
+  // Build notifications list — O(n) single pass, memoized
+  const notifications = useMemo(() => {
+    const items: { id: string; type: 'event' | 'article'; title: string; status: string; date: string; link: string }[] = [];
 
-  const totalPending = pendingEvents + pendingArticles;
+    if (role === 'aayam_pramukh') {
+      for (const e of events) {
+        if (e.status === 'Pending Aayam Review') items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+      }
+      for (const a of articles) {
+        if (a.status === 'Pending Aayam Review') items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
+      }
+    } else if (role === 'vibhag_pramukh') {
+      for (const e of events) {
+        if (e.status === 'Pending Final Approval') items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+      }
+    } else if (role === 'unit_head') {
+      for (const a of articles) {
+        if (a.status === 'Pending Unit Head Review') items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
+      }
+    }
+    return items;
+  }, [role, events, articles]);
+
+  const totalPending = notifications.length;
 
   // Animate bell whenever count increases
   useEffect(() => {
@@ -51,6 +71,18 @@ export function Navbar() {
     }
     prevCountRef.current = totalPending;
   }, [totalPending]);
+
+  // Close notification dropdown on outside click — O(1) handler
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [notifOpen]);
+
+  const toggleTheme = useCallback(() => setTheme(theme === 'dark' ? 'light' : 'dark'), [theme, setTheme]);
 
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
@@ -107,28 +139,105 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Animated Notification Bell */}
-        {totalPending > 0 && (
-          <div className="relative">
-            <div
-              className={cn(
-                'relative p-1.5 rounded-lg transition-colors hover:bg-muted cursor-default',
-                bellBounce && 'animate-badge-bounce'
+        {/* ── Dark/Light Toggle ── */}
+        {mounted && (
+          <button
+            onClick={toggleTheme}
+            className="relative w-8 h-8 rounded-lg bg-muted/80 border border-border/60 flex items-center justify-center hover:border-primary/40 transition-colors"
+            title={theme === 'dark' ? t('Light Mode', 'लाइट मोड') : t('Dark Mode', 'डार्क मोड')}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {theme === 'dark' ? (
+                <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                </motion.div>
+              ) : (
+                <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <Moon className="w-4 h-4 text-muted-foreground" />
+                </motion.div>
               )}
-            >
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              {/* Ping ring */}
-              <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-              </span>
-            </div>
-            {/* Count badge */}
-            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1 shadow-md shadow-primary/30">
-              {totalPending}
-            </span>
-          </div>
+            </AnimatePresence>
+          </button>
         )}
+
+        {/* ── Notification Bell + Dropdown ── */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => totalPending > 0 && setNotifOpen(o => !o)}
+            className={cn(
+              'relative p-1.5 rounded-lg transition-colors hover:bg-muted',
+              totalPending > 0 ? 'cursor-pointer' : 'cursor-default',
+              bellBounce && 'animate-badge-bounce'
+            )}
+          >
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            {totalPending > 0 && (
+              <>
+                <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                  <span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                </span>
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1 shadow-md shadow-primary/30">
+                  {totalPending}
+                </span>
+              </>
+            )}
+          </button>
+
+          {/* Dropdown Panel */}
+          <AnimatePresence>
+            {notifOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-full mt-2 w-80 max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
+              >
+                <div className="sticky top-0 bg-popover border-b border-border/60 px-4 py-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold font-devanagari">{t('Notifications', 'सूचनाएं')}</h3>
+                  <Badge variant="outline" className="text-[10px]">{totalPending}</Badge>
+                </div>
+                <div className="p-2 space-y-1">
+                  {notifications.map((n) => (
+                    <Link
+                      key={n.id}
+                      href={n.link}
+                      onClick={() => setNotifOpen(false)}
+                      className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group"
+                    >
+                      <div className={cn(
+                        'w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5',
+                        n.type === 'event' ? 'bg-primary/10' : 'bg-blue-500/10'
+                      )}>
+                        {n.type === 'event'
+                          ? <CalendarDays className="w-3.5 h-3.5 text-primary" />
+                          : <PenLine className="w-3.5 h-3.5 text-blue-500" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate group-hover:text-foreground">{n.title}</p>
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {lang === 'hi'
+                            ? (n.type === 'event' ? 'कार्यक्रम — समीक्षा प्रतीक्षित' : 'आलेख — समीक्षा प्रतीक्षित')
+                            : (n.type === 'event' ? 'Event — Review pending' : 'Article — Review pending')
+                          }
+                        </p>
+                      </div>
+                      <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
+                    </Link>
+                  ))}
+                </div>
+                <div className="border-t border-border/60 px-4 py-2.5">
+                  <Link href="/dashboard" onClick={() => setNotifOpen(false)} className="text-xs text-primary hover:underline font-devanagari">
+                    {t('View all in Dashboard →', 'डैशबोर्ड में सब देखें →')}
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Language Toggle */}
         <button

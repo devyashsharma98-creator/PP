@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
@@ -135,6 +135,15 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
 
   const allValuesChecked = Object.values(form.valuesChecklist).every(Boolean);
 
+  // O(n) word count — split on whitespace, filter empty
+  const contentStats = useMemo(() => {
+    const text = form.content.trim();
+    const chars = text.length;
+    const words = chars === 0 ? 0 : text.split(/\s+/).length;
+    const readMin = Math.max(1, Math.ceil(words / 200));
+    return { chars, words, readMin };
+  }, [form.content]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.content || !allValuesChecked) return;
@@ -178,6 +187,20 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
               rows={6}
               required
             />
+            {/* Live writing stats — O(n) */}
+            <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="font-mono font-semibold text-foreground/70">{contentStats.words}</span> {t('words', 'शब्द')}
+              </span>
+              <span className="opacity-40">·</span>
+              <span className="flex items-center gap-1">
+                <span className="font-mono font-semibold text-foreground/70">{contentStats.chars}</span> {t('chars', 'अक्षर')}
+              </span>
+              <span className="opacity-40">·</span>
+              <span className="flex items-center gap-1">
+                ~<span className="font-mono font-semibold text-foreground/70">{contentStats.readMin}</span> {t('min read', 'मिनट पठन')}
+              </span>
+            </div>
           </div>
           <div>
             <Label>{t("Summary", "सारांश")} <span className="text-muted-foreground text-xs">({t("auto-filled, editable", "स्वतः भरा, संपादन योग्य")})</span></Label>

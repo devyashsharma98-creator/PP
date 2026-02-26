@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ToastProvider } from "@/components/ToastProvider";
 import { PageTransition } from "@/components/PageTransition";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <ClientProviders>
           <ToastProvider>
@@ -41,6 +42,7 @@ export default function RootLayout({
               </div>
             </div>
             <MobileBottomNav />
+            <ScrollToTop />
           </ToastProvider>
         </ClientProviders>
       </body>
