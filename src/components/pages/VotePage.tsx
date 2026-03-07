@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,12 +17,48 @@ interface Props {
 export default function VotePage({ eventId }: Props) {
   const { events, castVote } = useAppContext();
   const t = useT();
-  const event = events.find(e => e.id === eventId);
+  const contextEvent = events.find(e => e.id === eventId);
+  const [publicEvent, setPublicEvent] = useState<GatividhiEvent | null>(null);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicLoadError, setPublicLoadError] = useState<string | null>(null);
+  const event = contextEvent ?? publicEvent;
+
+  useEffect(() => {
+    if (contextEvent) return;
+    let cancelled = false;
+    setPublicLoading(true);
+    setPublicLoadError(null);
+    fetch(`/api/public/events/${eventId}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Failed to load event.');
+        }
+        return res.json() as Promise<{ event: GatividhiEvent }>;
+      })
+      .then((data) => {
+        if (!cancelled) setPublicEvent(data.event);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setPublicLoadError(error instanceof Error ? error.message : 'Failed to load event.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPublicLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [contextEvent, eventId]);
 
   // Track which option user has selected per poll (before submitting)
   const [selected, setSelected] = useState<Record<string, string>>({});
   // Track which polls have been submitted
   const [voted, setVoted] = useState<Record<string, string>>({});
+  const [submittingPollId, setSubmittingPollId] = useState<string | null>(null);
+  const [voteError, setVoteError] = useState<string | null>(null);
 
   if (!event) {
     return (
@@ -30,7 +66,9 @@ export default function VotePage({ eventId }: Props) {
         <div className="text-center space-y-2">
           <p className="text-lg font-semibold">{t('Event not found', 'कार्यक्रम नहीं मिला')}</p>
           <p className="text-sm text-muted-foreground font-devanagari">
-            {t('This voting link may be invalid or expired.', 'यह मतदान लिंक अमान्य या समाप्त हो सकता है।')}
+            {publicLoading
+              ? t('Loading voting details…', 'मतदान विवरण लोड हो रहा है…')
+              : (publicLoadError ?? t('This voting link may be invalid or expired.', 'यह मतदान लिंक अमान्य या समाप्त हो सकता है।'))}
           </p>
         </div>
       </div>
@@ -39,11 +77,46 @@ export default function VotePage({ eventId }: Props) {
 
   const polls = event.polls ?? [];
 
-  const handleVote = (pollId: string) => {
+  const handleVote = async (pollId: string) => {
     const optionId = selected[pollId];
     if (!optionId) return;
-    castVote(eventId, pollId, optionId);
-    setVoted(p => ({ ...p, [pollId]: optionId }));
+    const poll = polls.find(p => p.id === pollId);
+    if (!poll || poll.isFinalized) return;
+
+    setVoteError(null);
+    setSubmittingPollId(pollId);
+    try {
+      const res = await fetch(`/api/public/events/${eventId}/polls/${pollId}/votes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ optionId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Vote submission failed.');
+      }
+      if (contextEvent) {
+        castVote(eventId, pollId, optionId, { skipRemote: true });
+      } else {
+        setPublicEvent(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            polls: (prev.polls ?? []).map(p => p.id === pollId
+              ? {
+                  ...p,
+                  options: p.options.map(o => (o.id === optionId ? { ...o, votes: o.votes + 1 } : o)),
+                }
+              : p),
+          };
+        });
+      }
+      setVoted(p => ({ ...p, [pollId]: optionId }));
+    } catch (error) {
+      setVoteError(error instanceof Error ? error.message : 'Vote submission failed.');
+    } finally {
+      setSubmittingPollId(null);
+    }
   };
 
   const allVoted = polls.length > 0 && polls.every(p => voted[p.id]);
@@ -159,6 +232,7 @@ export default function VotePage({ eventId }: Props) {
                             /* Selection view */
                             <button
                               onClick={() => setSelected(p => ({ ...p, [poll.id]: opt.id }))}
+                              disabled={poll.isFinalized || submittingPollId === poll.id}
                               className={cn(
                                 'w-full text-left px-3 py-2.5 rounded-xl border-2 transition-all font-devanagari text-sm',
                                 selected[poll.id] === opt.id
@@ -178,12 +252,15 @@ export default function VotePage({ eventId }: Props) {
                   {!hasVoted && (
                     <Button
                       className="w-full saffron-gradient text-white border-0"
-                      disabled={!selected[poll.id]}
+                      disabled={!selected[poll.id] || poll.isFinalized || submittingPollId === poll.id}
                       onClick={() => handleVote(poll.id)}
                     >
                       <Vote className="w-4 h-4 mr-2" />
-                      {t('Cast Vote', 'मत दें')}
+                      {submittingPollId === poll.id ? 'Submitting...' : 'Cast Vote'}
                     </Button>
+                  )}
+                  {voteError && !hasVoted && (
+                    <p className="text-center text-xs text-destructive">{voteError}</p>
                   )}
                   {hasVoted && (
                     <p className="text-center text-xs text-green-600 font-devanagari flex items-center justify-center gap-1.5">
@@ -213,3 +290,4 @@ export default function VotePage({ eventId }: Props) {
     </div>
   );
 }
+

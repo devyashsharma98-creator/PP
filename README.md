@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+# Pragya Pravah UI (Next.js + Supabase)
 
-## Project info
+Next.js App Router frontend for Pragya Pravah workflow operations, now wired to a Supabase backend foundation (schema, RLS, storage policies, server routes, and generated DB types).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Stack
 
-## How can I edit this code?
+- Next.js (App Router, TypeScript)
+- React
+- Tailwind CSS + shadcn/ui
+- Supabase (Postgres, Auth, Storage, Edge Functions scaffold)
 
-There are several ways of editing your application.
+## Project Structure (Supabase)
 
-**Use Lovable**
+- `supabase/config.toml` - local Supabase CLI config
+- `supabase/migrations/` - SQL source of truth (schema + RLS + storage policies)
+- `supabase/seed.sql` - idempotent local/dev seed
+- `supabase/functions/notification-dispatch-hook/` - Edge Function scaffold for dispatch integration
+- `src/types/database.ts` - generated from the linked Supabase schema
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Environment
 
-Changes made via Lovable will be committed automatically to this repo.
+Copy `.env.example` to `.env.local` and set values.
 
-**Use your preferred IDE**
+Required keys:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_PROJECT_REF`
+- `SUPABASE_DB_PASSWORD` (for CLI `db push` / `link`)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Optional:
 
-Follow these steps:
+- `NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH=true` for prototype role switching in the navbar
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Install / Run
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open `http://localhost:3000`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Supabase CLI Workflow
 
-**Use GitHub Codespaces**
+### 1. Login
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+supabase login
+```
 
-## What technologies are used for this project?
+### 2. Link this repo to a project
 
-This project is built with:
+```bash
+supabase link --project-ref <project-ref>
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+If prompted, provide the remote DB password (or use `-p`).
 
-## How can I deploy this project?
+### 3. Push migrations
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```bash
+npm run supabase:db:push
+```
 
-## Can I connect a custom domain to my Lovable project?
+### 4. Generate database types
 
-Yes, you can!
+```bash
+npm run supabase:types
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+This updates `src/types/database.ts` from the linked project.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Scripts
+
+- `npm run dev` - start Next.js dev server
+- `npm run build` - production build
+- `npm run lint` - ESLint
+- `npm run typecheck` - TypeScript check
+- `npm run supabase:login` - Supabase CLI login
+- `npm run supabase:link` - link local repo to a Supabase project
+- `npm run supabase:db:push` - push local SQL migrations to linked project
+- `npm run supabase:types` - generate TS DB types from linked project
+
+## Current Backend Foundation Status
+
+- Core workflow tables implemented (events, registrations, polls/votes, articles, prachar, notifications, attachments, audit logs)
+- Future-ready foundation tables implemented (org settings, roles, units, departments/aayams, tags, workflow templates/steps, comments, activity stream, locations)
+- RLS enabled across public workflow tables with helper-role functions and public registration/vote policies
+- Storage buckets created private by default with restrictive object policies
+- Next.js API routes added for bootstrap/app actions and secure public registration/vote submission
+
+## Notes / TODOs
+
+- Internal app action routes currently use server-side service role for prototype continuity. Replace with authenticated session-aware server actions/route guards before production launch.
+- Auth UI/session flows are not fully implemented yet; role switching remains demo-only and is env-gated.
+- Upload signing + attachment flows are scaffolded conceptually but not fully implemented in the UI.

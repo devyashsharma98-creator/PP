@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   PenLine, CheckCircle2, Clock, ArrowRight, Eye, BarChart3,
   Users, BookOpen, ExternalLink, X, ChevronDown, ChevronRight,
-  RotateCcw, Send,
+  RotateCcw, Send, FileText, AlertTriangle,
 } from "lucide-react";
 
 const statusColors: Record<ArticleStatus, string> = {
@@ -47,7 +47,7 @@ const valuesItems = [
 ];
 
 const emptyValues = { rashtraPratham: false, culturallyGrounded: false, balancedTone: false, noDivisiveContent: false };
-const emptyForm = { title: "", content: "", summary: "", category: "Shodh", socialUrl: "", valuesChecklist: emptyValues };
+const emptyForm = { title: "", content: "", summary: "", category: "Shodh", socialUrl: "", documentUrl: "", valuesChecklist: emptyValues };
 
 // ─── Article Card (expandable) ───────────────────────────────────────────────
 function ArticleCard({
@@ -87,6 +87,17 @@ function ArticleCard({
                   <ExternalLink className="w-3 h-3" /> {t('Source', 'स्रोत')}
                 </a>
               )}
+              {article.documentUrl && (
+                <a
+                  href={article.documentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className="flex items-center gap-0.5 text-primary hover:underline"
+                >
+                  <FileText className="w-3 h-3" /> {t('Document', 'दस्तावेज़')}
+                </a>
+              )}
             </p>
           </div>
           {open
@@ -105,6 +116,16 @@ function ArticleCard({
             className="overflow-hidden"
           >
             <div className="border-t border-border/50 px-4 py-4 bg-muted/20 space-y-3">
+              {/* Reviewer feedback callout */}
+              {article.status === "Draft" && article.latestReviewNotes && (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 font-devanagari">{t('Reviewer Notes', 'समीक्षक टिप्पणी')}</p>
+                    <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5 whitespace-pre-wrap">{article.latestReviewNotes}</p>
+                  </div>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{article.content}</p>
               {/* Values checklist display */}
               <div className="flex flex-wrap gap-2">
@@ -127,7 +148,7 @@ function ArticleCard({
 }
 
 // ─── Write Article Form ───────────────────────────────────────────────────────
-function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) => void }) {
+function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) => Promise<boolean> }) {
   const t = useT();
   const { lang } = useAppContext();
   const [open, setOpen] = useState(false);
@@ -144,10 +165,11 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
     return { chars, words, readMin };
   }, [form.content]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.content || !allValuesChecked) return;
-    onSubmit(form);
+    const ok = await onSubmit(form);
+    if (!ok) return;
     setForm(emptyForm);
     setOpen(false);
   };
@@ -210,6 +232,10 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
             <Label>{t("Social Media URL", "सोशल मीडिया लिंक")} <span className="text-muted-foreground text-xs">({t("optional", "वैकल्पिक")})</span></Label>
             <Input value={form.socialUrl} onChange={e => setForm(p => ({ ...p, socialUrl: e.target.value }))} placeholder="https://facebook.com/..." type="url" />
           </div>
+          <div>
+            <Label>{t("Document URL", "दस्तावेज़ लिंक")} <span className="text-muted-foreground text-xs">({t("optional — Google Doc, PDF etc.", "वैकल्पिक — Google Doc, PDF आदि")})</span></Label>
+            <Input value={form.documentUrl} onChange={e => setForm(p => ({ ...p, documentUrl: e.target.value }))} placeholder="https://docs.google.com/..." type="url" />
+          </div>
 
           {/* Values Checklist */}
           <div className="rounded-lg border border-border/60 p-3 space-y-2.5 bg-muted/30">
@@ -247,18 +273,21 @@ function EditForwardDialog({
   article,
   targetStatus,
   actionLabel,
+  showReviewNotes,
   onDone,
 }: {
   article: AalekhaArticle;
   targetStatus: ArticleStatus;
   actionLabel: string;
-  onDone: (edits: Partial<Pick<AalekhaArticle, "title" | "content" | "summary">>) => void;
+  showReviewNotes?: boolean;
+  onDone: (edits: Partial<Pick<AalekhaArticle, "title" | "content" | "summary">>, reviewNotes?: string) => Promise<boolean>;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(article.title);
   const [content, setContent] = useState(article.content);
   const [summary, setSummary] = useState(article.summary);
+  const [reviewNotes, setReviewNotes] = useState('');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -285,11 +314,76 @@ function EditForwardDialog({
             <Label>{t('Content', 'सामग्री')}</Label>
             <Textarea value={content} onChange={e => setContent(e.target.value)} rows={6} />
           </div>
+          {showReviewNotes && (
+            <div>
+              <Label className="font-devanagari">{t('Review Notes for Writer', 'लेखक के लिए समीक्षा टिप्पणी')} <span className="text-muted-foreground text-xs font-normal">({t('optional', 'वैकल्पिक')})</span></Label>
+              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={2} placeholder={t('Add feedback for the writer...', 'लेखक के लिए सुझाव लिखें...')} />
+            </div>
+          )}
           <Button
             className="w-full"
-            onClick={() => { onDone({ title, content, summary }); setOpen(false); }}
+            onClick={async () => {
+              const ok = await onDone({ title, content, summary }, reviewNotes.trim() || undefined);
+              if (!ok) return;
+              setOpen(false);
+            }}
           >
             <ArrowRight className="w-4 h-4 mr-2" /> {t('Confirm & Forward', 'पुष्टि करें और आगे भेजें')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Return with Review Notes Dialog ──────────────────────────────────────────
+function ReturnWithNotesDialog({
+  articleId,
+  onReturn,
+}: {
+  articleId: string;
+  onReturn: (reviewNotes?: string) => Promise<void>;
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const [notes, setNotes] = useState('');
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
+        >
+          <RotateCcw className="w-3 h-3 mr-1" /> {t('Return to Writer', 'लेखक को वापस करें')}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md bg-popover">
+        <DialogHeader>
+          <DialogTitle className="font-devanagari">{t('Return Article for Revision', 'आलेख संशोधन के लिए वापस करें')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label className="font-devanagari">{t('Review Notes', 'समीक्षा टिप्पणी')} <span className="text-muted-foreground text-xs font-normal">({t('recommended', 'अनुशंसित')})</span></Label>
+            <Textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={3}
+              placeholder={t('Tell the writer what to improve...', 'लेखक को बताएं कि क्या सुधारना है...')}
+              autoFocus
+            />
+          </div>
+          <Button
+            className="w-full"
+            variant="destructive"
+            onClick={async () => {
+              await onReturn(notes.trim() || undefined);
+              setOpen(false);
+              setNotes('');
+            }}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" /> {t('Confirm Return', 'वापसी की पुष्टि करें')}
           </Button>
         </div>
       </DialogContent>
@@ -304,8 +398,8 @@ export default function Aalekh() {
   const t = useT();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
 
-  const handleSubmit = (form: typeof emptyForm) => {
-    addArticle({
+  const handleSubmit = async (form: typeof emptyForm) => {
+    const ok = await addArticle({
       title: form.title,
       content: form.content,
       summary: form.summary || form.content.slice(0, 150),
@@ -313,9 +407,12 @@ export default function Aalekh() {
       date: new Date().toISOString().split("T")[0],
       category: form.category,
       socialUrl: form.socialUrl || undefined,
+      documentUrl: form.documentUrl || null,
       valuesChecklist: form.valuesChecklist,
     });
+    if (!ok) return false;
     addToast(t('Article submitted!', 'आलेख भेजा गया!'), 'success', t('Sent for Unit Head review', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया'));
+    return true;
   };
 
   // ── Karyakarta View ──────────────────────────────────────────────────────
@@ -383,22 +480,21 @@ export default function Aalekh() {
                           article={a}
                           targetStatus="Pending Aayam Review"
                           actionLabel={t("Edit & Forward to Aayam Pramukh", "संपादित करें और आयाम प्रमुख को भेजें")}
-                          onDone={(edits) => {
-                            updateArticleStatus(a.id, "Pending Aayam Review", edits);
+                          onDone={async (edits) => {
+                            const ok = await updateArticleStatus(a.id, "Pending Aayam Review", edits);
+                            if (!ok) return false;
                             addToast(t('Article forwarded!', 'आलेख आगे भेजा!'), 'info', t('Sent for Aayam Pramukh review', 'आयाम प्रमुख की समीक्षा के लिए'));
+                            return true;
                           }}
                         />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
-                          onClick={() => {
-                            updateArticleStatus(a.id, "Draft");
+                        <ReturnWithNotesDialog
+                          articleId={a.id}
+                          onReturn={async (reviewNotes) => {
+                            const ok = await updateArticleStatus(a.id, "Draft", undefined, { reviewNotes: reviewNotes ?? null });
+                            if (!ok) return;
                             addToast(t('Returned to writer', 'लेखक को वापस भेजा'), 'warning', t('Sent back for revision', 'संशोधन के लिए वापस भेजा'));
                           }}
-                        >
-                          <RotateCcw className="w-3 h-3 mr-1" /> {t('Return to Writer', 'लेखक को वापस करें')}
-                        </Button>
+                        />
                       </div>
                     }
                   />
@@ -483,31 +579,32 @@ export default function Aalekh() {
                           article={a}
                           targetStatus="Published"
                           actionLabel={t("Edit & Approve to Publish", "संपादित करें और प्रकाशित करें")}
-                          onDone={(edits) => {
-                            updateArticleStatus(a.id, "Published", edits);
+                          onDone={async (edits) => {
+                            const ok = await updateArticleStatus(a.id, "Published", edits);
+                            if (!ok) return false;
                             setLastPublished(edits.title ?? a.title);
                             addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
+                            return true;
                           }}
                         />
                         <Button size="sm" className="h-7 text-xs"
-                          onClick={() => {
-                            updateArticleStatus(a.id, "Published");
+                          onClick={async () => {
+                            const ok = await updateArticleStatus(a.id, "Published");
+                            if (!ok) return;
                             setLastPublished(a.title);
                             addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
                           }}
                         >
                           <CheckCircle2 className="w-3 h-3 mr-1" /> {t('Approve & Publish', 'अनुमोदित करें और प्रकाशित करें')}
                         </Button>
-                        <Button
-                          variant="outline" size="sm"
-                          className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
-                          onClick={() => {
-                            updateArticleStatus(a.id, "Draft");
+                        <ReturnWithNotesDialog
+                          articleId={a.id}
+                          onReturn={async (reviewNotes) => {
+                            const ok = await updateArticleStatus(a.id, "Draft", undefined, { reviewNotes: reviewNotes ?? null });
+                            if (!ok) return;
                             addToast(t('Returned for revision', 'संशोधन के लिए वापस भेजा'), 'warning', t('Sent back for revision', 'संशोधन के लिए वापस भेजा गया'));
                           }}
-                        >
-                          <RotateCcw className="w-3 h-3 mr-1" /> {t('Return for Revision', 'संशोधन के लिए वापस करें')}
-                        </Button>
+                        />
                       </div>
                     }
                   />

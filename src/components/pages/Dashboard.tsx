@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CountUp from "react-countup";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppContext, GatividhiEvent, FormConfig, VotePoll } from "@/context/AppContext";
+import { useAppContext, GatividhiEvent, FormConfig, VotePoll, VrittStatus } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import { format, parseISO, isValid } from "date-fns";
 import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
-  Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb,
+  Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb, FileText,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
@@ -46,7 +46,7 @@ const eventStatusHi: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  const { role, lang, events, addEvent, updateEventStatus, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
+  const { role, lang, permissions, events, addEvent, updateEventStatus, updateVritt, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
   const t = useT();
@@ -75,18 +75,37 @@ export default function Dashboard() {
     checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
     report: "", fileName: "", videoUrl: "", posterName: "",
   });
+  const [lastPublished, setLastPublished] = useState<string | null>(null);
+  const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
+  const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
+
+  const vrittStatusLabel = (s: VrittStatus) => {
+    const map: Record<VrittStatus, string> = { draft: t('Draft', 'प्रारूप'), submitted: t('Submitted', 'प्रस्तुत'), reviewed: t('Reviewed', 'समीक्षित') };
+    return map[s] ?? s;
+  };
+
+  const openVrittEditor = (event: GatividhiEvent) => {
+    setVrittForm({
+      content: event.vrittContent ?? '',
+      attendanceCount: event.vrittAttendanceCount ?? 0,
+      mediaUrls: event.vrittMediaUrls?.length ? [...event.vrittMediaUrls] : [''],
+      status: event.vrittStatus ?? 'draft',
+    });
+    setVrittEvent(event);
+  };
 
   const statusLabel = (status: string) => lang === 'hi' ? (eventStatusHi[status] ?? status) : status;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const selectedDate = parseISO(dateValue);
     if (!form.title || !isValid(selectedDate)) return;
 
-    addEvent({
+    const ok = await addEvent({
       title: form.title,
       description: form.description,
       date: format(selectedDate, "dd MMM yyyy"),
+      dateIso: selectedDate.toISOString(),
       unit: form.unit || "Bhopal",
       submittedBy: "Current User",
       checklist: form.checklist,
@@ -94,6 +113,10 @@ export default function Dashboard() {
       imageUrl: "",
       formConfig: localFormConfig,
     });
+    if (!ok) {
+      addToast(t('Not authorized to submit event', 'कार्यक्रम भेजने की अनुमति नहीं है'), 'error');
+      return;
+    }
     setForm({
       title: "", description: "", unit: "",
       checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
@@ -145,16 +168,30 @@ export default function Dashboard() {
     setLocalFormConfig(prev => ({ ...prev, customQuestions: prev.customQuestions.filter(q => q.id !== id) }));
   };
 
-  const handleCreatePoll = () => {
+  const handleCreatePoll = async () => {
     if (!pollCreateEvent || !newPollQuestion.trim()) return;
     const validOptions = newPollOptions.filter(o => o.trim());
     if (validOptions.length < 2) return;
-    addPoll(pollCreateEvent.id, {
+    const ok = await addPoll(pollCreateEvent.id, {
       question: newPollQuestion.trim(),
       questionHi: newPollQuestionHi.trim() || newPollQuestion.trim(),
       type: newPollType,
-      options: validOptions.map((label, i) => ({ id: `o${i}${Date.now()}`, label: label.trim(), votes: 0 })),
+      options: validOptions.map((label, i) => {
+        // TODO(src/components/pages/Dashboard.tsx): Use explicit date inputs for date polls instead of parsing free-text labels.
+        const trimmed = label.trim();
+        const parsedMs = newPollType === 'date' ? Date.parse(trimmed) : Number.NaN;
+        return {
+          id: `o${i}${Date.now()}`,
+          label: trimmed,
+          votes: 0,
+          scheduledAtIso: Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString(),
+        };
+      }),
     });
+    if (!ok) {
+      addToast(t('Not authorized to create poll', 'मतदान बनाने की अनुमति नहीं है'), 'error');
+      return;
+    }
     setPollCreateEvent(null);
     setNewPollQuestion(''); setNewPollQuestionHi(''); setNewPollOptions(['', '', '']);
     addToast(t('Poll created!', 'मतदान बनाया गया!'), 'success', t('Share the vote link with members', 'सदस्यों को वोट लिंक भेजें'));
@@ -174,7 +211,6 @@ export default function Dashboard() {
     const published = events.filter(e => e.status === "Published").length;
     const pending = events.filter(e => e.status === "Pending Final Approval");
     const units = new Set(events.map(e => e.unit)).size;
-    const [lastPublished, setLastPublished] = useState<string | null>(null);
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -241,8 +277,13 @@ export default function Dashboard() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => {
-                        updateEventStatus(event.id, "Published");
+                      disabled={!permissions.canPublishEvent}
+                      onClick={async () => {
+                        const ok = await updateEventStatus(event.id, "Published");
+                        if (!ok) {
+                          addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
+                          return;
+                        }
                         setLastPublished(event.title);
                         addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
                       }}
@@ -323,8 +364,12 @@ export default function Dashboard() {
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
-                      <Button size="sm" onClick={() => {
-                        updateEventStatus(event.id, "Pending Final Approval");
+                      <Button size="sm" onClick={async () => {
+                        const ok = await updateEventStatus(event.id, "Pending Final Approval");
+                        if (!ok) {
+                          addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
+                          return;
+                        }
                         addToast(t('Forwarded for final approval', 'अंतिम अनुमोदन के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
                       }}>
                         {t('Review & Forward', 'समीक्षा करें और भेजें')} <ArrowRight className="w-4 h-4 ml-1" />
@@ -549,8 +594,8 @@ export default function Dashboard() {
                             disabled={alreadyAdded || localFormConfig.customQuestions.length >= 5}
                             onClick={() => addSuggestion(s)}
                             className={`text-[11px] px-2 py-1 rounded-full border transition-colors font-devanagari ${alreadyAdded
-                                ? 'bg-primary/10 border-primary/30 text-primary cursor-default'
-                                : 'border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer'
+                              ? 'bg-primary/10 border-primary/30 text-primary cursor-default'
+                              : 'border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer'
                               } disabled:opacity-40`}
                           >
                             {alreadyAdded ? '✓ ' : '+ '}{t(s.question, s.questionHi)}
@@ -648,6 +693,12 @@ export default function Dashboard() {
                     >
                       <Vote className="w-3 h-3 mr-1" />{t('+ Poll', '+ मत')}
                     </Button>
+                    <Button variant="ghost" size="sm"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => openVrittEditor(event)}
+                    >
+                      <FileText className="w-3 h-3 mr-1" />{t('Vritt', 'वृत्त')}
+                    </Button>
                     {event.status === "Published" && (
                       <Link href="/feed">
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
@@ -656,6 +707,24 @@ export default function Dashboard() {
                       </Link>
                     )}
                   </div>
+                  {/* Vritt summary */}
+                  {event.vrittStatus && (
+                    <button onClick={() => openVrittEditor(event)} className="w-full text-left pt-2 border-t border-border/30 space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <Badge variant="outline" className={`text-[10px] ${event.vrittStatus === 'reviewed' ? 'border-green-500/40 text-green-600' : event.vrittStatus === 'submitted' ? 'border-blue-500/40 text-blue-600' : ''}`}>
+                          <FileText className="w-2.5 h-2.5 mr-0.5" /> {vrittStatusLabel(event.vrittStatus)}
+                        </Badge>
+                        {event.vrittAttendanceCount != null && event.vrittAttendanceCount > 0 && (
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Users className="w-3 h-3" /> {event.vrittAttendanceCount}
+                          </span>
+                        )}
+                      </div>
+                      {event.vrittContent && (
+                        <p className="text-[11px] text-muted-foreground line-clamp-2">{event.vrittContent}</p>
+                      )}
+                    </button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -792,8 +861,13 @@ export default function Dashboard() {
                       {/* Finalize button */}
                       {!poll.isFinalized && totalVotes > 0 && (
                         <Button size="sm" className="w-full text-xs"
-                          onClick={() => {
-                            finalizePoll(pollResultsEvent.id, poll.id, winner.id);
+                          disabled={!permissions.canFinalizePoll}
+                          onClick={async () => {
+                            const ok = await finalizePoll(pollResultsEvent.id, poll.id, winner.id);
+                            if (!ok) {
+                              addToast(t('Finalize not allowed', 'अंतिम करने की अनुमति नहीं है'), 'error');
+                              return;
+                            }
                             setPollResultsEvent(prev => prev ? {
                               ...prev,
                               polls: (prev.polls ?? []).map(p => p.id === poll.id
@@ -910,6 +984,106 @@ export default function Dashboard() {
                     )}
                   </motion.div>
                 ))}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Vritt Editor Sheet ── */}
+      <Sheet open={!!vrittEvent} onOpenChange={open => !open && setVrittEvent(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          {vrittEvent && (
+            <>
+              <SheetHeader className="mb-5">
+                <SheetTitle className="text-base font-devanagari flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" /> {t('Vritt — Post-Event Report', 'वृत्त — कार्यक्रम विवरण')}
+                </SheetTitle>
+                <p className="text-xs text-muted-foreground">{vrittEvent.title} · {vrittEvent.date}</p>
+              </SheetHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="font-devanagari">{t('Status', 'स्थिति')}</Label>
+                  <Select value={vrittForm.status} onValueChange={(v: string) => setVrittForm(p => ({ ...p, status: v as VrittStatus }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectItem value="draft">{t('Draft', 'प्रारूप')}</SelectItem>
+                      <SelectItem value="submitted">{t('Submitted', 'प्रस्तुत')}</SelectItem>
+                      <SelectItem value="reviewed">{t('Reviewed', 'समीक्षित')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="font-devanagari">{t('Attendance Count', 'उपस्थिति संख्या')}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={vrittForm.attendanceCount || ''}
+                    onChange={e => setVrittForm(p => ({ ...p, attendanceCount: parseInt(e.target.value) || 0 }))}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <Label className="font-devanagari">{t('Report Content', 'विवरण सामग्री')}</Label>
+                  <Textarea
+                    value={vrittForm.content}
+                    onChange={e => setVrittForm(p => ({ ...p, content: e.target.value }))}
+                    rows={5}
+                    placeholder={t('Write the post-event report...', 'कार्यक्रम के बाद का विवरण लिखें...')}
+                  />
+                </div>
+
+                <div>
+                  <Label className="font-devanagari">{t('Media URLs', 'मीडिया लिंक')} <span className="text-muted-foreground text-xs font-normal">({t('photos, videos', 'फ़ोटो, वीडियो')})</span></Label>
+                  <div className="space-y-2 mt-1">
+                    {vrittForm.mediaUrls.map((url, i) => (
+                      <div key={i} className="flex gap-2">
+                        <Input
+                          value={url}
+                          onChange={e => setVrittForm(p => ({ ...p, mediaUrls: p.mediaUrls.map((u, j) => j === i ? e.target.value : u) }))}
+                          placeholder="https://..."
+                          type="url"
+                          className="text-sm"
+                        />
+                        {vrittForm.mediaUrls.length > 1 && (
+                          <button
+                            onClick={() => setVrittForm(p => ({ ...p, mediaUrls: p.mediaUrls.filter((_, j) => j !== i) }))}
+                            className="text-muted-foreground hover:text-destructive shrink-0"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {vrittForm.mediaUrls.length < 5 && (
+                      <Button variant="outline" size="sm" className="text-xs w-full"
+                        onClick={() => setVrittForm(p => ({ ...p, mediaUrls: [...p.mediaUrls, ''] }))}>
+                        <Plus className="w-3 h-3 mr-1" /> {t('Add URL', 'लिंक जोड़ें')}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <Button className="w-full" onClick={async () => {
+                  const urls = vrittForm.mediaUrls.filter(u => u.trim());
+                  const ok = await updateVritt(vrittEvent.id, {
+                    vrittContent: vrittForm.content || undefined,
+                    vrittAttendanceCount: vrittForm.attendanceCount || undefined,
+                    vrittMediaUrls: urls.length > 0 ? urls : undefined,
+                    vrittStatus: vrittForm.status,
+                  });
+                  if (!ok) {
+                    addToast(t('Failed to save vritt', 'वृत्त सहेजने में विफल'), 'error');
+                    return;
+                  }
+                  addToast(t('Vritt saved!', 'वृत्त सहेजा गया!'), 'success');
+                  setVrittEvent(null);
+                }}>
+                  <CheckCircle2 className="w-4 h-4 mr-2" /> {t('Save Vritt', 'वृत्त सहेजें')}
+                </Button>
               </div>
             </>
           )}

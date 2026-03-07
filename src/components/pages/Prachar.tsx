@@ -6,11 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Megaphone, CheckCircle2, AlertCircle, MessageCircle,
   Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
+  FileText,
 } from 'lucide-react';
 import { useAppContext, type PracharPlatform } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
@@ -43,13 +45,21 @@ const templates = [
 ];
 
 export default function Prachar() {
-  const { events, pracharStatuses, updatePracharPlatform } = useAppContext();
+  const { events, permissions, pracharStatuses, updatePracharPlatform } = useAppContext();
   const t = useT();
   const publishedEvents = events.filter(e => e.status === 'Published');
 
+  // Track which platform is pending a skip-reason entry: "eventId::platform"
+  const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
+  const [pendingSkipText, setPendingSkipText] = useState('');
+
   const getStatus = (eventId: string) =>
-    pracharStatuses.find(p => p.eventId === eventId) ??
-    { eventId, platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false } };
+    pracharStatuses.find(p => p.eventId === eventId) ?? {
+      eventId,
+      platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
+      skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null },
+      templateReference: null,
+    };
 
   const isDone = (eventId: string) => {
     const s = getStatus(eventId);
@@ -147,33 +157,98 @@ export default function Prachar() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {platforms.map(platform => {
                         const checked = status.platforms[platform.key];
+                        const skipKey = `${event.id}::${platform.key}`;
+                        const isPendingSkip = pendingSkipKey === skipKey;
+                        const existingReason = status.skipReasons?.[platform.key] ?? null;
+
+                        const handleToggle = (nextDone: boolean) => {
+                          if (!permissions.canUpdatePrachar) return;
+                          if (nextDone) {
+                            // Marking done — clear skip reason
+                            setPendingSkipKey(null);
+                            setPendingSkipText('');
+                            void updatePracharPlatform(event.id, platform.key, true, null);
+                          } else {
+                            // Unchecking — prompt for skip reason
+                            setPendingSkipKey(skipKey);
+                            setPendingSkipText(existingReason ?? '');
+                          }
+                        };
+
+                        const confirmSkip = () => {
+                          const reason = pendingSkipText.trim() || null;
+                          void updatePracharPlatform(event.id, platform.key, false, reason);
+                          setPendingSkipKey(null);
+                          setPendingSkipText('');
+                        };
+
                         return (
                           <div
                             key={platform.key}
                             className={cn(
-                              'flex items-center gap-2 p-2.5 rounded-lg border transition-all cursor-pointer',
+                              'flex flex-col gap-1.5 p-2.5 rounded-lg border transition-all',
                               checked ? 'border-success/40 bg-[hsl(var(--success)/.06)]' : 'border-border/50 bg-muted/30 hover:border-border'
                             )}
-                            onClick={() => updatePracharPlatform(event.id, platform.key, !checked)}
                           >
-                            <Checkbox
-                              id={`${event.id}-${platform.key}`}
-                              checked={checked}
-                              onCheckedChange={v => updatePracharPlatform(event.id, platform.key, !!v)}
-                            />
-                            <div className="min-w-0">
-                              <platform.icon className={cn('w-3.5 h-3.5', platform.color)} />
-                              <Label
-                                htmlFor={`${event.id}-${platform.key}`}
-                                className="text-[10px] cursor-pointer block mt-0.5 leading-tight"
-                              >
-                                {t(platform.label, platform.labelHi)}
-                              </Label>
+                            <div
+                              className="flex items-center gap-2 cursor-pointer"
+                              onClick={() => handleToggle(!checked)}
+                            >
+                              <Checkbox
+                                id={`${event.id}-${platform.key}`}
+                                checked={checked}
+                                disabled={!permissions.canUpdatePrachar}
+                                onCheckedChange={v => handleToggle(!!v)}
+                              />
+                              <div className="min-w-0">
+                                <platform.icon className={cn('w-3.5 h-3.5', platform.color)} />
+                                <Label
+                                  htmlFor={`${event.id}-${platform.key}`}
+                                  className="text-[10px] cursor-pointer block mt-0.5 leading-tight"
+                                >
+                                  {t(platform.label, platform.labelHi)}
+                                </Label>
+                              </div>
                             </div>
+                            {/* Show existing skip reason */}
+                            {!checked && !isPendingSkip && existingReason && (
+                              <p className="text-[9px] text-muted-foreground italic pl-6 leading-tight truncate" title={existingReason}>
+                                {t('Skip', 'छोड़ा')}: {existingReason}
+                              </p>
+                            )}
+                            {/* Inline skip-reason input */}
+                            {isPendingSkip && (
+                              <div className="space-y-1 pl-0">
+                                <Input
+                                  value={pendingSkipText}
+                                  onChange={e => setPendingSkipText(e.target.value)}
+                                  placeholder={t('Reason for skipping...', 'छोड़ने का कारण...')}
+                                  className="h-6 text-[10px] px-2"
+                                  autoFocus
+                                  onKeyDown={e => { if (e.key === 'Enter') confirmSkip(); }}
+                                />
+                                <div className="flex gap-1">
+                                  <Button size="sm" className="h-5 text-[9px] px-2 flex-1" onClick={confirmSkip}>
+                                    {t('Save', 'सहेजें')}
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-5 text-[9px] px-2" onClick={() => { setPendingSkipKey(null); setPendingSkipText(''); }}>
+                                    {t('Cancel', 'रद्द')}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
                     </div>
+
+                    {/* Template reference */}
+                    {status.templateReference && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <FileText className="w-3 h-3 shrink-0" />
+                        {t('Template', 'टेम्पलेट')}: <span className="font-medium text-foreground/70">{status.templateReference}</span>
+                      </p>
+                    )}
 
                     {!done && (
                       <p className="text-[10px] text-muted-foreground flex items-center gap-1 font-devanagari">
@@ -227,7 +302,15 @@ export default function Prachar() {
                     <CardContent className="pt-3 pb-4 space-y-2">
                       <h3 className="text-sm font-medium font-devanagari">{t(tmpl.name, tmpl.nameHi)}</h3>
                       <p className="text-[10px] text-muted-foreground line-clamp-2">{t(tmpl.desc, tmpl.descHi)}</p>
-                      <Button variant="outline" size="sm" className="text-xs h-7 w-full">{t('Use Template', 'टेम्पलेट उपयोग करें')}</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 w-full"
+                        disabled
+                        title="Template generation flow is not implemented yet"
+                      >
+                        Template Preview Only
+                      </Button>
                     </CardContent>
                   </Card>
                 </div>

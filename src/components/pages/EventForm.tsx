@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,12 +30,48 @@ const stepVariants = {
 export default function EventForm({ eventId }: Props) {
   const { events, addRegistration } = useAppContext();
   const t = useT();
-  const event = events.find(e => e.id === eventId);
+  const contextEvent = events.find(e => e.id === eventId);
+  const [publicEvent, setPublicEvent] = useState<GatividhiEvent | null>(null);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicLoadError, setPublicLoadError] = useState<string | null>(null);
+  const event = contextEvent ?? publicEvent;
+
+  useEffect(() => {
+    if (contextEvent) return;
+    let cancelled = false;
+    setPublicLoading(true);
+    setPublicLoadError(null);
+    fetch(`/api/public/events/${eventId}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Failed to load event.');
+        }
+        return res.json() as Promise<{ event: GatividhiEvent }>;
+      })
+      .then((data) => {
+        if (!cancelled) setPublicEvent(data.event);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setPublicLoadError(error instanceof Error ? error.message : 'Failed to load event.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPublicLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [contextEvent, eventId]);
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const fc = event?.formConfig;
   const showPhone = fc ? fc.fields.phone : true;
@@ -77,16 +113,48 @@ export default function EventForm({ eventId }: Props) {
     setErrors({});
   };
 
-  const handleSubmit = () => {
-    addRegistration(eventId, {
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      city: form.city.trim(),
-      attendingCount: form.attendingCount,
-      hasSpecialNeeds: form.hasSpecialNeeds,
-      notes: form.notes.trim() || undefined,
-    });
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: form.name.trim(),
+        phone: form.phone.trim() || undefined,
+        city: form.city.trim() || undefined,
+        attendingCount: form.attendingCount,
+        hasSpecialNeeds: form.hasSpecialNeeds,
+        notes: form.notes.trim() || undefined,
+        customAnswers: form.customAnswers,
+      };
+
+      const res = await fetch(`/api/public/events/${eventId}/registrations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || t('Registration failed. Please try again.', 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'));
+      }
+
+      if (contextEvent) {
+        addRegistration(eventId, {
+          name: payload.name,
+          phone: payload.phone ?? '',
+          city: payload.city ?? '',
+          attendingCount: payload.attendingCount,
+          hasSpecialNeeds: payload.hasSpecialNeeds,
+          notes: payload.notes,
+          customAnswers: payload.customAnswers,
+        }, { skipRemote: true });
+      }
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : t('Registration failed. Please try again.', 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /* ── Event not found ── */
@@ -94,9 +162,15 @@ export default function EventForm({ eventId }: Props) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
-          <p className="text-lg font-semibold">{t('Event not found', 'कार्यक्रम नहीं मिला')}</p>
+          <p className="text-lg font-semibold">
+            {publicLoading
+              ? t('Loading event…', 'कार्यक्रम लोड हो रहा है…')
+              : t('Event not found', 'कार्यक्रम नहीं मिला')}
+          </p>
           <p className="text-sm text-muted-foreground font-devanagari">
-            {t('This form link may be invalid or expired.', 'यह फ़ॉर्म लिंक अमान्य या समाप्त हो सकता है।')}
+            {publicLoading
+              ? t('Please wait a moment.', 'कृपया कुछ क्षण प्रतीक्षा करें।')
+              : (publicLoadError ?? t('This form link may be invalid or expired.', 'यह फ़ॉर्म लिंक अमान्य या समाप्त हो सकता है।'))}
           </p>
         </div>
       </div>
@@ -424,6 +498,9 @@ export default function EventForm({ eventId }: Props) {
 
       {/* ── Navigation buttons ── */}
       <div className="flex items-center gap-3">
+        {submitError && step === 3 && (
+          <p className="text-xs text-destructive flex-1">{submitError}</p>
+        )}
         {step > 1 && (
           <Button variant="outline" onClick={goBack} className="flex-1">
             <ChevronLeft className="w-4 h-4 mr-1" /> {t('Back', 'वापस')}
@@ -436,13 +513,15 @@ export default function EventForm({ eventId }: Props) {
         ) : (
           <Button
             onClick={handleSubmit}
+            disabled={submitting}
             className="flex-1 saffron-gradient text-white border-0 shadow-md hover:shadow-lg hover:opacity-90"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            {t('Submit Registration', 'पंजीकरण भेजें')}
+            {submitting ? 'Submitting...' : 'Submit Registration'}
           </Button>
         )}
       </div>
     </div>
   );
 }
+

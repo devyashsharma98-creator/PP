@@ -23,7 +23,7 @@ const roleLabelsHi: Record<Role, string> = {
 };
 
 export function Navbar() {
-  const { role, setRole, lang, setLang, events, articles } = useAppContext();
+  const { role, setRole, viewer, lang, setLang, events, articles } = useAppContext();
   const pathname = usePathname();
   const t = useT();
   const { theme, setTheme } = useTheme();
@@ -33,6 +33,30 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const prevCountRef = useRef(0);
   const notifRef = useRef<HTMLDivElement>(null);
+  const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
+  const primaryRoleCode = viewer?.primaryRoleCode;
+  const canonicalRoleLabels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    org_admin: 'Org Admin',
+    karyakarta: 'Karyakarta (Writer)',
+    unit_head: 'Unit Head',
+    aayam_pramukh: 'Aayam Pramukh',
+    vibhag_pramukh: 'Vibhag Pramukh',
+    prant_sanyojak: 'Prant Sanyojak',
+    prant_aayam_pramukh: 'Prant Aayam Pramukh',
+    kshetra_reviewer: 'Kshetra Reviewer',
+  };
+  const canonicalRoleLabelsHi: Record<string, string> = {
+    super_admin: 'सुपर एडमिन',
+    org_admin: 'संगठन एडमिन',
+    karyakarta: 'कार्यकर्ता',
+    unit_head: 'यूनिट प्रमुख',
+    aayam_pramukh: 'आयाम प्रमुख',
+    vibhag_pramukh: 'विभाग प्रमुख',
+    prant_sanyojak: 'प्रांत संयोजक',
+    prant_aayam_pramukh: 'प्रांत आयाम प्रमुख',
+    kshetra_reviewer: 'क्षेत्र समीक्षक',
+  };
 
   // Hydration guard for theme
   useEffect(() => setMounted(true), []);
@@ -255,21 +279,31 @@ export function Navbar() {
           )}>हि</span>
         </button>
 
-        {/* Role Switcher */}
+        {/* Temporary demo role switcher until auth/profile role binding is implemented */}
         <div className="flex items-center gap-1.5 bg-muted/80 border border-border/60 rounded-lg px-2 py-1 md:px-3 md:py-1.5">
           <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
-          <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-            <SelectTrigger className="border-0 bg-transparent shadow-none h-auto p-0 text-xs md:text-sm font-medium w-[100px] md:w-[170px] focus:ring-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-lg z-50">
-              {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
-                <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
-                  {lang === 'hi' ? roleLabelsHi[key] : label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {demoRoleSwitchEnabled ? (
+            <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+              <SelectTrigger className="border-0 bg-transparent shadow-none h-auto p-0 text-xs md:text-sm font-medium w-[100px] md:w-[170px] focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border border-border shadow-lg z-50">
+                {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
+                  <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
+                    {lang === 'hi' ? roleLabelsHi[key] : label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
+              {primaryRoleCode
+                ? (lang === 'hi'
+                    ? (canonicalRoleLabelsHi[primaryRoleCode] ?? roleLabelsHi[role])
+                    : (canonicalRoleLabels[primaryRoleCode] ?? roleLabels[role]))
+                : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role])}
+            </span>
+          )}
         </div>
       </div>
     </header>
