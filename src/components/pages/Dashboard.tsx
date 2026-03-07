@@ -430,7 +430,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold">{t("Gatividhi Dashboard", "गतिविधि डैशबोर्ड")}</h1>
           <p className="text-muted-foreground text-sm">{t("Create and track events for your unit", "अपनी इकाई के लिए कार्यक्रम बनाएं और ट्रैक करें")}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {permissions.canCreateEvent && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> {t("Create New Event", "नया कार्यक्रम बनाएं")}</Button>
           </DialogTrigger>
@@ -610,7 +610,7 @@ export default function Dashboard() {
               <Button type="submit" className="w-full">{t('Submit for Review', 'समीक्षा के लिए भेजें')}</Button>
             </form>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </div>
 
       {/* Success alert after submission */}

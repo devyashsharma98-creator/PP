@@ -821,22 +821,46 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
       assertCanUpdatePracharStatus(ctx, eventRow);
 
       type PracharInsert = Db["prachar_statuses"]["Insert"];
-      const doneKey = `${input.payload.platform}_done` as keyof PracharInsert;
-      const skipKey = `${input.payload.platform}_skip_reason` as keyof PracharInsert;
+      type PracharUpdate = Db["prachar_statuses"]["Update"];
+      const doneKey = `${input.payload.platform}_done` as keyof PracharInsert & keyof PracharUpdate;
+      const skipKey = `${input.payload.platform}_skip_reason` as keyof PracharInsert & keyof PracharUpdate;
 
       const nowIso = new Date().toISOString();
-      const upsertData: PracharInsert = {
-        event_id: input.payload.eventId,
-        [doneKey]: input.payload.done,
-        [skipKey]: input.payload.done ? null : (input.payload.skipReason ?? null),
-        last_updated_by: ctx.user.id,
-        last_updated_at: nowIso,
-      };
+      const doneValue = input.payload.done;
+      const skipValue = doneValue ? null : (input.payload.skipReason ?? null);
 
-      const { error } = await supabase
+      // Check whether a prachar_statuses row already exists for this event
+      const { data: existing } = await supabase
         .from("prachar_statuses")
-        .upsert(upsertData, { onConflict: "event_id" });
-      if (error) throw error;
+        .select("id")
+        .eq("event_id", input.payload.eventId)
+        .maybeSingle();
+
+      if (existing) {
+        // Row exists — targeted update of only the changed platform columns
+        const { error } = await supabase
+          .from("prachar_statuses")
+          .update({
+            [doneKey]: doneValue,
+            [skipKey]: skipValue,
+            last_updated_by: ctx.user.id,
+            last_updated_at: nowIso,
+          } as PracharUpdate)
+          .eq("event_id", input.payload.eventId);
+        if (error) throw error;
+      } else {
+        // No row yet — insert a full initial row with only this platform set
+        const { error } = await supabase
+          .from("prachar_statuses")
+          .insert({
+            event_id: input.payload.eventId,
+            [doneKey]: doneValue,
+            [skipKey]: skipValue,
+            last_updated_by: ctx.user.id,
+            last_updated_at: nowIso,
+          } as PracharInsert);
+        if (error) throw error;
+      }
 
       return { ok: true };
     }

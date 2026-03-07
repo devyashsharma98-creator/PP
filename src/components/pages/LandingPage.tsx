@@ -978,6 +978,7 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ delay: 0.2 }}
+            className="space-y-3"
           >
             <Link href="/dashboard">
               <Button size="lg"
@@ -986,6 +987,11 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
+            <div>
+              <Link href="/login" className="text-sm text-primary hover:underline">
+                {isHi ? "लॉगिन करें →" : "Sign In →"}
+              </Link>
+            </div>
           </motion.div>
 
           <motion.div

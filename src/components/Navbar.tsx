@@ -1,10 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext, roleLabels, type Role } from '@/context/AppContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight } from 'lucide-react';
+import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -14,6 +14,7 @@ import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const roleLabelsHi: Record<Role, string> = {
   unit_head: 'यूनिट प्रमुख',
@@ -23,8 +24,9 @@ const roleLabelsHi: Record<Role, string> = {
 };
 
 export function Navbar() {
-  const { role, setRole, viewer, lang, setLang, events, articles } = useAppContext();
+  const { role, setRole, viewer, lang, setLang, events, articles, isAuthenticated } = useAppContext();
   const pathname = usePathname();
+  const router = useRouter();
   const t = useT();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -107,6 +109,19 @@ export function Navbar() {
   }, [notifOpen]);
 
   const toggleTheme = useCallback(() => setTheme(theme === 'dark' ? 'light' : 'dark'), [theme, setTheme]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch {
+      // Best-effort — redirect anyway
+      router.push('/login');
+      router.refresh();
+    }
+  }, [router]);
 
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
@@ -305,6 +320,17 @@ export function Navbar() {
             </span>
           )}
         </div>
+
+        {/* Logout */}
+        {isAuthenticated && (
+          <button
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            title={t('Sign Out', 'लॉग आउट')}
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </header>
   );

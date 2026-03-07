@@ -4,6 +4,7 @@ import type { Database } from "@/types/database";
 
 const PUBLIC_EXACT_PATHS = new Set([
   "/",
+  "/login",
   "/parichay",
   "/history",
   "/vimarsh",
@@ -77,8 +78,8 @@ export async function middleware(req: NextRequest) {
   }
 
   const redirectUrl = req.nextUrl.clone();
-  redirectUrl.pathname = "/";
-  redirectUrl.searchParams.set("auth", "required");
+  redirectUrl.pathname = "/login";
+  redirectUrl.searchParams.delete("auth");
   redirectUrl.searchParams.set("returnTo", `${pathname}${search}`);
   return NextResponse.redirect(redirectUrl);
 }
