@@ -230,12 +230,10 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
     await expect(page.getByText(/Vibhag Pramukh|विभाग प्रमुख/i)).toBeVisible();
-    await expect(
-      page.getByText(/Bhopal Vibhag Activity Console|Institutional Overview/i),
-    ).toBeVisible();
-    await expect(
-      page.getByText(/Final Approvals Queue|Final approval and publication lane/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Institutional Overview/i })).toBeVisible();
+    await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
+    await expect(page.getByText(/Final Approvals Queue/i)).toBeVisible();
     await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
   });
 
