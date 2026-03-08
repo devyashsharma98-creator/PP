@@ -124,8 +124,9 @@ export function Navbar() {
   }, [router]);
 
   return (
-    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 px-4 pt-4 md:px-6">
+      <div className="institution-panel-muted flex min-h-[78px] items-center justify-between gap-4 px-4 py-3 md:px-5">
+        <div className="flex items-center gap-3">
         {/* Mobile Menu Trigger */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -133,8 +134,8 @@ export function Navbar() {
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] p-0">
-            <div className="flex items-center gap-3 px-6 h-16 border-b border-border">
+          <SheetContent side="left" className="institution-ledger-rail w-[300px] border-r border-sidebar-border p-0 text-sidebar-foreground">
+            <div className="flex items-center gap-3 border-b border-sidebar-border px-6 py-4">
               <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
                 <Flame className="w-4 h-4 text-primary-foreground" />
               </div>
@@ -182,7 +183,7 @@ export function Navbar() {
         {mounted && (
           <button
             onClick={toggleTheme}
-            className="relative w-8 h-8 rounded-lg bg-muted/80 border border-border/60 flex items-center justify-center hover:border-primary/40 transition-colors"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
             title={theme === 'dark' ? t('Light Mode', 'लाइट मोड') : t('Dark Mode', 'डार्क मोड')}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -204,7 +205,7 @@ export function Navbar() {
           <button
             onClick={() => totalPending > 0 && setNotifOpen(o => !o)}
             className={cn(
-              'relative p-1.5 rounded-lg transition-colors hover:bg-muted',
+              'relative rounded-full p-2 transition-colors hover:bg-muted',
               totalPending > 0 ? 'cursor-pointer' : 'cursor-default',
               bellBounce && 'animate-badge-bounce'
             )}
@@ -281,21 +282,21 @@ export function Navbar() {
         {/* Language Toggle */}
         <button
           onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
-          className="relative flex items-center gap-0 bg-muted/80 border border-border/60 rounded-lg overflow-hidden h-8 text-xs font-bold transition-all hover:border-primary/40"
+          className="relative flex h-9 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-xs font-bold transition-all hover:border-primary/40"
           title={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
         >
           <span className={cn(
-            'px-2 py-1 transition-all duration-200',
+            'px-3 py-1 transition-all duration-200',
             lang === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
           )}>EN</span>
           <span className={cn(
-            'px-2 py-1 font-devanagari transition-all duration-200',
+            'px-3 py-1 font-devanagari transition-all duration-200',
             lang === 'hi' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
           )}>हि</span>
         </button>
 
         {/* Temporary demo role switcher until auth/profile role binding is implemented */}
-        <div className="flex items-center gap-1.5 bg-muted/80 border border-border/60 rounded-lg px-2 py-1 md:px-3 md:py-1.5">
+        <div className="shell-role-chip">
           <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
           {demoRoleSwitchEnabled ? (
             <Select value={role} onValueChange={(v) => setRole(v as Role)}>
@@ -325,12 +326,13 @@ export function Navbar() {
         {isAuthenticated && (
           <button
             onClick={handleLogout}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
             title={t('Sign Out', 'लॉग आउट')}
           >
             <LogOut className="w-4 h-4" />
           </button>
         )}
+      </div>
       </div>
     </header>
   );

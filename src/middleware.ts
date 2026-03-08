@@ -6,6 +6,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/",
   "/login",
   "/parichay",
+  "/directory",
   "/history",
   "/vimarsh",
   "/library",

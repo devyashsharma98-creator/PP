@@ -214,12 +214,39 @@ export default function Dashboard() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t("Vibhag Dashboard", "विभाग डैशबोर्ड")}</h1>
-          <p className="text-muted-foreground text-sm">{t("Overview of all activities across Bhopal Vibhag", "भोपाल विभाग की सभी गतिविधियों का अवलोकन")}</p>
+        <div className="dashboard-masthead space-y-5">
+          <div className="space-y-3">
+            <p className="section-seal">Bhopal Vibhag Activity Console</p>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight">{t("Institutional Overview", "Institutional Overview")}</h1>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                {t(
+                  "Unit activity, review queues, and published work in one operational view.", "Unit activity, review queues, and published work in one operational view."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="dashboard-context-grid">
+            <div className="dashboard-context-card">
+              <p className="shell-copy">Scope</p>
+              <p className="mt-2 text-sm font-semibold">Bhopal Vibhag</p>
+              <p className="mt-1 text-sm text-muted-foreground">Regional oversight across active units and review lanes.</p>
+            </div>
+            <div className="dashboard-context-card">
+              <p className="shell-copy">Operational focus</p>
+              <p className="mt-2 text-sm font-semibold">Final approvals and publication</p>
+              <p className="mt-1 text-sm text-muted-foreground">Prioritise event approvals, feed publishing, and prachar follow-through.</p>
+            </div>
+            <div className="dashboard-context-card">
+              <p className="shell-copy">Current activity</p>
+              <p className="mt-2 text-sm font-semibold">{pending.length} items in active review</p>
+              <p className="mt-1 text-sm text-muted-foreground">Published work, pending approvals, and unit participation tracked together.</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> 
           {[
             { label: t("Total Events", "कुल कार्यक्रम"), value: totalEvents, icon: BarChart3, color: "text-primary", barColor: "bg-primary", sparkData: [30, 50, 40, 70, 60, 80, 75] },
             { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-success", barColor: "bg-green-500", sparkData: [20, 35, 45, 40, 55, 65, 60] },
@@ -227,7 +254,7 @@ export default function Dashboard() {
             { label: t("Active Units", "सक्रिय इकाइयाँ"), value: units, icon: Users, color: "text-info", barColor: "bg-blue-500", sparkData: [40, 45, 50, 55, 60, 58, 65] },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Card className="glass-card hover-lift">
+              <Card className="institution-kpi hover-lift">
                 <CardContent className="pt-6 pb-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -258,9 +285,9 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <Card className="glass-card">
+        <Card className="institution-panel">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="dashboard-section-heading">
               <Eye className="w-5 h-5 text-primary" /> {t('Final Approvals Queue', 'अंतिम अनुमोदन कतार')}
             </CardTitle>
           </CardHeader>
@@ -340,7 +367,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pending Reviews */}
-          <Card className="glass-card">
+          <Card className="institution-panel">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" /> {t(`Pending Reviews (${pendingReview.length})`, `समीक्षा प्रतीक्षित (${pendingReview.length})`)}
@@ -385,7 +412,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Forwarded */}
-          <Card className="glass-card">
+          <Card className="institution-panel">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-success" /> {t(`Forwarded (${forwarded.length})`, `अग्रेषित (${forwarded.length})`)}
@@ -955,7 +982,7 @@ export default function Dashboard() {
                     className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-2"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
+                      <div className="dashboard-section-heading">
                         <div className="w-7 h-7 rounded-full saffron-gradient flex items-center justify-center shrink-0">
                           <span className="text-[10px] text-white font-bold">{reg.name.charAt(0)}</span>
                         </div>

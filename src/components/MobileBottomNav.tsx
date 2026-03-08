@@ -19,8 +19,8 @@ export function MobileBottomNav() {
   const t = useT();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-sidebar border-t border-sidebar-border safe-area-bottom">
-      <div className="flex items-stretch h-16">
+    <nav className="institution-ledger-rail safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border md:hidden">
+      <div className="grid h-[74px] grid-cols-5 gap-1 px-2 py-2">
         {primaryNav.map((item) => {
           const active = pathname === item.path;
           return (
@@ -28,14 +28,14 @@ export function MobileBottomNav() {
               key={item.path}
               href={item.path}
               className={cn(
-                'flex-1 flex flex-col items-center justify-center gap-0.5 text-center transition-colors duration-150 active:scale-95',
+                'flex flex-col items-center justify-center gap-1 rounded-2xl text-center transition-all duration-150 active:scale-95',
                 active
-                  ? 'text-primary bg-sidebar-primary/10'
-                  : 'text-sidebar-foreground/60 hover:text-sidebar-foreground/90'
+                  ? 'bg-primary/14 text-primary shadow-[0_12px_24px_-20px_hsl(27_100%_50%/0.8)]'
+                  : 'text-sidebar-foreground/68 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground'
               )}
             >
-              <item.icon className={cn('w-5 h-5', active && 'text-primary drop-shadow-sm')} />
-              <span className={cn('text-[10px] font-devanagari leading-none', active ? 'text-primary font-semibold' : '')}>
+              <item.icon className={cn('h-5 w-5', active && 'text-primary')} />
+              <span className={cn('text-[10px] leading-none font-devanagari', active && 'font-semibold text-primary')}>
                 {t(item.label, item.sublabel)}
               </span>
             </Link>

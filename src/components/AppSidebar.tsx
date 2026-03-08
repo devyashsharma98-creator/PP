@@ -50,32 +50,35 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        'hidden md:flex h-screen sticky top-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 z-30',
-        collapsed ? 'w-[68px]' : 'w-[240px]'
+        'institution-ledger-rail sticky top-0 z-30 hidden h-screen flex-col border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 md:flex',
+        collapsed ? 'w-[72px]' : 'w-[248px]'
       )}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border shrink-0">
-        <div className="w-9 h-9 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
-          <Flame className="w-5 h-5 text-primary-foreground" />
+      <div className="border-b border-sidebar-border px-4 py-4 shrink-0">
+        {!collapsed && <p className="shell-copy mb-3 text-sidebar-foreground/55">Bhopal Vibhag</p>}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl saffron-gradient shadow-lg shadow-primary/20">
+            <Flame className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden whitespace-nowrap"
+              >
+                <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground font-devanagari">
+                  {t('Pragya Pravah', 'प्रज्ञा प्रवाह')}
+                </h1>
+                <p className="text-[11px] text-sidebar-foreground/72">Activity ledger</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden whitespace-nowrap"
-            >
-              <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h1>
-              <p className="text-[10px] text-sidebar-foreground/60 font-devanagari">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
         {navItems.map((item) => {
           const active = pathname === item.path;
           return (
@@ -83,21 +86,20 @@ export function AppSidebar() {
               key={item.path}
               href={item.path}
               className={cn(
-                'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group',
+                'group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200',
                 active
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? 'bg-sidebar-primary/95 text-sidebar-primary-foreground shadow-[0_14px_32px_-24px_hsl(27_100%_50%/0.95)]'
+                  : 'text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
             >
-              {/* Animated glow indicator */}
               {active && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary shadow-[0_0_8px_hsl(27_100%_50%/0.6)]"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary shadow-[0_0_10px_hsl(27_100%_50%/0.7)]"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                 />
               )}
-              <item.icon className={cn('w-4 h-4 shrink-0', active && 'drop-shadow-sm')} />
+              <item.icon className={cn('h-4 w-4 shrink-0', active && 'drop-shadow-sm')} />
               <AnimatePresence>
                 {!collapsed && (
                   <motion.div
@@ -106,7 +108,9 @@ export function AppSidebar() {
                     exit={{ opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <span className={cn('text-xs', lang === 'hi' && 'font-devanagari')}>{t(item.label, item.sublabel)}</span>
+                    <span className={cn('text-xs', lang === 'hi' && 'font-devanagari')}>
+                      {t(item.label, item.sublabel)}
+                    </span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -115,13 +119,19 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="mx-2 mb-4 p-2 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground/50 hover:text-sidebar-accent-foreground transition-colors self-end"
-      >
-        {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-      </button>
+      <div className="px-3 pb-4">
+        {!collapsed && (
+          <div className="institution-panel-muted mb-3 px-3 py-3 text-xs text-sidebar-foreground/72">
+            Organised action across review, publication, and unit activity.
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="ml-auto flex rounded-full p-2 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
+      </div>
     </aside>
   );
 }

@@ -214,6 +214,8 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(main.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
     await expect(main.getByText(/civilisational thought/i)).toBeVisible();
     await expect(main.getByText(/internal testing/i).first()).toBeVisible();
+    await expect(page.getByText(/Activity ledger/i)).toHaveCount(0);
+    await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
   });
 
   test("12 - dashboard leads with institutional context and operational summary", async ({
@@ -247,21 +249,47 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
       main.getByText(/civilisational|Bharatiya|intellectual forum/i).first(),
     ).toBeVisible();
     await expect(
-      main.getByRole("link", { name: /Understand the Vision|दृष्टि समझें/i }),
+      main
+        .getByRole("link", { name: /Understand the Vision|दृष्टि समझें/i })
+        .first(),
     ).toBeVisible();
     await expect(
-      main.getByRole("link", {
-        name: /Enter Demo Console|डेमो प्रणाली खोलें/i,
-      }),
+      main
+        .getByRole("link", {
+          name: /Enter Demo Console|डेमो प्रणाली खोलें/i,
+        })
+        .first(),
     ).toBeVisible();
     await expect(
-      main.getByRole("link", {
-        name: /Connect with the Network|संवाद से जुड़ें/i,
-      }),
+      main
+        .getByRole("link", {
+          name: /Connect with the Network|संवाद से जुड़ें/i,
+        })
+        .first(),
     ).toBeVisible();
-    await expect(main.getByText(/Fields of Work|कार्य के आयाम/i)).toBeVisible();
+    await expect(main.getByText(/Fields of Work|कार्य के आयाम/i).first()).toBeVisible();
     await expect(
-      main.getByText(/Choose Your Path|अपना मार्ग चुनें/i),
+      main.getByText(/Choose Your Path|अपना मार्ग चुनें/i).first(),
     ).toBeVisible();
+    await expect(
+      main.getByText(/Review • Publish • Prachar • Coordinate/i).first(),
+    ).toBeVisible();
+    await expect(page.getByText(/Activity ledger/i)).toHaveCount(0);
+    await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
+  });
+
+  test("14 - public routes render without internal app chrome", async ({ page }) => {
+    const publicRoutes = [
+      { path: "/parichay", heading: /Pragya Pravah|प्रज्ञा प्रवाह|Organisation Overview/i },
+      { path: "/directory", heading: /Sampark Directory|सम्पर्क निर्देशिका/i },
+      { path: "/vimarsh", heading: /Vimarsh|विमर्श/i },
+    ];
+
+    for (const route of publicRoutes) {
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      await expect(page.locator("main").getByText(route.heading).first()).toBeVisible();
+      await expect(page.getByText(/Activity ledger/i)).toHaveCount(0);
+      await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
+    }
   });
 });

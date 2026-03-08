@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
+import { AppLayoutShell } from "@/components/AppLayoutShell";
 import { ClientProviders } from "@/components/ClientProviders";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Navbar } from "@/components/Navbar";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ToastProvider } from "@/components/ToastProvider";
-import { PageTransition } from "@/components/PageTransition";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
@@ -30,18 +27,7 @@ export default function RootLayout({
       <body>
         <ClientProviders>
           <ToastProvider>
-            <div className="flex min-h-screen w-full bg-background cultural-bg">
-              <AppSidebar />
-              <div className="flex-1 flex flex-col min-w-0">
-                <Navbar />
-                <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto">
-                  <PageTransition>
-                    {children}
-                  </PageTransition>
-                </main>
-              </div>
-            </div>
-            <MobileBottomNav />
+            <AppLayoutShell>{children}</AppLayoutShell>
             <ScrollToTop />
           </ToastProvider>
         </ClientProviders>
