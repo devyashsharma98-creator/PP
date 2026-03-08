@@ -228,13 +228,15 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
       return;
     }
 
-    await expect(page.getByText(/Bhopal Vibhag/i)).toBeVisible();
+    await expect(page.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
+    await expect(page.getByText(/Vibhag Pramukh|विभाग प्रमुख/i)).toBeVisible();
     await expect(
-      page.getByText(/Activity Console|Institutional Overview/i),
+      page.getByText(/Bhopal Vibhag Activity Console|Institutional Overview/i),
     ).toBeVisible();
     await expect(
-      page.getByText(/Final Approvals Queue|Review Board|Gatividhi/i),
+      page.getByText(/Final Approvals Queue|Final approval and publication lane/i),
     ).toBeVisible();
+    await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
   });
 
   test("13 - homepage introduces Pragya Pravah and offers three clear entry paths", async ({

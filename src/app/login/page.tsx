@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Flame, LogIn, Loader2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,6 @@ const DEMO_ACCOUNTS = [
 ];
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") || "/dashboard";
 
@@ -45,9 +44,8 @@ function LoginForm() {
         return;
       }
 
-      // Successful login — redirect
-      router.push(returnTo);
-      router.refresh();
+      // Force a full reload so the root app provider re-bootstraps with the new auth session.
+      window.location.assign(returnTo);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
