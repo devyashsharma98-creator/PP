@@ -504,7 +504,19 @@
   }
 
   .shell-role-chip {
-    @apply flex items-center gap-2 rounded-full border border-border/70 bg-background/75 px-3 py-1.5 text-xs font-medium text-foreground;
+    @apply flex items-center gap-3 rounded-2xl border border-border/70 bg-background/80 px-3 py-2 text-xs font-medium text-foreground shadow-[0_14px_32px_-28px_hsl(var(--navy)/0.22)];
+  }
+
+  .shell-panel-copy {
+    @apply text-[11px] uppercase tracking-[0.24em] text-muted-foreground;
+  }
+
+  .shell-panel-title {
+    @apply text-lg font-semibold tracking-tight text-foreground;
+  }
+
+  .shell-panel-subcopy {
+    @apply text-sm leading-6 text-muted-foreground;
   }
 
   .demo-bridge-bg {
@@ -538,6 +550,14 @@
 
   .dashboard-context-card {
     @apply institution-panel-muted px-4 py-3;
+  }
+
+  .dashboard-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .dashboard-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
   }
 
   .dashboard-section-heading {

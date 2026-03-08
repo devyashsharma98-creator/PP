@@ -23,6 +23,97 @@ const roleLabelsHi: Record<Role, string> = {
   karyakarta: 'कार्यकर्ता',
 };
 
+function getShellFrame(pathname: string, role: Role) {
+  if (pathname === '/dashboard') {
+    if (role === 'vibhag_pramukh') {
+      return {
+        titleEn: 'Institutional Console',
+        titleHi: 'संस्थागत प्रणाली',
+        subtitleEn: 'Final approvals, publication, and unit coordination in one operational view.',
+        subtitleHi: 'एक ही परिचालन दृश्य में अंतिम अनुमोदन, प्रकाशन और इकाई समन्वय।',
+      };
+    }
+
+    if (role === 'aayam_pramukh') {
+      return {
+        titleEn: 'Aayam Review Desk',
+        titleHi: 'आयाम समीक्षा डेस्क',
+        subtitleEn: 'Review incoming programmes, forward ready work, and keep the organisational lane clear.',
+        subtitleHi: 'आगत कार्यक्रमों की समीक्षा करें, तैयार कार्य आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।',
+      };
+    }
+
+    return {
+      titleEn: 'Gatividhi Desk',
+      titleHi: 'गतिविधि डेस्क',
+      subtitleEn: 'Programme planning, review movement, and follow-through for your unit in one place.',
+      subtitleHi: 'आपकी इकाई के लिए योजना, समीक्षा प्रवाह और अनुवर्ती कार्य एक ही स्थान पर।',
+    };
+  }
+
+  const routeFrames = [
+    {
+      match: '/prachar',
+      titleEn: 'Prachar Desk',
+      titleHi: 'प्रचार डेस्क',
+      subtitleEn: 'Publication follow-through, circulation records, and outreach rhythm.',
+      subtitleHi: 'प्रकाशन के बाद का प्रचार कार्य, प्रसार अभिलेख और संवाद लय।',
+    },
+    {
+      match: '/aalekh',
+      titleEn: 'Aalekh Desk',
+      titleHi: 'आलेख डेस्क',
+      subtitleEn: 'Drafts, review notes, and publication readiness for institutional writing.',
+      subtitleHi: 'संस्थागत लेखन के लिए प्रारूप, समीक्षा टिप्पणियाँ और प्रकाशन तैयारी।',
+    },
+    {
+      match: '/feed',
+      titleEn: 'Published Work',
+      titleHi: 'प्रकाशित कार्य',
+      subtitleEn: 'The current record of approved and circulated institutional writing.',
+      subtitleHi: 'अनुमोदित और प्रसारित संस्थागत लेखन का वर्तमान अभिलेख।',
+    },
+    {
+      match: '/dayitv',
+      titleEn: 'Dayitva Matrix',
+      titleHi: 'दायित्व संरचना',
+      subtitleEn: 'Organisational roles, reporting lines, and accountability structure.',
+      subtitleHi: 'संगठनात्मक भूमिकाएँ, संपर्क धाराएँ और उत्तरदायित्व की संरचना।',
+    },
+    {
+      match: '/calendar',
+      titleEn: 'Annual Panchang',
+      titleHi: 'वार्षिक पंचांग',
+      subtitleEn: 'Programme rhythm, dates, and shared institutional calendar visibility.',
+      subtitleHi: 'कार्यक्रम लय, तिथियाँ और साझा संस्थागत पंचांग दृश्यता।',
+    },
+    {
+      match: '/directory',
+      titleEn: 'Sampark Directory',
+      titleHi: 'सम्पर्क निर्देशिका',
+      subtitleEn: 'Institutional contacts, roles, and points of coordination.',
+      subtitleHi: 'संस्थागत सम्पर्क, दायित्व और समन्वय बिंदु।',
+    },
+    {
+      match: '/library',
+      titleEn: 'E-Library',
+      titleHi: 'ई-पुस्तकालय',
+      subtitleEn: 'Reference texts, study material, and archived intellectual resources.',
+      subtitleHi: 'सन्दर्भ ग्रंथ, अध्ययन सामग्री और संग्रहित बौद्धिक संसाधन।',
+    },
+  ];
+
+  const matched = routeFrames.find((frame) => pathname.startsWith(frame.match));
+  if (matched) return matched;
+
+  return {
+    titleEn: 'Pragya Pravah',
+    titleHi: 'प्रज्ञा प्रवाह',
+    subtitleEn: 'Civilisational discourse, organised action.',
+    subtitleHi: 'सभ्यतागत विमर्श, संगठित कार्य।',
+  };
+}
+
 export function Navbar() {
   const { role, setRole, viewer, lang, setLang, events, articles, isAuthenticated } = useAppContext();
   const pathname = usePathname();
@@ -59,6 +150,7 @@ export function Navbar() {
     prant_aayam_pramukh: 'प्रांत आयाम प्रमुख',
     kshetra_reviewer: 'क्षेत्र समीक्षक',
   };
+  const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
 
   // Hydration guard for theme
   useEffect(() => setMounted(true), []);
@@ -135,13 +227,25 @@ export function Navbar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="institution-ledger-rail w-[300px] border-r border-sidebar-border p-0 text-sidebar-foreground">
-            <div className="flex items-center gap-3 border-b border-sidebar-border px-6 py-4">
-              <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
-                <Flame className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-sm font-bold tracking-tight text-foreground font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h1>
-                <p className="text-[10px] text-muted-foreground font-devanagari">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
+            <div className="border-b border-sidebar-border px-6 py-4">
+              <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">
+                {t('Bhopal Vibhag', 'भोपाल विभाग')}
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
+                  <Flame className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/60">
+                    {t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}
+                  </p>
+                  <h1 className={cn('text-sm font-bold tracking-tight text-foreground', lang === 'hi' && 'font-devanagari')}>
+                    {t(shellFrame.titleEn, shellFrame.titleHi)}
+                  </h1>
+                  <p className={cn('text-[11px] leading-5 text-sidebar-foreground/72', lang === 'hi' && 'font-devanagari')}>
+                    {t(shellFrame.subtitleEn, shellFrame.subtitleHi)}
+                  </p>
+                </div>
               </div>
             </div>
             <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -174,7 +278,19 @@ export function Navbar() {
           <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden">
             <Flame className="w-3.5 h-3.5 text-white" />
           </div>
-          <h2 className="text-base font-bold text-foreground tracking-tight font-devanagari">{t('Pragya Pravah', 'प्रज्ञा प्रवाह')}</h2>
+          <div className="space-y-1">
+            <p className="shell-copy text-foreground/55">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="shell-panel-copy">{t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}</span>
+              <span className="text-muted-foreground/60">•</span>
+              <h2 className={cn('text-base font-bold tracking-tight', lang === 'hi' && 'font-devanagari')}>
+                {t(shellFrame.titleEn, shellFrame.titleHi)}
+              </h2>
+            </div>
+            <p className={cn('hidden text-xs text-muted-foreground md:block', lang === 'hi' && 'font-devanagari')}>
+              {t(shellFrame.subtitleEn, shellFrame.subtitleHi)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -298,28 +414,33 @@ export function Navbar() {
         {/* Temporary demo role switcher until auth/profile role binding is implemented */}
         <div className="shell-role-chip">
           <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
-          {demoRoleSwitchEnabled ? (
-            <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-              <SelectTrigger className="border-0 bg-transparent shadow-none h-auto p-0 text-xs md:text-sm font-medium w-[100px] md:w-[170px] focus:ring-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border border-border shadow-lg z-50">
-                {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
-                  <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
-                    {lang === 'hi' ? roleLabelsHi[key] : label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
-              {primaryRoleCode
-                ? (lang === 'hi'
-                    ? (canonicalRoleLabelsHi[primaryRoleCode] ?? roleLabelsHi[role])
-                    : (canonicalRoleLabels[primaryRoleCode] ?? roleLabels[role]))
-                : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role])}
-            </span>
-          )}
+          <div className="min-w-0">
+            <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+              {t('Dayitva', 'दायित्व')}
+            </p>
+            {demoRoleSwitchEnabled ? (
+              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+                <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border shadow-lg z-50">
+                  {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
+                    <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
+                      {lang === 'hi' ? roleLabelsHi[key] : label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
+                {primaryRoleCode
+                  ? (lang === 'hi'
+                      ? (canonicalRoleLabelsHi[primaryRoleCode] ?? roleLabelsHi[role])
+                      : (canonicalRoleLabels[primaryRoleCode] ?? roleLabels[role]))
+                  : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role])}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Logout */}

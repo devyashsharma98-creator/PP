@@ -71,7 +71,12 @@ export function AppSidebar() {
                 <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground font-devanagari">
                   {t('Pragya Pravah', 'प्रज्ञा प्रवाह')}
                 </h1>
-                <p className="text-[11px] text-sidebar-foreground/72">Activity ledger</p>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/58">
+                  Internal institutional console
+                </p>
+                <p className="text-[11px] leading-5 text-sidebar-foreground/72">
+                  Civilisational discourse, organised action.
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -121,8 +126,13 @@ export function AppSidebar() {
 
       <div className="px-3 pb-4">
         {!collapsed && (
-          <div className="institution-panel-muted mb-3 px-3 py-3 text-xs text-sidebar-foreground/72">
-            Organised action across review, publication, and unit activity.
+          <div className="institution-panel-muted mb-3 space-y-2 px-3 py-3 text-xs text-sidebar-foreground/72">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/55">
+              Current lane
+            </p>
+            <p className="leading-5 text-sidebar-foreground/75">
+              Review, publication, and unit coordination.
+            </p>
           </div>
         )}
         <button

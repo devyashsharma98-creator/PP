@@ -45,6 +45,64 @@ const eventStatusHi: Record<string, string> = {
   Published: "प्रकाशित",
 };
 
+type DashboardContextItem = {
+  labelEn: string;
+  labelHi: string;
+  valueEn: string;
+  valueHi?: string;
+  detailEn: string;
+  detailHi: string;
+};
+
+function DashboardMasthead({
+  t,
+  sealEn,
+  sealHi,
+  titleEn,
+  titleHi,
+  descriptionEn,
+  descriptionHi,
+  contexts,
+  action,
+}: {
+  t: (en: string, hi: string) => string;
+  sealEn: string;
+  sealHi: string;
+  titleEn: string;
+  titleHi: string;
+  descriptionEn: string;
+  descriptionHi: string;
+  contexts: DashboardContextItem[];
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="dashboard-masthead space-y-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-3">
+          <p className="section-seal">{t(sealEn, sealHi)}</p>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">{t(titleEn, titleHi)}</h1>
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              {t(descriptionEn, descriptionHi)}
+            </p>
+          </div>
+        </div>
+        {action ? <div className="lg:pb-1">{action}</div> : null}
+      </div>
+
+      <div className="dashboard-context-grid">
+        {contexts.map((context) => (
+          <div key={context.labelEn} className="dashboard-context-card">
+            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
+            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
+            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { role, lang, permissions, events, addEvent, updateEventStatus, updateVritt, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
   const router = useRouter();
@@ -214,37 +272,41 @@ export default function Dashboard() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="dashboard-masthead space-y-5">
-          <div className="space-y-3">
-            <p className="section-seal">Bhopal Vibhag Activity Console</p>
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">{t("Institutional Overview", "Institutional Overview")}</h1>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                {t(
-                  "Unit activity, review queues, and published work in one operational view.", "Unit activity, review queues, and published work in one operational view."
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="dashboard-context-grid">
-            <div className="dashboard-context-card">
-              <p className="shell-copy">Scope</p>
-              <p className="mt-2 text-sm font-semibold">Bhopal Vibhag</p>
-              <p className="mt-1 text-sm text-muted-foreground">Regional oversight across active units and review lanes.</p>
-            </div>
-            <div className="dashboard-context-card">
-              <p className="shell-copy">Operational focus</p>
-              <p className="mt-2 text-sm font-semibold">Final approvals and publication</p>
-              <p className="mt-1 text-sm text-muted-foreground">Prioritise event approvals, feed publishing, and prachar follow-through.</p>
-            </div>
-            <div className="dashboard-context-card">
-              <p className="shell-copy">Current activity</p>
-              <p className="mt-2 text-sm font-semibold">{pending.length} items in active review</p>
-              <p className="mt-1 text-sm text-muted-foreground">Published work, pending approvals, and unit participation tracked together.</p>
-            </div>
-          </div>
-        </div>
+        <DashboardMasthead
+          t={t}
+          sealEn="Bhopal Vibhag Activity Console"
+          sealHi="भोपाल विभाग गतिविधि डेस्क"
+          titleEn="Institutional Overview"
+          titleHi="संस्थागत अवलोकन"
+          descriptionEn="Final approvals, publication, and unit coordination in one operational view."
+          descriptionHi="एक ही परिचालन दृश्य में अंतिम अनुमोदन, प्रकाशन और इकाई समन्वय।"
+          contexts={[
+            {
+              labelEn: "Scope",
+              labelHi: "क्षेत्र",
+              valueEn: "Bhopal Vibhag",
+              valueHi: "भोपाल विभाग",
+              detailEn: "Regional oversight across active units and review lanes.",
+              detailHi: "सक्रिय इकाइयों और समीक्षा धाराओं पर क्षेत्रीय दृष्टि।",
+            },
+            {
+              labelEn: "Operational focus",
+              labelHi: "परिचालन केंद्र",
+              valueEn: "Final approval and publication lane",
+              valueHi: "अंतिम अनुमोदन और प्रकाशन धारा",
+              detailEn: "Prioritise event approvals, feed publishing, and prachar follow-through.",
+              detailHi: "कार्यक्रम अनुमोदन, फीड प्रकाशन और प्रचार अनुवर्ती को प्राथमिकता दें।",
+            },
+            {
+              labelEn: "Current activity",
+              labelHi: "वर्तमान गतिविधि",
+              valueEn: `${pending.length} items in active review`,
+              valueHi: `${pending.length} प्रविष्टियाँ सक्रिय समीक्षा में`,
+              detailEn: "Published work, pending approvals, and unit participation tracked together.",
+              detailHi: "प्रकाशित कार्य, लंबित अनुमोदन और इकाई सहभागिता एक साथ दिखाई देती है।",
+            },
+          ]}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> 
           {[
@@ -360,10 +422,41 @@ export default function Dashboard() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t("Aayam Review Board", "आयाम समीक्षा मंडल")}</h1>
-          <p className="text-muted-foreground text-sm">{t("Review and forward events submitted by Unit Heads", "इकाई प्रमुखों द्वारा प्रस्तुत कार्यक्रमों की समीक्षा करें")}</p>
-        </div>
+        <DashboardMasthead
+          t={t}
+          sealEn="Aayam Review Desk"
+          sealHi="आयाम समीक्षा डेस्क"
+          titleEn="Aayam Review Board"
+          titleHi="आयाम समीक्षा मंडल"
+          descriptionEn="Review incoming programmes, forward ready work, and keep the organisational lane clear."
+          descriptionHi="आगत कार्यक्रमों की समीक्षा करें, तैयार कार्य आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
+          contexts={[
+            {
+              labelEn: "Review queue",
+              labelHi: "समीक्षा कतार",
+              valueEn: `${pendingReview.length} programmes awaiting review`,
+              valueHi: `${pendingReview.length} कार्यक्रम समीक्षा हेतु प्रतीक्षित`,
+              detailEn: "Programmes submitted by unit heads arrive here first.",
+              detailHi: "इकाई प्रमुखों द्वारा भेजे गए कार्यक्रम पहले यहाँ दिखाई देते हैं।",
+            },
+            {
+              labelEn: "Forwarded lane",
+              labelHi: "अग्रेषित धारा",
+              valueEn: `${forwarded.length} items moved ahead`,
+              valueHi: `${forwarded.length} प्रविष्टियाँ आगे भेजी गईं`,
+              detailEn: "Track what has already reached final approval or publication.",
+              detailHi: "जो कार्य अंतिम अनुमोदन या प्रकाशन तक पहुँच चुका है, वह यहाँ दिखता है।",
+            },
+            {
+              labelEn: "Operational focus",
+              labelHi: "परिचालन केंद्र",
+              valueEn: "Review and forwarding discipline",
+              valueHi: "समीक्षा और अग्रेषण अनुशासन",
+              detailEn: "Keep the review lane moving cleanly for vibhag-level action.",
+              detailHi: "विभाग स्तर की कार्रवाई के लिए समीक्षा धारा को स्पष्ट और गतिशील रखें।",
+            },
+          ]}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pending Reviews */}
@@ -449,14 +542,52 @@ export default function Dashboard() {
     { key: "screen", en: "Screen", hi: "स्क्रीन" },
     { key: "lights", en: "Lights", hi: "रोशनी" },
   ];
+  const activeWorkflowCount = myEvents.filter(event => event.status !== "Published").length;
+  const publishedUnitEvents = myEvents.filter(event => event.status === "Published").length;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t("Gatividhi Dashboard", "गतिविधि डैशबोर्ड")}</h1>
-          <p className="text-muted-foreground text-sm">{t("Create and track events for your unit", "अपनी इकाई के लिए कार्यक्रम बनाएं और ट्रैक करें")}</p>
-        </div>
+      <DashboardMasthead
+        t={t}
+        sealEn="Unit Activity Desk"
+        sealHi="इकाई गतिविधि डेस्क"
+        titleEn="Gatividhi Dashboard"
+        titleHi="गतिविधि डैशबोर्ड"
+        descriptionEn="Programme planning, review movement, and post-event follow-through for your unit in one place."
+        descriptionHi="आपकी इकाई के लिए कार्यक्रम योजना, समीक्षा प्रवाह और कार्यक्रमोत्तर अनुवर्ती एक ही स्थान पर।"
+        contexts={[
+          {
+            labelEn: "Operational scope",
+            labelHi: "परिचालन क्षेत्र",
+            valueEn: permissions.canCreateEvent ? "Unit planning and submission" : "Karyakarta participation lane",
+            valueHi: permissions.canCreateEvent ? "इकाई योजना और प्रस्तुति" : "कार्यकर्ता सहभागिता धारा",
+            detailEn: permissions.canCreateEvent
+              ? "Prepare programmes, complete vyavastha, and move work into review."
+              : "Track assigned programmes, contribute inputs, and stay aligned with the review lane.",
+            detailHi: permissions.canCreateEvent
+              ? "कार्यक्रम तैयार करें, व्यवस्था पूर्ण करें और कार्य को समीक्षा में भेजें।"
+              : "निर्धारित कार्यक्रम देखें, योगदान दें और समीक्षा धारा के साथ जुड़े रहें।",
+          },
+          {
+            labelEn: "Active workflow",
+            labelHi: "सक्रिय प्रवाह",
+            valueEn: `${activeWorkflowCount} records in motion`,
+            valueHi: `${activeWorkflowCount} प्रविष्टियाँ गतिशील`,
+            detailEn: "Drafts, reviews, and pending follow-through remain visible together.",
+            detailHi: "प्रारूप, समीक्षा और लंबित अनुवर्ती एक साथ दिखाई देते हैं।",
+          },
+          {
+            labelEn: "Published record",
+            labelHi: "प्रकाशित अभिलेख",
+            valueEn: `${publishedUnitEvents} published events`,
+            valueHi: `${publishedUnitEvents} प्रकाशित कार्यक्रम`,
+            detailEn: "Keep published work, forms, polls, and vritt updates close to the planning lane.",
+            detailHi: "प्रकाशित कार्य, फॉर्म, मतदान और वृत्त अद्यतन को योजना धारा से जुड़ा रखें।",
+          },
+        ]}
+      />
+
+      <div className="flex justify-end">
         {permissions.canCreateEvent && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> {t("Create New Event", "नया कार्यक्रम बनाएं")}</Button>

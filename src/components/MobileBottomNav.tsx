@@ -20,6 +20,10 @@ export function MobileBottomNav() {
 
   return (
     <nav className="institution-ledger-rail safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border md:hidden">
+      <div className="flex items-center justify-between px-4 pt-2 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/55">
+        <span>Bhopal Vibhag</span>
+        <span>Pragya Pravah</span>
+      </div>
       <div className="grid h-[74px] grid-cols-5 gap-1 px-2 py-2">
         {primaryNav.map((item) => {
           const active = pathname === item.path;
