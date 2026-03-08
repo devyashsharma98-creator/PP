@@ -259,5 +259,9 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
         name: /Connect with the Network|संवाद से जुड़ें/i,
       }),
     ).toBeVisible();
+    await expect(main.getByText(/Fields of Work|कार्य के आयाम/i)).toBeVisible();
+    await expect(
+      main.getByText(/Choose Your Path|अपना मार्ग चुनें/i),
+    ).toBeVisible();
   });
 });
