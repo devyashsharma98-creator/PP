@@ -12,7 +12,7 @@ async function loginAs(
   email: string,
   password: string,
 ) {
-  await page.goto("/login");
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[type="password"]').fill(password);
   await page.locator('button[type="submit"]').click();
@@ -202,5 +202,62 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
       'button[title="Sign Out"], button[title="लॉग आउट"]',
     );
     await expect(logoutBtn).toBeVisible({ timeout: 5_000 });
+  });
+  test("11 - login presents the institutional demo bridge", async ({ page }) => {
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+
+    const main = page.locator("main");
+
+    await expect(
+      main.getByRole("heading", { name: /Pragya Pravah/i }),
+    ).toBeVisible();
+    await expect(main.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
+    await expect(main.getByText(/civilisational thought/i)).toBeVisible();
+    await expect(main.getByText(/internal testing/i).first()).toBeVisible();
+  });
+
+  test("12 - dashboard leads with institutional context and operational summary", async ({
+    page,
+  }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await expect(page.getByText(/Bhopal Vibhag/i)).toBeVisible();
+    await expect(
+      page.getByText(/Activity Console|Institutional Overview/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Final Approvals Queue|Review Board|Gatividhi/i),
+    ).toBeVisible();
+  });
+
+  test("13 - homepage introduces Pragya Pravah and offers three clear entry paths", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const main = page.locator("main");
+
+    await expect(main.getByText(/Pragya Pravah/i).first()).toBeVisible();
+    await expect(
+      main.getByText(/civilisational|Bharatiya|intellectual forum/i).first(),
+    ).toBeVisible();
+    await expect(
+      main.getByRole("link", { name: /Understand the Vision|दृष्टि समझें/i }),
+    ).toBeVisible();
+    await expect(
+      main.getByRole("link", {
+        name: /Enter Demo Console|डेमो प्रणाली खोलें/i,
+      }),
+    ).toBeVisible();
+    await expect(
+      main.getByRole("link", {
+        name: /Connect with the Network|संवाद से जुड़ें/i,
+      }),
+    ).toBeVisible();
   });
 });
