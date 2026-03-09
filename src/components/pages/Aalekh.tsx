@@ -49,6 +49,64 @@ const valuesItems = [
 const emptyValues = { rashtraPratham: false, culturallyGrounded: false, balancedTone: false, noDivisiveContent: false };
 const emptyForm = { title: "", content: "", summary: "", category: "Shodh", socialUrl: "", documentUrl: "", valuesChecklist: emptyValues };
 
+type AalekhContextItem = {
+  labelEn: string;
+  labelHi: string;
+  valueEn: string;
+  valueHi?: string;
+  detailEn: string;
+  detailHi: string;
+};
+
+function AalekhMasthead({
+  t,
+  sealEn,
+  sealHi,
+  titleEn,
+  titleHi,
+  descriptionEn,
+  descriptionHi,
+  contexts,
+  action,
+}: {
+  t: (en: string, hi: string) => string;
+  sealEn: string;
+  sealHi: string;
+  titleEn: string;
+  titleHi: string;
+  descriptionEn: string;
+  descriptionHi: string;
+  contexts: AalekhContextItem[];
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="aalekh-masthead space-y-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-3">
+          <p className="section-seal">{t(sealEn, sealHi)}</p>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">{t(titleEn, titleHi)}</h1>
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              {t(descriptionEn, descriptionHi)}
+            </p>
+          </div>
+        </div>
+        {action ? <div className="lg:pb-1">{action}</div> : null}
+      </div>
+
+      <div className="aalekh-context-grid">
+        {contexts.map((context) => (
+          <div key={context.labelEn} className="aalekh-context-card">
+            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
+            <p className="aalekh-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
+            <p className="aalekh-context-detail">{t(context.detailEn, context.detailHi)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Article Card (expandable) ───────────────────────────────────────────────
 function ArticleCard({
   article,
@@ -62,9 +120,9 @@ function ArticleCard({
   const t = useT();
 
   return (
-    <Card className="glass-card overflow-hidden">
+    <Card className="aalekh-article-card overflow-hidden">
       <button className="w-full text-left" onClick={() => setOpen(o => !o)}>
-        <CardContent className="py-3.5 px-4 flex items-start gap-3">
+        <CardContent className="py-4 px-4 flex items-start gap-3">
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className={`text-[10px] border ${statusColors[article.status]}`}>
@@ -99,6 +157,7 @@ function ArticleCard({
                 </a>
               )}
             </p>
+            <p className="aalekh-article-summary">{article.summary}</p>
           </div>
           {open
             ? <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
@@ -115,7 +174,7 @@ function ArticleCard({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-border/50 px-4 py-4 bg-muted/20 space-y-3">
+            <div className="aalekh-article-detail-surface">
               {/* Reviewer feedback callout */}
               {article.status === "Draft" && article.latestReviewNotes && (
                 <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 flex items-start gap-2">
@@ -126,19 +185,23 @@ function ArticleCard({
                   </div>
                 </div>
               )}
+              <p className="shell-copy">{t("Article body", "आलेख पाठ")}</p>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{article.content}</p>
               {/* Values checklist display */}
-              <div className="flex flex-wrap gap-2">
-                {valuesItems.map(v => (
-                  <span
-                    key={v.key}
-                    className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-devanagari ${article.valuesChecklist[v.key] ? "border-green-500/40 text-green-700 dark:text-green-400 bg-green-500/10" : "border-red-500/40 text-red-600 bg-red-500/10"}`}
-                  >
-                    {article.valuesChecklist[v.key] ? "✓" : "✗"} {v.label}
-                  </span>
-                ))}
+              <div className="space-y-2">
+                <p className="shell-copy">{t("Editorial values", "संपादकीय मूल्य")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {valuesItems.map(v => (
+                    <span
+                      key={v.key}
+                      className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-devanagari ${article.valuesChecklist[v.key] ? "border-green-500/40 text-green-700 dark:text-green-400 bg-green-500/10" : "border-red-500/40 text-red-600 bg-red-500/10"}`}
+                    >
+                      {article.valuesChecklist[v.key] ? "✓" : "✗"} {v.label}
+                    </span>
+                  ))}
+                </div>
               </div>
-              {actions && <div className="pt-1">{actions}</div>}
+              {actions && <div className="border-t border-border/50 pt-3">{actions}</div>}
             </div>
           </motion.div>
         )}
@@ -238,12 +301,17 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
           </div>
 
           {/* Values Checklist */}
-          <div className="rounded-lg border border-border/60 p-3 space-y-2.5 bg-muted/30">
-            <p className="text-xs font-semibold text-foreground/80 font-devanagari">
-              {t('Organisational Values Compliance', 'संगठन मूल्य अनुपालन')} <span className="text-muted-foreground font-normal">({t('all required to submit', 'सभी अनिवार्य')})</span>
-            </p>
+          <div className="aalekh-values-panel">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-foreground/80 font-devanagari">
+                {t('Editorial Maryada Check', 'संपादकीय मर्यादा जांच')} <span className="text-muted-foreground font-normal">({t('all required to submit', 'सभी अनिवार्य')})</span>
+              </p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {t('Affirm the institutional values before this aalekh enters the review pipeline.', 'इस आलेख को समीक्षा पंक्ति में भेजने से पहले संस्थागत मूल्यों की पुष्टि करें।')}
+              </p>
+            </div>
             {valuesItems.map(v => (
-              <div key={v.key} className="flex items-start gap-2.5">
+              <div key={v.key} className="aalekh-values-item">
                 <Checkbox
                   id={v.key}
                   checked={form.valuesChecklist[v.key]}
@@ -420,13 +488,42 @@ export default function Aalekh() {
     const mine = articles.filter(a => a.author === "Current User");
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{t("My Articles", "मेरे आलेख")}</h1>
-            <p className="text-muted-foreground text-sm">{t("Write articles — submit for Unit Head review before publishing", "आलेख लिखें — प्रकाशन से पहले यूनिट प्रमुख की समीक्षा के लिए भेजें")}</p>
-          </div>
-          <WriteArticleDialog onSubmit={handleSubmit} />
-        </div>
+        <AalekhMasthead
+          t={t}
+          sealEn="Aalekh Writing Desk"
+          sealHi="आलेख लेखन कक्ष"
+          titleEn="Draft and Submit Aalekh"
+          titleHi="आलेख लिखें और समीक्षा हेतु भेजें"
+          descriptionEn="Shape your article with clarity, keep revision notes close, and submit each draft into the publication pipeline with confidence."
+          descriptionHi="अपने आलेख को स्पष्टता के साथ तैयार करें, संशोधन टिप्पणियों को साथ रखें, और प्रत्येक प्रारूप को प्रकाशन प्रक्रिया में विश्वास के साथ भेजें।"
+          action={<WriteArticleDialog onSubmit={handleSubmit} />}
+          contexts={[
+            {
+              labelEn: "Current lane",
+              labelHi: "वर्तमान चरण",
+              valueEn: "Writing and revision lane",
+              valueHi: "लेखन और संशोधन चरण",
+              detailEn: "Draft your aalekh, revise returned articles, and prepare them for unit review.",
+              detailHi: "अपना आलेख लिखें, लौटे हुए मसौदों को सुधारें, और उन्हें यूनिट समीक्षा के लिए तैयार करें।",
+            },
+            {
+              labelEn: "Next movement",
+              labelHi: "अगला प्रवाह",
+              valueEn: "Submit for Unit Head review",
+              valueHi: "यूनिट प्रमुख समीक्षा हेतु भेजें",
+              detailEn: "Every completed draft moves first through the unit editorial gate before publication.",
+              detailHi: "प्रकाशन से पहले हर पूरा मसौदा पहले यूनिट संपादकीय चरण से गुजरता है।",
+            },
+            {
+              labelEn: "Published intent",
+              labelHi: "प्रकाशन उद्देश्य",
+              valueEn: "Ideas shaped for institutional publication",
+              valueHi: "संस्थागत प्रकाशन हेतु तैयार विचार",
+              detailEn: "Strong writing here becomes reviewed, approved, and published aalekh for the wider feed.",
+              detailHi: "यहाँ की मजबूत लेखनी समीक्षा और अनुमोदन के बाद व्यापक फ़ीड में प्रकाशित आलेख बनती है।",
+            },
+          ]}
+        />
 
         {mine.length === 0 ? (
           <Card className="glass-card">
@@ -455,16 +552,50 @@ export default function Aalekh() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t("Aalekh Review", "आलेख समीक्षा")}</h1>
-          <p className="text-muted-foreground text-sm">{t("Review articles submitted by Karyakartas — edit if needed, then forward to Aayam Pramukh", "कार्यकर्ताओं के आलेखों की समीक्षा करें — जरूरत हो तो संपादित करें, फिर आयाम प्रमुख को भेजें")}</p>
-        </div>
+        <AalekhMasthead
+          t={t}
+          sealEn="First Editorial Review Desk"
+          sealHi="प्रथम संपादकीय समीक्षा कक्ष"
+          titleEn="Review and Route Aalekh"
+          titleHi="आलेख की समीक्षा करें और आगे बढ़ाएँ"
+          descriptionEn="This desk receives writer submissions first. Review each draft carefully, return what needs work, and forward the ready pieces into the aayam lane."
+          descriptionHi="यह कक्ष लेखक के मसौदे सबसे पहले प्राप्त करता है। प्रत्येक आलेख की सावधानी से समीक्षा करें, आवश्यक होने पर वापस भेजें, और तैयार सामग्री को आयाम चरण में अग्रेषित करें।"
+          contexts={[
+            {
+              labelEn: "Current lane",
+              labelHi: "वर्तमान चरण",
+              valueEn: "Pending first-review queue",
+              valueHi: "प्रथम समीक्षा प्रतीक्षारत पंक्ति",
+              detailEn: "Return with notes or forward to aayam once the draft is ready for thematic approval.",
+              detailHi: "जब मसौदा तैयार हो जाए तो टिप्पणियों सहित वापस भेजें या आयाम चरण में अग्रेषित करें।",
+            },
+            {
+              labelEn: "Editorial responsibility",
+              labelHi: "संपादकीय दायित्व",
+              valueEn: "Strengthen clarity before escalation",
+              valueHi: "अगले चरण से पहले स्पष्टता सुदृढ़ करें",
+              detailEn: "This is the quality gate between initial writing and final publication review.",
+              detailHi: "यह प्रारंभिक लेखन और अंतिम प्रकाशन समीक्षा के बीच की गुणवत्ता-परीक्षा है।",
+            },
+            {
+              labelEn: "Next movement",
+              labelHi: "अगला प्रवाह",
+              valueEn: "Forward to Aayam Pramukh",
+              valueHi: "आयाम प्रमुख को भेजें",
+              detailEn: "Approved drafts move onward for thematic scrutiny and publication approval.",
+              detailHi: "स्वीकृत मसौदे आगे विषयगत समीक्षा और प्रकाशन अनुमोदन के लिए जाते हैं।",
+            },
+          ]}
+        />
 
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="w-4 h-4 text-amber-500" /> {t(`Pending Your Review (${queue.length})`, `आपकी समीक्षा प्रतीक्षित (${queue.length})`)}
+              <Clock className="w-4 h-4 text-amber-500" /> {t(`Pending First-Review Queue (${queue.length})`, `प्रथम समीक्षा प्रतीक्षारत (${queue.length})`)}
             </CardTitle>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {t("Return with notes or forward to aayam", "टिप्पणियों सहित वापस भेजें या आयाम को अग्रेषित करें")}
+            </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
@@ -531,10 +662,41 @@ export default function Aalekh() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold font-devanagari">{t('Final Aalekh Approval', 'अंतिम आलेख अनुमोदन')}</h1>
-          <p className="text-muted-foreground text-sm">{t('Review forwarded articles — approve to publish in the feed', 'अग्रेषित आलेखों की समीक्षा करें — फ़ीड में प्रकाशित करने के लिए अनुमोदित करें')}</p>
-        </div>
+        <AalekhMasthead
+          t={t}
+          sealEn="Aalekh Publication Desk"
+          sealHi="आलेख प्रकाशन कक्ष"
+          titleEn="Approve and Publish Aalekh"
+          titleHi="आलेख अनुमोदित करें और प्रकाशित करें"
+          descriptionEn="This publication desk receives reviewed drafts, makes the final editorial call, and moves approved pieces into the institutional archive and feed."
+          descriptionHi="यह प्रकाशन कक्ष समीक्षित मसौदे प्राप्त करता है, अंतिम संपादकीय निर्णय लेता है, और स्वीकृत सामग्री को संस्थागत अभिलेख तथा फ़ीड में प्रकाशित करता है।"
+          contexts={[
+            {
+              labelEn: "Current lane",
+              labelHi: "वर्तमान चरण",
+              valueEn: "Final approval and publication lane",
+              valueHi: "अंतिम अनुमोदन और प्रकाशन चरण",
+              detailEn: "Review forwarded aalekh, approve the ready ones, and return the rest with clear notes.",
+              detailHi: "अग्रेषित आलेखों की समीक्षा करें, तैयार सामग्री को अनुमोदित करें, और शेष को स्पष्ट टिप्पणियों सहित वापस भेजें।",
+            },
+            {
+              labelEn: "Published record",
+              labelHi: "प्रकाशित अभिलेख",
+              valueEn: "Institutional archive in motion",
+              valueHi: "गतिशील संस्थागत अभिलेख",
+              detailEn: "Every published aalekh becomes part of the visible intellectual record of the organisation.",
+              detailHi: "प्रत्येक प्रकाशित आलेख संगठन के दृश्य बौद्धिक अभिलेख का हिस्सा बनता है।",
+            },
+            {
+              labelEn: "Editorial standard",
+              labelHi: "संपादकीय मानक",
+              valueEn: "Final thematic scrutiny",
+              valueHi: "अंतिम विषयगत समीक्षा",
+              detailEn: "Use this desk to preserve tone, clarity, and mission alignment before publication.",
+              detailHi: "प्रकाशन से पहले स्वर, स्पष्टता और मिशन-संगति बनाए रखने के लिए इस कक्ष का उपयोग करें।",
+            },
+          ]}
+        />
 
         {lastPublished && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
@@ -562,7 +724,7 @@ export default function Aalekh() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="w-4 h-4 text-blue-500" /> {t(`Awaiting Final Approval (${queue.length})`, `अंतिम अनुमोदन प्रतीक्षित (${queue.length})`)}
+              <Clock className="w-4 h-4 text-blue-500" /> {t(`Final Approval Queue (${queue.length})`, `अंतिम अनुमोदन पंक्ति (${queue.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -618,8 +780,11 @@ export default function Aalekh() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published (${published.length})`, `प्रकाशित (${published.length})`)}
+                <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published Aalekh Archive (${published.length})`, `प्रकाशित आलेख अभिलेख (${published.length})`)}
               </CardTitle>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {t("Institutional publication record and approved aalekh archive.", "संस्थागत प्रकाशन अभिलेख और अनुमोदित आलेख संग्रह।")}
+              </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {published.map((a, i) => (
