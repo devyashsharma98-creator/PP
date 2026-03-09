@@ -176,6 +176,52 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.locator("body")).toContainText(/prachar|प्रचार/i);
   });
 
+  test("8b - prachar presents the command center masthead", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/prachar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Prachar Command Center/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Distribute and Confirm Reach/i })).toBeVisible();
+    await expect(page.getByText(/approved work now moves into organised public circulation/i)).toBeVisible();
+  });
+
+  test("8c - prachar shows campaign distribution accountability", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/prachar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Live Distribution Command Center/i)).toBeVisible();
+    await expect(page.getByText(/Campaign Dissemination Queue/i)).toBeVisible();
+    await expect(page.getByText(/platform accountability across published events/i)).toBeVisible();
+  });
+
+  test("8d - prachar exposes the creative studio", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/prachar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Campaign Creative Studio/i)).toBeVisible();
+    await expect(page.getByText(/Communication kits, posters, and publicity formats/i)).toBeVisible();
+  });
   test("9 — authenticated user can access aalekh", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 

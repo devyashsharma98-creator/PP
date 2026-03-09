@@ -607,6 +607,81 @@
     @apply flex items-start gap-2.5 rounded-xl border border-border/50 bg-background/70 px-3 py-2;
   }
 
+  .prachar-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(35 50% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.16), transparent 36%);
+  }
+
+  .prachar-authority-card {
+    @apply institution-panel-muted max-w-sm px-4 py-3;
+  }
+
+  .prachar-authority-title {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .prachar-authority-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .prachar-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .prachar-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .prachar-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .prachar-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .prachar-command-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .prachar-command-card {
+    @apply institution-panel-muted px-4 py-4;
+  }
+
+  .prachar-command-value {
+    @apply mt-2 text-lg font-semibold tracking-tight text-foreground;
+  }
+
+  .prachar-command-detail {
+    @apply mt-2 text-sm leading-6 text-muted-foreground;
+  }
+
+  .prachar-campaign-card {
+    @apply institution-panel-muted border-border/70 bg-background/85;
+  }
+
+  .prachar-progress-strip {
+    @apply grid gap-2 sm:grid-cols-3 lg:min-w-[17rem];
+  }
+
+  .prachar-progress-chip {
+    @apply rounded-2xl border border-border/60 bg-background/80 px-3 py-2;
+  }
+
+  .prachar-progress-value {
+    @apply mt-1 text-sm font-semibold text-foreground;
+  }
+
+  .prachar-platform-card {
+    @apply flex flex-col gap-2 rounded-xl border p-3 transition-all;
+  }
+
+  .prachar-studio-card {
+    @apply institution-panel overflow-hidden border-border/70 bg-background/85;
+  }
+
   .home-hero-bg {
     background:
       radial-gradient(circle at 12% 18%, hsl(var(--primary) / 0.18), transparent 28%),
