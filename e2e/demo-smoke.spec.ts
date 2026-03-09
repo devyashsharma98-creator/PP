@@ -3,6 +3,9 @@ import { test, expect } from "@playwright/test";
 const DEMO_EMAIL = "demo.vibhag@example.com";
 const DEMO_PASSWORD = "Password123!";
 const ADMIN_EMAIL = "demo.admin@example.com";
+const AAYAM_EMAIL = "demo.aayam@example.com";
+const UNITHEAD_EMAIL = "demo.unithead@example.com";
+const KARYAKARTA_EMAIL = "demo.karyakarta@example.com";
 
 /**
  * Helper: login via the /login page.
@@ -189,6 +192,56 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.locator("body")).toContainText(/aalekh|आलेख/i);
   });
 
+  test("9b - aalekh presents the karyakarta writing lane", async ({ page }) => {
+    await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/aalekh");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Aalekh Writing Desk/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Draft and Submit Aalekh/i })).toBeVisible();
+    await expect(page.getByText(/Writing and revision lane/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Write New Article/i })).toBeVisible();
+  });
+
+  test("9c - aalekh presents the unit-head review lane", async ({ page }) => {
+    await loginAs(page, UNITHEAD_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/aalekh");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/First Editorial Review Desk/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Review and Route Aalekh/i })).toBeVisible();
+    await expect(page.getByText(/Pending first-review queue/i)).toBeVisible();
+    await expect(page.getByText(/Return with notes or forward to aayam/i)).toBeVisible();
+  });
+
+  test("9d - aalekh presents the aayam publication lane", async ({ page }) => {
+    await loginAs(page, AAYAM_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/aalekh");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Aalekh Publication Desk/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Approve and Publish Aalekh/i })).toBeVisible();
+    await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
+    await expect(page.getByText(/Published Aalekh Archive/i)).toBeVisible();
+  });
   test("10 — logout button visible when authenticated", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
@@ -309,3 +362,4 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     }
   });
 });
+
