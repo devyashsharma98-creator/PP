@@ -14,7 +14,6 @@ const DEMO_ACCOUNTS = [
   { label: "Aayam Pramukh", email: "demo.aayam@example.com" },
   { label: "Unit Head", email: "demo.unithead@example.com" },
   { label: "Karyakarta", email: "demo.karyakarta@example.com" },
-  { label: "Super Admin", email: "demo.admin@example.com" },
 ];
 
 function LoginForm() {

@@ -174,7 +174,7 @@ const roleLabels: Record<Role, string> = {
   unit_head: 'Unit Head',
   aayam_pramukh: 'Aayam Pramukh',
   vibhag_pramukh: 'Vibhag Pramukh',
-  karyakarta: 'Karyakarta (Writer)',
+  karyakarta: 'Karyakarta',
 };
 
 export { roleLabels };

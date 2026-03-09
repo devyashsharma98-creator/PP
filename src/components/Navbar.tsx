@@ -115,7 +115,7 @@ function getShellFrame(pathname: string, role: Role) {
 }
 
 export function Navbar() {
-  const { role, setRole, viewer, lang, setLang, events, articles, isAuthenticated } = useAppContext();
+  const { role, setRole, lang, setLang, events, articles, isAuthenticated } = useAppContext();
   const pathname = usePathname();
   const router = useRouter();
   const t = useT();
@@ -127,29 +127,6 @@ export function Navbar() {
   const prevCountRef = useRef(0);
   const notifRef = useRef<HTMLDivElement>(null);
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
-  const primaryRoleCode = viewer?.primaryRoleCode;
-  const canonicalRoleLabels: Record<string, string> = {
-    super_admin: 'Super Admin',
-    org_admin: 'Org Admin',
-    karyakarta: 'Karyakarta (Writer)',
-    unit_head: 'Unit Head',
-    aayam_pramukh: 'Aayam Pramukh',
-    vibhag_pramukh: 'Vibhag Pramukh',
-    prant_sanyojak: 'Prant Sanyojak',
-    prant_aayam_pramukh: 'Prant Aayam Pramukh',
-    kshetra_reviewer: 'Kshetra Reviewer',
-  };
-  const canonicalRoleLabelsHi: Record<string, string> = {
-    super_admin: 'सुपर एडमिन',
-    org_admin: 'संगठन एडमिन',
-    karyakarta: 'कार्यकर्ता',
-    unit_head: 'यूनिट प्रमुख',
-    aayam_pramukh: 'आयाम प्रमुख',
-    vibhag_pramukh: 'विभाग प्रमुख',
-    prant_sanyojak: 'प्रांत संयोजक',
-    prant_aayam_pramukh: 'प्रांत आयाम प्रमुख',
-    kshetra_reviewer: 'क्षेत्र समीक्षक',
-  };
   const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
 
   // Hydration guard for theme
@@ -433,11 +410,7 @@ export function Navbar() {
               </Select>
             ) : (
               <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
-                {primaryRoleCode
-                  ? (lang === 'hi'
-                      ? (canonicalRoleLabelsHi[primaryRoleCode] ?? roleLabelsHi[role])
-                      : (canonicalRoleLabels[primaryRoleCode] ?? roleLabels[role]))
-                  : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role])}
+                {lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]}
               </span>
             )}
           </div>

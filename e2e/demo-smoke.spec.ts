@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const DEMO_EMAIL = "demo.vibhag@example.com";
 const DEMO_PASSWORD = "Password123!";
+const ADMIN_EMAIL = "demo.admin@example.com";
 
 /**
  * Helper: login via the /login page.
@@ -54,7 +55,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByRole("button", { name: "Karyakarta" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Unit Head" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Aayam Pramukh" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Super Admin" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Super Admin" })).toHaveCount(0);
   });
 
   test("2 — demo account pill fills email and password", async ({ page }) => {
@@ -235,6 +236,19 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
     await expect(page.getByText(/Final Approvals Queue/i)).toBeVisible();
     await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
+  });
+
+  test("12b - admin account collapses to vibhag-pramukh UI", async ({ page }) => {
+    await loginAs(page, ADMIN_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await expect(page.getByText(/Super Admin|Org Admin/i)).toHaveCount(0);
+    await expect(page.getByText(/Vibhag Pramukh|à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–/i)).toBeVisible();
+    await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
   });
 
   test("13 - homepage introduces Pragya Pravah and offers three clear entry paths", async ({
