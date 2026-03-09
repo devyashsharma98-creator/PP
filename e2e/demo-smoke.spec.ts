@@ -223,7 +223,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/First Editorial Review Desk/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Review and Route Aalekh/i })).toBeVisible();
     await expect(page.getByText(/Pending first-review queue/i).first()).toBeVisible();
-    await expect(page.getByText(/Return with notes or forward to aayam/i)).toBeVisible();
+    await expect(page.getByText(/Return with notes or forward to aayam/i).first()).toBeVisible();
   });
 
   test("9d - aalekh presents the aayam publication lane", async ({ page }) => {
