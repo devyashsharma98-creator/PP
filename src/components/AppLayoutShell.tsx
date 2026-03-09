@@ -5,12 +5,15 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { Navbar } from "@/components/Navbar";
 import { PageTransition } from "@/components/PageTransition";
+import { Skeleton } from "@/components/Skeletons";
+import { useAppContext } from "@/context/AppContext";
 
 const FULL_BLEED_PUBLIC_PATHS = new Set(["/", "/login"]);
 const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/directory", "/vimarsh"]);
 
 export function AppLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { authReady } = useAppContext();
   const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
   const isPaddedPublicRoute = PADDED_PUBLIC_PATHS.has(pathname);
 
@@ -30,6 +33,29 @@ export function AppLayoutShell({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </PageTransition>
+      </main>
+    );
+  }
+
+  if (!authReady) {
+    return (
+      <main className="app-main-shell min-h-screen overflow-y-auto px-4 pb-20 pt-5 md:px-6 md:pb-6 md:pt-6">
+        <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center">
+          <div className="institution-panel w-full max-w-3xl space-y-6 px-6 py-8 md:px-8">
+            <div className="space-y-2">
+              <p className="section-seal">Internal institutional console</p>
+              <h1 className="text-2xl font-semibold tracking-tight">Loading dashboard context...</h1>
+              <p className="text-sm text-muted-foreground">
+                Securing access and preparing the correct dayitva lane.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Skeleton className="h-28 rounded-2xl" />
+              <Skeleton className="h-28 rounded-2xl" />
+              <Skeleton className="h-28 rounded-2xl" />
+            </div>
+          </div>
+        </div>
       </main>
     );
   }

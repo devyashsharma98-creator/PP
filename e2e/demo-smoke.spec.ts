@@ -246,6 +246,8 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
       return;
     }
 
+    const headerText = await page.locator("header").textContent();
+    expect(headerText ?? "").not.toMatch(/Karyakarta/i);
     await expect(page.getByText(/Super Admin|Org Admin/i)).toHaveCount(0);
     await expect(page.getByText(/Vibhag Pramukh|à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–/i)).toBeVisible();
     await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
