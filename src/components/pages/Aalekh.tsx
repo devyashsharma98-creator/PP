@@ -776,25 +776,29 @@ export default function Aalekh() {
           </CardContent>
         </Card>
 
-        {published.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published Aalekh Archive (${published.length})`, `प्रकाशित आलेख अभिलेख (${published.length})`)}
-              </CardTitle>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {t("Institutional publication record and approved aalekh archive.", "संस्थागत प्रकाशन अभिलेख और अनुमोदित आलेख संग्रह।")}
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published Aalekh Archive (${published.length})`, `प्रकाशित आलेख अभिलेख (${published.length})`)}
+            </CardTitle>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {t("Institutional publication record and approved aalekh archive.", "संस्थागत प्रकाशन अभिलेख और अनुमोदित आलेख संग्रह।")}
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {published.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-4 text-center">
+                {t("No aalekh published yet. Approved work will appear here.", "अभी कोई आलेख प्रकाशित नहीं है। अनुमोदित सामग्री यहाँ दिखाई देगी।")}
               </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {published.map((a, i) => (
+            ) : (
+              published.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
                   <ArticleCard article={a} />
                 </motion.div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+              ))
+            )}
+          </CardContent>
+        </Card>
       </motion.div>
     );
   }
