@@ -102,7 +102,7 @@ Aalekh should mainly behave as a three-lane publication workflow inside the wide
 ### Karyakarta
 - sees personal drafts and returned items
 - can write a new Aalekh
-- primary action: `Submit for Review / ??????? ???? ?????`
+- primary action: `Submit for Review`
 - role feeling: writer-contributor
 
 ### Unit Head
