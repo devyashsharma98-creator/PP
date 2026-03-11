@@ -65,21 +65,27 @@ function SectionHeading({
   align = "left",
 }: SectionHeadingProps) {
   return (
-    <div className={cn("space-y-3", align === "center" && "text-center") }>
+    <div className={cn("max-w-4xl space-y-4", align === "center" && "mx-auto text-center")}>
       <p className="home-editorial-eyebrow">
         <span>{eyebrowEn}</span>
         <span className="font-devanagari tracking-[0.12em]">{eyebrowHi}</span>
       </p>
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{titleEn}</h2>
-        <p className="font-devanagari text-lg text-foreground/78">{titleHi}</p>
+      <div className="space-y-3">
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl lg:leading-[1.1]">
+          {titleEn}
+        </h2>
+        <p className="font-devanagari text-xl font-medium text-foreground/90">
+          {titleHi}
+        </p>
       </div>
-      <p className={cn("max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base", align === "center" && "mx-auto") }>
-        {bodyEn}
-      </p>
-      <p className={cn("max-w-3xl font-devanagari text-sm leading-7 text-foreground/72 sm:text-base", align === "center" && "mx-auto") }>
-        {bodyHi}
-      </p>
+      <div className="grid gap-6 sm:grid-cols-[1fr_1fr] lg:gap-12">
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {bodyEn}
+        </p>
+        <p className="font-devanagari text-sm leading-relaxed text-foreground/80 sm:text-base">
+          {bodyHi}
+        </p>
+      </div>
     </div>
   );
 }
@@ -242,84 +248,79 @@ export default function LandingPage() {
 
   return (
     <div className="bg-background text-foreground">
-      <section className="home-hero-bg overflow-hidden border-b border-border/50">
-        <div className="home-section-shell pt-10 sm:pt-14">
-          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+      <section className="home-hero-bg overflow-hidden border-b border-border/40">
+        <div className="home-section-shell py-16 sm:py-24">
+          <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-6"
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-8"
             >
               <p className="home-editorial-eyebrow">
                 <span>Pragya Pravah</span>
                 <span className="font-devanagari tracking-[0.12em]">प्रज्ञा प्रवाह</span>
               </p>
-              <div className="space-y-4">
-                <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                  A Bharatiya intellectual forum for civilisational thought and organised action.
+              <div className="space-y-5">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl lg:leading-[1.05]">
+                  Civilisational thought.<br />
+                  <span className="text-primary">Organised action.</span>
                 </h1>
-                <p className="max-w-2xl font-devanagari text-lg text-foreground/78 sm:text-xl">
+                <p className="max-w-2xl font-devanagari text-xl font-medium text-foreground/90 sm:text-2xl">
                   भारत-केंद्रित चिंतन, संवाद और संगठित कार्य का समकालीन संस्थागत मंच।
                 </p>
-                <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                  Pragya Pravah works where public ideas, cultural continuity, discourse, research,
-                  publication, and organisational discipline meet.
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  A Bharatiya intellectual forum that converts philosophical reflection into disciplined 
+                  review, research, publication, and coordinated public outreach.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-full px-6">
+              <div className="flex flex-wrap gap-4">
+                <Button asChild size="lg" className="h-14 rounded-full px-8 text-base shadow-lg shadow-primary/20">
                   <Link href="/parichay">
-                    Understand the Vision / दृष्टि समझें
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {isHi ? "दृष्टि समझें" : "Understand the Vision"}
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
+                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-base bg-background/50 backdrop-blur-sm">
                   <Link href="/login">
-                    Enter Demo Console / डेमो प्रणाली खोलें
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="ghost" className="rounded-full px-6">
-                  <Link href="/directory">
-                    Connect with the Network / संवाद से जुड़ें
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-              className="home-hero-panel relative overflow-hidden"
+              transition={{ delay: 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="home-hero-panel relative border border-primary/20 bg-card/40 backdrop-blur-md"
             >
-              <div className="absolute -right-12 -top-10 text-primary/18">
-                <Mandala className="h-48 w-48 animate-spin-slow" />
+              <div className="absolute -right-16 -top-16 text-primary/15">
+                <Mandala className="h-64 w-64 animate-spin-slow" />
               </div>
-              <div className="relative space-y-5">
-                <p className="section-seal">Civilisational clarity for the present</p>
-                <div className="space-y-3">
-                  <h2 className="text-2xl font-semibold tracking-tight">Why this work matters now</h2>
-                  <p className="font-devanagari text-base text-foreground/76">
-                    भारतीय विचार को समकालीन समाज, सार्वजनिक विमर्श और संगठित कार्य से जोड़ना ही इसकी आवश्यकता है। 
+              <div className="relative space-y-6">
+                <p className="section-seal">Civilisational depth</p>
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-semibold tracking-tight">The imperative for clarity</h2>
+                  <p className="font-devanagari text-lg text-foreground/80 leading-relaxed">
+                    भारतीय विचार को समकालीन समाज और संगठित कार्य से जोड़ना ही वर्तमान आवश्यकता है। 
                   </p>
-                  <p className="text-sm leading-7 text-muted-foreground">
-                    The task is not only to preserve memory, but to articulate Bharatiya categories in present
-                    intellectual life with seriousness, discipline, and public relevance.
+                  <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    The task is not nostalgia. It is to articulate Bharatiya categories in contemporary 
+                    intellectual life with institutional rigour and public relevance.
                   </p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="home-insight-card">
+                <div className="grid gap-4 sm:grid-cols-2 pt-2">
+                  <div className="rounded-2xl border border-border/60 bg-background/60 p-5 transition-colors hover:border-primary/30">
                     <p className="shell-copy">Identity</p>
-                    <p className="mt-2 text-sm font-semibold">Civilisational confidence</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Ideas anchored in Bharat's own categories and continuity.</p>
+                    <p className="mt-2 text-base font-semibold">Civilisational confidence</p>
+                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">Ideas anchored in Bharat's own categories and continuity.</p>
                   </div>
-                  <div className="home-insight-card">
+                  <div className="rounded-2xl border border-border/60 bg-background/60 p-5 transition-colors hover:border-primary/30">
                     <p className="shell-copy">Method</p>
-                    <p className="mt-2 text-sm font-semibold">Discourse into institutions</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Review, publication, outreach, and organised follow-through.</p>
+                    <p className="mt-2 text-base font-semibold">Discourse into action</p>
+                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">Review, publication, and disciplined institutional follow-through.</p>
                   </div>
                 </div>
               </div>
@@ -332,35 +333,30 @@ export default function LandingPage() {
         <SectionHeading
           eyebrowEn="Institutional Framing"
           eyebrowHi="संस्थागत परिचय"
-          titleEn="A public-facing intellectual forum with organised depth"
-          titleHi="एक वैचारिक मंच, जो संगठनात्मक गहराई के साथ कार्य करता है"
-          bodyEn="Pragya Pravah is not only a cultural idea-space. It is an intellectual forum that develops discourse, nurtures research, and carries thought into coordinated public action."
+          titleEn="A forum with organised depth"
+          titleHi="वैचारिक मंच, जो संगठनात्मक गहराई के साथ कार्य करता है"
+          bodyEn="Pragya Pravah sits between civilisational reflection and coordinated action. We develop discourse, nurture research, and translate thought into institutional form."
           bodyHi="प्रज्ञा प्रवाह केवल सांस्कृतिक भावभूमि नहीं है। यह ऐसा बौद्धिक मंच है जो विमर्श गढ़ता है, शोध को पोषित करता है और विचार को संगठित सार्वजनिक कार्य तक ले जाता है।"
-          align="center"
         />
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
+        <div className="mt-16 grid gap-6 lg:grid-cols-12 lg:items-stretch">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="home-band-card space-y-5"
+            transition={{ duration: 0.6 }}
+            className="home-band-card lg:col-span-5 flex flex-col justify-center space-y-6"
           >
-            <p className="section-seal">Public institution, not a generic platform</p>
-            <div className="space-y-3">
-              <h3 className="text-2xl font-semibold tracking-tight">
-                Thought has to take institutional form if it is to shape society.
+            <p className="section-seal">Institutional form</p>
+            <div className="space-y-4">
+              <h3 className="text-3xl font-bold tracking-tight leading-tight">
+                Thought must take form to shape society.
               </h3>
-              <p className="font-devanagari text-base leading-7 text-foreground/76">
+              <p className="font-devanagari text-lg leading-relaxed text-foreground/80">
                 यदि विचार समाज को दिशा देना चाहते हैं, तो उन्हें संस्था, अनुशासन और कार्यप्रवाह का रूप लेना होगा।
               </p>
             </div>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Pragya Pravah sits between civilisational reflection and organised follow-through.
-              That is why the visual language must feel both rooted and operational.
-            </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               <span className="home-band-pill">Discourse</span>
               <span className="home-band-pill">Research</span>
               <span className="home-band-pill">Publication</span>
@@ -368,281 +364,204 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="lg:col-span-7 grid gap-4 sm:grid-cols-2">
             {institutionCards.map((card, index) => (
               <motion.div
                 key={card.titleEn}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.4 }}
-                className="home-insight-card"
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                className="group rounded-3xl border border-border/60 bg-card/30 p-6 transition-all hover:border-primary/40 hover:bg-card/50"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <card.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold">{card.titleEn}</h3>
-                    <p className="font-devanagari text-sm text-foreground/72">{card.titleHi}</p>
-                  </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                  <card.icon className="h-6 w-6" />
                 </div>
-                <p className="mt-4 text-sm leading-7 text-muted-foreground">{card.bodyEn}</p>
-                <p className="mt-2 font-devanagari text-sm leading-7 text-foreground/72">{card.bodyHi}</p>
+                <div className="mt-5 space-y-1">
+                  <h3 className="text-lg font-bold">{card.titleEn}</h3>
+                  <p className="font-devanagari text-sm font-medium text-foreground/80">{card.titleHi}</p>
+                </div>
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm leading-relaxed text-muted-foreground">{card.bodyEn}</p>
+                  <p className="font-devanagari text-sm leading-relaxed text-foreground/70">{card.bodyHi}</p>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-y border-border/50 bg-card/50">
+      <section className="pravah-lattice-bg border-y border-border/40 bg-muted/20">
         <div className="home-section-shell">
           <SectionHeading
             eyebrowEn="Fields of Work"
             eyebrowHi="कार्य के आयाम"
-            titleEn="The organisation's work moves across discourse, research, outreach, and formation"
-            titleHi="संस्था का कार्य विमर्श, शोध, प्रचार और निर्माण के आयामों में चलता है"
-            bodyEn="Each aayam is not just a title. It is an active field of thought, coordination, and institutional work."
+            titleEn="Disciplined workstreams"
+            titleHi="संस्था का कार्य विमर्श, शोध और प्रसार के आयामों में चलता है"
+            bodyEn="Each aayam represents an active field of coordination, moving vision into different forms of organised public presence."
             bodyHi="प्रत्येक आयाम केवल नाम नहीं है, बल्कि विचार, समन्वय और संस्थागत कार्य का सक्रिय क्षेत्र है।"
           />
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[0.34fr_0.66fr]">
-            <motion.aside
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-              className="home-band-card space-y-5 lg:sticky lg:top-24"
-            >
-              <p className="section-seal">From idea to field activity</p>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-semibold tracking-tight">
-                  Each workstream converts vision into a different form of organised public work.
-                </h3>
-                <p className="font-devanagari text-base leading-7 text-foreground/76">
-                  प्रत्येक आयाम दृष्टि को अलग-अलग प्रकार के सार्वजनिक और संस्थागत कार्य में बदलता है।
-                </p>
-              </div>
-              <div className="space-y-2 text-sm leading-7 text-muted-foreground">
-                <p>Vimarsh frames questions.</p>
-                <p>Shodh builds references.</p>
-                <p>Prachar extends social reach.</p>
-                <p>Yuva develops the next line of organisers and thinkers.</p>
-              </div>
-            </motion.aside>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              {workstreams.map((stream, index) => (
-                <motion.div
-                  key={stream.titleEn}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08, duration: 0.45 }}
-                  className="home-work-grid-card"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <stream.icon className="h-5 w-5" />
+          <div className="mt-16 space-y-8">
+            {workstreams.map((stream, index) => (
+              <motion.div
+                key={stream.titleEn}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/80 p-8 shadow-sm transition-all hover:border-primary/40 lg:p-12"
+              >
+                <div className="grid gap-8 lg:grid-cols-[1fr_2fr_1fr] lg:items-center">
+                  <div className="flex items-center gap-6">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <stream.icon className="h-8 w-8" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">{stream.titleEn}</h3>
-                      <p className="font-devanagari text-sm text-foreground/72">{stream.titleHi}</p>
+                      <h3 className="text-2xl font-bold tracking-tight">{stream.titleEn}</h3>
+                      <p className="font-devanagari text-lg text-foreground/80">{stream.titleHi}</p>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm leading-7 text-muted-foreground">{stream.bodyEn}</p>
-                  <p className="mt-2 font-devanagari text-sm leading-7 text-foreground/72">{stream.bodyHi}</p>
-                  <div className="mt-5">
-                    <Button asChild variant="outline" className="rounded-full">
+                  <div className="grid gap-4 sm:grid-cols-2 border-l border-border/40 pl-8">
+                    <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                      {stream.bodyEn}
+                    </p>
+                    <p className="font-devanagari text-sm leading-relaxed text-foreground/70 sm:text-base">
+                      {stream.bodyHi}
+                    </p>
+                  </div>
+                  <div className="flex justify-start lg:justify-end">
+                    <Button asChild variant="outline" className="h-12 rounded-full px-6 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all">
                       <Link href={stream.href}>
-                        {stream.ctaEn} / {stream.ctaHi}
+                        {isHi ? stream.ctaHi : stream.ctaEn}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section-shell overflow-hidden">
+        <div className="grid gap-12 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+          <div className="space-y-12">
+            <SectionHeading
+              eyebrowEn="Operational Vision"
+              eyebrowHi="कार्य से प्रणाली तक"
+              titleEn="The flow of mission"
+              titleHi="प्रज्ञा प्रवाह का संगठित कार्य-रूप"
+              bodyEn="Our institutional workflows convert philosophical vision into daily operations across review, publication, and coordination."
+              bodyHi="डेमो प्रणाली और ईआरपी यह दिखाते हैं कि विमर्श, समीक्षा, प्रकाशन और प्रचार किस प्रकार वास्तविक संस्थागत कार्यप्रवाह में चलते हैं।"
+            />
+
+            <div className="relative space-y-4">
+              <div className="absolute left-[2.25rem] top-8 bottom-8 w-[2px] bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+              {operationsSteps.map((step, index) => (
+                <motion.div
+                  key={step.step}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="relative flex gap-8 pl-1 pb-8 last:pb-0"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary z-10 font-bold border border-primary/20">
+                    {step.step}
+                  </div>
+                  <div className="space-y-4 pt-1">
+                    <div className="space-y-1">
+                      <h4 className="text-xl font-bold">{step.titleEn}</h4>
+                      <p className="font-devanagari text-base font-medium text-foreground/80">{step.titleHi}</p>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <p className="text-sm leading-relaxed text-muted-foreground">{step.bodyEn}</p>
+                      <p className="font-devanagari text-sm leading-relaxed text-foreground/70">{step.bodyHi}</p>
+                    </div>
                   </div>
                 </motion.div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="home-section-shell">
-        <SectionHeading
-          eyebrowEn="Why This Work Matters"
-          eyebrowHi="यह कार्य अभी क्यों"
-          titleEn="Civilisational thought must speak in contemporary terms"
-          titleHi="सभ्यतागत विचार को वर्तमान भाषा और संस्थागत रूप में सामने आना होगा"
-          bodyEn="The challenge is not only preservation. It is to make Bharatiya thought visible, intelligible, and effective in present public life."
-          bodyHi="चुनौती केवल संरक्षण की नहीं है। भारतीय विचार को समकालीन सार्वजनिक जीवन में स्पष्ट, बोधगम्य और प्रभावी रूप में उपस्थित करना आवश्यक है।"
-          align="center"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45 }}
-          className="home-band-card mt-10"
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="section-seal">Civilisational relevance in present tense</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight">
-                The question is not memory alone. It is intellectual presence, public confidence, and institutional continuity.
-              </h3>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="home-hero-panel relative border border-primary/20"
+          >
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+              <Mandala className="h-[120%] w-[120%] text-primary/10 animate-spin-slow-reverse" />
             </div>
-            <div className="home-sequence-strip">Review • Publish • Prachar • Coordinate</div>
-          </div>
-        </motion.div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {urgencyPoints.map((point, index) => (
-            <motion.div
-              key={point.titleEn}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08, duration: 0.45 }}
-              className="home-insight-card"
-            >
-              <h3 className="text-base font-semibold">{point.titleEn}</h3>
-              <p className="mt-1 font-devanagari text-sm text-foreground/74">{point.titleHi}</p>
-              <p className="mt-4 text-sm leading-7 text-muted-foreground">{point.bodyEn}</p>
-              <p className="mt-2 font-devanagari text-sm leading-7 text-foreground/72">{point.bodyHi}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-border/50 bg-card/50">
-        <div className="home-section-shell">
-          <SectionHeading
-            eyebrowEn="Choose Your Path"
-            eyebrowHi="अपना मार्ग चुनें"
-            titleEn="Different visitors need different entry points"
-            titleHi="हर आगंतुक के लिए प्रवेश का मार्ग अलग हो सकता है"
-            bodyEn="The homepage should guide a visitor, a thinker, and an organiser without forcing them into the same reading path."
-            bodyHi="यह पृष्ठ प्रथम आगंतुक, चिंतक और आयोजक—तीनों को एक ही ढाँचे में नहीं बाँधता, बल्कि उनके लिए अलग प्रवेश-पथ देता है।"
-          />
-
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {audiencePaths.map((path, index) => (
-              <motion.div
-                key={path.titleEn}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.45 }}
-                className="home-path-card"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <path.icon className="h-5 w-5" />
-                  </div>
-                  <span className="home-path-index">{`0${index + 1}`}</span>
-                </div>
-                <div className="mt-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">{path.titleEn}</h3>
-                    <p className="font-devanagari text-sm text-foreground/72">{path.titleHi}</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-7 text-muted-foreground">{path.bodyEn}</p>
-                <p className="mt-2 font-devanagari text-sm leading-7 text-foreground/72">{path.bodyHi}</p>
-                <div className="mt-5">
-                  <Button asChild className="rounded-full">
-                    <Link href={path.href}>
-                      {path.ctaEn} / {path.ctaHi}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+            <div className="relative space-y-8">
+              <div className="rounded-3xl bg-background/60 p-8 backdrop-blur-sm border border-border/50">
+                <h3 className="text-2xl font-bold tracking-tight">Experience the Console</h3>
+                <p className="mt-2 font-devanagari text-base text-foreground/80">
+                  देखें कि विचार किस प्रकार एक अनुशासित प्रणाली के माध्यम से समाज तक पहुँचते हैं।
+                </p>
+                <div className="mt-8 flex flex-col gap-3">
+                  <Button asChild size="lg" className="h-14 rounded-2xl px-8 shadow-xl shadow-primary/20">
+                    <Link href="/login">
+                      {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-14 rounded-2xl px-8 bg-background/50">
+                    <Link href="/dashboard">
+                      {isHi ? "कार्यप्रवाह देखें" : "See Organisational Work"}
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="home-section-shell">
-        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45 }}
-            className="relative flex items-center justify-center text-primary/20"
-          >
-            <Mandala className="h-72 w-72" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="rounded-full border border-primary/20 bg-background/80 px-5 py-3 text-center shadow-sm backdrop-blur">
-                <p className="text-sm font-semibold text-foreground">ज्ञान · संवाद · संगठन</p>
-                <p className="mt-1 font-devanagari text-sm text-foreground/72">ज्ञान, विमर्श और कार्य का समन्वय</p>
+              </div>
+              
+              <div className="grid gap-4">
+                <div className="flex items-center gap-4 rounded-2xl border border-border/60 bg-background/50 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold">
+                    ✓
+                  </div>
+                  <p className="text-sm font-medium leading-relaxed">
+                    A unified digital system for review and publication.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl border border-border/60 bg-background/50 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold">
+                    ✓
+                  </div>
+                  <p className="text-sm font-medium leading-relaxed">
+                    Real-time coordination across units and aayams.
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45 }}
-            className="home-hero-panel"
-          >
-            <SectionHeading
-              eyebrowEn="Mission Into Operations"
-              eyebrowHi="कार्य से प्रणाली तक"
-              titleEn="Pragya Pravah in organised action"
-              titleHi="प्रज्ञा प्रवाह का संगठित कार्य-रूप"
-              bodyEn="The ERP and demo console show how discourse, review, publication, and outreach move through actual institutional workflows."
-              bodyHi="डेमो प्रणाली और ईआरपी यह दिखाते हैं कि विमर्श, समीक्षा, प्रकाशन और प्रचार किस प्रकार वास्तविक संस्थागत कार्यप्रवाह में चलते हैं।"
-            />
-            <div className="mt-6 flex flex-wrap gap-3">
-              <div className="home-sequence-strip">Review • Publish • Prachar • Coordinate</div>
-              <div className="home-band-pill">Institutional workflow</div>
-            </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {operationsSteps.map((step) => (
-                <div key={step.step} className="home-process-step">
-                  <div className="flex items-center gap-3">
-                    <span className="home-path-index">{step.step}</span>
-                    <div>
-                      <p className="text-sm font-semibold">{step.titleEn}</p>
-                      <p className="font-devanagari text-sm text-foreground/72">{step.titleHi}</p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{step.bodyEn}</p>
-                  <p className="mt-2 font-devanagari text-sm leading-7 text-foreground/72">{step.bodyHi}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="rounded-full px-6">
-                <Link href="/login">
-                  Enter Demo Console / डेमो प्रणाली खोलें
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full px-6">
-                <Link href="/dashboard">
-                  See Organisational Work / कार्यप्रवाह देखें
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </motion.div>
         </div>
       </section>
 
-      <section className="px-4 pb-16 sm:px-6 sm:pb-20">
-        <div className="mx-auto max-w-5xl text-center">
-          <div className="home-sutra-band mb-8" />
-          <p className="text-sm uppercase tracking-[0.24em] text-primary">Pragya Pravah</p>
-          <p className="mt-3 text-lg font-medium text-foreground/82">
-            {isHi
-              ? "भारत-केंद्रित चिंतन को समकालीन समाज में संस्थागत शक्ति देना।"
-              : "Giving institutional strength to Bharat-centred thought in contemporary public life."}
-          </p>
+      <section className="bg-muted/30 px-4 py-24 sm:px-6">
+        <div className="mx-auto max-w-4xl text-center space-y-8">
+          <div className="mx-auto w-24 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <p className="text-sm uppercase tracking-[0.3em] font-bold text-primary">Pragya Pravah</p>
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl lg:leading-[1.2]">
+              Giving institutional strength to <br className="hidden sm:block" />
+              <span className="text-primary italic font-serif">Bharat-centred thought.</span>
+            </h2>
+            <p className="font-devanagari text-xl font-medium text-foreground/80 sm:text-2xl">
+              भारत-केंद्रित चिंतन को समकालीन समाज में संस्थागत शक्ति देना।
+            </p>
+          </div>
+          <div className="pt-8">
+            <Button asChild size="lg" variant="ghost" className="rounded-full px-8 text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/directory">
+                Connect with the Network / संवाद से जुड़ें
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
