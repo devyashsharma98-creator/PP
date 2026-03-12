@@ -564,6 +564,48 @@
     @apply flex items-center gap-2 text-base font-semibold tracking-tight;
   }
 
+  .calendar-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(37 44% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 35%);
+  }
+
+  .calendar-authority-card {
+    @apply institution-panel-muted max-w-sm px-4 py-4;
+  }
+
+  .calendar-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .calendar-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .calendar-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .calendar-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .calendar-summary-card {
+    @apply institution-panel-muted border-border/70;
+    background-color: hsl(var(--background) / 0.85);
+  }
+
+  .calendar-grid-card {
+    @apply institution-panel overflow-hidden border-border/70;
+    background-color: hsl(var(--background) / 0.88);
+  }
+
+  .calendar-side-card {
+    @apply institution-panel-muted border-border/70;
+    background-color: hsl(var(--background) / 0.85);
+  }
+
   .aalekh-masthead {
     @apply institution-panel p-6 md:p-7;
     background:

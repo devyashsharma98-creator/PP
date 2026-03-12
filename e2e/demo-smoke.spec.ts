@@ -288,6 +288,54 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
     await expect(page.getByText(/Published Aalekh Archive/i)).toBeVisible();
   });
+
+  test("9e - calendar presents the institutional planning masthead", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/calendar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Institutional Calendar Desk/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Plan the Month and Track Organisational Rhythm/i })).toBeVisible();
+    await expect(page.getByText(/institutional rhythm, upcoming work, and pending coordination/i)).toBeVisible();
+  });
+
+  test("9f - calendar shows the hybrid planning surface", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/calendar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Hybrid Planning View/i)).toBeVisible();
+    await expect(page.getByText(/Month Grid/i)).toBeVisible();
+    await expect(page.getByText(/Selected Day Ledger/i)).toBeVisible();
+  });
+
+  test("9g - calendar exposes agenda and reminder framing", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/calendar");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText(/Agenda and Reminders/i)).toBeVisible();
+    await expect(page.getByText(/Upcoming Institutional Rhythm/i)).toBeVisible();
+    await expect(page.getByText(/Pending Coordination/i)).toBeVisible();
+  });
   test("10 — logout button visible when authenticated", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 

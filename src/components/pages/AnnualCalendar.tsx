@@ -69,23 +69,116 @@ const MONTHS_HI = ['जनवरी','फ़रवरी','मार्च','अ
 const DAYS_EN = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 const DAYS_HI = ['र','सो','म','बु','गु','शु','श'];
 
+const ROLE_COPY: Record<string, {
+  roleEn: string;
+  roleHi: string;
+  eyebrowEn: string;
+  eyebrowHi: string;
+  lensEn: string;
+  lensHi: string;
+  lensDetailEn: string;
+  lensDetailHi: string;
+  cadenceEn: string;
+  cadenceHi: string;
+  cadenceDetailEn: string;
+  cadenceDetailHi: string;
+  reminderEn: string;
+  reminderHi: string;
+  reminderDetailEn: string;
+  reminderDetailHi: string;
+}> = {
+  vibhag_pramukh: {
+    roleEn: 'Vibhag Pramukh',
+    roleHi: '\u0935\u093f\u092d\u093e\u0917 \u092a\u094d\u0930\u092e\u0941\u0916',
+    eyebrowEn: 'Organisation-wide sequencing',
+    eyebrowHi: '\u0938\u0902\u0917\u0920\u0928-\u0935\u094d\u092f\u093e\u092a\u0940 \u0915\u094d\u0930\u092e',
+    lensEn: 'Vibhag oversight',
+    lensHi: '\u0935\u093f\u092d\u093e\u0917 \u0926\u0943\u0937\u094d\u091f\u093f',
+    lensDetailEn: "Track approvals, recurring programmes, and the month's institutional sequence.",
+    lensDetailHi: '\u0905\u0928\u0941\u092e\u094b\u0926\u0928, \u0928\u093f\u092f\u092e\u093f\u0924 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0914\u0930 \u092e\u093e\u0938\u093f\u0915 \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0915\u094d\u0930\u092e \u092a\u0930 \u0926\u0943\u0937\u094d\u091f\u093f \u0930\u0916\u0947\u0902\u0964',
+    cadenceEn: 'Institutional cadence',
+    cadenceHi: '\u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0917\u0924\u093f',
+    cadenceDetailEn: 'The planning surface keeps aayam activity and final approvals in one shared rhythm.',
+    cadenceDetailHi: '\u092f\u0939 \u0926\u0943\u0936\u094d\u092f \u0906\u092f\u093e\u092e \u0917\u0924\u093f \u0914\u0930 \u0905\u0902\u0924\u093f\u092e \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0915\u094b \u090f\u0915 \u0939\u0940 \u0915\u094d\u0930\u092e \u092e\u0947\u0902 \u0932\u093e\u0924\u093e \u0939\u0948\u0964',
+    reminderEn: 'Final movement matters most',
+    reminderHi: '\u0905\u0902\u0924\u093f\u092e \u0917\u0924\u093f \u0938\u092c\u0938\u0947 \u092e\u0939\u0924\u094d\u0935\u092a\u0942\u0930\u094d\u0923',
+    reminderDetailEn: 'Use the right ledger to keep pending approvals and major gatherings moving.',
+    reminderDetailHi: '\u0909\u091a\u093f\u0924 \u0932\u0947\u0916\u093e \u0926\u0947\u0916\u0915\u0930 \u0932\u0902\u092c\u093f\u0924 \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0914\u0930 \u092e\u0941\u0916\u094d\u092f \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0906\u0917\u0947 \u092c\u0922\u093c\u093e\u090f\u0902\u0964',
+  },
+  aayam_pramukh: {
+    roleEn: 'Aayam Pramukh',
+    roleHi: '\u0906\u092f\u093e\u092e \u092a\u094d\u0930\u092e\u0941\u0916',
+    eyebrowEn: 'Aayam review and programme cadence',
+    eyebrowHi: '\u0906\u092f\u093e\u092e \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0914\u0930 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0917\u0924\u093f',
+    lensEn: 'Thematic review lane',
+    lensHi: '\u0935\u093f\u0937\u092f\u0915 \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0926\u093f\u0936\u093e',
+    lensDetailEn: 'Balance final review work with upcoming aayam-linked events in one monthly view.',
+    lensDetailHi: '\u0905\u0902\u0924\u093f\u092e \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0914\u0930 \u0906\u092f\u093e\u092e \u0938\u0902\u092c\u0902\u0927\u093f\u0924 \u0906\u0917\u093e\u092e\u0940 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0915\u094b \u090f\u0915 \u0926\u0943\u0936\u094d\u092f \u092e\u0947\u0902 \u0926\u0947\u0916\u0947\u0902\u0964',
+    cadenceEn: 'Review-to-programme flow',
+    cadenceHi: '\u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0938\u0947 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0924\u0915',
+    cadenceDetailEn: 'Keep approvals, published work, and upcoming public activity aligned.',
+    cadenceDetailHi: '\u0905\u0928\u0941\u092e\u094b\u0926\u0928, \u092a\u094d\u0930\u0915\u093e\u0936\u093f\u0924 \u0938\u093e\u092e\u0917\u094d\u0930\u0940 \u0914\u0930 \u0906\u0917\u093e\u092e\u0940 \u091c\u0928\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0917\u0924\u093f\u0935\u093f\u0927\u093f \u0915\u094b \u0938\u0902\u0930\u0947\u0916\u093f\u0924 \u0930\u0916\u0947\u0902\u0964',
+    reminderEn: 'Review before reach',
+    reminderHi: '\u092a\u0939\u0932\u0947 \u0938\u092e\u0940\u0915\u094d\u0937\u093e, \u092b\u093f\u0930 \u092a\u0939\u0941\u0902\u091a',
+    reminderDetailEn: 'The day ledger helps keep thematic review from slipping behind programme dates.',
+    reminderDetailHi: '\u0926\u093f\u0935\u0938 \u0932\u0947\u0916\u093e \u0906\u092f\u093e\u092e \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0915\u094b \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0924\u093f\u0925\u093f \u0938\u0947 \u092a\u0940\u091b\u0947 \u091c\u093e\u0928\u0947 \u0938\u0947 \u0930\u094b\u0915\u0924\u093e \u0939\u0948\u0964',
+  },
+  unit_head: {
+    roleEn: 'Unit Head',
+    roleHi: '\u0907\u0915\u093e\u0908 \u092a\u094d\u0930\u092e\u0941\u0916',
+    eyebrowEn: 'Local readiness and event management',
+    eyebrowHi: '\u0938\u094d\u0925\u093e\u0928\u0940\u092f \u0924\u0948\u092f\u093e\u0930\u0940 \u0914\u0930 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u092a\u094d\u0930\u092c\u0902\u0927\u0928',
+    lensEn: 'Unit execution lens',
+    lensHi: '\u0907\u0915\u093e\u0908 \u0915\u093e\u0930\u094d\u092f\u093e\u0928\u094d\u0935\u092f\u0928 \u0926\u0943\u0937\u094d\u091f\u093f',
+    lensDetailEn: 'Watch drafts, approvals, and local event readiness from one planning desk.',
+    lensDetailHi: '\u092a\u094d\u0930\u093e\u0930\u0942\u092a, \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0914\u0930 \u0938\u094d\u0925\u093e\u0928\u0940\u092f \u0924\u0948\u092f\u093e\u0930\u0940 \u0915\u094b \u090f\u0915 \u092f\u094b\u091c\u0928\u093e \u0921\u0947\u0938\u094d\u0915 \u0938\u0947 \u0926\u0947\u0916\u0947\u0902\u0964',
+    cadenceEn: 'Readiness every week',
+    cadenceHi: '\u0938\u093e\u092a\u094d\u0924\u093e\u0939\u093f\u0915 \u0924\u0948\u092f\u093e\u0930\u0940',
+    cadenceDetailEn: 'The month view keeps local submissions and programme execution in sync.',
+    cadenceDetailHi: '\u092e\u093e\u0938\u093f\u0915 \u0926\u0943\u0936\u094d\u092f \u0938\u094d\u0925\u093e\u0928\u0940\u092f \u092a\u094d\u0930\u0938\u094d\u0924\u0941\u0924\u093f\u092f\u094b\u0902 \u0914\u0930 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0915\u093e\u0930\u094d\u092f\u093e\u0928\u094d\u0935\u092f\u0928 \u0915\u094b \u090f\u0915\u0938\u093e\u0925 \u0930\u0916\u0924\u093e \u0939\u0948\u0964',
+    reminderEn: 'Drafts need movement',
+    reminderHi: '\u092a\u094d\u0930\u093e\u0930\u0942\u092a \u0915\u094b \u0917\u0924\u093f \u091a\u093e\u0939\u093f\u090f',
+    reminderDetailEn: 'Use the reminders rail to keep unfinished unit work from stalling the month.',
+    reminderDetailHi: '\u0938\u094d\u092e\u0930\u0923 \u0926\u093f\u0936\u093e \u0938\u0947 \u0905\u0927\u0942\u0930\u093e \u0907\u0915\u093e\u0908 \u0915\u093e\u0930\u094d\u092f \u092e\u0939\u0940\u0928\u0947 \u0915\u094b \u0930\u0941\u0915\u0928\u0947 \u0938\u0947 \u0930\u094b\u0915\u0947\u0902\u0964',
+  },
+  karyakarta: {
+    roleEn: 'Karyakarta',
+    roleHi: '\u0915\u093e\u0930\u094d\u092f\u0915\u0930\u094d\u0924\u093e',
+    eyebrowEn: 'Participation and institutional awareness',
+    eyebrowHi: '\u0938\u0939\u092d\u093e\u0917\u093f\u0924\u093e \u0914\u0930 \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0926\u0943\u0937\u094d\u091f\u093f',
+    lensEn: 'Participation lens',
+    lensHi: '\u0938\u0939\u092d\u093e\u0917\u093f\u0924\u093e \u0926\u0943\u0937\u094d\u091f\u093f',
+    lensDetailEn: 'See what is published, what is next, and where the organisation is moving this month.',
+    lensDetailHi: '\u0926\u0947\u0916\u0947\u0902 \u0915\u094c\u0928 \u0938\u093e \u0915\u093e\u0930\u094d\u092f \u092a\u094d\u0930\u0915\u093e\u0936\u093f\u0924 \u0939\u0948, \u0906\u0917\u0947 \u0915\u094d\u092f\u093e \u0939\u0948, \u0914\u0930 \u0938\u0902\u0917\u0920\u0928 \u0915\u093f\u0938 \u0926\u093f\u0936\u093e \u092e\u0947\u0902 \u091c\u093e \u0930\u0939\u093e \u0939\u0948\u0964',
+    cadenceEn: 'Shared organisational rhythm',
+    cadenceHi: '\u0938\u093e\u091d\u093e \u0938\u0902\u0917\u0920\u0928 \u0917\u0924\u093f',
+    cadenceDetailEn: 'The calendar keeps recurring programmes and upcoming events easy to follow.',
+    cadenceDetailHi: '\u092f\u0939 \u092a\u0902\u091a\u093e\u0902\u0917 \u0928\u093f\u092f\u092e\u093f\u0924 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0914\u0930 \u0906\u0917\u093e\u092e\u0940 \u0917\u0924\u093f\u0935\u093f\u0927\u093f\u092f\u094b\u0902 \u0915\u094b \u0938\u0930\u0932 \u0930\u0916\u0924\u093e \u0939\u0948\u0964',
+    reminderEn: 'Stay aligned with the month',
+    reminderHi: '\u092e\u0939\u0940\u0928\u0947 \u0915\u0947 \u0938\u093e\u0925 \u0938\u0902\u0930\u0947\u0916\u093f\u0924 \u0930\u0939\u0947\u0902',
+    reminderDetailEn: 'The right rail keeps the next institutional commitments visible without clutter.',
+    reminderDetailHi: '\u0926\u093e\u0908\u0902 \u092a\u091f\u094d\u091f\u0940 \u0905\u0917\u0932\u0947 \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0926\u093e\u092f\u093f\u0924\u094d\u0935\u094b\u0902 \u0915\u094b \u0938\u094d\u092a\u0937\u094d\u091f \u0930\u0916\u0924\u0940 \u0939\u0948\u0964',
+  },
+};
+
 function daysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate(); }
 function firstDay(y: number, m: number) { return new Date(y, m, 1).getDay(); }
 
 // ── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ icon: Icon, label, value, iconWrapClass, valueClass }: {
-  icon: LucideIcon; label: string; value: number | string; iconWrapClass: string; valueClass: string;
+function KpiCard({ icon: Icon, label, value, detail, iconWrapClass, valueClass }: {
+  icon: LucideIcon; label: string; value: number | string; detail?: string; iconWrapClass: string; valueClass: string;
 }) {
   return (
-    <Card className="glass-card">
+    <Card className="calendar-summary-card">
       <CardContent className="pt-4 pb-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', iconWrapClass)}>
+        <div className="flex items-center justify-between gap-3">
+          <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl', iconWrapClass)}>
             <Icon className="w-4 h-4" />
           </div>
           <span className={cn('text-2xl font-bold tabular-nums', valueClass)}>{value}</span>
         </div>
-        <p className="text-xs text-muted-foreground font-medium leading-tight">{label}</p>
+        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        {detail && <p className="mt-2 text-xs leading-5 text-muted-foreground">{detail}</p>}
       </CardContent>
     </Card>
   );
@@ -251,15 +344,34 @@ export default function AnnualCalendar() {
   const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
   const monthLabel = lang === 'hi' ? `${MONTHS_HI[month]} ${year}` : `${MONTHS_EN[month]} ${year}`;
   const dayHeaders = lang === 'hi' ? DAYS_HI : DAYS_EN;
+  const selectedDateLabel = lang === 'hi' ? `${selDay} ${MONTHS_HI[month]} ${year}` : `${MONTHS_EN[month]} ${selDay}, ${year}`;
+  const roleCopy = ROLE_COPY[role] ?? ROLE_COPY.karyakarta;
+  const immediateReminderValue = pendingAction.length > 0
+    ? t(`${pendingAction.length} coordination item${pendingAction.length === 1 ? '' : 's'}`, `${pendingAction.length} \u0938\u092e\u0928\u094d\u0935\u092f \u092e\u0926`)
+    : upcoming[0]
+      ? t(upcoming[0].title, upcoming[0].titleHi)
+      : t('No pending coordination', '\u0915\u094b\u0908 \u0932\u0902\u092c\u093f\u0924 \u0938\u092e\u0928\u094d\u0935\u092f \u0928\u0939\u0940\u0902');
+  const immediateReminderDetail = pendingAction.length > 0
+    ? t('Use the coordination ledger to keep work moving on time.', '\u0938\u092e\u0928\u094d\u0935\u092f \u0932\u0947\u0916\u093e \u0926\u0947\u0916\u0915\u0930 \u0915\u093e\u0930\u094d\u092f \u0915\u094b \u0938\u092e\u092f \u092a\u0930 \u0906\u0917\u0947 \u092c\u0922\u093c\u093e\u090f\u0902\u0964')
+    : t(roleCopy.reminderDetailEn, roleCopy.reminderDetailHi);
+  const contextCards = [
+    {
+      label: t('Current Planning Lens', '\u0935\u0930\u094d\u0924\u092e\u093e\u0928 \u092f\u094b\u091c\u0928\u093e \u0926\u0943\u0937\u094d\u091f\u093f'),
+      value: t(roleCopy.lensEn, roleCopy.lensHi),
+      detail: t(roleCopy.lensDetailEn, roleCopy.lensDetailHi),
+    },
+    {
+      label: t('Planning Cadence', '\u092f\u094b\u091c\u0928\u093e \u0917\u0924\u093f'),
+      value: t(roleCopy.cadenceEn, roleCopy.cadenceHi),
+      detail: t(roleCopy.cadenceDetailEn, roleCopy.cadenceDetailHi),
+    },
+    {
+      label: t('Immediate Reminder', '\u0924\u0924\u094d\u0915\u093e\u0932 \u0938\u094d\u092e\u0930\u0923'),
+      value: immediateReminderValue,
+      detail: immediateReminderDetail,
+    },
+  ];
 
-  // Role headings
-  const headings: Record<string, { en: string; hi: string }> = {
-    vibhag_pramukh: { en: 'Organisation Calendar — Full View',     hi: 'संगठन पंचांग — पूर्ण दृश्य' },
-    aayam_pramukh:  { en: 'Aayam Calendar — Review Dashboard',     hi: 'आयाम पंचांग — समीक्षा डैशबोर्ड' },
-    unit_head:      { en: 'Unit Calendar — Event Management',       hi: 'इकाई पंचांग — कार्यक्रम प्रबंधन' },
-    karyakarta:     { en: 'Annual Calendar — Organisation Schedule', hi: 'वार्षिक पंचांग — संगठन कार्यक्रम' },
-  };
-  const heading = headings[role] ?? headings.karyakarta;
 
   // Action label for event card
   const getActionLabel = (e: CalEvent): string | undefined => {
@@ -273,14 +385,59 @@ export default function AnnualCalendar() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5 pb-10">
 
       {/* Header */}
-      <div>
-        <h1 className={cn('text-2xl font-bold', lang === 'hi' && 'font-devanagari')}>
-          {t(heading.en, heading.hi)}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t('Role-based scheduling across all aayams', 'सभी आयामों का भूमिका-आधारित पंचांग')}
-        </p>
-      </div>
+      <section className="calendar-masthead">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl space-y-4">
+            <span className="shell-ribbon">
+              {t('Institutional Calendar Desk', '\u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u092a\u0902\u091a\u093e\u0902\u0917 \u0915\u0915\u094d\u0937')}
+            </span>
+            <div className="space-y-3">
+              <p className={cn('shell-copy', lang === 'hi' && 'font-devanagari')}>
+                {t(roleCopy.eyebrowEn, roleCopy.eyebrowHi)}
+              </p>
+              <div className="space-y-2">
+                <h1 className={cn('text-3xl font-semibold tracking-tight text-foreground md:text-4xl', lang === 'hi' && 'font-devanagari')}>
+                  {t('Plan the Month and Track Organisational Rhythm', '\u092e\u093e\u0938\u093f\u0915 \u092f\u094b\u091c\u0928\u093e \u0914\u0930 \u0938\u0902\u0917\u0920\u0928 \u0915\u0940 \u0917\u0924\u093f \u092a\u0930 \u0926\u0943\u0937\u094d\u091f\u093f \u0930\u0916\u0947\u0902')}
+                </h1>
+                <p className={cn('max-w-2xl text-sm leading-7 text-muted-foreground md:text-base', lang === 'hi' && 'font-devanagari')}>
+                  {t(
+                    'This calendar aligns institutional rhythm, upcoming work, and pending coordination for every internal role.',
+                    '\u092f\u0939 \u092a\u0902\u091a\u093e\u0902\u0917 \u092a\u094d\u0930\u0924\u094d\u092f\u0947\u0915 \u0906\u0902\u0924\u0930\u093f\u0915 \u092d\u0942\u092e\u093f\u0915\u093e \u0915\u0947 \u0932\u093f\u090f \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0917\u0924\u093f, \u0906\u0917\u093e\u092e\u0940 \u0915\u093e\u0930\u094d\u092f \u0914\u0930 \u0932\u0902\u092c\u093f\u0924 \u0938\u092e\u0928\u094d\u0935\u092f \u0915\u094b \u090f\u0915 \u0938\u093e\u0925 \u0932\u093e\u0924\u093e \u0939\u0948\u0964',
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="calendar-authority-card">
+            <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>
+              {t('Current Dayitva', '\u0935\u0930\u094d\u0924\u092e\u093e\u0928 \u0926\u093e\u092f\u093f\u0924\u094d\u0935')}
+            </p>
+            <h2 className={cn('shell-panel-title mt-2', lang === 'hi' && 'font-devanagari')}>
+              {t(roleCopy.roleEn, roleCopy.roleHi)}
+            </h2>
+            <p className={cn('shell-panel-subcopy mt-2', lang === 'hi' && 'font-devanagari')}>
+              {t(roleCopy.reminderEn, roleCopy.reminderHi)}
+            </p>
+            <div className="mt-4 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{monthLabel}</p>
+              <p className={cn('mt-2 text-sm leading-6 text-muted-foreground', lang === 'hi' && 'font-devanagari')}>
+                {t(roleCopy.reminderDetailEn, roleCopy.reminderDetailHi)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="calendar-context-grid">
+          {contextCards.map((card) => (
+            <div key={card.label} className="calendar-context-card">
+              <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>{card.label}</p>
+              <p className={cn('calendar-context-value', lang === 'hi' && 'font-devanagari')}>{card.value}</p>
+              <p className={cn('calendar-context-detail', lang === 'hi' && 'font-devanagari')}>{card.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -297,6 +454,7 @@ export default function AnnualCalendar() {
           <Card className="glass-card border-warning/30 bg-warning/5">
             <CardContent className="pt-3 pb-3 flex items-center gap-3 flex-wrap">
               <Bell className="w-4 h-4 text-warning shrink-0" />
+              <span className={cn('text-[11px] font-semibold uppercase tracking-[0.18em] text-warning', lang === 'hi' && 'font-devanagari')}>{t('Pending Coordination', '\u0932\u0902\u092c\u093f\u0924 \u0938\u092e\u0928\u094d\u0935\u092f')}</span>
               <p className={cn('text-sm font-medium text-warning', lang === 'hi' && 'font-devanagari')}>
                 {t(
                   `${pendingAction.length} event${pendingAction.length > 1 ? 's' : ''} need${pendingAction.length === 1 ? 's' : ''} your action`,
@@ -317,18 +475,27 @@ export default function AnnualCalendar() {
           </Card>
         </motion.div>
       )}
+      <div className="space-y-2">
+        <span className="section-seal">{t('Hybrid Planning View', '\u0938\u0902\u092f\u0941\u0915\u094d\u0924 \u092f\u094b\u091c\u0928\u093e \u0926\u0943\u0936\u094d\u092f')}</span>
+        <p className={cn('text-sm leading-6 text-muted-foreground', lang === 'hi' && 'font-devanagari')}>
+          {t('Month Grid on the left. Agenda, reminders, and selected-day details on the right.', '\u092c\u093e\u0908\u0902 \u0913\u0930 \u092e\u093e\u0939 \u0926\u0943\u0936\u094d\u092f\u0964 \u0926\u093e\u0908\u0902 \u0913\u0930 \u0915\u093e\u0930\u094d\u092f\u0938\u0942\u091a\u0940, \u0938\u094d\u092e\u0930\u0923 \u0914\u0930 \u091a\u092f\u0928\u093f\u0924 \u0926\u093f\u0935\u0938 \u0935\u093f\u0935\u0930\u0923\u0964')}
+        </p>
+      </div>
 
       {/* Calendar + side panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* ── Calendar grid (2/3) ──────────────────────────────────────── */}
         <div className="lg:col-span-2">
-          <Card className="glass-card">
+          <Card className="calendar-grid-card">
             <CardContent className="pt-4 px-3 sm:px-5">
 
               {/* Month navigation */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-1">
+                  <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>{t('Month Grid', '\u092e\u093e\u0939 \u0926\u0943\u0936\u094d\u092f')}</p>
                 <h2 className={cn('text-base font-semibold', lang === 'hi' && 'font-devanagari')}>{monthLabel}</h2>
+                </div>
                 <div className="flex items-center gap-1">
                   {!isCurrentMonth && (
                     <Button variant="ghost" size="sm" className="h-8 text-xs px-2" onClick={goToday}>
@@ -422,27 +589,25 @@ export default function AnnualCalendar() {
 
         {/* ── Side panel (1/3) ─────────────────────────────────────────── */}
         <div className="space-y-4">
+          <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>{t('Agenda and Reminders', '\u0915\u093e\u0930\u094d\u092f\u0938\u0942\u091a\u0940 \u0914\u0930 \u0938\u094d\u092e\u0930\u0923')}</p>
 
           {/* Selected day / today's schedule */}
-          <Card className="glass-card">
+          <Card className="calendar-side-card">
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="w-4 h-4 text-primary shrink-0" />
-                <h3 className={cn('text-sm font-semibold', lang === 'hi' && 'font-devanagari')}>
-                  {selDay === today.getDate() && isCurrentMonth
-                    ? t("Today's Schedule", 'आज का कार्यक्रम')
-                    : lang === 'hi'
-                      ? `${selDay} ${MONTHS_HI[month]}`
-                      : `${MONTHS_EN[month]} ${selDay}`}
-                </h3>
-                {selEvents.length > 0 && (
-                  <Badge className="ml-auto text-[10px] bg-primary/10 text-primary">{selEvents.length}</Badge>
-                )}
+              <div className="space-y-2 mb-3">
+                <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>{t('Selected Day Ledger', '\u091a\u092f\u0928\u093f\u0924 \u0926\u093f\u0935\u0938 \u0932\u0947\u0916\u093e')}</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary shrink-0" />
+                  <p className={cn('text-sm font-semibold', lang === 'hi' && 'font-devanagari')}>{selectedDateLabel}</p>
+                  {selEvents.length > 0 && (
+                    <Badge className="ml-auto text-[10px] bg-primary/10 text-primary">{selEvents.length}</Badge>
+                  )}
+                </div>
               </div>
 
               {selEvents.length === 0 ? (
                 <p className={cn('text-xs text-muted-foreground text-center py-5', lang === 'hi' && 'font-devanagari')}>
-                  {t('No events on this day', 'इस दिन कोई कार्यक्रम नहीं')}
+                  {t('No events on this day', '\u0907\u0938 \u0926\u093f\u0928 \u0915\u094b\u0908 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0928\u0939\u0940\u0902')}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -461,18 +626,21 @@ export default function AnnualCalendar() {
           </Card>
 
           {/* Upcoming events */}
-          <Card className="glass-card">
+          <Card className="calendar-side-card">
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-primary shrink-0" />
-                <h3 className={cn('text-sm font-semibold', lang === 'hi' && 'font-devanagari')}>
-                  {t('Upcoming Events', 'आगामी कार्यक्रम')}
-                </h3>
+              <div className="space-y-2 mb-3">
+                <p className={cn('shell-panel-copy', lang === 'hi' && 'font-devanagari')}>{t('Upcoming Institutional Rhythm', '\u0906\u0917\u093e\u092e\u0940 \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0915\u094d\u0930\u092e')}</p>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary shrink-0" />
+                  <h3 className={cn('text-sm font-semibold', lang === 'hi' && 'font-devanagari')}>
+                    {t('Agenda-linked programme flow', '\u0915\u093e\u0930\u094d\u092f\u0938\u0942\u091a\u0940 \u0938\u0902\u092c\u0902\u0927\u093f\u0924 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0917\u0924\u093f')}
+                  </h3>
+                </div>
               </div>
 
               {upcoming.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">
-                  {t('No upcoming events', 'कोई आगामी कार्यक्रम नहीं')}
+                  {t('No upcoming events', '\u0915\u094b\u0908 \u0906\u0917\u093e\u092e\u0940 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0928\u0939\u0940\u0902')}
                 </p>
               ) : (
                 <div>
@@ -489,14 +657,12 @@ export default function AnnualCalendar() {
                           setSelDay(d.getDate());
                         }}
                       >
-                        {/* Date badge */}
                         <div className="text-center min-w-[30px] shrink-0">
                           <p className="text-xs font-bold text-primary leading-none">{d.getDate()}</p>
                           <p className={cn('text-[9px] text-muted-foreground', lang === 'hi' && 'font-devanagari')}>
                             {lang === 'hi' ? MONTHS_HI[d.getMonth()].slice(0, 3) : MONTHS_EN[d.getMonth()].slice(0, 3)}
                           </p>
                         </div>
-                        {/* Event info */}
                         <div className="flex-1 min-w-0">
                           <p className={cn('text-xs font-medium truncate', lang === 'hi' && 'font-devanagari')}>
                             {lang === 'hi' ? e.titleHi : e.title}
@@ -509,7 +675,6 @@ export default function AnnualCalendar() {
                             {e.recurring && <RotateCcw className="w-2.5 h-2.5 text-warning ml-1" />}
                           </div>
                         </div>
-                        {/* Status dot */}
                         {(e.status === 'Pending Aayam Review' || e.status === 'Pending Final Approval') && (
                           <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
                         )}
