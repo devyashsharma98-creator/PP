@@ -435,7 +435,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
       main.getByText(/Choose Your Path|अपना मार्ग चुनें/i).first(),
     ).toBeVisible();
     await expect(
-      main.getByText(/Review • Publish • Prachar • Coordinate/i).first(),
+      main.getByRole("heading", { name: /The flow of mission/i }).first(),
     ).toBeVisible();
     await expect(page.getByText(/Activity ledger/i)).toHaveCount(0);
     await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
