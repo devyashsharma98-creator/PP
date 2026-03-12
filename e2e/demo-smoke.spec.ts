@@ -189,7 +189,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Prachar Command Center/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Distribute and Confirm Reach/i })).toBeVisible();
-    await expect(page.getByText(/approved work now moves into organised public circulation/i)).toBeVisible();
+    await expect(page.getByText(/move approved work into public reach/i)).toBeVisible();
   });
 
   test("8c - prachar shows campaign distribution accountability", async ({ page }) => {
@@ -251,7 +251,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Aalekh Writing Desk/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Draft and Submit Aalekh/i })).toBeVisible();
-    await expect(page.getByText(/Writing and revision lane/i)).toBeVisible();
+    await expect(page.getByText(/Draft, revise, and send forward/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Write New Article/i })).toBeVisible();
   });
 
@@ -302,7 +302,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Institutional Calendar Desk/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Plan the Month and Track Organisational Rhythm/i })).toBeVisible();
-    await expect(page.getByText(/institutional rhythm, upcoming work, and pending coordination/i)).toBeVisible();
+    await expect(page.getByText(/Track monthly rhythm, upcoming work, and coordination in one view/i)).toBeVisible();
   });
 
   test("9f - calendar shows the hybrid planning surface", async ({ page }) => {

@@ -73,8 +73,8 @@ function PracharMasthead({
             </h1>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
               {t(
-                'Approved work now moves into organised public circulation across every required channel. Track completion, resolve gaps, and close each campaign with accountability.',
-                'à¤…à¤¨à¥à¤®à¥‹à¤¦à¤¿à¤¤ à¤•à¤¾à¤°à¥à¤¯ à¤…à¤¬ à¤ªà¥à¤°à¤¤à¥à¤¯à¥‡à¤• à¤†à¤µà¤¶à¥à¤¯à¤• à¤®à¤‚à¤š à¤ªà¤° à¤¸à¤‚à¤—à¤ à¤¿à¤¤ à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤• à¤ªà¥à¤°à¤¸à¤¾à¤° à¤®à¥‡à¤‚ à¤œà¤¾à¤¤à¤¾ à¤¹à¥ˆà¥¤ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤¦à¥‡à¤–à¥‡à¤‚, à¤•à¤®à¤¿à¤¯à¥‹à¤‚ à¤•à¥‹ à¤¦à¥‚à¤° à¤•à¤°à¥‡à¤‚ à¤”à¤° à¤ªà¥à¤°à¤¤à¥à¤¯à¥‡à¤• à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤•à¥‹ à¤‰à¤¤à¥à¤¤à¤°à¤¦à¤¾à¤¯à¤¿à¤¤à¥à¤µ à¤•à¥‡ à¤¸à¤¾à¤¥ à¤ªà¥‚à¤°à¤¾ à¤•à¤°à¥‡à¤‚à¥¤',
+                'Move approved work into public reach. Track completion, close gaps, and finish each campaign.',
+                'स्वीकृत कार्य को सार्वजनिक पहुंच तक ले जाएं। पूर्णता देखें, कमी भरें और हर अभियान पूरा करें।',
               )}
             </p>
           </div>
@@ -89,8 +89,8 @@ function PracharMasthead({
           </p>
           <p className="prachar-authority-detail">
             {canAct
-              ? t('You can mark platform completion or document skipped channels with reasons.', 'à¤†à¤ª à¤®à¤‚à¤š à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤šà¤¿à¤¹à¥à¤¨à¤¿à¤¤ à¤•à¤° à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚ à¤¯à¤¾ à¤•à¤¾à¤°à¤£ à¤¸à¤¹à¤¿à¤¤ à¤›à¥‹à¤¡à¤¼à¥‡ à¤—à¤ à¤šà¥ˆà¤¨à¤² à¤¦à¤°à¥à¤œ à¤•à¤° à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤')
-              : t('You can review dissemination status, but final platform completion remains with the responsible desk.', 'à¤†à¤ª à¤ªà¥à¤°à¤¸à¤¾à¤° à¤¸à¥à¤¥à¤¿à¤¤à¤¿ à¤¦à¥‡à¤– à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚, à¤ªà¤° à¤…à¤‚à¤¤à¤¿à¤® à¤®à¤‚à¤š à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤œà¤¿à¤®à¥à¤®à¥‡à¤¦à¤¾à¤° à¤•à¤•à¥à¤· à¤•à¥‡ à¤ªà¤¾à¤¸ à¤°à¤¹à¤¤à¥€ à¤¹à¥ˆà¥¤')}
+              ? t('Mark completed channels or note why one was skipped.', 'पूर्ण चैनल दर्ज करें या स्किप का कारण लिखें।')
+              : t('You can review campaign status here. Final closure stays with the responsible desk.', 'यहां अभियान की स्थिति देखें। अंतिम समापन जिम्मेदार कक्ष करेगा।')}
           </p>
         </div>
       </div>
@@ -310,8 +310,8 @@ export default function Prachar() {
               <h2 className="dashboard-section-heading">{t('Campaign Dissemination Queue', 'अभियान प्रसार कतार')}</h2>
               <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
                 {t(
-                  'Platform accountability across published events stays visible here. Review which campaigns are complete, which channels were intentionally skipped, and where follow-through is still required.',
-                  'प्रकाशित कार्यक्रमों में मंच-उत्तरदायित्व यहां स्पष्ट रहता है। देखें कौन से अभियान पूर्ण हैं, कौन से चैनल कारण सहित छोड़े गए हैं और कहां अभी अनुवर्तन शेष है।',
+                  'See what is complete, what was skipped with reason, and what still needs follow-through.',
+                  'यहां देखें क्या पूरा हुआ, क्या कारण सहित छोड़ा गया और कहां अभी अनुवर्तन बाकी है।',
                 )}
               </p>
             </div>
@@ -336,8 +336,8 @@ export default function Prachar() {
             </div>
             <p className="prachar-command-detail">
               {campaignStats.incompleteCampaigns === 0
-                ? t('Every published event is currently closed for dissemination.', 'प्रत्येक प्रकाशित कार्यक्रम का प्रसार अभी पूर्ण है।')
-                : t(`${campaignStats.incompleteCampaigns} campaigns still need closure across required platforms.`, `${campaignStats.incompleteCampaigns} अभियानों को अभी आवश्यक मंचों पर पूर्णता चाहिए।`)}
+                ? t('All published campaigns are closed.', 'सभी प्रकाशित अभियान पूरे हो चुके हैं।')
+                : t(`${campaignStats.incompleteCampaigns} campaigns still need closure.`, `${campaignStats.incompleteCampaigns} अभियान अभी पूरे होने बाकी हैं।`)}
             </p>
           </div>
 
@@ -351,8 +351,8 @@ export default function Prachar() {
             </div>
             <p className="prachar-command-detail">
               {t(
-                `${campaignStats.openFollowThrough} channels still need active follow-through and ${campaignStats.documentedSkips} have documented skip reasons.`,
-                `${campaignStats.openFollowThrough} चैनलों में अभी सक्रिय अनुवर्तन चाहिए और ${campaignStats.documentedSkips} में कारण सहित स्किप दर्ज है।`,
+                `${campaignStats.openFollowThrough} channels still need follow-through and ${campaignStats.documentedSkips} have skip notes.`,
+                `${campaignStats.openFollowThrough} चैनलों पर अभी अनुवर्तन चाहिए और ${campaignStats.documentedSkips} पर स्किप नोट दर्ज है।`,
               )}
             </p>
           </div>
@@ -367,8 +367,8 @@ export default function Prachar() {
             </div>
             <p className="prachar-command-detail">
               {permissions.canUpdatePrachar
-                ? t('Use the queue below to complete missing platform actions or record intentional skips.', 'नीचे की कतार से लंबित मंच कार्रवाई पूर्ण करें या कारण सहित स्किप दर्ज करें।')
-                : t('Use the queue below to understand what still needs campaign attention across the organisation.', 'नीचे की कतार से समझें कि संगठन में किन अभियानों को अभी ध्यान चाहिए।')}
+                ? t('Use the queue below to finish pending channels or record skips.', 'नीचे की कतार से बाकी चैनल पूरे करें या स्किप दर्ज करें।')
+                : t('Use the queue below to see which campaigns still need attention.', 'नीचे की कतार से देखें किन अभियानों को अभी ध्यान चाहिए।')}
             </p>
           </div>
         </div>
@@ -378,8 +378,8 @@ export default function Prachar() {
             <AlertCircle className="h-4 w-4 text-warning" />
             <AlertDescription className="text-sm">
               {t(
-                `${incompleteCount} published campaign${incompleteCount > 1 ? 's' : ''} still need complete dissemination closure.`,
-                `${incompleteCount} प्रकाशित अभियान अभी पूर्ण प्रसार समापन की प्रतीक्षा में हैं।`,
+                `${incompleteCount} published campaign${incompleteCount > 1 ? 's' : ''} still need dissemination closure.`,
+                `${incompleteCount} प्रकाशित अभियान अभी प्रसार पूर्णता की प्रतीक्षा में हैं।`,
               )}
             </AlertDescription>
           </Alert>
@@ -391,7 +391,7 @@ export default function Prachar() {
         {publishedEvents.length === 0 ? (
           <Card className="institution-panel-muted">
             <CardContent className="py-10 text-center text-muted-foreground text-sm">
-              {t('No published events are waiting for Prachar yet. Approve events from the dashboard to activate this command center.', 'प्रचार हेतु अभी कोई प्रकाशित कार्यक्रम उपलब्ध नहीं है। इस नियंत्रण कक्ष को सक्रिय करने के लिए डैशबोर्ड से कार्यक्रम अनुमोदित करें।')}
+              {t('No published events are ready for Prachar yet. Approve events from the dashboard to activate this desk.', 'प्रचार के लिए अभी कोई प्रकाशित कार्यक्रम तैयार नहीं है। इस कक्ष को सक्रिय करने के लिए डैशबोर्ड से कार्यक्रम अनुमोदित करें।')}
             </CardContent>
           </Card>
         ) : (
@@ -510,10 +510,10 @@ export default function Prachar() {
                                 </Label>
                                 <p className="mt-1 text-[10px] leading-5 text-muted-foreground">
                                   {checked
-                                    ? t('Channel completed and recorded.', 'चैनल पूर्ण होकर दर्ज हो चुका है।')
+                                    ? t('Channel marked complete.', 'चैनल पूर्ण दर्ज है।')
                                     : existingReason
-                                      ? t(`Skip noted: ${existingReason}`, `स्किप कारण: ${existingReason}`)
-                                      : t('Awaiting dissemination confirmation.', 'प्रसार पुष्टि की प्रतीक्षा में।')}
+                                      ? t(`Skip noted: ${existingReason}`, `स्किप नोट: ${existingReason}`)
+                                      : t('Waiting for dissemination confirmation.', 'प्रसार पुष्टि की प्रतीक्षा है।')}
                                 </p>
                               </div>
                             </div>
@@ -523,14 +523,14 @@ export default function Prachar() {
                                 <Input
                                   value={pendingSkipText}
                                   onChange={e => setPendingSkipText(e.target.value)}
-                                  placeholder={t('Reason for skipping this channel', 'इस चैनल को छोड़ने का कारण')}
+                                  placeholder={t('Why skip this channel?', 'यह चैनल क्यों छोड़ा गया?')}
                                   className="h-8 text-xs px-2"
                                   autoFocus
                                   onKeyDown={e => { if (e.key === 'Enter') confirmSkip(); }}
                                 />
                                 <div className="flex gap-2">
                                   <Button size="sm" className="h-7 text-[11px] px-3 flex-1" onClick={confirmSkip}>
-                                    {t('Save reason', 'कारण सहेजें')}
+                                    {t('Save note', 'नोट सहेजें')}
                                   </Button>
                                   <Button size="sm" variant="ghost" className="h-7 text-[11px] px-3" onClick={() => { setPendingSkipKey(null); setPendingSkipText(''); }}>
                                     {t('Cancel', 'रद्द')}
@@ -555,8 +555,8 @@ export default function Prachar() {
                         <p className="flex items-center gap-1">
                           <Clock3 className="w-3 h-3 text-warning shrink-0" />
                           {done
-                            ? t('Campaign closure recorded across all required channels.', 'सभी आवश्यक चैनलों पर अभियान पूर्णता दर्ज हो चुकी है।')
-                            : t('Complete remaining channels or document intentional skips to close this campaign.', 'इस अभियान को पूर्ण करने के लिए शेष चैनलों को पूरा करें या कारण सहित स्किप दर्ज करें।')}
+                            ? t('Campaign closure is recorded across all required channels.', 'सभी जरूरी चैनलों पर अभियान पूर्ण दर्ज है।')
+                            : t('Complete the remaining channels or note why any were skipped.', 'बाकी चैनल पूरे करें या बताएं कौन-सा चैनल क्यों छोड़ा गया।')}
                         </p>
                       </div>
 
@@ -589,8 +589,8 @@ export default function Prachar() {
               <h2 className="dashboard-section-heading">{t('Communication kits, posters, and publicity formats', 'संचार किट, पोस्टर और प्रचार प्रारूप')}</h2>
               <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
                 {t(
-                  'Use these ready visual directions to package approved work for faster public circulation. The studio exists to keep message discipline and campaign energy aligned.',
-                  'स्वीकृत कार्य को शीघ्र सार्वजनिक प्रसार हेतु तैयार करने के लिए इन दृश्य प्रारूपों का उपयोग करें। यह कक्ष संदेश अनुशासन और अभियान ऊर्जा को एक दिशा में रखता है।',
+                  'Use these ready formats to package approved work for faster public reach. The studio keeps message discipline and campaign energy aligned.',
+                  'इन तैयार प्रारूपों से स्वीकृत कार्य को जल्दी सार्वजनिक पहुंच तक ले जाएं। यह कक्ष संदेश और अभियान ऊर्जा को एक दिशा में रखता है।',
                 )}
               </p>
             </div>
@@ -610,7 +610,7 @@ export default function Prachar() {
             <p className="shell-copy">{t('Studio use', 'कक्ष उपयोग')}</p>
             <p className="prachar-command-value">{t('Ready asset directions', 'तत्पर दृश्य दिशाएं')}</p>
             <p className="prachar-command-detail">
-              {t('Pick a format that matches the campaign and then keep the published message consistent across every channel.', 'अभियान के अनुरूप प्रारूप चुनें और प्रकाशित संदेश को प्रत्येक चैनल पर एकरूप रखें।')}
+              {t('Pick the format that fits the campaign and keep the message consistent on every channel.', 'अभियान के अनुरूप प्रारूप चुनें और संदेश हर चैनल पर एक जैसा रखें।')}
             </p>
           </div>
           <div className="prachar-command-card">
@@ -624,7 +624,7 @@ export default function Prachar() {
             <p className="shell-copy">{t('Next source', 'अगला स्रोत')}</p>
             <p className="prachar-command-value">{t('Pull ideas from Vimarsh', 'विमर्श से विषय लें')}</p>
             <p className="prachar-command-detail">
-              {t('When campaigns need stronger framing, move back to Vimarsh topics and sharpen the narrative before distribution.', 'जब अभियान को अधिक सशक्त फ्रेमिंग चाहिए, तो वितरण से पहले विमर्श विषयों पर लौटकर कथ्य को स्पष्ट करें।')}
+              {t('When a campaign needs sharper framing, return to Vimarsh and tighten the narrative before distribution.', 'जब अभियान को और स्पष्ट कथ्य चाहिए, तो वितरण से पहले विमर्श पर लौटें और भाषा को सधा लें।')}
             </p>
           </div>
         </div>

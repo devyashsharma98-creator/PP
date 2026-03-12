@@ -307,7 +307,7 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
                 {t('Editorial Maryada Check', 'संपादकीय मर्यादा जांच')} <span className="text-muted-foreground font-normal">({t('all required to submit', 'सभी अनिवार्य')})</span>
               </p>
               <p className="text-xs leading-5 text-muted-foreground">
-                {t('Affirm the institutional values before this aalekh enters the review pipeline.', 'इस आलेख को समीक्षा पंक्ति में भेजने से पहले संस्थागत मूल्यों की पुष्टि करें।')}
+                {t('Confirm these basics before sending the aalekh forward.', 'आलेख आगे भेजने से पहले इन बिंदुओं की पुष्टि करें।')}
               </p>
             </div>
             {valuesItems.map(v => (
@@ -328,7 +328,7 @@ function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) =
 
           <Button type="submit" className="w-full" disabled={!allValuesChecked}>
             <Send className="w-4 h-4 mr-2" />
-            {allValuesChecked ? t("Submit for Unit Head Review", "यूनिट प्रमुख समीक्षा के लिए भेजें") : t("Check all values to submit", "सभी मूल्यों की जांच करें")}
+            {allValuesChecked ? t("Send to Unit Head Review", "यूनिट प्रमुख समीक्षा को भेजें") : t("Check all values to send", "भेजने से पहले सभी बिंदु जांचें")}
           </Button>
         </form>
       </DialogContent>
@@ -369,7 +369,7 @@ function EditForwardDialog({
           <DialogTitle>{actionLabel}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-xs text-muted-foreground font-devanagari">{t('Review and optionally edit before forwarding.', 'आगे भेजने से पहले समीक्षा करें और आवश्यकतानुसार संपादित करें।')}</p>
+          <p className="text-xs text-muted-foreground font-devanagari">{t('Review it here and edit if needed before sending ahead.', 'यहां समीक्षा करें और जरूरत हो तो सुधारकर आगे भेजें।')}</p>
           <div>
             <Label>{t('Title', 'शीर्षक')}</Label>
             <Input value={title} onChange={e => setTitle(e.target.value)} />
@@ -385,7 +385,7 @@ function EditForwardDialog({
           {showReviewNotes && (
             <div>
               <Label className="font-devanagari">{t('Review Notes for Writer', 'लेखक के लिए समीक्षा टिप्पणी')} <span className="text-muted-foreground text-xs font-normal">({t('optional', 'वैकल्पिक')})</span></Label>
-              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={2} placeholder={t('Add feedback for the writer...', 'लेखक के लिए सुझाव लिखें...')} />
+              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={2} placeholder={t('Add a short note for the writer...', 'लेखक के लिए छोटा-सा नोट लिखें...')} />
             </div>
           )}
           <Button
@@ -438,7 +438,7 @@ function ReturnWithNotesDialog({
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
-              placeholder={t('Tell the writer what to improve...', 'लेखक को बताएं कि क्या सुधारना है...')}
+              placeholder={t('Tell the writer what to improve next...', 'लेखक को बताएं अगला सुधार क्या है...')}
               autoFocus
             />
           </div>
@@ -494,33 +494,33 @@ export default function Aalekh() {
           sealHi="आलेख लेखन कक्ष"
           titleEn="Draft and Submit Aalekh"
           titleHi="आलेख लिखें और समीक्षा हेतु भेजें"
-          descriptionEn="Shape your article with clarity, keep revision notes close, and submit each draft into the publication pipeline with confidence."
-          descriptionHi="अपने आलेख को स्पष्टता के साथ तैयार करें, संशोधन टिप्पणियों को साथ रखें, और प्रत्येक प्रारूप को प्रकाशन प्रक्रिया में विश्वास के साथ भेजें।"
+          descriptionEn="Write clearly, revise returned drafts, and send each aalekh into review."
+          descriptionHi="स्पष्ट लिखें, लौटे मसौदे सुधारें और हर आलेख समीक्षा में भेजें।"
           action={<WriteArticleDialog onSubmit={handleSubmit} />}
           contexts={[
             {
               labelEn: "Current lane",
               labelHi: "वर्तमान चरण",
-              valueEn: "Writing and revision lane",
-              valueHi: "लेखन और संशोधन चरण",
-              detailEn: "Draft your aalekh, revise returned articles, and prepare them for unit review.",
-              detailHi: "अपना आलेख लिखें, लौटे हुए मसौदों को सुधारें, और उन्हें यूनिट समीक्षा के लिए तैयार करें।",
+              valueEn: "Draft, revise, and send forward",
+              valueHi: "लिखें, सुधारें, आगे भेजें",
+              detailEn: "Work on new drafts, revise returned ones, and get them ready for unit review.",
+              detailHi: "नए मसौदे लिखें, लौटे हुए सुधारें और उन्हें यूनिट समीक्षा के लिए तैयार करें।",
             },
             {
               labelEn: "Next movement",
               labelHi: "अगला प्रवाह",
-              valueEn: "Submit for Unit Head review",
-              valueHi: "यूनिट प्रमुख समीक्षा हेतु भेजें",
-              detailEn: "Every completed draft moves first through the unit editorial gate before publication.",
-              detailHi: "प्रकाशन से पहले हर पूरा मसौदा पहले यूनिट संपादकीय चरण से गुजरता है।",
+              valueEn: "Send to Unit Head review",
+              valueHi: "यूनिट प्रमुख समीक्षा को भेजें",
+              detailEn: "Each ready draft first passes through the unit review desk.",
+              detailHi: "हर तैयार मसौदा पहले यूनिट समीक्षा कक्ष से गुजरता है।",
             },
             {
               labelEn: "Published intent",
               labelHi: "प्रकाशन उद्देश्य",
               valueEn: "Ideas shaped for institutional publication",
               valueHi: "संस्थागत प्रकाशन हेतु तैयार विचार",
-              detailEn: "Strong writing here becomes reviewed, approved, and published aalekh for the wider feed.",
-              detailHi: "यहाँ की मजबूत लेखनी समीक्षा और अनुमोदन के बाद व्यापक फ़ीड में प्रकाशित आलेख बनती है।",
+              detailEn: "Strong writing here moves into review and then into the published feed.",
+              detailHi: "यहां की मजबूत लेखनी पहले समीक्षा में जाती है, फिर प्रकाशित फ़ीड तक पहुंचती है।",
             },
           ]}
         />
@@ -529,7 +529,7 @@ export default function Aalekh() {
           <Card className="glass-card">
             <CardContent className="py-10 text-center text-muted-foreground text-sm space-y-3">
               <PenLine className="w-8 h-8 mx-auto opacity-40" />
-              <p>{t("No articles yet. Write your first article!", "अभी कोई आलेख नहीं। अपना पहला आलेख लिखें!")}</p>
+              <p>{t("No aalekh yet. Write your first one.", "अभी कोई आलेख नहीं। पहला आलेख लिखें।")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -558,32 +558,32 @@ export default function Aalekh() {
           sealHi="प्रथम संपादकीय समीक्षा कक्ष"
           titleEn="Review and Route Aalekh"
           titleHi="आलेख की समीक्षा करें और आगे बढ़ाएँ"
-          descriptionEn="This desk receives writer submissions first. Review each draft carefully, return what needs work, and forward the ready pieces into the aayam lane."
-          descriptionHi="यह कक्ष लेखक के मसौदे सबसे पहले प्राप्त करता है। प्रत्येक आलेख की सावधानी से समीक्षा करें, आवश्यक होने पर वापस भेजें, और तैयार सामग्री को आयाम चरण में अग्रेषित करें।"
+          descriptionEn="Review incoming drafts, send back what needs work, and move ready pieces into the aayam lane."
+          descriptionHi="आए हुए मसौदे देखें, जो अधूरे हों उन्हें लौटाएं और तैयार सामग्री को आयाम चरण में भेजें।"
           contexts={[
             {
               labelEn: "Current lane",
               labelHi: "वर्तमान चरण",
               valueEn: "Pending first-review queue",
               valueHi: "प्रथम समीक्षा प्रतीक्षारत पंक्ति",
-              detailEn: "Return with notes or forward to aayam once the draft is ready for thematic approval.",
-              detailHi: "जब मसौदा तैयार हो जाए तो टिप्पणियों सहित वापस भेजें या आयाम चरण में अग्रेषित करें।",
+              detailEn: "Send notes back when needed, or move the draft to aayam once it is ready.",
+              detailHi: "ज़रूरत हो तो नोट के साथ लौटाएं, नहीं तो तैयार मसौदा आयाम को भेजें।",
             },
             {
               labelEn: "Editorial responsibility",
               labelHi: "संपादकीय दायित्व",
               valueEn: "Strengthen clarity before escalation",
               valueHi: "अगले चरण से पहले स्पष्टता सुदृढ़ करें",
-              detailEn: "This is the quality gate between initial writing and final publication review.",
-              detailHi: "यह प्रारंभिक लेखन और अंतिम प्रकाशन समीक्षा के बीच की गुणवत्ता-परीक्षा है।",
+              detailEn: "This is the quality gate between first writing and final publication review.",
+              detailHi: "यह शुरुआती लेखन और अंतिम प्रकाशन समीक्षा के बीच की गुणवत्ता जांच है।",
             },
             {
               labelEn: "Next movement",
               labelHi: "अगला प्रवाह",
               valueEn: "Forward to Aayam Pramukh",
               valueHi: "आयाम प्रमुख को भेजें",
-              detailEn: "Approved drafts move onward for thematic scrutiny and publication approval.",
-              detailHi: "स्वीकृत मसौदे आगे विषयगत समीक्षा और प्रकाशन अनुमोदन के लिए जाते हैं।",
+              detailEn: "Approved drafts move ahead for thematic review and publication approval.",
+              detailHi: "स्वीकृत मसौदे आगे विषयगत समीक्षा और प्रकाशन अनुमोदन में जाते हैं।",
             },
           ]}
         />
@@ -594,12 +594,12 @@ export default function Aalekh() {
               <Clock className="w-4 h-4 text-amber-500" /> {t(`Pending First-Review Queue (${queue.length})`, `प्रथम समीक्षा प्रतीक्षारत (${queue.length})`)}
             </CardTitle>
             <p className="text-sm leading-6 text-muted-foreground">
-              {t("Return with notes or forward to aayam", "टिप्पणियों सहित वापस भेजें या आयाम को अग्रेषित करें")}
+              {t("Return with notes or send to aayam", "टिप्पणियों के साथ लौटाएं या आयाम को भेजें")}
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4 text-center">{t('All clear! No articles pending review.', 'सब ठीक है! कोई आलेख समीक्षा प्रतीक्षित नहीं।')}</p>
+              <p className="text-muted-foreground text-sm py-4 text-center">{t('No aalekh are waiting for review.', 'अभी कोई आलेख समीक्षा में प्रतीक्षित नहीं है।')}</p>
             ) : (
               queue.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -610,7 +610,7 @@ export default function Aalekh() {
                         <EditForwardDialog
                           article={a}
                           targetStatus="Pending Aayam Review"
-                          actionLabel={t("Edit & Forward to Aayam Pramukh", "संपादित करें और आयाम प्रमुख को भेजें")}
+                          actionLabel={t("Review and Send to Aayam", "समीक्षा करें और आयाम को भेजें")}
                           onDone={async (edits) => {
                             const ok = await updateArticleStatus(a.id, "Pending Aayam Review", edits);
                             if (!ok) return false;
@@ -668,31 +668,31 @@ export default function Aalekh() {
           sealHi="आलेख प्रकाशन कक्ष"
           titleEn="Approve and Publish Aalekh"
           titleHi="आलेख अनुमोदित करें और प्रकाशित करें"
-          descriptionEn="This publication desk receives reviewed drafts, makes the final editorial call, and moves approved pieces into the institutional archive and feed."
-          descriptionHi="यह प्रकाशन कक्ष समीक्षित मसौदे प्राप्त करता है, अंतिम संपादकीय निर्णय लेता है, और स्वीकृत सामग्री को संस्थागत अभिलेख तथा फ़ीड में प्रकाशित करता है।"
+          descriptionEn="Review the final drafts, make the last editorial call, and publish approved aalekh into the archive and feed."
+          descriptionHi="अंतिम मसौदे देखें, आखिरी संपादकीय निर्णय लें और स्वीकृत आलेख को अभिलेख व फ़ीड में प्रकाशित करें।"
           contexts={[
             {
               labelEn: "Current lane",
               labelHi: "वर्तमान चरण",
               valueEn: "Final approval and publication lane",
               valueHi: "अंतिम अनुमोदन और प्रकाशन चरण",
-              detailEn: "Review forwarded aalekh, approve the ready ones, and return the rest with clear notes.",
-              detailHi: "अग्रेषित आलेखों की समीक्षा करें, तैयार सामग्री को अनुमोदित करें, और शेष को स्पष्ट टिप्पणियों सहित वापस भेजें।",
+              detailEn: "Approve the ready aalekh and return the rest with clear notes.",
+              detailHi: "तैयार आलेख अनुमोदित करें और बाकी को साफ टिप्पणियों के साथ लौटाएं।",
             },
             {
               labelEn: "Published record",
               labelHi: "प्रकाशित अभिलेख",
               valueEn: "Institutional archive in motion",
               valueHi: "गतिशील संस्थागत अभिलेख",
-              detailEn: "Every published aalekh becomes part of the visible intellectual record of the organisation.",
-              detailHi: "प्रत्येक प्रकाशित आलेख संगठन के दृश्य बौद्धिक अभिलेख का हिस्सा बनता है।",
+              detailEn: "Each published aalekh becomes part of the organisation's visible intellectual record.",
+              detailHi: "हर प्रकाशित आलेख संगठन के दिखने वाले बौद्धिक अभिलेख का हिस्सा बनता है।",
             },
             {
               labelEn: "Editorial standard",
               labelHi: "संपादकीय मानक",
               valueEn: "Final thematic scrutiny",
               valueHi: "अंतिम विषयगत समीक्षा",
-              detailEn: "Use this desk to preserve tone, clarity, and mission alignment before publication.",
+              detailEn: "Use this desk to keep tone, clarity, and mission alignment intact before publication.",
               detailHi: "प्रकाशन से पहले स्वर, स्पष्टता और मिशन-संगति बनाए रखने के लिए इस कक्ष का उपयोग करें।",
             },
           ]}
@@ -729,7 +729,7 @@ export default function Aalekh() {
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4 text-center">{t('No articles pending approval.', 'अनुमोदन प्रतीक्षित कोई आलेख नहीं।')}</p>
+              <p className="text-muted-foreground text-sm py-4 text-center">{t('Nothing is waiting for approval.', 'अभी अनुमोदन के लिए कुछ भी प्रतीक्षित नहीं है।')}</p>
             ) : (
               queue.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -740,7 +740,7 @@ export default function Aalekh() {
                         <EditForwardDialog
                           article={a}
                           targetStatus="Published"
-                          actionLabel={t("Edit & Approve to Publish", "संपादित करें और प्रकाशित करें")}
+                          actionLabel={t("Review and Publish", "समीक्षा करें और प्रकाशित करें")}
                           onDone={async (edits) => {
                             const ok = await updateArticleStatus(a.id, "Published", edits);
                             if (!ok) return false;
@@ -782,13 +782,13 @@ export default function Aalekh() {
               <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published Aalekh Archive (${published.length})`, `प्रकाशित आलेख अभिलेख (${published.length})`)}
             </CardTitle>
             <p className="text-sm leading-6 text-muted-foreground">
-              {t("Institutional publication record and approved aalekh archive.", "संस्थागत प्रकाशन अभिलेख और अनुमोदित आलेख संग्रह।")}
+              {t("Published aalekh record and approved archive.", "प्रकाशित आलेख अभिलेख और अनुमोदित संग्रह।")}
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {published.length === 0 ? (
               <p className="text-muted-foreground text-sm py-4 text-center">
-                {t("No aalekh published yet. Approved work will appear here.", "अभी कोई आलेख प्रकाशित नहीं है। अनुमोदित सामग्री यहाँ दिखाई देगी।")}
+                {t("No aalekh are published yet. Approved work will appear here.", "अभी कोई आलेख प्रकाशित नहीं है। अनुमोदित सामग्री यहीं दिखाई देगी।")}
               </p>
             ) : (
               published.map((a, i) => (

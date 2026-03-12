@@ -102,8 +102,8 @@ const ROLE_COPY: Record<string, {
     cadenceDetailHi: '\u092f\u0939 \u0926\u0943\u0936\u094d\u092f \u0906\u092f\u093e\u092e \u0917\u0924\u093f \u0914\u0930 \u0905\u0902\u0924\u093f\u092e \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0915\u094b \u090f\u0915 \u0939\u0940 \u0915\u094d\u0930\u092e \u092e\u0947\u0902 \u0932\u093e\u0924\u093e \u0939\u0948\u0964',
     reminderEn: 'Final movement matters most',
     reminderHi: '\u0905\u0902\u0924\u093f\u092e \u0917\u0924\u093f \u0938\u092c\u0938\u0947 \u092e\u0939\u0924\u094d\u0935\u092a\u0942\u0930\u094d\u0923',
-    reminderDetailEn: 'Use the right ledger to keep pending approvals and major gatherings moving.',
-    reminderDetailHi: '\u0909\u091a\u093f\u0924 \u0932\u0947\u0916\u093e \u0926\u0947\u0916\u0915\u0930 \u0932\u0902\u092c\u093f\u0924 \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0914\u0930 \u092e\u0941\u0916\u094d\u092f \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0906\u0917\u0947 \u092c\u0922\u093c\u093e\u090f\u0902\u0964',
+    reminderDetailEn: 'Keep approvals and major gatherings moving on time.',
+    reminderDetailHi: '\u0932\u0902\u092c\u093f\u0924 \u0905\u0928\u0941\u092e\u094b\u0926\u0928 \u0914\u0930 \u092e\u0941\u0916\u094d\u092f \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0938\u092e\u092f \u092a\u0930 \u0906\u0917\u0947 \u092c\u0922\u093c\u093e\u090f\u0902\u0964',
   },
   aayam_pramukh: {
     roleEn: 'Aayam Pramukh',
@@ -120,8 +120,8 @@ const ROLE_COPY: Record<string, {
     cadenceDetailHi: '\u0905\u0928\u0941\u092e\u094b\u0926\u0928, \u092a\u094d\u0930\u0915\u093e\u0936\u093f\u0924 \u0938\u093e\u092e\u0917\u094d\u0930\u0940 \u0914\u0930 \u0906\u0917\u093e\u092e\u0940 \u091c\u0928\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0917\u0924\u093f\u0935\u093f\u0927\u093f \u0915\u094b \u0938\u0902\u0930\u0947\u0916\u093f\u0924 \u0930\u0916\u0947\u0902\u0964',
     reminderEn: 'Review before reach',
     reminderHi: '\u092a\u0939\u0932\u0947 \u0938\u092e\u0940\u0915\u094d\u0937\u093e, \u092b\u093f\u0930 \u092a\u0939\u0941\u0902\u091a',
-    reminderDetailEn: 'The day ledger helps keep thematic review from slipping behind programme dates.',
-    reminderDetailHi: '\u0926\u093f\u0935\u0938 \u0932\u0947\u0916\u093e \u0906\u092f\u093e\u092e \u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0915\u094b \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0924\u093f\u0925\u093f \u0938\u0947 \u092a\u0940\u091b\u0947 \u091c\u093e\u0928\u0947 \u0938\u0947 \u0930\u094b\u0915\u0924\u093e \u0939\u0948\u0964',
+    reminderDetailEn: 'Keep review work aligned with programme dates.',
+    reminderDetailHi: '\u0938\u092e\u0940\u0915\u094d\u0937\u093e \u0915\u093e\u0930\u094d\u092f \u0915\u094b \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0924\u093f\u0925\u093f \u0915\u0947 \u0938\u093e\u0925 \u0938\u0902\u0930\u0947\u0916\u093f\u0924 \u0930\u0916\u0947\u0902\u0964',
   },
   unit_head: {
     roleEn: 'Unit Head',
@@ -138,8 +138,8 @@ const ROLE_COPY: Record<string, {
     cadenceDetailHi: '\u092e\u093e\u0938\u093f\u0915 \u0926\u0943\u0936\u094d\u092f \u0938\u094d\u0925\u093e\u0928\u0940\u092f \u092a\u094d\u0930\u0938\u094d\u0924\u0941\u0924\u093f\u092f\u094b\u0902 \u0914\u0930 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0915\u093e\u0930\u094d\u092f\u093e\u0928\u094d\u0935\u092f\u0928 \u0915\u094b \u090f\u0915\u0938\u093e\u0925 \u0930\u0916\u0924\u093e \u0939\u0948\u0964',
     reminderEn: 'Drafts need movement',
     reminderHi: '\u092a\u094d\u0930\u093e\u0930\u0942\u092a \u0915\u094b \u0917\u0924\u093f \u091a\u093e\u0939\u093f\u090f',
-    reminderDetailEn: 'Use the reminders rail to keep unfinished unit work from stalling the month.',
-    reminderDetailHi: '\u0938\u094d\u092e\u0930\u0923 \u0926\u093f\u0936\u093e \u0938\u0947 \u0905\u0927\u0942\u0930\u093e \u0907\u0915\u093e\u0908 \u0915\u093e\u0930\u094d\u092f \u092e\u0939\u0940\u0928\u0947 \u0915\u094b \u0930\u0941\u0915\u0928\u0947 \u0938\u0947 \u0930\u094b\u0915\u0947\u0902\u0964',
+    reminderDetailEn: 'Use reminders to keep unit work from slipping.',
+    reminderDetailHi: '\u0938\u094d\u092e\u0930\u0923 \u0915\u0947 \u0938\u093e\u0925 \u0907\u0915\u093e\u0908 \u0915\u093e\u0930\u094d\u092f \u0915\u094b \u092a\u093f\u091b\u0921\u093c\u0928\u0947 \u0938\u0947 \u0930\u094b\u0915\u0947\u0902\u0964',
   },
   karyakarta: {
     roleEn: 'Karyakarta',
@@ -156,8 +156,8 @@ const ROLE_COPY: Record<string, {
     cadenceDetailHi: '\u092f\u0939 \u092a\u0902\u091a\u093e\u0902\u0917 \u0928\u093f\u092f\u092e\u093f\u0924 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0914\u0930 \u0906\u0917\u093e\u092e\u0940 \u0917\u0924\u093f\u0935\u093f\u0927\u093f\u092f\u094b\u0902 \u0915\u094b \u0938\u0930\u0932 \u0930\u0916\u0924\u093e \u0939\u0948\u0964',
     reminderEn: 'Stay aligned with the month',
     reminderHi: '\u092e\u0939\u0940\u0928\u0947 \u0915\u0947 \u0938\u093e\u0925 \u0938\u0902\u0930\u0947\u0916\u093f\u0924 \u0930\u0939\u0947\u0902',
-    reminderDetailEn: 'The right rail keeps the next institutional commitments visible without clutter.',
-    reminderDetailHi: '\u0926\u093e\u0908\u0902 \u092a\u091f\u094d\u091f\u0940 \u0905\u0917\u0932\u0947 \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0926\u093e\u092f\u093f\u0924\u094d\u0935\u094b\u0902 \u0915\u094b \u0938\u094d\u092a\u0937\u094d\u091f \u0930\u0916\u0924\u0940 \u0939\u0948\u0964',
+    reminderDetailEn: 'The right rail keeps the next commitments in view.',
+    reminderDetailHi: '\u0926\u093e\u0908\u0902 \u092a\u091f\u094d\u091f\u0940 \u0905\u0917\u0932\u0947 \u0926\u093e\u092f\u093f\u0924\u094d\u0935 \u0938\u094d\u092a\u0937\u094d\u091f \u0930\u0916\u0924\u0940 \u0939\u0948\u0964',
   },
 };
 
@@ -401,8 +401,8 @@ export default function AnnualCalendar() {
                 </h1>
                 <p className={cn('max-w-2xl text-sm leading-7 text-muted-foreground md:text-base', lang === 'hi' && 'font-devanagari')}>
                   {t(
-                    'This calendar aligns institutional rhythm, upcoming work, and pending coordination for every internal role.',
-                    '\u092f\u0939 \u092a\u0902\u091a\u093e\u0902\u0917 \u092a\u094d\u0930\u0924\u094d\u092f\u0947\u0915 \u0906\u0902\u0924\u0930\u093f\u0915 \u092d\u0942\u092e\u093f\u0915\u093e \u0915\u0947 \u0932\u093f\u090f \u0938\u0902\u0938\u094d\u0925\u093e\u0917\u0924 \u0917\u0924\u093f, \u0906\u0917\u093e\u092e\u0940 \u0915\u093e\u0930\u094d\u092f \u0914\u0930 \u0932\u0902\u092c\u093f\u0924 \u0938\u092e\u0928\u094d\u0935\u092f \u0915\u094b \u090f\u0915 \u0938\u093e\u0925 \u0932\u093e\u0924\u093e \u0939\u0948\u0964',
+                    'Track monthly rhythm, upcoming work, and coordination in one view.',
+                    '\u092f\u0939 \u092a\u0902\u091a\u093e\u0902\u0917 \u092e\u093e\u0938\u093f\u0915 \u0917\u0924\u093f, \u0906\u0917\u093e\u092e\u0940 \u0915\u093e\u0930\u094d\u092f \u0914\u0930 \u091c\u0930\u0942\u0930\u0940 \u0938\u092e\u0928\u094d\u0935\u092f \u0915\u094b \u090f\u0915 \u0938\u093e\u0925 \u0926\u093f\u0916\u093e\u0924\u093e \u0939\u0948\u0964',
                   )}
                 </p>
               </div>
@@ -457,8 +457,8 @@ export default function AnnualCalendar() {
               <span className={cn('text-[11px] font-semibold uppercase tracking-[0.18em] text-warning', lang === 'hi' && 'font-devanagari')}>{t('Pending Coordination', '\u0932\u0902\u092c\u093f\u0924 \u0938\u092e\u0928\u094d\u0935\u092f')}</span>
               <p className={cn('text-sm font-medium text-warning', lang === 'hi' && 'font-devanagari')}>
                 {t(
-                  `${pendingAction.length} event${pendingAction.length > 1 ? 's' : ''} need${pendingAction.length === 1 ? 's' : ''} your action`,
-                  `${pendingAction.length} कार्यक्रम आपकी कार्यवाही प्रतीक्षित`
+                  `${pendingAction.length} event${pendingAction.length > 1 ? 's' : ''} need${pendingAction.length === 1 ? 's' : ''} attention`,
+                  `${pendingAction.length} कार्यक्रम पर अभी ध्यान चाहिए`
                 )}
               </p>
               <div className="flex flex-wrap gap-1.5 ml-auto">
@@ -478,7 +478,7 @@ export default function AnnualCalendar() {
       <div className="space-y-2">
         <span className="section-seal">{t('Hybrid Planning View', '\u0938\u0902\u092f\u0941\u0915\u094d\u0924 \u092f\u094b\u091c\u0928\u093e \u0926\u0943\u0936\u094d\u092f')}</span>
         <p className={cn('text-sm leading-6 text-muted-foreground', lang === 'hi' && 'font-devanagari')}>
-          {t('Month Grid on the left. Agenda, reminders, and selected-day details on the right.', '\u092c\u093e\u0908\u0902 \u0913\u0930 \u092e\u093e\u0939 \u0926\u0943\u0936\u094d\u092f\u0964 \u0926\u093e\u0908\u0902 \u0913\u0930 \u0915\u093e\u0930\u094d\u092f\u0938\u0942\u091a\u0940, \u0938\u094d\u092e\u0930\u0923 \u0914\u0930 \u091a\u092f\u0928\u093f\u0924 \u0926\u093f\u0935\u0938 \u0935\u093f\u0935\u0930\u0923\u0964')}
+          {t('Month Grid left. Agenda, reminders, and day details right.', '\u092c\u093e\u0908\u0902 \u0913\u0930 \u092e\u093e\u0939 \u0926\u0943\u0936\u094d\u092f\u0964 \u0926\u093e\u0908\u0902 \u0913\u0930 \u0915\u093e\u0930\u094d\u092f\u0938\u0942\u091a\u0940, \u0938\u094d\u092e\u0930\u0923 \u0914\u0930 \u0926\u093f\u0935\u0938 \u0935\u093f\u0935\u0930\u0923\u0964')}
         </p>
       </div>
 
