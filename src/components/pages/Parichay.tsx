@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   ArrowRight, BookOpen, Flame, MessagesSquare,
   Megaphone, Compass, Sparkles, Star,
@@ -121,7 +121,14 @@ const PANCH = [
   { num: "५", hi: "स्व का बोध", en: "Swa Bodh", icon: Zap },
 ];
 
-const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } } };
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
 
 export default function Parichay() {
   const { lang } = useAppContext();
