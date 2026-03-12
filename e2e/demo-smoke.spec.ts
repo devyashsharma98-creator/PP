@@ -317,7 +317,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await page.waitForLoadState("networkidle");
 
     await expect(page.getByText(/Hybrid Planning View/i)).toBeVisible();
-    await expect(page.getByText(/Month Grid/i)).toBeVisible();
+    await expect(page.getByText("Month Grid", { exact: true })).toBeVisible();
     await expect(page.getByText(/Selected Day Ledger/i)).toBeVisible();
   });
 
@@ -334,7 +334,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Agenda and Reminders/i)).toBeVisible();
     await expect(page.getByText(/Upcoming Institutional Rhythm/i)).toBeVisible();
-    await expect(page.getByText(/Pending Coordination/i)).toBeVisible();
+    await expect(page.getByText("Pending Coordination", { exact: true })).toBeVisible();
   });
   test("10 — logout button visible when authenticated", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);

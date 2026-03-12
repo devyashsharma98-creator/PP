@@ -445,6 +445,50 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="home-section-shell">
+        <SectionHeading
+          eyebrowEn="Choose Your Path"
+          eyebrowHi="अपना मार्ग चुनें"
+          titleEn="Three ways to enter the institution"
+          titleHi="प्रज्ञा प्रवाह से जुड़ने के तीन स्वाभाविक प्रवेश-द्वार"
+          bodyEn="First-time visitors, thinkers, and organisers should be able to recognise where they belong without reading the entire site."
+          bodyHi="प्रथम आगंतुक, चिंतक और आयोजक बिना पूरा पोर्टल पढ़े यह समझ सकें कि उनके लिए प्रवेश का सही मार्ग कौन-सा है।"
+        />
+
+        <div className="mt-16 grid gap-6 lg:grid-cols-3">
+          {audiencePaths.map((path, index) => (
+            <motion.div
+              key={path.titleEn}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08, duration: 0.5 }}
+              className="group flex h-full flex-col rounded-[2rem] border border-border/60 bg-card/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-card/60"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary transition-transform group-hover:scale-105">
+                <path.icon className="h-7 w-7" />
+              </div>
+              <div className="mt-6 space-y-2">
+                <h3 className="text-2xl font-bold tracking-tight">{path.titleEn}</h3>
+                <p className="font-devanagari text-base font-medium text-foreground/80">{path.titleHi}</p>
+              </div>
+              <div className="mt-5 flex-1 space-y-4">
+                <p className="text-sm leading-relaxed text-muted-foreground">{path.bodyEn}</p>
+                <p className="font-devanagari text-sm leading-relaxed text-foreground/70">{path.bodyHi}</p>
+              </div>
+              <div className="mt-8">
+                <Button asChild className="h-12 rounded-full px-6 shadow-sm shadow-primary/10">
+                  <Link href={path.href}>
+                    {isHi ? path.ctaHi : path.ctaEn}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       <section className="home-section-shell overflow-hidden">
         <div className="grid gap-12 lg:grid-cols-[1fr_0.8fr] lg:items-center">
           <div className="space-y-12">
