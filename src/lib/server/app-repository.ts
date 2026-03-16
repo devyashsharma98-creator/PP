@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type {
-  AalekhaArticle,
+  AalekhArticle,
   AppActionRequest,
   AppBootstrapPayload,
   ArticleStatus,
@@ -421,7 +421,7 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
     }
   }
 
-  const articles = visibleArticleRows.map<AalekhaArticle>((a) => {
+  const articles = visibleArticleRows.map<AalekhArticle>((a) => {
     const values = asObject(a.values_checklist);
     return {
       id: a.id,

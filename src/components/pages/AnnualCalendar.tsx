@@ -237,7 +237,7 @@ function EventCard({ event, lang, actionLabel, onAction }: {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AnnualCalendar() {
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const [year, setYear]       = useState(today.getFullYear());
   const [month, setMonth]     = useState(today.getMonth());
   const [selDay, setSelDay]   = useState<number>(today.getDate());
@@ -289,7 +289,7 @@ export default function AnnualCalendar() {
       .filter(e => new Date(e.date) >= new Date(today.toDateString()))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 8),
-    [allEvents]);
+    [allEvents, today]);
 
   // Events needing action (per role)
   const pendingAction = useMemo(() => {

@@ -36,7 +36,7 @@ function isProtectedInternalApi(pathname: string) {
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  if (isStaticAsset(pathname) || isPublicPath(pathname)) {
+  if (isStaticAsset(pathname) || isPublicPath(pathname) || process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === 'true') {
     return NextResponse.next();
   }
 

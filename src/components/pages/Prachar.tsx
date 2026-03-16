@@ -232,14 +232,12 @@ export default function Prachar() {
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
   const [pendingSkipText, setPendingSkipText] = useState('');
-
-  const getStatus = (eventId: string) =>
-    pracharStatuses.find(p => p.eventId === eventId) ?? {
-      eventId,
-      platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
-      skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null },
-      templateReference: null,
-    };
+const getStatus = useCallback((eventId: string) =>
+  pracharStatuses.find(p => p.eventId === eventId) ?? {
+    eventId,
+    platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
+    skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null },
+  }, [pracharStatuses]);
 
   const isDone = (eventId: string) => {
     const s = getStatus(eventId);
@@ -274,7 +272,7 @@ export default function Prachar() {
       openFollowThrough,
       completionRate: publishedEvents.length === 0 ? 0 : Math.round(((publishedEvents.length - incompleteCount) / publishedEvents.length) * 100),
     };
-  }, [incompleteCount, pracharStatuses, publishedEvents]);
+  }, [incompleteCount, publishedEvents, getStatus]);
   const mastheadContexts = useMemo(
     () => roleCopy(role, permissions.canUpdatePrachar, incompleteCount),
     [incompleteCount, permissions.canUpdatePrachar, role],

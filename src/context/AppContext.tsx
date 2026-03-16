@@ -106,7 +106,7 @@ export interface GatividhiEvent {
   vrittStatus?: VrittStatus;
 }
 
-export interface AalekhaArticle {
+export interface AalekhArticle {
   id: string;
   title: string;
   content: string;
@@ -159,25 +159,16 @@ interface AppState {
   finalizePoll: (eventId: string, pollId: string, winnerOptionId: string) => Promise<boolean>;
   pracharStatuses: PracharStatus[];
   updatePracharPlatform: (eventId: string, platform: PracharPlatform, done: boolean, skipReason?: string | null) => Promise<boolean>;
-  articles: AalekhaArticle[];
-  addArticle: (article: Omit<AalekhaArticle, 'id' | 'status'>) => Promise<boolean>;
+  articles: AalekhArticle[];
+  addArticle: (article: Omit<AalekhArticle, 'id' | 'status'>) => Promise<boolean>;
   updateArticleStatus: (
     id: string,
     status: ArticleStatus,
-    edits?: Partial<Pick<AalekhaArticle, 'title' | 'content' | 'summary'>>,
+    edits?: Partial<Pick<AalekhArticle, 'title' | 'content' | 'summary'>>,
     extra?: { documentUrl?: string | null; reviewNotes?: string | null },
   ) => Promise<boolean>;
   vimarshTopics: VimarshTopic[];
 }
-
-const roleLabels: Record<Role, string> = {
-  unit_head: 'Unit Head',
-  aayam_pramukh: 'Aayam Pramukh',
-  vibhag_pramukh: 'Vibhag Pramukh',
-  karyakarta: 'Karyakarta',
-};
-
-export { roleLabels };
 
 const defaultPermissions: AppPermissionSummary = {
   canReadInternalBootstrap: false,
@@ -299,7 +290,7 @@ const initialPracharStatuses: PracharStatus[] = [
   { eventId: '4', platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false }, skipReasons: { ...defaultSkipReasons } },
 ];
 
-const initialArticles: AalekhaArticle[] = [
+const initialArticles: AalekhArticle[] = [
   {
     id: 'art1',
     title: 'भारतीय ज्ञान परंपरा और आधुनिक शिक्षा',
@@ -353,7 +344,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lang, setLang] = useState<Lang>('en');
   const [events, setEvents] = useState<GatividhiEvent[]>(demoDataFallbackEnabled ? initialEvents : []);
   const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>(demoDataFallbackEnabled ? initialPracharStatuses : []);
-  const [articles, setArticles] = useState<AalekhaArticle[]>(demoDataFallbackEnabled ? initialArticles : []);
+  const [articles, setArticles] = useState<AalekhArticle[]>(demoDataFallbackEnabled ? initialArticles : []);
   const [vimarshTopics, setVimarshTopics] = useState<VimarshTopic[]>([]);
 
   const role = demoRoleSwitchEnabled && demoRoleOverride ? demoRoleOverride : serverRole;
@@ -373,7 +364,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const applyBootstrap = useCallback((payload: AppBootstrapPayload) => {
     if (Array.isArray(payload.events)) setEvents(payload.events as GatividhiEvent[]);
     if (Array.isArray(payload.pracharStatuses)) setPracharStatuses(payload.pracharStatuses as PracharStatus[]);
-    if (Array.isArray(payload.articles)) setArticles(payload.articles as AalekhaArticle[]);
+    if (Array.isArray(payload.articles)) setArticles(payload.articles as AalekhArticle[]);
     if (Array.isArray(payload.vimarshTopics)) setVimarshTopics(payload.vimarshTopics);
     if (payload.viewer) {
       setViewer(payload.viewer);
@@ -385,19 +376,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loadRemoteBootstrap = useCallback(async () => {
     try {
       const res = await fetch('/api/app/bootstrap', { cache: 'no-store' });
-      if (res.status === 401) {
+      if (res.status === 401 || res.status === 403) {
         setViewer(null);
         setPermissions(defaultPermissions);
         setServerRole('karyakarta');
-        clearInternalData();
-        setAuthReady(true);
-        return;
-      }
-      if (res.status === 403) {
-        setViewer(null);
-        setPermissions(defaultPermissions);
-        setServerRole('karyakarta');
-        clearInternalData();
+        if (!demoDataFallbackEnabled) {
+          clearInternalData();
+        }
         setAuthReady(true);
         return;
       }
@@ -417,6 +402,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [applyBootstrap, clearInternalData, demoDataFallbackEnabled]);
 
   const persistAppAction = useCallback(async (action: AppActionRequest, opts?: { refresh?: boolean }) => {
+    if (demoDataFallbackEnabled) {
+      // Handle local state updates for demo fallback
+      if (action.action === 'addArticle') {
+        const newArt: AalekhArticle = {
+          ...action.payload,
+          id: `art-${Date.now()}`,
+          status: 'Pending Unit Head Review',
+        };
+        setArticles(prev => [newArt, ...prev]);
+        return true;
+      }
+      if (action.action === 'updateArticleStatus') {
+        const { id, status, edits, reviewNotes } = action.payload;
+        setArticles(prev => prev.map(a => 
+          a.id === id 
+            ? { ...a, ...edits, status, latestReviewNotes: reviewNotes ?? null } 
+            : a
+        ));
+        return true;
+      }
+      if (action.action === 'createEvent') {
+        const newEv: GatividhiEvent = {
+          ...action.payload,
+          id: `ev-${Date.now()}`,
+          status: 'Draft',
+          ...defaultVrittFields,
+        };
+        setEvents(prev => [newEv, ...prev]);
+        return true;
+      }
+      if (action.action === 'updateEventStatus') {
+        const { id, status } = action.payload;
+        setEvents(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+        return true;
+      }
+      if (action.action === 'updatePracharPlatform') {
+        const { eventId, platform, done } = action.payload;
+        setPracharStatuses(prev => {
+          const existing = prev.find(p => p.eventId === eventId);
+          if (existing) {
+            return prev.map(p => p.eventId === eventId 
+              ? { ...p, platforms: { ...p.platforms, [platform]: done } } 
+              : p
+            );
+          }
+          return [...prev, { 
+            eventId, 
+            platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false, [platform]: done },
+            skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null }
+          }];
+        });
+        return true;
+      }
+    }
+
     try {
       const res = await fetch('/api/app/actions', {
         method: 'POST',
@@ -438,7 +478,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {
       return false;
     }
-  }, [loadRemoteBootstrap]);
+  }, [loadRemoteBootstrap, demoDataFallbackEnabled]);
 
   useEffect(() => {
     void loadRemoteBootstrap();
@@ -526,7 +566,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return persistAppAction({ action: 'finalizePoll', payload: { eventId, pollId, winnerOptionId } }, { refresh: true });
   }, [permissions.canFinalizePoll, persistAppAction]);
 
-  const addArticle = useCallback(async (article: Omit<AalekhaArticle, 'id' | 'status'>) => {
+  const addArticle = useCallback(async (article: Omit<AalekhArticle, 'id' | 'status'>) => {
     if (!permissions.canCreateArticle) return false;
     return persistAppAction({ action: 'addArticle', payload: article }, { refresh: true });
   }, [permissions.canCreateArticle, persistAppAction]);
@@ -534,7 +574,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateArticleStatus = useCallback(async (
     id: string,
     status: ArticleStatus,
-    edits?: Partial<Pick<AalekhaArticle, 'title' | 'content' | 'summary'>>,
+    edits?: Partial<Pick<AalekhArticle, 'title' | 'content' | 'summary'>>,
     extra?: { documentUrl?: string | null; reviewNotes?: string | null },
   ) => {
     return persistAppAction({

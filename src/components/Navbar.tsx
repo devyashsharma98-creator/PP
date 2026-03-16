@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAppContext, roleLabels, type Role } from '@/context/AppContext';
+import { useAppContext, type Role } from '@/context/AppContext';
+import { roleLabels, roleLabelsHi } from '@/lib/app/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -15,13 +16,6 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
-
-const roleLabelsHi: Record<Role, string> = {
-  unit_head: 'यूनिट प्रमुख',
-  aayam_pramukh: 'आयाम प्रमुख',
-  vibhag_pramukh: 'विभाग प्रमुख',
-  karyakarta: 'कार्यकर्ता',
-};
 
 function getShellFrame(pathname: string, role: Role) {
   if (pathname === '/dashboard') {

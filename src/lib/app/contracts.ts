@@ -119,7 +119,7 @@ export interface GatividhiEvent {
   vrittStatus?: VrittStatus;
 }
 
-export interface AalekhaArticle {
+export interface AalekhArticle {
   id: string;
   title: string;
   content: string;
@@ -158,7 +158,7 @@ export interface VimarshTopic {
 
 export interface AppBootstrapPayload {
   events: GatividhiEvent[];
-  articles: AalekhaArticle[];
+  articles: AalekhArticle[];
   pracharStatuses: PracharStatus[];
   vimarshTopics: VimarshTopic[];
   notifications?: unknown[];
@@ -227,14 +227,14 @@ export type AppActionRequest =
     }
   | {
       action: "addArticle";
-      payload: Omit<AalekhaArticle, "id" | "status">;
+      payload: Omit<AalekhArticle, "id" | "status">;
     }
   | {
       action: "updateArticleStatus";
       payload: {
         id: string;
         status: ArticleStatus;
-        edits?: Partial<Pick<AalekhaArticle, "title" | "content" | "summary">>;
+        edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>;
         documentUrl?: string | null;
         reviewNotes?: string | null;
       };

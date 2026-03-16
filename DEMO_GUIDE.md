@@ -35,12 +35,12 @@ Verify checklist:
 
 ### C. Login Page Works
 
-- [ ] Open `http://localhost:3000/login` — card with Flame icon, email/password fields, 5 demo-account pills visible
+- [ ] Open `http://localhost:3000/login` — card with Flame icon, email/password fields, 4 demo-account pills visible
 - [ ] Click "Vibhag Pramukh" pill → email fills to `demo.vibhag@example.com`, password fills to `Password123!`
 - [ ] Click "Sign In" → spinner shows, then redirects to `/dashboard`
 - [ ] Navbar shows role badge "Vibhag Pramukh" (or "विभाग प्रमुख" in Hindi mode)
 
-### D. All 5 Demo Accounts Work
+### D. All 4 Demo Accounts Work
 
 Logout (click LogOut icon in navbar) and test each:
 
@@ -50,9 +50,8 @@ Logout (click LogOut icon in navbar) and test each:
 | 2 | Aayam Pramukh | Aayam Pramukh |
 | 3 | Unit Head | Unit Head |
 | 4 | Karyakarta | Karyakarta (Writer) |
-| 5 | Super Admin | Super Admin |
 
-- [ ] All 5 login successfully and show correct badge
+- [ ] All 4 login successfully and show correct badge
 - [ ] Logout button (LogOut icon, right side of navbar) works → returns to `/login`
 
 ### E. Seeded Data Visible
@@ -99,7 +98,7 @@ Login as `demo.vibhag@example.com` and verify:
 
 - Open a new incognito tab → `localhost:3000/login`
 - Show the login card with Flame branding, demo account pills
-- Say: *"Yeh hamara login page hai. Real Supabase authentication hai. Demo ke liye 5 role-wise accounts hain — ek click me fill ho jaata hai."*
+- Say: *"Yeh hamara login page hai. Real Supabase authentication hai. Demo ke liye 4 role-wise accounts hain — ek click me fill ho jaata hai."*
 - Don't actually login here — switch back to your already-logged-in tab
 
 ### Step 2 — Dashboard / Gatividhi (1.5 min)
@@ -263,7 +262,8 @@ Login as `demo.vibhag@example.com` and verify:
 
 *"Toh yeh tha Pragya Pravah Bhopal Vibhag ka pilot system.*
 
-*Jo ready hai: Proper login-logout, 5 role-based accounts, event management with planning checklist aur vritt reports, Aalekh writing with Unit Head → Aayam Pramukh review chain aur values checklist, Prachar tracking across 4 social platforms with skip reasons, aur Vimarsh ke 15 discourse topics with curated study material. Real Supabase database hai, Row Level Security se secure hai, dark mode aur Hindi-English bilingual support hai.*
+*Jo ready hai: Proper login-logout, 4 role-based accounts,
+ event management with planning checklist aur vritt reports, Aalekh writing with Unit Head → Aayam Pramukh review chain aur values checklist, Prachar tracking across 4 social platforms with skip reasons, aur Vimarsh ke 15 discourse topics with curated study material. Real Supabase database hai, Row Level Security se secure hai, dark mode aur Hindi-English bilingual support hai.*
 
 *Jo next aayega: File upload, Dayitv data wiring, analytics dashboard, aur Phase 2 me AI features.*
 
@@ -284,7 +284,6 @@ ACCOUNTS:
   Aayam Pramukh   → demo.aayam@example.com
   Unit Head       → demo.unithead@example.com
   Karyakarta      → demo.karyakarta@example.com
-  Super Admin     → demo.admin@example.com
   Password (all)  → Password123!
 
 LOGOUT: Click LogOut icon (right end of navbar) → returns to /login

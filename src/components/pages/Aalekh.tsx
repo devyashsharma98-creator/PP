@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
-import type { AalekhaArticle, ArticleStatus } from "@/context/AppContext";
+import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -112,7 +112,7 @@ function ArticleCard({
   article,
   actions,
 }: {
-  article: AalekhaArticle;
+  article: AalekhArticle;
   actions?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -344,11 +344,11 @@ function EditForwardDialog({
   showReviewNotes,
   onDone,
 }: {
-  article: AalekhaArticle;
+  article: AalekhArticle;
   targetStatus: ArticleStatus;
   actionLabel: string;
   showReviewNotes?: boolean;
-  onDone: (edits: Partial<Pick<AalekhaArticle, "title" | "content" | "summary">>, reviewNotes?: string) => Promise<boolean>;
+  onDone: (edits: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>, reviewNotes?: string) => Promise<boolean>;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);

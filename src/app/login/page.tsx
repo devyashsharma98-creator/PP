@@ -30,6 +30,12 @@ function LoginForm() {
     setError("");
     setLoading(true);
 
+    if (process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === 'true') {
+      // Bypass real auth for demo purposes
+      window.location.assign(returnTo);
+      return;
+    }
+
     try {
       const supabase = getSupabaseBrowserClient();
       const { error: authError } = await supabase.auth.signInWithPassword({

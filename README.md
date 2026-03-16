@@ -9,13 +9,37 @@ Next.js App Router frontend for Pragya Pravah workflow operations, now wired to 
 - Tailwind CSS + shadcn/ui
 - Supabase (Postgres, Auth, Storage, Edge Functions scaffold)
 
-## Project Structure (Supabase)
+## Project Structure
+
+### Frontend
+
+- `src/app/` - Next.js App Router pages and API routes
+- `src/components/` - React components
+  - `ui/` - Shared atomic UI components (shadcn/ui)
+  - `pages/` - Page-specific complex views and logic
+- `src/context/` - Global application state and providers (`AppContext`)
+- `src/lib/` - Shared utilities and domain logic
+  - `app/` - Core contracts, types, and constants
+  - `server/` - Server-side repositories, permissions, and business logic
+  - `supabase/` - Supabase client configurations (browser/server)
+- `src/types/` - Shared TypeScript definitions (including generated DB types)
+
+### Supabase (Backend)
 
 - `supabase/config.toml` - local Supabase CLI config
 - `supabase/migrations/` - SQL source of truth (schema + RLS + storage policies)
 - `supabase/seed.sql` - idempotent local/dev seed
-- `supabase/functions/notification-dispatch-hook/` - Edge Function scaffold for dispatch integration
-- `src/types/database.ts` - generated from the linked Supabase schema
+- `supabase/functions/` - Edge Function scaffolds
+
+## Documentation
+
+Detailed architectural plans and design documents are available in the `docs/plans/` directory:
+
+- [Demo Role Collapse Design](./docs/plans/2026-03-08-demo-role-collapse-design.md)
+- [Aalekh Publication Pipeline](./docs/plans/2026-03-09-aalekh-publication-pipeline.md)
+- [Prachar Campaign Control Room](./docs/plans/2026-03-09-prachar-campaign-control-room.md)
+- [Institutional Planning Calendar](./docs/plans/2026-03-12-calendar-institutional-planning-panchang.md)
+- [Phase 2 Expansion Plan](./docs/plans/2026-03-16-access-workflow-phase2-status-expansion.md)
 
 ## Environment
 
