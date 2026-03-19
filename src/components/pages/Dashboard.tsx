@@ -24,8 +24,9 @@ import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
   Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb, FileText,
-  RotateCcw, Sparkles,
+  RotateCcw, Sparkles, QrCode,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { cn } from "@/lib/utils";
@@ -152,6 +153,7 @@ export default function Dashboard() {
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
   const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
+  const [qrEvent, setQrEvent] = useState<GatividhiEvent | null>(null);
 
   const vrittStatusLabel = (s: VrittStatus) => {
     const map: Record<VrittStatus, string> = { draft: t('Draft', 'प्रारूप'), submitted: t('Submitted', 'प्रस्तुत'), reviewed: t('Reviewed', 'समीक्षित') };
@@ -201,10 +203,17 @@ export default function Dashboard() {
     // Statistics from registrations
     const regCount = vrittEvent.registrations?.length ?? 0;
     const totalPeople = vrittEvent.registrations?.reduce((s, r) => s + r.attendingCount, 0) ?? 0;
-    if (regCount > 0) {
+    const checkedIn = vrittEvent.vrittCheckedInCount ?? 0;
+
+    if (regCount > 0 || checkedIn > 0) {
       lines.push(isHi ? "उपस्थिति एवं सहभागिता:" : "Attendance & Participation:");
-      lines.push(isHi ? `• कुल पंजीकरण: ${regCount}` : `• Total Registrations: ${regCount}`);
-      lines.push(isHi ? `• अपेक्षित उपस्थिति: ${totalPeople}` : `• Expected Attendance: ${totalPeople}`);
+      if (regCount > 0) {
+        lines.push(isHi ? `• कुल पंजीकरण: ${regCount}` : `• Total Registrations: ${regCount}`);
+        lines.push(isHi ? `• अपेक्षित उपस्थिति: ${totalPeople}` : `• Expected Attendance: ${totalPeople}`);
+      }
+      if (checkedIn > 0) {
+        lines.push(isHi ? `• क्यूआर चेक-इन (Venue QR): ${checkedIn}` : `• Venue QR Check-ins: ${checkedIn}`);
+      }
       lines.push("");
     }
 
@@ -215,7 +224,7 @@ export default function Dashboard() {
     setVrittForm(p => ({
       ...p,
       content: lines.join("\n"),
-      attendanceCount: totalPeople || p.attendanceCount
+      attendanceCount: checkedIn || totalPeople || p.attendanceCount
     }));
     addToast(t('Smart Draft generated!', 'स्मार्ट ड्राफ्ट तैयार!'), 'info');
   };
@@ -626,7 +635,7 @@ export default function Dashboard() {
   }
 
   // Unit Head & Karyakarta View
-  const myEvents = events.filter(e => e.submittedBy === "Current User" || e.submittedBy === "Ramesh Sharma" || e.submittedBy === "Priya Patel" || e.submittedBy === "Anil Verma" || e.submittedBy === "Kavita Singh" || e.submittedBy === "Suresh Yadav");
+  const myEvents = events.filter(e => e.submittedBy === "Current User" || e.submittedBy === "Unit Head" || e.submittedBy === "Ramesh Sharma" || e.submittedBy === "Priya Patel" || e.submittedBy === "Anil Verma" || e.submittedBy === "Kavita Singh" || e.submittedBy === "Suresh Yadav");
 
   const checklistItems: { key: keyof typeof form.checklist; en: string; hi: string }[] = [
     { key: "designing", en: "Designing & Digital", hi: "डिज़ाइनिंग एवं डिजिटल" },
@@ -1034,11 +1043,19 @@ export default function Dashboard() {
                       <FileText className="w-3 h-3 mr-1" />{t('Vritt', 'वृत्त')}
                     </Button>
                     {event.status === "Published" && (
-                      <Link href="/feed">
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
-                          {t('Feed', 'फ़ीड')} <ArrowRight className="w-3 h-3 ml-1" />
+                      <>
+                        <Button variant="ghost" size="sm"
+                          className="h-7 px-2 text-xs text-amber-600 hover:text-amber-700"
+                          onClick={() => setQrEvent(event)}
+                        >
+                          <QrCode className="w-3 h-3 mr-1" />{t('Venue QR', 'क्यूआर')}
                         </Button>
-                      </Link>
+                        <Link href="/feed">
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80">
+                            {t('Feed', 'फ़ीड')} <ArrowRight className="w-3 h-3 ml-1" />
+                          </Button>
+                        </Link>
+                      </>
                     )}
                   </div>
                   {/* Vritt summary */}
@@ -1048,6 +1065,11 @@ export default function Dashboard() {
                         <Badge variant="outline" className={`text-[10px] ${event.vrittStatus === 'reviewed' ? 'border-green-500/40 text-green-600' : event.vrittStatus === 'submitted' ? 'border-blue-500/40 text-blue-600' : ''}`}>
                           <FileText className="w-2.5 h-2.5 mr-0.5" /> {vrittStatusLabel(event.vrittStatus)}
                         </Badge>
+                        {event.vrittCheckedInCount != null && event.vrittCheckedInCount > 0 && (
+                          <span className="text-amber-600 flex items-center gap-1 font-bold">
+                            <QrCode className="w-3 h-3" /> {event.vrittCheckedInCount}
+                          </span>
+                        )}
                         {event.vrittAttendanceCount != null && event.vrittAttendanceCount > 0 && (
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Users className="w-3 h-3" /> {event.vrittAttendanceCount}
@@ -1430,6 +1452,54 @@ export default function Dashboard() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* ── QR Code Dialog ── */}
+      <Dialog open={!!qrEvent} onOpenChange={open => !open && setQrEvent(null)}>
+        <DialogContent className="sm:max-w-md bg-popover">
+          <DialogHeader>
+            <DialogTitle className="font-devanagari flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-amber-600" /> {t('Venue Check-in QR', 'उपस्थिति क्यूआर कोड')}
+            </DialogTitle>
+            {qrEvent && <p className="text-xs text-muted-foreground mt-1">{qrEvent.title}</p>}
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-6 space-y-6">
+            <div className="p-4 bg-white rounded-3xl shadow-xl border-8 border-primary/5">
+              {qrEvent && (
+                <QRCodeSVG
+                  value={`${window.location.origin}/form/${qrEvent.id}/checkin`}
+                  size={240}
+                  level="H"
+                  includeMargin={true}
+                />
+              )}
+            </div>
+            
+            <div className="text-center space-y-2">
+              <p className="text-sm font-bold font-devanagari">{t('Scan to mark attendance', 'उपस्थिति दर्ज करने के लिए स्कैन करें')}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t('This QR links to the official institutional check-in page for this event.', 'यह क्यूआर इस कार्यक्रम के आधिकारिक संस्थागत चेक-इन पेज से जोड़ता है।')}
+              </p>
+            </div>
+
+            <div className="w-full pt-2 flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="w-full h-11 rounded-xl text-xs gap-2"
+                onClick={() => {
+                  if (qrEvent) {
+                    const url = `${window.location.origin}/form/${qrEvent.id}/checkin`;
+                    navigator.clipboard.writeText(url);
+                    addToast(t('Check-in link copied!', 'चेक-इन लिंक कॉपी हुआ!'), 'success');
+                  }
+                }}
+              >
+                <Link2 className="w-4 h-4" /> {t('Copy Check-in Link', 'चेक-इन लिंक कॉपी करें')}
+              </Button>
+              <Button variant="ghost" className="text-xs" onClick={() => setQrEvent(null)}>{t('Close', 'बंद करें')}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

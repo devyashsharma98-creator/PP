@@ -122,6 +122,7 @@ export interface GatividhiEvent {
   formConfig?: FormConfig;
   polls?: VotePoll[];
   vrittAttendanceCount?: number;
+  vrittCheckedInCount?: number;
   vrittMediaUrls?: string[];
   vrittContent?: string;
   vrittStatus?: VrittStatus;
@@ -188,6 +189,7 @@ interface AppState {
     edits?: Partial<Pick<AalekhArticle, 'title' | 'content' | 'summary'>>,
     extra?: { documentUrl?: string | null; reviewNotes?: string | null },
   ) => Promise<boolean>;
+  markAttendance: (eventId: string, options?: { skipRemote?: boolean }) => void;
   vimarshTopics: VimarshTopic[];
 }
 
@@ -203,6 +205,7 @@ const defaultPermissions: AppPermissionSummary = {
 
 const defaultVrittFields = {
   vrittAttendanceCount: 0,
+  vrittCheckedInCount: 0,
   vrittMediaUrls: [] as string[],
   vrittContent: '',
   vrittStatus: 'draft' as const,
@@ -215,11 +218,9 @@ const initialEvents: GatividhiEvent[] = [
     description: 'Annual youth leadership and skill development summit for college students across Bhopal division.',
     date: '2026-02-15',
     unit: 'Bhopal Shahar',
-    submittedBy: 'Ramesh Sharma',
+    submittedBy: 'Unit Head',
     status: 'Published',
     checklist: { designing: true, food: true, seating: true, transport: true, accommodation: false, soundMic: true, camera: true, screen: true, lights: true },
-    report: 'The event was a great success with 250+ attendees participating in various workshops.',
-    imageUrl: '',
     registrations: [
       { id: 'r1', name: 'Priya Sharma', phone: '9876543210', city: 'Bhopal', attendingCount: 1, hasSpecialNeeds: false, submittedAt: '2026-02-10' },
       { id: 'r2', name: 'Rahul Mishra', phone: '9812345678', city: 'Vidisha', attendingCount: 2, hasSpecialNeeds: false, submittedAt: '2026-02-12' },
@@ -227,6 +228,8 @@ const initialEvents: GatividhiEvent[] = [
       { id: 'r4', name: 'Suresh Patel', phone: '9754321098', city: 'Bhopal', attendingCount: 3, hasSpecialNeeds: false, submittedAt: '2026-02-14' },
     ],
     ...defaultVrittFields,
+    vrittAttendanceCount: 250,
+    vrittCheckedInCount: 242,
   },
   {
     id: '2',
@@ -476,6 +479,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         return true;
       }
+      if (action.action === 'markAttendance') {
+        const { eventId } = action.payload;
+        setEvents(prev => prev.map(e => 
+          e.id === eventId 
+            ? { ...e, vrittCheckedInCount: (e.vrittCheckedInCount || 0) + 1 } 
+            : e
+        ));
+        return true;
+      }
     }
 
     try {
@@ -604,6 +616,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, { refresh: true });
   }, [persistAppAction]);
 
+  const markAttendance = useCallback((eventId: string, options?: { skipRemote?: boolean }) => {
+    if (options?.skipRemote !== false) {
+      setEvents(prev => prev.map(e => 
+        e.id === eventId 
+          ? { ...e, vrittCheckedInCount: (e.vrittCheckedInCount || 0) + 1 } 
+          : e
+      ));
+    }
+    if (!options?.skipRemote) {
+      void persistAppAction({ action: 'markAttendance', payload: { eventId } });
+    }
+  }, [persistAppAction]);
+
   return (
     <AppContext.Provider value={{
       role, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
@@ -612,6 +637,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateFormConfig, addPoll, castVote, finalizePoll,
       pracharStatuses, updatePracharPlatform,
       articles, addArticle, updateArticleStatus,
+      markAttendance,
       vimarshTopics,
     }}>
       {children}

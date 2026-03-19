@@ -270,6 +270,10 @@ export type AppActionRequest =
         vrittMediaUrls?: string[];
         vrittStatus?: VrittStatus;
       };
+    }
+  | {
+      action: "markAttendance";
+      payload: { eventId: string };
     };
 
 export interface PublicRegistrationRequest {
