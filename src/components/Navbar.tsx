@@ -132,14 +132,23 @@ export function Navbar() {
 
     if (role === 'aayam_pramukh') {
       for (const e of events) {
-        if (e.status === 'Pending Aayam Review') items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+        if (e.status === 'Pending Aayam Review' || e.status === 'Submitted by Unit') {
+          items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+        }
       }
       for (const a of articles) {
         if (a.status === 'Pending Aayam Review') items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
       }
     } else if (role === 'vibhag_pramukh') {
       for (const e of events) {
-        if (e.status === 'Pending Final Approval') items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+        if (e.status === 'Pending Vibhag Review' || e.status === 'Pending Prant Authorization') {
+          items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
+        }
+      }
+      for (const a of articles) {
+        if (a.status === 'Pending Vibhag Review' || a.status === 'Pending Prant Authorization') {
+          items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
+        }
       }
     } else if (role === 'unit_head') {
       for (const a of articles) {
