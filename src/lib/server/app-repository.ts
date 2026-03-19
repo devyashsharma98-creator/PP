@@ -398,6 +398,7 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
       formConfig: buildFormConfig(fc, questions),
       polls: polls.length ? polls : undefined,
       vrittAttendanceCount: e.vritt_attendance_count ?? 0,
+      vrittCheckedInCount: (e as any).vritt_checked_in_count ?? 0,
       vrittMediaUrls: e.vritt_media_urls ?? [],
       vrittContent: e.vritt_content ?? "",
       vrittStatus: (["draft", "submitted", "reviewed"].includes(e.vritt_status ?? "")
@@ -644,6 +645,24 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         );
       }
       await insertEventStatusHistory(supabase, ctx, existing.id, existing.status, dbStatus);
+      return { ok: true };
+    }
+
+    case "markAttendance": {
+      const { data: event, error: selectError } = await supabase
+        .from("events")
+        .select("vritt_checked_in_count")
+        .eq("id", input.payload.eventId)
+        .single();
+      if (selectError) throw selectError;
+
+      const { error } = await supabase
+        .from("events")
+        .update({
+          vritt_checked_in_count: ((event as any).vritt_checked_in_count || 0) + 1,
+        } as any)
+        .eq("id", input.payload.eventId);
+      if (error) throw error;
       return { ok: true };
     }
 
