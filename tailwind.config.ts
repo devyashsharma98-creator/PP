@@ -15,9 +15,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Outfit', 'sans-serif'],
-        body: ['Outfit', 'sans-serif'],
-        devanagari: ['Noto Sans Devanagari', 'sans-serif'],
+        serif: ['Fraunces', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Fraunces', 'serif'],
+        body: ['Inter', 'sans-serif'],
+        devanagari: ['Noto Serif Devanagari', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",

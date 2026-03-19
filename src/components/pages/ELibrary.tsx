@@ -38,10 +38,10 @@ function ELibraryMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Knowledge Preservation', 'ज्ञान परंपरा संरक्षण')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Institutional E-Library', 'संस्थागत ई-पुस्तकालय')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'A curated repository of foundational Bharatiya Knowledge Systems (IKS) texts, preserved for research and intellectual awakening.',
                 'भारतीय ज्ञान परंपरा (IKS) के आधारभूत ग्रंथों का एक संकलित भंडार, जो शोध और बौद्धिक जागरण हेतु सुरक्षित है।'
@@ -51,7 +51,7 @@ function ELibraryMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>

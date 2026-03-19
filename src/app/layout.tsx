@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -23,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <body className="font-body antialiased selection:bg-primary/20 selection:text-primary">
         <ClientProviders>
           <ToastProvider>
             <AppLayoutShell>{children}</AppLayoutShell>

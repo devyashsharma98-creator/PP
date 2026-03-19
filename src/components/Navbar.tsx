@@ -254,27 +254,24 @@ export function Navbar() {
           </SheetContent>
         </Sheet>
 
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden shrink-0">
             <Flame className="w-3.5 h-3.5 text-white" />
           </div>
-          <div className="space-y-1">
-            <p className="shell-copy text-foreground/55">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="shell-panel-copy">{t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}</span>
-              <span className="text-muted-foreground/60">•</span>
-              <h2 className={cn('text-base font-bold tracking-tight', lang === 'hi' && 'font-devanagari')}>
+          <div className="space-y-0.5 min-w-0">
+            <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="shell-panel-copy hidden lg:block shrink-0">{t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}</span>
+              <span className="text-muted-foreground/60 hidden lg:block shrink-0">•</span>
+              <h2 className={cn('text-sm md:text-base font-bold tracking-tight truncate', lang === 'hi' && 'font-devanagari')}>
                 {t(shellFrame.titleEn, shellFrame.titleHi)}
               </h2>
             </div>
-            <p className={cn('hidden text-xs text-muted-foreground md:block', lang === 'hi' && 'font-devanagari')}>
-              {t(shellFrame.subtitleEn, shellFrame.subtitleHi)}
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
         {/* ── Dark/Light Toggle ── */}
         {mounted && (
           <button

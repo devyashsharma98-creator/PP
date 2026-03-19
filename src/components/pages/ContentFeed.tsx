@@ -38,10 +38,10 @@ function ContentFeedMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Public Intellectual Record', 'सार्वजनिक बौद्धिक अभिलेख')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Aalekh & Shodh Feed', 'आलेख एवं शोध फ़ीड')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'A combined chronicle of institutional activities and scholarly research, providing a window into the intellectual momentum of Pragya Pravah.',
                 'संस्थागत गतिविधियों और विद्वत्तापूर्ण शोध का एक संयुक्त विवरण, जो प्रज्ञा प्रवाह की बौद्धिक गतिशीलता का प्रतिबिंब है।'
@@ -51,7 +51,7 @@ function ContentFeedMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
@@ -147,7 +147,7 @@ export default function ContentFeed() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-5 text-xs text-muted-foreground flex-wrap border-t border-border/50 pt-4 mt-2">
+                <div className="flex items-center gap-x-5 gap-y-2 text-xs text-muted-foreground flex-wrap border-t border-border/50 pt-4 mt-2">
                   <span className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
                     <CalendarDays className="w-3.5 h-3.5 text-primary/60" />
                     {allItems[0].date}
@@ -181,10 +181,10 @@ export default function ContentFeed() {
           {allItems.slice(1).map((item, i) => (
             <motion.div key={item.id} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <Card className="institution-panel hover-lift overflow-hidden group border-border/60 hover:border-primary/30 transition-all duration-300">
-                <CardContent className="py-5 px-5 flex gap-5">
+                <CardContent className="py-5 px-5 flex flex-col sm:flex-row gap-4 sm:gap-5">
                   {/* Left accent */}
                   <div className={cn(
-                    "w-1.5 shrink-0 rounded-full",
+                    "w-full sm:w-1.5 h-1 sm:h-auto shrink-0 rounded-full",
                     item.type === 'event' ? 'bg-orange-500/60' : 'bg-blue-500/60'
                   )} />
 

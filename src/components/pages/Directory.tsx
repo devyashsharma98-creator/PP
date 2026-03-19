@@ -38,10 +38,10 @@ function DirectoryMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Institutional Sampark', 'संस्थागत सम्पर्क')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Sampark Directory', 'सम्पर्क निर्देशिका')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'A unified contact point for karyakartas across all aayams and units, enabling seamless organisational coordination.',
                 'सभी आयामों और इकाइयों के कार्यकर्ताओं हेतु एक एकीकृत सम्पर्क सूत्र, जो निर्बाध संगठनात्मक समन्वय सुनिश्चित करता है।'
@@ -51,7 +51,7 @@ function DirectoryMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>

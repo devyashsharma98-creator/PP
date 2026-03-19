@@ -78,7 +78,7 @@ function SectionHeading({
           {titleHi}
         </p>
       </div>
-      <div className="grid gap-6 sm:grid-cols-[1fr_1fr] lg:gap-12">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12">
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {bodyEn}
         </p>
@@ -422,7 +422,7 @@ export default function LandingPage() {
                       <p className="font-devanagari text-lg text-foreground/80">{stream.titleHi}</p>
                     </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2 border-l border-border/40 pl-8">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:border-l lg:border-border/40 lg:pl-8">
                     <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
                       {stream.bodyEn}
                     </p>
@@ -502,7 +502,7 @@ export default function LandingPage() {
             />
 
             <div className="relative space-y-4">
-              <div className="absolute left-[2.25rem] top-8 bottom-8 w-[2px] bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+              <div className="absolute left-[2.25rem] top-8 bottom-8 w-[2px] bg-gradient-to-b from-primary/40 via-primary/20 to-transparent hidden sm:block" />
               {operationsSteps.map((step, index) => (
                 <motion.div
                   key={step.step}
@@ -510,7 +510,7 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="relative flex gap-8 pl-1 pb-8 last:pb-0"
+                  className="relative flex flex-col sm:flex-row gap-4 sm:gap-8 pl-1 pb-8 last:pb-0"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary z-10 font-bold border border-primary/20">
                     {step.step}

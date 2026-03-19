@@ -20,8 +20,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   PenLine, CheckCircle2, Clock, ArrowRight, Eye, BarChart3,
   Users, BookOpen, ExternalLink, X, ChevronDown, ChevronRight,
-  RotateCcw, Send, FileText, AlertTriangle, TrendingUp,
+  RotateCcw, Send, FileText, AlertTriangle, TrendingUp, User, CalendarDays
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const statusColors: Record<ArticleStatus, string> = {
   Draft: "bg-muted text-muted-foreground border-border",
@@ -97,8 +98,8 @@ function AalekhMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t(sealEn, sealHi)}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">{t(titleEn, titleHi)}</h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t(titleEn, titleHi)}</h1>
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(descriptionEn, descriptionHi)}
             </p>
           </div>
@@ -106,7 +107,7 @@ function AalekhMasthead({
         {action ? <div className="lg:pb-1">{action}</div> : null}
       </div>
 
-      <div className="aalekh-context-grid">
+      <div className="aalekh-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="aalekh-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
@@ -132,48 +133,55 @@ function ArticleCard({
   const t = useT();
 
   return (
-    <Card className="aalekh-article-card overflow-hidden">
+    <Card className="aalekh-article-card overflow-hidden hover:border-primary/30 transition-all duration-300">
       <button className="w-full text-left" onClick={() => setOpen(o => !o)}>
-        <CardContent className="py-4 px-4 flex items-start gap-3">
-          <div className="flex-1 min-w-0 space-y-1">
+        <CardContent className="py-4 px-5 flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="flex-1 min-w-0 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className={`text-[10px] border ${statusColors[article.status]}`}>
+              <Badge variant="outline" className={cn("text-[9px] font-bold uppercase tracking-wider", statusColors[article.status])}>
                 {lang === 'hi' ? statusHi[article.status] : article.status}
               </Badge>
-              <Badge variant="outline" className="text-[10px]">{article.category}</Badge>
+              <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest bg-muted/30">{article.category}</Badge>
             </div>
-            <h3 className="font-medium text-sm leading-snug">{article.title}</h3>
-            <p className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
-              <BookOpen className="w-3 h-3 shrink-0" />{article.author}
-              <span className="opacity-50">·</span>{article.date}
-              {article.socialUrl && (
-                <a
-                  href={article.socialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="flex items-center gap-0.5 text-primary hover:underline"
-                >
-                  <ExternalLink className="w-3 h-3" /> {t('Source', 'स्रोत')}
-                </a>
-              )}
-              {article.documentUrl && (
-                <a
-                  href={article.documentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="flex items-center gap-0.5 text-primary hover:underline"
-                >
-                  <FileText className="w-3 h-3" /> {t('Document', 'दस्तावेज़')}
-                </a>
-              )}
-            </p>
-            <p className="aalekh-article-summary">{article.summary}</p>
+            <h3 className="font-bold text-sm md:text-base leading-tight text-foreground/90">{article.title}</h3>
+            <div className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-3 flex-wrap font-medium">
+              <span className="flex items-center gap-1.5"><User className="w-3 h-3 opacity-60" />{article.author}</span>
+              <span className="opacity-40">•</span>
+              <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3 opacity-60" />{article.date}</span>
+              
+              <div className="flex items-center gap-3 ml-auto sm:ml-0">
+                {article.socialUrl && (
+                  <a
+                    href={article.socialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" /> {t('Source', 'स्रोत')}
+                  </a>
+                )}
+                {article.documentUrl && (
+                  <a
+                    href={article.documentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <FileText className="w-3 h-3" /> {t('Document', 'दस्तावेज़')}
+                  </a>
+                )}
+              </div>
+            </div>
+            <p className="aalekh-article-summary line-clamp-1">{article.summary}</p>
           </div>
-          {open
-            ? <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-            : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />}
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center transition-colors self-end sm:self-start",
+            open ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+          )}>
+            {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </div>
         </CardContent>
       </button>
 
@@ -842,7 +850,7 @@ export default function Aalekh() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { label: t("Total Articles", "कुल आलेख"), value: total, icon: BarChart3, color: "text-primary" },
           { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-green-600" },

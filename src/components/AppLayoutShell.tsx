@@ -29,7 +29,7 @@ export function AppLayoutShell({ children }: { children: React.ReactNode }) {
     return (
       <main className="min-h-screen overflow-x-hidden bg-background">
         <PageTransition>
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:px-8 md:py-8">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:px-8 md:py-12 pb-32 md:pb-12">
             {children}
           </div>
         </PageTransition>
@@ -39,7 +39,7 @@ export function AppLayoutShell({ children }: { children: React.ReactNode }) {
 
   if (!authReady) {
     return (
-      <main className="app-main-shell min-h-screen overflow-y-auto px-4 pb-20 pt-5 md:px-6 md:pb-6 md:pt-6">
+      <main className="app-main-shell min-h-screen overflow-y-auto px-4 pb-32 pt-8 md:px-6 md:pb-8 md:pt-12">
         <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center">
           <div className="institution-panel w-full max-w-3xl space-y-6 px-6 py-8 md:px-8">
             <div className="space-y-2">
@@ -66,7 +66,7 @@ export function AppLayoutShell({ children }: { children: React.ReactNode }) {
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main className="app-main-shell flex-1 overflow-y-auto px-4 pb-20 pt-5 md:px-6 md:pb-6 md:pt-6">
+          <main className="app-main-shell flex-1 overflow-y-auto px-4 pb-32 pt-6 md:px-6 md:pb-10 md:pt-8">
             <PageTransition>{children}</PageTransition>
           </main>
         </div>

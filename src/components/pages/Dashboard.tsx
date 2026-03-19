@@ -24,9 +24,11 @@ import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
   Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb, FileText,
+  RotateCcw,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
+import { cn } from "@/lib/utils";
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -95,8 +97,8 @@ function DashboardMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t(sealEn, sealHi)}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">{t(titleEn, titleHi)}</h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t(titleEn, titleHi)}</h1>
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(descriptionEn, descriptionHi)}
             </p>
           </div>
@@ -104,7 +106,7 @@ function DashboardMasthead({
         {action ? <div className="lg:pb-1">{action}</div> : null}
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
@@ -200,10 +202,6 @@ export default function Dashboard() {
     setSubmitted(true);
     addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
     router.push("/dashboard");
-  };
-
-  const toggleChecklist = (key: keyof typeof form.checklist) => {
-    setForm(prev => ({ ...prev, checklist: { ...prev.checklist, [key]: !prev.checklist[key] } }));
   };
 
   const SUGGESTIONS: { question: string; questionHi: string; type: 'text' | 'yesno' }[] = [
@@ -326,7 +324,7 @@ export default function Dashboard() {
           ]}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"> 
           {[
             { label: t("Total Events", "कुल कार्यक्रम"), value: totalEvents, icon: BarChart3, color: "text-primary", barColor: "bg-primary", sparkData: [30, 50, 40, 70, 60, 80, 75] },
             { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-success", barColor: "bg-green-500", sparkData: [20, 35, 45, 40, 55, 65, 60] },
@@ -376,27 +374,35 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {pending.map(event => (
-                  <motion.div key={event.id} layout className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border/50">
-                    <div>
-                      <p className="font-medium">{event.title}</p>
-                      <p className="text-sm text-muted-foreground">{event.unit} · {event.date} · <span className="text-primary font-medium">{t(event.status, eventStatusHi[event.status])}</span></p>
+                  <motion.div key={event.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/50 border border-border/50 gap-4">
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm md:text-base truncate">{event.title}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-2">
+                        <span>{event.unit}</span>
+                        <span className="opacity-40">•</span>
+                        <span>{event.date}</span>
+                        <span className="opacity-40">•</span>
+                        <span className="text-primary font-bold">{t(event.status, eventStatusHi[event.status])}</span>
+                      </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                       {event.status === "Pending Vibhag Review" && (
                         <Button
                           size="sm"
                           variant="outline"
+                          className="flex-1 sm:flex-none h-8 text-[11px] gap-1.5"
                           onClick={async () => {
                             const ok = await updateEventStatus(event.id, "Pending Prant Authorization");
                             if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
                           }}
                         >
-                          <ArrowRight className="w-4 h-4 mr-1" /> {t('Forward to Prant', 'प्रांत को भेजें')}
+                          <ArrowRight className="w-3.5 h-3.5" /> {t('Forward', 'भेजें')}
                         </Button>
                       )}
                       {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && (
                         <Button
                           size="sm"
+                          className="flex-1 sm:flex-none h-8 text-[11px] gap-1.5 saffron-gradient text-white border-0"
                           disabled={!permissions.canPublishEvent}
                           onClick={async () => {
                             const ok = await updateEventStatus(event.id, "Published");
@@ -408,7 +414,7 @@ export default function Dashboard() {
                             addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
                           }}
                         >
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> {t('Authorize & Publish', 'अनुमोदित और प्रकाशित करें')}
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {t('Publish', 'प्रकाशित करें')}
                         </Button>
                       )}
                     </div>
@@ -509,16 +515,17 @@ export default function Dashboard() {
                 <p className="text-muted-foreground text-sm py-6 text-center">{t('All caught up! No pending reviews.', 'सब ठीक है! कोई समीक्षा प्रतीक्षित नहीं।')}</p>
               ) : (
                 pendingReview.map(event => (
-                  <motion.div key={event.id} layout className="p-4 rounded-lg bg-accent/50 border border-border/50 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{event.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                          <MapPin className="w-3 h-3" />{event.unit}
-                          <CalendarDays className="w-3 h-3 ml-2" />{event.date}
+                  <motion.div key={event.id} className="p-4 rounded-lg bg-accent/50 border border-border/50 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm md:text-base truncate">{event.title}</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-2">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.unit}</span>
+                          <span className="opacity-40">•</span>
+                          <span className="flex items-center gap-1"><CalendarDays className="w-3 h-3" />{event.date}</span>
                         </p>
                       </div>
-                      <Badge className={statusBadge(event.status)}>{t(event.status, eventStatusHi[event.status])}</Badge>
+                      <Badge className={cn(statusBadge(event.status), "shrink-0 self-start")}>{t(event.status, eventStatusHi[event.status])}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
@@ -570,16 +577,69 @@ export default function Dashboard() {
   const myEvents = events.filter(e => e.submittedBy === "Current User" || true);
 
   const checklistItems: { key: keyof typeof form.checklist; en: string; hi: string }[] = [
-    { key: "designing", en: "Designing", hi: "डिज़ाइनिंग" },
-    { key: "food", en: "Food", hi: "भोजन" },
-    { key: "seating", en: "Sitting & Place", hi: "बैठक व स्थान" },
-    { key: "transport", en: "Transport", hi: "परिवहन" },
+    { key: "designing", en: "Designing & Digital", hi: "डिज़ाइनिंग एवं डिजिटल" },
+    { key: "food", en: "Food & Refreshments", hi: "भोजन एवं जलपान" },
+    { key: "seating", en: "Sitting & Venue", hi: "बैठक व स्थान" },
+    { key: "transport", en: "Transport & Logistics", hi: "परिवहन एवं व्यवस्था" },
     { key: "accommodation", en: "Accommodation", hi: "आवास" },
-    { key: "soundMic", en: "Sound + Music", hi: "ध्वनि एवं संगीत" },
-    { key: "camera", en: "Camera", hi: "कैमरा" },
-    { key: "screen", en: "Screen", hi: "स्क्रीन" },
-    { key: "lights", en: "Lights", hi: "रोशनी" },
+    { key: "soundMic", en: "Sound, Music & Mic", hi: "ध्वनि, संगीत एवं माइक" },
+    { key: "camera", en: "Photography & Video", hi: "छायाचित्र एवं वीडियो" },
+    { key: "screen", en: "Screen & Projection", hi: "स्क्रीन एवं प्रोजेक्शन" },
+    { key: "lights", en: "Lighting Arrangement", hi: "प्रकाश व्यवस्था" },
   ];
+
+  const eventTemplates: Record<string, { labelEn: string; labelHi: string; checklist: (keyof typeof form.checklist)[] }> = {
+    seminar: {
+      labelEn: "Seminar / Gosthi",
+      labelHi: "संगोष्ठी / विचार गोष्ठी",
+      checklist: ["designing", "seating", "soundMic", "screen", "camera", "food"],
+    },
+    protest: {
+      labelEn: "Protest / Pradarshan",
+      labelHi: "प्रदर्शन / धरना",
+      checklist: ["designing", "soundMic", "camera", "transport"],
+    },
+    study_circle: {
+      labelEn: "Study Circle / Adhyayan",
+      labelHi: "अध्ययन मंडल / बैठक",
+      checklist: ["seating", "food"],
+    },
+    workshop: {
+      labelEn: "Workshop / Karyashala",
+      labelHi: "कार्यशाला / प्रशिक्षण",
+      checklist: ["designing", "seating", "soundMic", "screen", "camera", "food", "accommodation"],
+    },
+    outreach: {
+      labelEn: "Public Outreach / Prachar",
+      labelHi: "जनसंपर्क / प्रचार अभियान",
+      checklist: ["designing", "transport", "camera"],
+    },
+  };
+
+  const applyTemplate = (type: string) => {
+    const template = eventTemplates[type];
+    if (!template) return;
+    
+    const newChecklist = { ...form.checklist };
+    // Reset all
+    (Object.keys(newChecklist) as (keyof typeof form.checklist)[]).forEach(k => {
+      newChecklist[k] = false;
+    });
+    // Apply template
+    template.checklist.forEach(k => {
+      newChecklist[k] = true;
+    });
+    
+    setForm(p => ({ ...p, checklist: newChecklist }));
+  };
+
+  const toggleChecklist = (key: keyof typeof form.checklist) => {
+    setForm(prev => ({
+      ...prev,
+      checklist: { ...prev.checklist, [key]: !prev.checklist[key] },
+    }));
+  };
+
   const activeWorkflowCount = myEvents.filter(event => event.status !== "Published").length;
   const publishedUnitEvents = myEvents.filter(event => event.status === "Published").length;
 
@@ -637,6 +697,19 @@ export default function Dashboard() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="col-span-2">
+                  <Label>{t('Event Type (Template)', 'कार्यक्रम का प्रकार')}</Label>
+                  <Select onValueChange={applyTemplate}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('Select a template to auto-fill checklist', 'चेकलिस्ट भरने के लिए टेम्पलेट चुनें')} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      {Object.entries(eventTemplates).map(([key, template]) => (
+                        <SelectItem key={key} value={key}>{t(template.labelEn, template.labelHi)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
                   <Label>{t('Event Title', 'कार्यक्रम का नाम')}</Label>
                   <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder={t('Enter event name', 'कार्यक्रम का नाम दर्ज करें')} required />
                 </div>
@@ -663,6 +736,19 @@ export default function Dashboard() {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="pre" className="space-y-3 pt-2">
+                  <div className="flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[10px] h-6 px-2 text-muted-foreground hover:text-destructive"
+                      onClick={() => setForm(p => ({
+                        ...p,
+                        checklist: Object.keys(p.checklist).reduce((acc, k) => ({ ...acc, [k]: false }), {} as typeof p.checklist)
+                      }))}
+                    >
+                      <RotateCcw className="w-3 h-3 mr-1" /> {t('Clear Selection', 'सब हटाएं')}
+                    </Button>
+                  </div>
                   {checklistItems.map(item => (
                     <div key={item.key} className="flex items-center gap-3">
                       <Checkbox checked={form.checklist[item.key]} onCheckedChange={() => toggleChecklist(item.key)} id={item.key} />

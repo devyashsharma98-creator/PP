@@ -16,6 +16,7 @@ import { useT } from '@/lib/useT';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 
+
 // ── Vimarsh Context Types ──────────────────────────────────────────────────
 
 type VimarshContextItem = {
@@ -40,10 +41,10 @@ function VimarshMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Vimarsh Command Center', 'विमर्श संचालन कक्ष')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Discourse, Assertion & Counter', 'विमर्श, मंडन एवं खंडन')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'Shape the narrative, affirm the civilisational truth, and counter misinformation through disciplined intellectual action.',
                 'कथ्य को आकार दें, सभ्यतागत सत्य का मंडन करें और अनुशासित बौद्धिक कार्य के माध्यम से कुप्रचार का खंडन करें।'
@@ -53,7 +54,7 @@ function VimarshMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>

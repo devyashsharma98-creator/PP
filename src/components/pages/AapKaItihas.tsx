@@ -35,10 +35,10 @@ function AapKaItihasMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Institutional Memory', 'संस्थागत स्मृति')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Aap Ka Itihas', 'आपका इतिहास')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'A personal record of your journey within Pragya Pravah, celebrating your contributions and aligning your path with the historical momentum of our civilization.',
                 'प्रज्ञा प्रवाह के भीतर आपकी यात्रा का एक व्यक्तिगत अभिलेख, जो आपके योगदान का सम्मान करता है और आपके मार्ग को हमारी सभ्यता की ऐतिहासिक गतिशीलता के साथ जोड़ता है।'
@@ -48,7 +48,7 @@ function AapKaItihasMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
@@ -201,12 +201,12 @@ export default function AapKaItihas() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 + i * 0.04 }}
-                  className="flex gap-5 relative group"
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-5 relative group"
                 >
                   {/* Timeline dot */}
                   <div className={cn(
                     "w-11 h-11 rounded-2xl flex items-center justify-center z-10 shrink-0 transition-all duration-300",
-                    "bg-background border-2 shadow-sm group-hover:scale-110",
+                    "bg-background border-2 shadow-sm group-hover:scale-110 ml-[1px] sm:ml-0",
                     cfg.border
                   )}>
                     <Icon className={cn("w-5 h-5", cfg.color)} />

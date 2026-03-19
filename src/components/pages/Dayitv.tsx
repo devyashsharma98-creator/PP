@@ -36,10 +36,10 @@ function DayitvMasthead({
         <div className="space-y-3">
           <p className="section-seal">{t('Organizational Command', 'संगठनात्मक संचालन')}</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               {t('Structure & Responsibility', 'संरचना एवं कार्य का स्वरूप')}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'A disciplined multi-tier hierarchy ensuring the flow of civilisational thought from the national level to every local unit.',
                 'एक अनुशासित बहु-स्तरीय संरचना जो राष्ट्रीय स्तर से प्रत्येक स्थानीय इकाई तक सभ्यतागत चिंतन के प्रवाह को सुनिश्चित करती है।'
@@ -49,7 +49,7 @@ function DayitvMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid">
+      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
         {contexts.map((context) => (
           <div key={context.labelEn} className="dashboard-context-card">
             <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
