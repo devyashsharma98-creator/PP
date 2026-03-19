@@ -24,7 +24,7 @@ import {
   Plus, CalendarDays, MapPin, User, CheckCircle2, Clock, Eye,
   ArrowRight, BarChart3, Users, TrendingUp, X, Link2, ClipboardCheck,
   Phone, Building2, Trash2, SlidersHorizontal, Vote, Lightbulb, FileText,
-  RotateCcw,
+  RotateCcw, Sparkles,
 } from "lucide-react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
@@ -166,6 +166,58 @@ export default function Dashboard() {
       status: event.vrittStatus ?? 'draft',
     });
     setVrittEvent(event);
+  };
+
+  const generateSmartDraft = () => {
+    if (!vrittEvent) return;
+    const isHi = lang === 'hi';
+    const lines: string[] = [];
+
+    // Header
+    lines.push(isHi ? `।। वृत्त : ${vrittEvent.title} ।।` : `!! Vritt : ${vrittEvent.title} !!`);
+    lines.push(isHi ? `दिनांक: ${vrittEvent.date} | इकाई: ${vrittEvent.unit}` : `Date: ${vrittEvent.date} | Unit: ${vrittEvent.unit}`);
+    lines.push("");
+
+    // Description/Goal
+    if (vrittEvent.description) {
+      lines.push(isHi ? `मुख्य उद्देश्य: ${vrittEvent.description}` : `Core Objective: ${vrittEvent.description}`);
+      lines.push("");
+    }
+
+    // Vyavastha/Checklist items
+    const checkedItems = Object.entries(vrittEvent.checklist)
+      .filter(([_, checked]) => !!checked)
+      .map(([key]) => checklistItems.find(i => i.key === key))
+      .filter(Boolean);
+
+    if (checkedItems.length > 0) {
+      lines.push(isHi ? "समीक्षा (व्यवस्थाएं):" : "Operational Review (Arrangements):");
+      checkedItems.forEach(item => {
+        lines.push(`• ${t(item!.en, item!.hi)}: ${isHi ? '[सफल/सुधार अपेक्षित]' : '[Successful / Needs Improvement]'}`);
+      });
+      lines.push("");
+    }
+
+    // Statistics from registrations
+    const regCount = vrittEvent.registrations?.length ?? 0;
+    const totalPeople = vrittEvent.registrations?.reduce((s, r) => s + r.attendingCount, 0) ?? 0;
+    if (regCount > 0) {
+      lines.push(isHi ? "उपस्थिति एवं सहभागिता:" : "Attendance & Participation:");
+      lines.push(isHi ? `• कुल पंजीकरण: ${regCount}` : `• Total Registrations: ${regCount}`);
+      lines.push(isHi ? `• अपेक्षित उपस्थिति: ${totalPeople}` : `• Expected Attendance: ${totalPeople}`);
+      lines.push("");
+    }
+
+    // Final result
+    lines.push(isHi ? "निष्कर्ष / आगामी योजना:" : "Conclusion / Next Steps:");
+    lines.push(isHi ? "[कार्यक्रम का सारांश और आगामी कार्ययोजना यहाँ लिखें]" : "[Write event summary and future action points here]");
+
+    setVrittForm(p => ({
+      ...p,
+      content: lines.join("\n"),
+      attendanceCount: totalPeople || p.attendanceCount
+    }));
+    addToast(t('Smart Draft generated!', 'स्मार्ट ड्राफ्ट तैयार!'), 'info');
   };
 
   const statusLabel = (status: string) => lang === 'hi' ? (eventStatusHi[status] ?? status) : status;
@@ -1307,16 +1359,23 @@ export default function Dashboard() {
                     placeholder="0"
                   />
                 </div>
-
-                <div>
+                <div className="flex items-center justify-between">
                   <Label className="font-devanagari">{t('Report Content', 'विवरण सामग्री')}</Label>
-                  <Textarea
-                    value={vrittForm.content}
-                    onChange={e => setVrittForm(p => ({ ...p, content: e.target.value }))}
-                    rows={5}
-                    placeholder={t('Write the post-event report...', 'कार्यक्रम के बाद का विवरण लिखें...')}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-[10px] text-primary gap-1 px-2 border border-primary/20 hover:bg-primary/5"
+                    onClick={generateSmartDraft}
+                  >
+                    <Sparkles className="w-3 h-3" /> {t('Smart Draft', 'स्मार्ट ड्राफ्ट')}
+                  </Button>
                 </div>
+                <Textarea
+                  value={vrittForm.content}
+                  onChange={e => setVrittForm(p => ({ ...p, content: e.target.value }))}
+                  rows={5}
+                  placeholder={t('Write the post-event report...', 'कार्यक्रम के बाद का विवरण लिखें...')}
+                />
 
                 <div>
                   <Label className="font-devanagari">{t('Media URLs', 'मीडिया लिंक')} <span className="text-muted-foreground text-xs font-normal">({t('photos, videos', 'फ़ोटो, वीडियो')})</span></Label>
