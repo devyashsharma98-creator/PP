@@ -562,7 +562,7 @@ async function insertEventStatusHistory(
     fromStatus: oldStatus,
     toStatus: newStatus,
     actorId: ctx.user.id,
-    actorRole: ctx.profile?.role || "unknown",
+    actorRole: ctx.effectiveRoles[0] || "unknown",
     remarks,
   });
 }
@@ -614,7 +614,7 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
     }
 
     case "updateEventStatus": {
-      const dbStatus = uiToDbEventStatus[input.payload.status];
+      const dbStatus = uiToDbEventStatus[input.payload.status] as EventRow["status"];
       const { data: existing, error: selectError } = await supabase
         .from("events")
         .select("*")
@@ -832,14 +832,14 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         fromStatus: null,
         toStatus: "pending_unit_head_review",
         actorId: ctx.user.id,
-        actorRole: ctx.profile?.role || "unknown",
+        actorRole: ctx.effectiveRoles[0] || "unknown",
       });
 
       return { ok: true };
     }
 
     case "updateArticleStatus": {
-      const targetStatus = uiToDbArticleStatus[input.payload.status];
+      const targetStatus = uiToDbArticleStatus[input.payload.status] as ArticleRow["status"];
       const { data: articleRow, error: articleError } = await supabase
         .from("articles")
         .select("*")
@@ -888,8 +888,8 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         fromStatus: articleRow.status,
         toStatus: targetStatus,
         actorId: ctx.user.id,
-        actorRole: ctx.profile?.role || "unknown",
-        remarks: input.payload.reviewNotes,
+        actorRole: ctx.effectiveRoles[0] || "unknown",
+        remarks: input.payload.reviewNotes || undefined,
         metadata: { edits: input.payload.edits },
       });
 

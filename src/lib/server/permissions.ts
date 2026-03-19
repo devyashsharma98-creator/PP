@@ -215,7 +215,7 @@ export function canReviewEventAtAayam(ctx: RequestAuthContext, event: EventRow) 
   );
 }
 
-export function canReviewAtVibhag(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
+export function canReviewAtVibhag(ctx: RequestAuthContext, entity: ScopedEntity) {
   return hasScopedRole(
     ctx,
     ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh", "vibhag_pramukh"],
@@ -223,7 +223,7 @@ export function canReviewAtVibhag(ctx: RequestAuthContext, entity: { org_id: str
   );
 }
 
-export function canAuthorizeAtPrant(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
+export function canAuthorizeAtPrant(ctx: RequestAuthContext, entity: ScopedEntity) {
   return hasScopedRole(
     ctx,
     ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh"],
@@ -231,7 +231,7 @@ export function canAuthorizeAtPrant(ctx: RequestAuthContext, entity: { org_id: s
   );
 }
 
-export function canEscalateToKshetra(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
+export function canEscalateToKshetra(ctx: RequestAuthContext, entity: ScopedEntity) {
   return hasScopedRole(
     ctx,
     ["super_admin", "org_admin", "kshetra_reviewer"],
@@ -320,7 +320,7 @@ export function canTransitionEventStatus(ctx: RequestAuthContext, event: EventRo
   if (target === "rejected") return canReviewAtVibhag(ctx, entity) || canAuthorizeAtPrant(ctx, entity);
 
   // Legacy support
-  if (target === "pending_final_approval") return canReviewEventAtAayam(ctx, event);
+  if ((target as string) === "pending_final_approval") return canReviewEventAtAayam(ctx, event);
   if (target === "draft") return canManageEventDraft(ctx, event) || canReviewEventAtAayam(ctx, event);
   if (target === "cancelled") return canPublishEvent(ctx, event);
   return false;

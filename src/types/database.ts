@@ -2150,6 +2150,66 @@ export type Database = {
           },
         ]
       }
+      workflow_approvals: {
+        Row: {
+          actor_id: string
+          actor_role: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          from_status: string | null
+          id: string
+          is_final_step: boolean | null
+          metadata: Json | null
+          remarks: string | null
+          step_label: string | null
+          to_status: string
+        }
+        Insert: {
+          actor_id: string
+          actor_role: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          from_status?: string | null
+          id?: string
+          is_final_step?: boolean | null
+          metadata?: Json | null
+          remarks?: string | null
+          step_label?: string | null
+          to_status: string
+        }
+        Update: {
+          actor_id?: string
+          actor_role?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          from_status?: string | null
+          id?: string
+          is_final_step?: boolean | null
+          metadata?: Json | null
+          remarks?: string | null
+          step_label?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_approvals_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_approvals_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_templates: {
         Row: {
           code: string
@@ -2315,16 +2375,29 @@ export type Database = {
         | "draft"
         | "pending_unit_head_review"
         | "pending_aayam_review"
+        | "pending_vibhag_review"
+        | "pending_prant_authorization"
+        | "authorized_public"
         | "published"
+        | "escalated_kshetra"
+        | "returned_for_revision"
+        | "rejected"
         | "archived"
       assignment_scope_type: "org" | "unit" | "department" | "event" | "article"
       attachment_visibility: "private" | "org" | "public"
       comment_visibility: "org" | "internal" | "public"
       event_status:
         | "draft"
+        | "submitted_by_unit"
         | "pending_aayam_review"
-        | "pending_final_approval"
+        | "pending_vibhag_review"
+        | "pending_prant_authorization"
+        | "pending_prant_dual_authorization"
+        | "authorized_public"
         | "published"
+        | "escalated_kshetra"
+        | "returned_for_revision"
+        | "rejected"
         | "cancelled"
       notification_kind:
         | "workflow"
@@ -2917,7 +2990,13 @@ export const Constants = {
         "draft",
         "pending_unit_head_review",
         "pending_aayam_review",
+        "pending_vibhag_review",
+        "pending_prant_authorization",
+        "authorized_public",
         "published",
+        "escalated_kshetra",
+        "returned_for_revision",
+        "rejected",
         "archived",
       ],
       assignment_scope_type: ["org", "unit", "department", "event", "article"],
@@ -2925,9 +3004,16 @@ export const Constants = {
       comment_visibility: ["org", "internal", "public"],
       event_status: [
         "draft",
+        "submitted_by_unit",
         "pending_aayam_review",
-        "pending_final_approval",
+        "pending_vibhag_review",
+        "pending_prant_authorization",
+        "pending_prant_dual_authorization",
+        "authorized_public",
         "published",
+        "escalated_kshetra",
+        "returned_for_revision",
+        "rejected",
         "cancelled",
       ],
       notification_kind: [
