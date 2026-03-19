@@ -8,10 +8,61 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Search, BookOpen, Download, FileText, Filter, Star, Eye,
-  ChevronRight, Library, BookMarked, Sparkles,
+  ChevronRight, Library, BookMarked, Sparkles, Compass, TrendingUp
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
+import { cn } from '@/lib/utils';
+
+// ── ELibrary Context Types ────────────────────────────────────────────────
+
+type ELibraryContextItem = {
+  labelEn: string;
+  labelHi: string;
+  valueEn: string;
+  valueHi?: string;
+  detailEn: string;
+  detailHi: string;
+};
+
+function ELibraryMasthead({
+  t,
+  contexts,
+}: {
+  t: (en: string, hi: string) => string;
+  contexts: ELibraryContextItem[];
+}) {
+  return (
+    <div className="dashboard-masthead space-y-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-3">
+          <p className="section-seal">{t('Knowledge Preservation', 'ज्ञान परंपरा संरक्षण')}</p>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t('Institutional E-Library', 'संस्थागत ई-पुस्तकालय')}
+            </h1>
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              {t(
+                'A curated repository of foundational Bharatiya Knowledge Systems (IKS) texts, preserved for research and intellectual awakening.',
+                'भारतीय ज्ञान परंपरा (IKS) के आधारभूत ग्रंथों का एक संकलित भंडार, जो शोध और बौद्धिक जागरण हेतु सुरक्षित है।'
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-context-grid">
+        {contexts.map((context) => (
+          <div key={context.labelEn} className="dashboard-context-card">
+            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
+            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
+            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ── Book Data ────────────────────────────────────────────────────────────────
 
@@ -150,89 +201,123 @@ export default function ELibrary() {
     return matchCategory && matchSearch;
   });
 
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
+  const contexts: ELibraryContextItem[] = [
+    {
+      labelEn: "Collection Depth",
+      labelHi: "संग्रह गहराई",
+      valueEn: `${books.length} Standard Texts`,
+      valueHi: `${books.length} मानक ग्रंथ`,
+      detailEn: "Digitized foundational works of Bharatiya knowledge.",
+      detailHi: "भारतीय ज्ञान के डिजिटल मूलभूत कार्य।",
+    },
+    {
+      labelEn: "Active Disciplines",
+      labelHi: "सक्रिय विषय",
+      valueEn: `${categories.length - 1} Subject Areas`,
+      valueHi: `${categories.length - 1} विषय क्षेत्र`,
+      detailEn: "From Arthashastra to Ayurveda and beyond.",
+      detailHi: "अर्थशास्त्र से आयुर्वेद और उससे आगे तक।",
+    },
+    {
+      labelEn: "Institutional Archiving",
+      labelHi: "संस्थागत संग्रहण",
+      valueEn: "Rare Text Preservation",
+      valueHi: "दुर्लभ ग्रंथ संरक्षण",
+      detailEn: "Ensuring scholarly access to civilisational wisdom.",
+      detailHi: "सभ्यतागत ज्ञान तक विद्वत्तापूर्ण पहुंच सुनिश्चित करना।",
+    },
+  ];
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Library className="w-5 h-5 text-primary" />
-            <h1 className="text-2xl font-bold font-devanagari">{t('E-Library', 'ई-पुस्तकालय')}</h1>
-          </div>
-          <p className="text-muted-foreground text-sm font-devanagari">
-            {t('Curated collection of Bharatiya Knowledge Systems texts', 'भारतीय ज्ञान परंपरा की संकलित पुस्तकें')}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs gap-1">
-            <BookOpen className="w-3 h-3" /> {books.length} {t('Books', 'पुस्तकें')}
-          </Badge>
-        </div>
-      </div>
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
+      <ELibraryMasthead t={t} contexts={contexts} />
 
       {/* Search + Category Filters */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={t('Search by title, author...', 'शीर्षक, लेखक से खोजें...')}
-            className="pl-10"
-          />
+      <section className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="relative w-full sm:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('Search the archives...', 'संग्रह में खोजें...')}
+              className="pl-10 h-11 rounded-xl bg-background/50 border-border/60 focus:border-primary/40 focus:ring-primary/10 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs gap-1.5 py-1 px-3 bg-muted/30 border-border/60">
+              <Filter className="w-3.5 h-3.5 opacity-60" /> {t('Filter by Subject', 'विषय अनुसार')}
+            </Badge>
+          </div>
         </div>
-        <div className="flex gap-1.5 flex-wrap">
+
+        <div className="flex gap-2 flex-wrap pb-2">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-[11px] px-3 py-1 rounded-full border transition-all font-devanagari ${activeCategory === cat
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-                }`}
+              className={cn(
+                "text-[11px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all font-devanagari",
+                activeCategory === cat
+                  ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                  : 'bg-background/50 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground'
+              )}
             >
               {isHi ? categoryLabelsHi[cat] : cat}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Book Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((book, i) => (
-            <motion.div
-              key={book.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ delay: i * 0.04 }}
-              className="group cursor-pointer"
-              onClick={() => setSelectedBook(selectedBook?.id === book.id ? null : book)}
-            >
-              <BookCover book={book} isHi={isHi} />
-              <div className="mt-2 space-y-0.5 px-0.5">
-                <h3 className="text-xs font-medium truncate font-devanagari">
-                  {isHi ? book.titleHi : book.title}
-                </h3>
-                <p className="text-[10px] text-muted-foreground truncate">{book.author}</p>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: book.rating }).map((_, j) => (
-                    <Star key={j} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                  ))}
+      <section className="space-y-5">
+        <div className="flex items-center gap-3">
+          <span className="section-seal">{t('The Archive', 'ग्रंथ संग्रहालय')}</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((book, i) => (
+              <motion.div
+                key={book.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: i * 0.03 }}
+                className="group cursor-pointer"
+                onClick={() => setSelectedBook(selectedBook?.id === book.id ? null : book)}
+              >
+                <div className={cn(
+                  "relative transition-all duration-300 transform group-hover:-translate-y-1",
+                  selectedBook?.id === book.id && "ring-2 ring-primary ring-offset-4 ring-offset-background rounded-xl"
+                )}>
+                  <BookCover book={book} isHi={isHi} />
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+                <div className="mt-3 space-y-1 px-1">
+                  <h3 className="text-sm font-bold truncate font-devanagari text-foreground/90">
+                    {isHi ? book.titleHi : book.title}
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium truncate">{book.author}</p>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Star key={j} className={cn(
+                        "w-2.5 h-2.5",
+                        j < book.rating ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"
+                      )} />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </section>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 space-y-3">
-          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/30" />
-          <p className="text-sm text-muted-foreground">{t('No books found', 'कोई पुस्तक नहीं मिली')}</p>
+        <div className="text-center py-24 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
+          <BookMarked className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+          <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">{t('No texts found in this discipline.', 'इस विषय में कोई ग्रंथ नहीं मिला।')}</p>
         </div>
       )}
 
@@ -243,42 +328,52 @@ export default function ELibrary() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <Card className="glass-card border-primary/20">
-              <CardContent className="py-5 flex flex-col sm:flex-row gap-5">
-                <div className="w-32 shrink-0">
+            <Card className="institution-panel border-primary/20 shadow-xl overflow-hidden">
+              <div className="h-1.5 bg-gradient-to-r from-amber-500 via-primary to-orange-600" />
+              <CardContent className="py-8 px-8 flex flex-col sm:flex-row gap-8">
+                <div className="w-40 shrink-0 shadow-2xl shadow-black/20 transform -rotate-1">
                   <BookCover book={selectedBook} isHi={isHi} />
                 </div>
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <h2 className="text-lg font-bold font-devanagari">
-                      {isHi ? selectedBook.titleHi : selectedBook.title}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">{selectedBook.author} · {selectedBook.year}</p>
-                  </div>
-                  <p className={`text-sm text-foreground/70 leading-relaxed ${isHi ? 'font-devanagari' : ''}`}>
-                    {isHi ? selectedBook.descriptionHi : selectedBook.description}
-                  </p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Badge variant="outline" className="text-[10px] gap-1">
-                      <FileText className="w-3 h-3" /> {selectedBook.pages} {t('pages', 'पृष्ठ')}
-                    </Badge>
-                    <Badge className="bg-primary/10 text-primary border-0 text-[10px]">
+                <div className="flex-1 space-y-5">
+                  <div className="space-y-1">
+                    <Badge className="bg-primary/10 text-primary border-0 text-[10px] font-bold uppercase tracking-widest mb-2">
                       {isHi ? categoryLabelsHi[selectedBook.category] : selectedBook.category}
                     </Badge>
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: selectedBook.rating }).map((_, j) => (
-                        <Star key={j} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <h2 className="text-3xl font-bold font-devanagari tracking-tight">
+                      {isHi ? selectedBook.titleHi : selectedBook.title}
+                    </h2>
+                    <p className="text-lg text-muted-foreground font-medium">{selectedBook.author} · <span className="text-primary/60">{selectedBook.year}</span></p>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-5 rounded-2xl border border-border/40">
+                    <p className={`text-base text-foreground/80 leading-relaxed ${isHi ? 'font-devanagari' : ''}`}>
+                      {isHi ? selectedBook.descriptionHi : selectedBook.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-6 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary/60" />
+                      <span className="text-sm font-bold">{selectedBook.pages} <span className="text-muted-foreground font-normal">{t('pages', 'पृष्ठ')}</span></span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star key={j} className={cn(
+                          "w-4 h-4",
+                          j < selectedBook.rating ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"
+                        )} />
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 pt-1">
-                    <Button size="sm" className="gap-1.5 text-xs">
-                      <Eye className="w-3.5 h-3.5" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <Button size="lg" className="gap-2 px-8 rounded-full shadow-lg shadow-primary/20">
+                      <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                      <Download className="w-3.5 h-3.5" /> {t('Download PDF', 'PDF डाउनलोड')}
+                    <Button size="lg" variant="outline" className="gap-2 px-8 rounded-full border-border/60 hover:bg-muted/50">
+                      <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
                     </Button>
                   </div>
                 </div>
@@ -288,23 +383,25 @@ export default function ELibrary() {
         )}
       </AnimatePresence>
 
+      <div className="sutra-divider" />
+
       {/* Bottom CTA */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-        <Card className="glass-card border-primary/15 bg-primary/5">
-          <CardContent className="py-5 flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
+      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
+        <Card className="institution-panel border-primary/15 bg-primary/5 hover:border-primary/30 transition-all shadow-sm">
+          <CardContent className="py-6 flex flex-col sm:flex-row items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <Sparkles className="w-7 h-7 text-primary" />
             </div>
-            <div className="flex-1 text-center sm:text-left">
-              <p className="font-semibold text-sm font-devanagari">
-                {t('Want to contribute a book?', 'पुस्तक योगदान करना चाहते हैं?')}
+            <div className="flex-1 text-center sm:text-left space-y-1">
+              <p className="font-bold text-base font-devanagari text-foreground/90">
+                {t('Contribute to the Civilisational Record', 'सभ्यतागत अभिलेख में योगदान दें')}
               </p>
-              <p className="text-xs text-muted-foreground font-devanagari">
-                {t('Upload PDFs of rare Bharatiya texts for the community', 'समाज के लिए दुर्लभ भारतीय ग्रंथों की PDF अपलोड करें')}
+              <p className="text-sm text-muted-foreground font-devanagari">
+                {t('Upload digitized PDFs of rare Bharatiya texts to expand our community library.', 'हमारे सामुदायिक पुस्तकालय का विस्तार करने के लिए दुर्लभ ग्रंथों की डिजिटल PDF अपलोड करें।')}
               </p>
             </div>
-            <Button size="sm" variant="outline" className="shrink-0 text-xs gap-1">
-              <BookOpen className="w-3.5 h-3.5" /> {t('Upload', 'अपलोड')}
+            <Button variant="outline" className="shrink-0 h-11 px-8 rounded-xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-widest text-xs gap-2">
+              <BookOpen className="w-4 h-4" /> {t('Upload Text', 'ग्रंथ अपलोड करें')}
             </Button>
           </CardContent>
         </Card>
