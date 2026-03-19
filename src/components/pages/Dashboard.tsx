@@ -154,6 +154,56 @@ export default function Dashboard() {
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
   const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
   const [qrEvent, setQrEvent] = useState<GatividhiEvent | null>(null);
+  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  const EXPERT_POOL = [
+    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
+    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
+    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
+    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
+    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
+    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
+  ];
+  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  const EXPERT_POOL = [
+    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
+    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
+    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
+    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
+    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
+    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
+  ];
+  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  const EXPERT_POOL = [
+    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
+    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
+    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
+    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
+    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
+    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
+  ];
+  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  const EXPERT_POOL = [
+    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
+    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
+    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
+    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
+    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
+    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
+  ];
+  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  const EXPERT_POOL = [
+    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
+    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
+    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
+    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
+    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
+    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
+  ];
 
   const vrittStatusLabel = (s: VrittStatus) => {
     const map: Record<VrittStatus, string> = { draft: t('Draft', 'प्रारूप'), submitted: t('Submitted', 'प्रस्तुत'), reviewed: t('Reviewed', 'समीक्षित') };
@@ -723,6 +773,10 @@ export default function Dashboard() {
       newChecklist[k] = true;
     });
     
+    // Filter experts
+    const suggestions = EXPERT_POOL.filter(e => e.keywords.includes(type));
+    setSuggestedExperts(suggestions);
+    
     setForm(p => ({ ...p, checklist: newChecklist }));
   };
 
@@ -981,6 +1035,36 @@ export default function Dashboard() {
                   </div>
                 </TabsContent>
               </Tabs>
+
+              {/* Suggested Experts Section */}
+              {suggestedExperts.length > 0 && (
+                <div className="space-y-3 pt-2 border-t border-border/40">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('Suggested Institutional Experts', 'अनुशंसित संस्थागत विशेषज्ञ')}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {suggestedExperts.map((expert, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-primary/5 border border-primary/10">
+                        <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
+                          <span className="text-[10px] text-white font-bold">{expert.name.charAt(0)}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{lang === 'hi' ? expert.nameHi : expert.name}</p>
+                          <div className="flex gap-1 overflow-hidden">
+                            {expert.vakshe.slice(0, 2).map((v, vi) => (
+                              <span key={vi} className="text-[8px] text-primary font-medium">{v}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-muted-foreground italic px-1">
+                    {t('These members have relevant expertise for this event type.', 'इन सदस्यों के पास इस कार्यक्रम के प्रकार हेतु प्रासंगिक विशेषज्ञता है।')}
+                  </p>
+                </div>
+              )}
 
               <Button type="submit" className="w-full">{t('Submit for Review', 'समीक्षा के लिए भेजें')}</Button>
             </form>

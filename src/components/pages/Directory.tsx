@@ -67,16 +67,16 @@ function DirectoryMasthead({
 // ── Member Data ──────────────────────────────────────────────────────────────
 
 const members = [
-  { id: '1', name: 'Ramesh Sharma', nameHi: 'रमेश शर्मा', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98261XXXXX', email: 'ramesh@example.com', unit: 'Bhopal Shahar' },
-  { id: '2', name: 'Anil Verma', nameHi: 'अनिल वर्मा', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Vimarsh', contact: '98263XXXXX', email: 'anil@example.com', unit: 'Bhopal Shahar' },
-  { id: '3', name: 'Kavita Singh', nameHi: 'कविता सिंह', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98264XXXXX', email: 'kavita@example.com', unit: 'Vidisha' },
-  { id: '4', name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Yuva', contact: '98265XXXXX', email: 'pradeep@example.com', unit: 'Bhopal Shahar' },
-  { id: '5', name: 'Meena Joshi', nameHi: 'मीना जोशी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Mahila', contact: '98266XXXXX', email: 'meena@example.com', unit: 'Sehore' },
-  { id: '6', name: 'Deshraj Patel', nameHi: 'देशराज पटेल', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98267XXXXX', email: 'deshraj@example.com', unit: 'Raisen' },
-  { id: '7', name: 'Suresh Yadav', nameHi: 'सुरेश यादव', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Yuva', contact: '98268XXXXX', email: 'suresh@example.com', unit: 'Bhopal Shahar' },
-  { id: '8', name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98269XXXXX', email: 'rajesh@example.com', unit: 'Vidisha' },
-  { id: '9', name: 'Deepak Kumar', nameHi: 'दीपक कुमार', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Vimarsh', contact: '98262XXXXX', email: 'deepak@example.com', unit: 'Bhopal Shahar' },
-  { id: '10', name: 'Sunita Chouhan', nameHi: 'सुनीता चौहान', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Mahila', contact: '98270XXXXX', email: 'sunita@example.com', unit: 'Raisen' },
+  { id: '1', name: 'Ramesh Sharma', nameHi: 'रमेश शर्मा', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98261XXXXX', email: 'ramesh@example.com', unit: 'Bhopal Shahar', vakshe: ['Media', 'Digital Reach'], vaksheHi: ['मीडिया', 'डिजिटल पहुंच'] },
+  { id: '2', name: 'Anil Verma', nameHi: 'अनिल वर्मा', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Vimarsh', contact: '98263XXXXX', email: 'anil@example.com', unit: 'Bhopal Shahar', vakshe: ['Colonialism', 'History'], vaksheHi: ['उपनिवेशवाद', 'इतिहास'] },
+  { id: '3', name: 'Kavita Singh', nameHi: 'कविता सिंह', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98264XXXXX', email: 'kavita@example.com', unit: 'Vidisha', vakshe: ['IKS', 'Archaeology'], vaksheHi: ['भारतीय ज्ञान परंपरा', 'पुरातत्व'] },
+  { id: '4', name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Yuva', contact: '98265XXXXX', email: 'pradeep@example.com', unit: 'Bhopal Shahar', vakshe: ['Public Speaking', 'Campus Connect'], vaksheHi: ['वक्तृत्व', 'कैंपस संपर्क'] },
+  { id: '5', name: 'Meena Joshi', nameHi: 'मीना जोशी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Mahila', contact: '98266XXXXX', email: 'meena@example.com', unit: 'Sehore', vakshe: ['Education Policy', 'Social Work'], vaksheHi: ['शिक्षा नीति', 'समाज कार्य'] },
+  { id: '6', name: 'Deshraj Patel', nameHi: 'देशराज पटेल', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98267XXXXX', email: 'deshraj@example.com', unit: 'Raisen', vakshe: ['Content Writing', 'PR'], vaksheHi: ['सामग्री लेखन', 'जनसंपर्क'] },
+  { id: '7', name: 'Suresh Yadav', nameHi: 'सुरेश यादव', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Yuva', contact: '98268XXXXX', email: 'suresh@example.com', unit: 'Bhopal Shahar', vakshe: ['Event Management', 'Youth Outreach'], vaksheHi: ['कार्यक्रम प्रबंधन', 'युवा संपर्क'] },
+  { id: '8', name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98269XXXXX', email: 'rajesh@example.com', unit: 'Vidisha', vakshe: ['Sanskrit', 'Manuscripts'], vaksheHi: ['संस्कृत', 'पांडुलिपि'] },
+  { id: '9', name: 'Deepak Kumar', nameHi: 'दीपक कुमार', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Vimarsh', contact: '98262XXXXX', email: 'deepak@example.com', unit: 'Bhopal Shahar', vakshe: ['Social Media', 'Data Analysis'], vaksheHi: ['सोशल मीडिया', 'डेटा विश्लेषण'] },
+  { id: '10', name: 'Sunita Chouhan', nameHi: 'सुनीता चौहान', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Mahila', contact: '98270XXXXX', email: 'sunita@example.com', unit: 'Raisen', vakshe: ['Legal', 'Policy Advocacy'], vaksheHi: ['कानूनी', 'नीति वकालत'] },
 ];
 
 const aayamConfig: Record<string, { color: string; bg: string; border: string }> = {
@@ -118,9 +118,12 @@ export default function Directory() {
 
   const filtered = members.filter(m => {
     const matchAayam = aayamFilter === 'All' || m.aayam === aayamFilter;
-    const matchSearch = m.name.toLowerCase().includes(search.toLowerCase())
+    const searchLower = search.toLowerCase();
+    const matchSearch = m.name.toLowerCase().includes(searchLower)
       || m.nameHi.includes(search)
-      || m.unit.toLowerCase().includes(search.toLowerCase());
+      || m.unit.toLowerCase().includes(searchLower)
+      || m.vakshe.some(v => v.toLowerCase().includes(searchLower))
+      || m.vaksheHi.some(v => v.includes(search));
     return matchAayam && matchSearch;
   });
 
@@ -239,6 +242,13 @@ export default function Directory() {
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium">
                               <MapPin className="w-3 h-3 opacity-60" />{m.unit}
                             </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {(isHi ? m.vaksheHi : m.vakshe).map((v, idx) => (
+                              <span key={idx} className="text-[9px] bg-primary/5 text-primary/70 px-1.5 py-0.5 rounded border border-primary/10 font-bold uppercase tracking-wider">
+                                {v}
+                              </span>
+                            ))}
                           </div>
                         </div>
                         <div className={cn(
