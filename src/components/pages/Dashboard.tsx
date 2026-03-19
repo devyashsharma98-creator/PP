@@ -512,6 +512,38 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        <Card className="institution-panel">
+          <CardHeader>
+            <CardTitle className="dashboard-section-heading flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-success" /> {t('Published Events Management', 'प्रकाशित कार्यक्रम प्रबंधन')}
+              </div>
+              <Badge variant="outline" className="text-[10px]">{published} {t('Active', 'सक्रिय')}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {events.filter(e => e.status === "Published").map(event => (
+                <div key={event.id} className="p-4 rounded-xl border border-border/60 bg-muted/20 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-bold text-sm leading-tight">{event.title}</h4>
+                    <Badge className="bg-green-500/10 text-green-600 border-0 text-[9px] uppercase font-bold tracking-widest">{t('Live', 'सक्रिय')}</Badge>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">{event.unit} · {event.date}</p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button variant="outline" size="sm" className="h-8 text-[10px] gap-1.5 flex-1" onClick={() => setQrEvent(event)}>
+                      <QrCode className="w-3.5 h-3.5 text-amber-600" /> {t('Venue QR', 'क्यूआर')}
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-8 text-[10px] gap-1.5 flex-1" onClick={() => openVrittEditor(event)}>
+                      <FileText className="w-3.5 h-3.5 text-primary" /> {t('Vritt', 'वृत्त')}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     );
   }
