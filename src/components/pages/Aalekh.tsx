@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   PenLine, CheckCircle2, Clock, ArrowRight, Eye, BarChart3,
   Users, BookOpen, ExternalLink, X, ChevronDown, ChevronRight,
-  RotateCcw, Send, FileText, AlertTriangle,
+  RotateCcw, Send, FileText, AlertTriangle, TrendingUp,
 } from "lucide-react";
 
 const statusColors: Record<ArticleStatus, string> = {
