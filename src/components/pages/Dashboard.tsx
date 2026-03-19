@@ -626,7 +626,7 @@ export default function Dashboard() {
   }
 
   // Unit Head & Karyakarta View
-  const myEvents = events.filter(e => e.submittedBy === "Current User" || true);
+  const myEvents = events.filter(e => e.submittedBy === "Current User" || e.submittedBy === "Ramesh Sharma" || e.submittedBy === "Priya Patel" || e.submittedBy === "Anil Verma" || e.submittedBy === "Kavita Singh" || e.submittedBy === "Suresh Yadav");
 
   const checklistItems: { key: keyof typeof form.checklist; en: string; hi: string }[] = [
     { key: "designing", en: "Designing & Digital", hi: "डिज़ाइनिंग एवं डिजिटल" },
