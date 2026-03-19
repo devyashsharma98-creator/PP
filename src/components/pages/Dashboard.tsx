@@ -164,46 +164,6 @@ export default function Dashboard() {
     { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
     { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
   ];
-  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
-
-  const EXPERT_POOL = [
-    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
-    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
-    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
-    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
-    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
-    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
-  ];
-  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
-
-  const EXPERT_POOL = [
-    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
-    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
-    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
-    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
-    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
-    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
-  ];
-  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
-
-  const EXPERT_POOL = [
-    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
-    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
-    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
-    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
-    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
-    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
-  ];
-  const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
-
-  const EXPERT_POOL = [
-    { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
-    { name: 'Kavita Singh', nameHi: 'कविता सिंह', vakshe: ['IKS', 'Archaeology'], keywords: ['seminar', 'workshop'] },
-    { name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', vakshe: ['Public Speaking', 'Campus Connect'], keywords: ['protest', 'outreach'] },
-    { name: 'Meena Joshi', nameHi: 'मीना जोशी', vakshe: ['Education Policy'], keywords: ['seminar', 'workshop'] },
-    { name: 'Deepak Kumar', nameHi: 'दीपक कुमार', vakshe: ['Social Media'], keywords: ['outreach', 'protest'] },
-    { name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', vakshe: ['Sanskrit', 'Manuscripts'], keywords: ['seminar', 'study_circle'] },
-  ];
 
   const vrittStatusLabel = (s: VrittStatus) => {
     const map: Record<VrittStatus, string> = { draft: t('Draft', 'प्रारूप'), submitted: t('Submitted', 'प्रस्तुत'), reviewed: t('Reviewed', 'समीक्षित') };
