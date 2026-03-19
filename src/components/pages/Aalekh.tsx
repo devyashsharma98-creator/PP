@@ -27,14 +27,26 @@ const statusColors: Record<ArticleStatus, string> = {
   Draft: "bg-muted text-muted-foreground border-border",
   "Pending Unit Head Review": "bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-400",
   "Pending Aayam Review": "bg-blue-500/15 text-blue-700 border-blue-500/30 dark:text-blue-400",
+  "Pending Vibhag Review": "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 dark:text-indigo-400",
+  "Pending Prant Authorization": "bg-violet-500/15 text-violet-700 border-violet-500/30 dark:text-violet-400",
   Published: "bg-green-500/15 text-green-700 border-green-500/30 dark:text-green-400",
+  "Escalated to Kshetra": "bg-orange-500/15 text-orange-700 border-orange-500/30 dark:text-orange-400",
+  "Returned for Revision": "bg-rose-500/15 text-rose-700 border-rose-500/30 dark:text-rose-400",
+  Rejected: "bg-destructive/15 text-destructive border-destructive/30",
+  Archived: "bg-muted text-muted-foreground border-border opacity-60",
 };
 
 const statusHi: Record<ArticleStatus, string> = {
   Draft: "प्रारूप",
-  "Pending Unit Head Review": "यूनिट समीक्षा प्रतीक्षित",
-  "Pending Aayam Review": "आयाम समीक्षा प्रतीक्षित",
+  "Pending Unit Head Review": "इकाई समीक्षा",
+  "Pending Aayam Review": "आयाम समीक्षा",
+  "Pending Vibhag Review": "विभाग समीक्षा",
+  "Pending Prant Authorization": "प्रांत अनुमोदन",
   Published: "प्रकाशित",
+  "Escalated to Kshetra": "क्षेत्र अग्रेषित",
+  "Returned for Revision": "संशोधन हेतु",
+  Rejected: "अस्वीकृत",
+  Archived: "अभिलेख",
 };
 
 const categories = ["Shodh", "Vimarsh", "Yuva", "Mahila", "Prachar", "Aalekh"];
@@ -658,78 +670,59 @@ export default function Aalekh() {
   // ── Aayam Pramukh View ───────────────────────────────────────────────────
   if (role === "aayam_pramukh") {
     const queue = articles.filter(a => a.status === "Pending Aayam Review");
-    const published = articles.filter(a => a.status === "Published");
+    const forwarded = articles.filter(a => 
+      a.status !== "Pending Aayam Review" && 
+      a.status !== "Pending Unit Head Review" &&
+      a.status !== "Draft"
+    );
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <AalekhMasthead
           t={t}
-          sealEn="Aalekh Publication Desk"
-          sealHi="आलेख प्रकाशन कक्ष"
-          titleEn="Approve and Publish Aalekh"
-          titleHi="आलेख अनुमोदित करें और प्रकाशित करें"
-          descriptionEn="Review the final drafts, make the last editorial call, and publish approved aalekh into the archive and feed."
-          descriptionHi="अंतिम मसौदे देखें, आखिरी संपादकीय निर्णय लें और स्वीकृत आलेख को अभिलेख व फ़ीड में प्रकाशित करें।"
+          sealEn="Aalekh Thematic Review Desk"
+          sealHi="आलेख विषयगत समीक्षा कक्ष"
+          titleEn="Review and Route Aalekh"
+          titleHi="आलेख की समीक्षा करें और आगे बढ़ाएँ"
+          descriptionEn="Review the final drafts, make the thematic editorial call, and forward to Vibhag for final review."
+          descriptionHi="अंतिम मसौदे देखें, विषयगत संपादकीय निर्णय लें और अंतिम समीक्षा के लिए विभाग को भेजें।"
           contexts={[
             {
               labelEn: "Current lane",
               labelHi: "वर्तमान चरण",
-              valueEn: "Final approval and publication lane",
-              valueHi: "अंतिम अनुमोदन और प्रकाशन चरण",
-              detailEn: "Approve the ready aalekh and return the rest with clear notes.",
-              detailHi: "तैयार आलेख अनुमोदित करें और बाकी को साफ टिप्पणियों के साथ लौटाएं।",
+              valueEn: "Aayam Thematic Review",
+              valueHi: "आयाम विषयगत समीक्षा",
+              detailEn: "Approve the ready aalekh for vibhag review or return for unit revision.",
+              detailHi: "विभाग समीक्षा के लिए तैयार आलेख भेजें या इकाई संशोधन के लिए लौटाएं।",
             },
             {
-              labelEn: "Published record",
-              labelHi: "प्रकाशित अभिलेख",
-              valueEn: "Institutional archive in motion",
-              valueHi: "गतिशील संस्थागत अभिलेख",
-              detailEn: "Each published aalekh becomes part of the organisation's visible intellectual record.",
-              detailHi: "हर प्रकाशित आलेख संगठन के दिखने वाले बौद्धिक अभिलेख का हिस्सा बनता है।",
+              labelEn: "Next movement",
+              labelHi: "अगला प्रवाह",
+              valueEn: "Forward to Vibhag Pramukh",
+              valueHi: "विभाग प्रमुख को भेजें",
+              detailEn: "Thematic clearance moves the aalekh into the regional approval rhythm.",
+              detailHi: "विषयगत स्पष्टता आलेख को क्षेत्रीय अनुमोदन प्रवाह में ले जाती है।",
             },
             {
               labelEn: "Editorial standard",
               labelHi: "संपादकीय मानक",
-              valueEn: "Final thematic scrutiny",
-              valueHi: "अंतिम विषयगत समीक्षा",
-              detailEn: "Use this desk to keep tone, clarity, and mission alignment intact before publication.",
-              detailHi: "प्रकाशन से पहले स्वर, स्पष्टता और मिशन-संगति बनाए रखने के लिए इस कक्ष का उपयोग करें।",
+              valueEn: "Thematic scrutiny & mission alignment",
+              valueHi: "विषयगत जांच और मिशन-संगति",
+              detailEn: "Keep tone, clarity, and organisation mission alignment intact.",
+              detailHi: "स्वर, स्पष्टता और संगठन की मिशन-संगति बनाए रखें।",
             },
           ]}
         />
 
-        {lastPublished && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-            <Alert className="border-green-500/40 bg-green-500/10">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <AlertDescription className="flex items-center justify-between">
-                <span className="text-green-800 dark:text-green-300 text-sm font-devanagari">
-                  <strong>{lastPublished}</strong> {t('published to feed!', 'फ़ीड में प्रकाशित!')}
-                </span>
-                <div className="flex items-center gap-2 ml-3">
-                  <Link href="/feed">
-                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-700 dark:text-green-400">
-                      {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                  </Link>
-                  <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="w-4 h-4 text-blue-500" /> {t(`Final Approval Queue (${queue.length})`, `अंतिम अनुमोदन पंक्ति (${queue.length})`)}
+              <Clock className="w-4 h-4 text-blue-500" /> {t(`Aayam Review Queue (${queue.length})`, `आयाम समीक्षा पंक्ति (${queue.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {queue.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4 text-center">{t('Nothing is waiting for approval.', 'अभी अनुमोदन के लिए कुछ भी प्रतीक्षित नहीं है।')}</p>
+              <p className="text-muted-foreground text-sm py-4 text-center">{t('Nothing is waiting for review.', 'अभी समीक्षा के लिए कुछ भी प्रतीक्षित नहीं है।')}</p>
             ) : (
               queue.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -739,26 +732,15 @@ export default function Aalekh() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <EditForwardDialog
                           article={a}
-                          targetStatus="Published"
-                          actionLabel={t("Review and Publish", "समीक्षा करें और प्रकाशित करें")}
+                          targetStatus="Pending Vibhag Review"
+                          actionLabel={t("Review and Send to Vibhag", "समीक्षा करें और विभाग को भेजें")}
                           onDone={async (edits) => {
-                            const ok = await updateArticleStatus(a.id, "Published", edits);
+                            const ok = await updateArticleStatus(a.id, "Pending Vibhag Review", edits);
                             if (!ok) return false;
-                            setLastPublished(edits.title ?? a.title);
-                            addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
+                            addToast(t('Article forwarded!', 'आलेख आगे भेजा!'), 'info', t('Sent for Vibhag Pramukh review', 'विभाग प्रमुख की समीक्षा के लिए'));
                             return true;
                           }}
                         />
-                        <Button size="sm" className="h-7 text-xs"
-                          onClick={async () => {
-                            const ok = await updateArticleStatus(a.id, "Published");
-                            if (!ok) return;
-                            setLastPublished(a.title);
-                            addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
-                          }}
-                        >
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> {t('Approve & Publish', 'अनुमोदित करें और प्रकाशित करें')}
-                        </Button>
                         <ReturnWithNotesDialog
                           articleId={a.id}
                           onReturn={async (reviewNotes) => {
@@ -779,19 +761,16 @@ export default function Aalekh() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" /> {t(`Published Aalekh Archive (${published.length})`, `प्रकाशित आलेख अभिलेख (${published.length})`)}
+              <TrendingUp className="w-4 h-4 text-primary" /> {t(`Forwarded / Published (${forwarded.length})`, `अग्रेषित / प्रकाशित (${forwarded.length})`)}
             </CardTitle>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {t("Published aalekh record and approved archive.", "प्रकाशित आलेख अभिलेख और अनुमोदित संग्रह।")}
-            </p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {published.length === 0 ? (
+            {forwarded.length === 0 ? (
               <p className="text-muted-foreground text-sm py-4 text-center">
-                {t("No aalekh are published yet. Approved work will appear here.", "अभी कोई आलेख प्रकाशित नहीं है। अनुमोदित सामग्री यहीं दिखाई देगी।")}
+                {t("No aalekh have been moved ahead yet.", "अभी कोई आलेख आगे नहीं बढ़ाया गया है।")}
               </p>
             ) : (
-              published.map((a, i) => (
+              forwarded.map((a, i) => (
                 <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
                   <ArticleCard article={a} />
                 </motion.div>
@@ -806,21 +785,68 @@ export default function Aalekh() {
   // ── Vibhag Pramukh View ──────────────────────────────────────────────────
   const total = articles.length;
   const published = articles.filter(a => a.status === "Published").length;
-  const pending = articles.filter(a => a.status === "Pending Unit Head Review" || a.status === "Pending Aayam Review").length;
+  const pendingCount = articles.filter(a => a.status !== "Published" && a.status !== "Draft" && a.status !== "Archived").length;
+  const vibhagQueue = articles.filter(a => a.status === "Pending Vibhag Review" || a.status === "Pending Prant Authorization");
   const publishedList = articles.filter(a => a.status === "Published");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold font-devanagari">{t('Aalekh Overview', 'आलेख अवलोकन')}</h1>
-        <p className="text-muted-foreground text-sm">{t('Published articles across all aayams — Bhopal Vibhag', 'सभी आयामों के प्रकाशित आलेख — भोपाल विभाग')}</p>
-      </div>
+      <AalekhMasthead
+        t={t}
+        sealEn="Vibhag Editorial Console"
+        sealHi="विभाग संपादकीय डेस्क"
+        titleEn="Vibhag Review Board"
+        titleHi="विभाग समीक्षा मंडल"
+        descriptionEn="Regional oversight of all aayams. Review, authorize, and publish institutional aalekh."
+        descriptionHi="सभी आयामों की क्षेत्रीय दृष्टि। संस्थागत आलेखों की समीक्षा करें, अधिकृत करें और प्रकाशित करें।"
+        contexts={[
+          {
+            labelEn: "Operational focus",
+            labelHi: "परिचालन केंद्र",
+            valueEn: "Vibhag & Prant Approval Lane",
+            valueHi: "विभाग और प्रांत अनुमोदन धारा",
+            detailEn: "Final quality gate before publication to the state-level feed.",
+            detailHi: "राज्य-स्तरीय फ़ीड में प्रकाशन से पहले अंतिम गुणवत्ता जांच।",
+          },
+          {
+            labelEn: "Current activity",
+            labelHi: "वर्तमान गतिविधि",
+            valueEn: `${vibhagQueue.length} items awaiting action`,
+            valueHi: `${vibhagQueue.length} प्रविष्टियाँ कार्रवाई हेतु प्रतीक्षित`,
+            detailEn: "Track pending approvals from across all active aayams.",
+            detailHi: "सभी सक्रिय आयामों से लंबित अनुमोदनों पर नज़र रखें।",
+          },
+        ]}
+      />
+
+      {lastPublished && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <Alert className="border-green-500/40 bg-green-500/10">
+            <CheckCircle2 className="w-4 h-4 text-green-600" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-green-800 dark:text-green-300 text-sm font-devanagari">
+                <strong>{lastPublished}</strong> {t('published to feed!', 'फ़ीड में प्रकाशित!')}
+              </span>
+              <div className="flex items-center gap-2 ml-3">
+                <Link href="/feed">
+                  <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-700 dark:text-green-400">
+                    {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
+                </Link>
+                <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: t("Total Articles", "कुल आलेख"), value: total, icon: BarChart3, color: "text-primary" },
           { label: t("Published", "प्रकाशित"), value: published, icon: CheckCircle2, color: "text-green-600" },
-          { label: t("In Review", "समीक्षाधीन"), value: pending, icon: Clock, color: "text-amber-500" },
+          { label: t("In Review", "समीक्षाधीन"), value: pendingCount, icon: Clock, color: "text-amber-500" },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <Card className="glass-card hover-lift">
@@ -837,6 +863,61 @@ export default function Aalekh() {
           </motion.div>
         ))}
       </div>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" /> {t(`Vibhag Review Queue (${vibhagQueue.length})`, `विभाग समीक्षा पंक्ति (${vibhagQueue.length})`)}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {vibhagQueue.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-8 text-center">{t('No aalekh are waiting for vibhag/prant action.', 'अभी कोई आलेख विभाग या प्रांत कार्रवाई के लिए प्रतीक्षित नहीं है।')}</p>
+          ) : (
+            vibhagQueue.map((a, i) => (
+              <motion.div key={a.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                <ArticleCard
+                  article={a}
+                  actions={
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {a.status === "Pending Vibhag Review" && (
+                        <Button size="sm" className="h-7 text-xs" onClick={async () => {
+                          const ok = await updateArticleStatus(a.id, "Pending Prant Authorization");
+                          if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
+                        }}>
+                          <ArrowRight className="w-3 h-3 mr-1" /> {t('Forward to Prant', 'प्रांत को भेजें')}
+                        </Button>
+                      )}
+                      {(a.status === "Pending Prant Authorization") && (
+                        <EditForwardDialog
+                          article={a}
+                          targetStatus="Published"
+                          actionLabel={t("Review and Publish", "समीक्षा करें और प्रकाशित करें")}
+                          onDone={async (edits) => {
+                            const ok = await updateArticleStatus(a.id, "Published", edits);
+                            if (!ok) return false;
+                            setLastPublished(edits.title ?? a.title);
+                            addToast(t('Article Published!', 'आलेख प्रकाशित!'), 'success', t('Available in Feed', 'फ़ीड में उपलब्ध'));
+                            return true;
+                          }}
+                        />
+                      )}
+                      <ReturnWithNotesDialog
+                        articleId={a.id}
+                        onReturn={async (reviewNotes) => {
+                          const ok = await updateArticleStatus(a.id, "Draft", undefined, { reviewNotes: reviewNotes ?? null });
+                          if (!ok) return;
+                          addToast(t('Returned to writer', 'लेखक को वापस भेजा'), 'warning', t('Sent back for revision', 'संशोधन के लिए वापस भेजा गया'));
+                        }}
+                      />
+                    </div>
+                  }
+                />
+              </motion.div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="glass-card">
         <CardHeader>

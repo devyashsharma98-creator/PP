@@ -31,18 +31,32 @@ import { useT } from '@/lib/useT';
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
     Draft: "status-draft",
+    "Submitted by Unit": "status-pending-review",
     "Pending Aayam Review": "status-pending-review",
-    "Pending Final Approval": "status-pending-approval",
+    "Pending Vibhag Review": "status-pending-approval",
+    "Pending Prant Authorization": "status-pending-approval",
+    "Pending Prant Dual Authorization": "status-pending-approval",
     Published: "status-published",
+    "Escalated to Kshetra": "status-pending-approval",
+    "Returned for Revision": "status-draft",
+    Rejected: "status-cancelled",
+    Cancelled: "status-cancelled",
   };
   return map[status] || "";
 };
 
 const eventStatusHi: Record<string, string> = {
   Draft: "प्रारूप",
+  "Submitted by Unit": "इकाई द्वारा प्रस्तुत",
   "Pending Aayam Review": "आयाम समीक्षा प्रतीक्षित",
-  "Pending Final Approval": "अंतिम अनुमोदन प्रतीक्षित",
+  "Pending Vibhag Review": "विभाग समीक्षा प्रतीक्षित",
+  "Pending Prant Authorization": "प्रांत अनुमोदन प्रतीक्षित",
+  "Pending Prant Dual Authorization": "प्रांत दोहरा अनुमोदन प्रतीक्षित",
   Published: "प्रकाशित",
+  "Escalated to Kshetra": "क्षेत्र को अग्रेषित",
+  "Returned for Revision": "संशोधन के लिए लौटाया",
+  Rejected: "अस्वीकृत",
+  Cancelled: "रद्द",
 };
 
 type DashboardContextItem = {
@@ -267,7 +281,11 @@ export default function Dashboard() {
   if (role === "vibhag_pramukh") {
     const totalEvents = events.length;
     const published = events.filter(e => e.status === "Published").length;
-    const pending = events.filter(e => e.status === "Pending Final Approval");
+    const pending = events.filter(e => 
+      e.status === "Pending Vibhag Review" || 
+      e.status === "Pending Prant Authorization" ||
+      e.status === "Pending Prant Dual Authorization"
+    );
     const units = new Set(events.map(e => e.unit)).size;
 
     return (
@@ -276,10 +294,10 @@ export default function Dashboard() {
           t={t}
           sealEn="Bhopal Vibhag Activity Console"
           sealHi="भोपाल विभाग गतिविधि डेस्क"
-          titleEn="Institutional Overview"
-          titleHi="संस्थागत अवलोकन"
-          descriptionEn="Final approvals, publication, and unit coordination in one operational view."
-          descriptionHi="एक ही परिचालन दृश्य में अंतिम अनुमोदन, प्रकाशन और इकाई समन्वय।"
+          titleEn="Vibhag Review Board"
+          titleHi="विभाग समीक्षा मंडल"
+          descriptionEn="Vibhag review, Prant forwarding, and unit coordination in one operational view."
+          descriptionHi="विभाग समीक्षा, प्रांत को अग्रेषण और इकाई समन्वय।"
           contexts={[
             {
               labelEn: "Scope",
@@ -292,8 +310,8 @@ export default function Dashboard() {
             {
               labelEn: "Operational focus",
               labelHi: "परिचालन केंद्र",
-              valueEn: "Final approval and publication lane",
-              valueHi: "अंतिम अनुमोदन और प्रकाशन धारा",
+              valueEn: "Vibhag & Prant Review Lane",
+              valueHi: "विभाग और प्रांत समीक्षा धारा",
               detailEn: "Prioritise event approvals, feed publishing, and prachar follow-through.",
               detailHi: "कार्यक्रम अनुमोदन, फीड प्रकाशन और प्रचार अनुवर्ती को प्राथमिकता दें।",
             },
@@ -329,7 +347,6 @@ export default function Dashboard() {
                       <stat.icon className={`w-5 h-5 ${stat.color}`} />
                     </div>
                   </div>
-                  {/* Mini sparkline bar */}
                   <div className="flex items-end gap-[3px] h-6 mt-3">
                     {stat.sparkData.map((v, j) => (
                       <motion.div
@@ -350,35 +367,51 @@ export default function Dashboard() {
         <Card className="institution-panel">
           <CardHeader>
             <CardTitle className="dashboard-section-heading">
-              <Eye className="w-5 h-5 text-primary" /> {t('Final Approvals Queue', 'अंतिम अनुमोदन कतार')}
+              <Eye className="w-5 h-5 text-primary" /> {t('Vibhag & Prant Approval Queue', 'विभाग और प्रांत अनुमोदन कतार')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {pending.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-8 text-center">{t('No events pending final approval.', 'अंतिम अनुमोदन प्रतीक्षित कोई कार्यक्रम नहीं।')}</p>
+              <p className="text-muted-foreground text-sm py-8 text-center">{t('No events pending vibhag/prant approval.', 'विभाग या प्रांत अनुमोदन प्रतीक्षित कोई कार्यक्रम नहीं।')}</p>
             ) : (
               <div className="space-y-3">
                 {pending.map(event => (
                   <motion.div key={event.id} layout className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border/50">
                     <div>
                       <p className="font-medium">{event.title}</p>
-                      <p className="text-sm text-muted-foreground">{event.unit} · {event.date}</p>
+                      <p className="text-sm text-muted-foreground">{event.unit} · {event.date} · <span className="text-primary font-medium">{t(event.status, eventStatusHi[event.status])}</span></p>
                     </div>
-                    <Button
-                      size="sm"
-                      disabled={!permissions.canPublishEvent}
-                      onClick={async () => {
-                        const ok = await updateEventStatus(event.id, "Published");
-                        if (!ok) {
-                          addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
-                          return;
-                        }
-                        setLastPublished(event.title);
-                        addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
-                      }}
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-1" /> {t('Publish to Feed', 'फ़ीड में प्रकाशित करें')}
-                    </Button>
+                    <div className="flex gap-2">
+                      {event.status === "Pending Vibhag Review" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const ok = await updateEventStatus(event.id, "Pending Prant Authorization");
+                            if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
+                          }}
+                        >
+                          <ArrowRight className="w-4 h-4 mr-1" /> {t('Forward to Prant', 'प्रांत को भेजें')}
+                        </Button>
+                      )}
+                      {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && (
+                        <Button
+                          size="sm"
+                          disabled={!permissions.canPublishEvent}
+                          onClick={async () => {
+                            const ok = await updateEventStatus(event.id, "Published");
+                            if (!ok) {
+                              addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
+                              return;
+                            }
+                            setLastPublished(event.title);
+                            addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
+                          }}
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> {t('Authorize & Publish', 'अनुमोदित और प्रकाशित करें')}
+                        </Button>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -417,8 +450,13 @@ export default function Dashboard() {
   }
 
   if (role === "aayam_pramukh") {
-    const pendingReview = events.filter(e => e.status === "Pending Aayam Review");
-    const forwarded = events.filter(e => e.status === "Pending Final Approval" || e.status === "Published");
+    const pendingReview = events.filter(e => e.status === "Pending Aayam Review" || e.status === "Submitted by Unit");
+    const forwarded = events.filter(e => 
+      e.status !== "Pending Aayam Review" && 
+      e.status !== "Submitted by Unit" && 
+      e.status !== "Draft" &&
+      e.status !== "Cancelled"
+    );
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -428,30 +466,30 @@ export default function Dashboard() {
           sealHi="आयाम समीक्षा डेस्क"
           titleEn="Aayam Review Board"
           titleHi="आयाम समीक्षा मंडल"
-          descriptionEn="Review incoming programmes, forward ready work, and keep the organisational lane clear."
-          descriptionHi="आगत कार्यक्रमों की समीक्षा करें, तैयार कार्य आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
+          descriptionEn="Review incoming programmes, forward for vibhag review, and keep the organisational lane clear."
+          descriptionHi="आगत कार्यक्रमों की समीक्षा करें, विभाग समीक्षा हेतु आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
           contexts={[
             {
               labelEn: "Review queue",
               labelHi: "समीक्षा कतार",
               valueEn: `${pendingReview.length} programmes awaiting review`,
               valueHi: `${pendingReview.length} कार्यक्रम समीक्षा हेतु प्रतीक्षित`,
-              detailEn: "Programmes submitted by unit heads arrive here first.",
-              detailHi: "इकाई प्रमुखों द्वारा भेजे गए कार्यक्रम पहले यहाँ दिखाई देते हैं।",
+              detailEn: "Programmes submitted by units arrive here for thematic review.",
+              detailHi: "इकाइयों द्वारा भेजे गए कार्यक्रम विषयगत समीक्षा के लिए यहाँ आते हैं।",
             },
             {
               labelEn: "Forwarded lane",
               labelHi: "अग्रेषित धारा",
               valueEn: `${forwarded.length} items moved ahead`,
               valueHi: `${forwarded.length} प्रविष्टियाँ आगे भेजी गईं`,
-              detailEn: "Track what has already reached final approval or publication.",
-              detailHi: "जो कार्य अंतिम अनुमोदन या प्रकाशन तक पहुँच चुका है, वह यहाँ दिखता है।",
+              detailEn: "Track what has already reached vibhag/prant review or publication.",
+              detailHi: "जो कार्य विभाग/प्रांत समीक्षा या प्रकाशन तक पहुँच चुका है, वह यहाँ दिखता है।",
             },
             {
               labelEn: "Operational focus",
               labelHi: "परिचालन केंद्र",
-              valueEn: "Review and forwarding discipline",
-              valueHi: "समीक्षा और अग्रेषण अनुशासन",
+              valueEn: "Thematic Review & Forwarding",
+              valueHi: "विषयगत समीक्षा और अग्रेषण",
               detailEn: "Keep the review lane moving cleanly for vibhag-level action.",
               detailHi: "विभाग स्तर की कार्रवाई के लिए समीक्षा धारा को स्पष्ट और गतिशील रखें।",
             },
@@ -480,22 +518,22 @@ export default function Dashboard() {
                           <CalendarDays className="w-3 h-3 ml-2" />{event.date}
                         </p>
                       </div>
-                      <Badge className={statusBadge(event.status)}>{statusLabel(event.status)}</Badge>
+                      <Badge className={statusBadge(event.status)}>{t(event.status, eventStatusHi[event.status])}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
                       <Button size="sm" onClick={async () => {
-                        const ok = await updateEventStatus(event.id, "Pending Final Approval");
+                        const ok = await updateEventStatus(event.id, "Pending Vibhag Review");
                         if (!ok) {
                           addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
                           return;
                         }
-                        addToast(t('Forwarded for final approval', 'अंतिम अनुमोदन के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
+                        addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
                       }}>
-                        {t('Review & Forward', 'समीक्षा करें और भेजें')} <ArrowRight className="w-4 h-4 ml-1" />
+                        {t('Review & Forward to Vibhag', 'समीक्षा करें और विभाग को भेजें')} <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                       <p className="text-xs text-muted-foreground pl-0.5 font-devanagari">
-                        {t('Forwarded events are visible to Vibhag Pramukh for final approval.', 'अग्रेषित कार्यक्रम विभाग प्रमुख को अंतिम अनुमोदन के लिए दिखाई देंगे।')}
+                        {t('Forwarded events are visible to Vibhag Pramukh for further review.', 'अग्रेषित कार्यक्रम विभाग प्रमुख को अगली समीक्षा के लिए दिखाई देंगे।')}
                       </p>
                     </div>
                   </motion.div>
@@ -778,7 +816,7 @@ export default function Dashboard() {
             <CheckCircle2 className="w-4 h-4 text-green-600" />
             <AlertDescription className="flex items-center justify-between">
               <span className="text-green-800 dark:text-green-300 text-sm font-devanagari">
-                {t('Event submitted for Aayam review! It will appear in the list below.', 'कार्यक्रम आयाम समीक्षा के लिए भेजा गया! यह नीचे सूची में दिखाई देगा।')}
+                {t('Event submitted for review! It will appear in the list below.', 'कार्यक्रम समीक्षा के लिए भेजा गया! यह नीचे सूची में दिखाई देगा।')}
               </span>
               <button onClick={() => setSubmitted(false)} className="ml-4 text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
                 <X className="w-4 h-4" />

@@ -13,9 +13,30 @@ import type {
 export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh' | 'karyakarta';
 export type Lang = 'en' | 'hi';
 
-export type EventStatus = 'Draft' | 'Pending Aayam Review' | 'Pending Final Approval' | 'Published';
+export type EventStatus =
+  | "Draft"
+  | "Submitted by Unit"
+  | "Pending Aayam Review"
+  | "Pending Vibhag Review"
+  | "Pending Prant Authorization"
+  | "Pending Prant Dual Authorization"
+  | "Published"
+  | "Escalated to Kshetra"
+  | "Returned for Revision"
+  | "Rejected"
+  | "Cancelled";
 
-export type ArticleStatus = 'Draft' | 'Pending Unit Head Review' | 'Pending Aayam Review' | 'Published';
+export type ArticleStatus =
+  | "Draft"
+  | "Pending Unit Head Review"
+  | "Pending Aayam Review"
+  | "Pending Vibhag Review"
+  | "Pending Prant Authorization"
+  | "Published"
+  | "Escalated to Kshetra"
+  | "Returned for Revision"
+  | "Rejected"
+  | "Archived";
 
 export type PracharPlatform = 'whatsapp' | 'facebook' | 'instagram' | 'telegram';
 
@@ -246,7 +267,7 @@ const initialEvents: GatividhiEvent[] = [
     date: '2026-03-10',
     unit: 'Sehore',
     submittedBy: 'Anil Verma',
-    status: 'Pending Final Approval',
+    status: 'Pending Vibhag Review',
     checklist: { designing: true, food: true, seating: true, transport: true, accommodation: true, soundMic: true, camera: true, screen: true, lights: true },
     report: 'Event included panel discussions, cultural performances, and community dialogue sessions.',
     imageUrl: '',

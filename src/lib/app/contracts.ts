@@ -15,15 +15,28 @@ export type Lang = "en" | "hi";
 
 export type EventStatus =
   | "Draft"
+  | "Submitted by Unit"
   | "Pending Aayam Review"
-  | "Pending Final Approval"
-  | "Published";
+  | "Pending Vibhag Review"
+  | "Pending Prant Authorization"
+  | "Pending Prant Dual Authorization"
+  | "Published"
+  | "Escalated to Kshetra"
+  | "Returned for Revision"
+  | "Rejected"
+  | "Cancelled";
 
 export type ArticleStatus =
   | "Draft"
   | "Pending Unit Head Review"
   | "Pending Aayam Review"
-  | "Published";
+  | "Pending Vibhag Review"
+  | "Pending Prant Authorization"
+  | "Published"
+  | "Escalated to Kshetra"
+  | "Returned for Revision"
+  | "Rejected"
+  | "Archived";
 
 export type PracharPlatform = "whatsapp" | "facebook" | "instagram" | "telegram";
 

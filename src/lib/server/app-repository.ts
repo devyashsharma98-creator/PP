@@ -41,34 +41,61 @@ type EventRow = Db["events"]["Row"];
 type ArticleRow = Db["articles"]["Row"];
 type DbClient = SupabaseClient<Database>;
 
-const dbToUiEventStatus: Record<EventRow["status"], EventStatus> = {
+const dbToUiEventStatus: Record<string, EventStatus> = {
   draft: "Draft",
+  submitted_by_unit: "Submitted by Unit",
   pending_aayam_review: "Pending Aayam Review",
-  pending_final_approval: "Pending Final Approval",
-  published: "Published",
-  cancelled: "Draft",
+  pending_vibhag_review: "Pending Vibhag Review",
+  pending_prant_authorization: "Pending Prant Authorization",
+  pending_prant_dual_authorization: "Pending Prant Dual Authorization",
+  authorized_public: "Published",
+  published: "Published", // Backward compatibility
+  escalated_kshetra: "Escalated to Kshetra",
+  returned_for_revision: "Returned for Revision",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
+  pending_final_approval: "Pending Vibhag Review", // Legacy mapping
 };
 
-const uiToDbEventStatus: Record<EventStatus, EventRow["status"]> = {
+const uiToDbEventStatus: Record<EventStatus, string> = {
   Draft: "draft",
+  "Submitted by Unit": "submitted_by_unit",
   "Pending Aayam Review": "pending_aayam_review",
-  "Pending Final Approval": "pending_final_approval",
-  Published: "published",
+  "Pending Vibhag Review": "pending_vibhag_review",
+  "Pending Prant Authorization": "pending_prant_authorization",
+  "Pending Prant Dual Authorization": "pending_prant_dual_authorization",
+  Published: "authorized_public",
+  "Escalated to Kshetra": "escalated_kshetra",
+  "Returned for Revision": "returned_for_revision",
+  Rejected: "rejected",
+  Cancelled: "cancelled",
 };
 
-const dbToUiArticleStatus: Record<ArticleRow["status"], ArticleStatus> = {
+const dbToUiArticleStatus: Record<string, ArticleStatus> = {
   draft: "Draft",
   pending_unit_head_review: "Pending Unit Head Review",
   pending_aayam_review: "Pending Aayam Review",
-  published: "Published",
-  archived: "Draft",
+  pending_vibhag_review: "Pending Vibhag Review",
+  pending_prant_authorization: "Pending Prant Authorization",
+  authorized_public: "Published",
+  published: "Published", // Backward compatibility
+  escalated_kshetra: "Escalated to Kshetra",
+  returned_for_revision: "Returned for Revision",
+  rejected: "Rejected",
+  archived: "Archived",
 };
 
-const uiToDbArticleStatus: Record<ArticleStatus, ArticleRow["status"]> = {
+const uiToDbArticleStatus: Record<ArticleStatus, string> = {
   Draft: "draft",
   "Pending Unit Head Review": "pending_unit_head_review",
   "Pending Aayam Review": "pending_aayam_review",
-  Published: "published",
+  "Pending Vibhag Review": "pending_vibhag_review",
+  "Pending Prant Authorization": "pending_prant_authorization",
+  Published: "authorized_public",
+  "Escalated to Kshetra": "escalated_kshetra",
+  "Returned for Revision": "returned_for_revision",
+  Rejected: "rejected",
+  Archived: "archived",
 };
 
 function asObject(value: Json | null): Record<string, unknown> {
@@ -483,19 +510,60 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
   };
 }
 
+async function recordWorkflowApproval(
+  supabase: DbClient,
+  params: {
+    entityType: "event" | "article";
+    entityId: string;
+    fromStatus: string | null;
+    toStatus: string;
+    actorId: string;
+    actorRole: string;
+    stepLabel?: string;
+    remarks?: string;
+    isFinalStep?: boolean;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  await supabase.from("workflow_approvals").insert({
+    entity_type: params.entityType,
+    entity_id: params.entityId,
+    from_status: params.fromStatus,
+    to_status: params.toStatus,
+    actor_id: params.actorId,
+    actor_role: params.actorRole,
+    step_label: params.stepLabel,
+    remarks: params.remarks,
+    is_final_step: !!params.isFinalStep,
+    metadata: (params.metadata || {}) as Json,
+  });
+}
+
 async function insertEventStatusHistory(
   supabase: DbClient,
-  actorUserId: string,
+  ctx: RequestAuthContext,
   eventId: string,
   oldStatus: EventRow["status"] | null,
   newStatus: EventRow["status"],
+  remarks?: string,
 ) {
   await supabase.from("event_status_history").insert({
     event_id: eventId,
     old_status: oldStatus,
     new_status: newStatus,
-    changed_by: actorUserId,
-    reason: "app_action",
+    changed_by: ctx.user.id,
+    reason: remarks || "app_action",
+  });
+
+  // Also record in the new workflow_approvals table for Phase 2
+  await recordWorkflowApproval(supabase, {
+    entityType: "event",
+    entityId: eventId,
+    fromStatus: oldStatus,
+    toStatus: newStatus,
+    actorId: ctx.user.id,
+    actorRole: ctx.profile?.role || "unknown",
+    remarks,
   });
 }
 
@@ -541,7 +609,7 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         });
       }
 
-      await insertEventStatusHistory(supabase, ctx.user.id, eventRow.id, null, "pending_aayam_review");
+      await insertEventStatusHistory(supabase, ctx, eventRow.id, null, "pending_aayam_review");
       return { ok: true, eventId: eventRow.id };
     }
 
@@ -575,7 +643,7 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
           { onConflict: "event_id" },
         );
       }
-      await insertEventStatusHistory(supabase, ctx.user.id, existing.id, existing.status, dbStatus);
+      await insertEventStatusHistory(supabase, ctx, existing.id, existing.status, dbStatus);
       return { ok: true };
     }
 
@@ -738,21 +806,35 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
 
     case "addArticle": {
       assertCanCreateArticle(ctx, { orgId, unitId: null, departmentId: null });
-      const { error } = await supabase.from("articles").insert({
-        org_id: orgId,
-        title: input.payload.title,
-        content: input.payload.content,
-        summary: input.payload.summary,
-        category: input.payload.category,
-        status: "pending_unit_head_review",
-        author_user_id: ctx.user.id,
-        author_name_snapshot: ctx.profile?.display_name ?? input.payload.author,
-        social_url: input.payload.socialUrl ?? null,
-        values_checklist: input.payload.valuesChecklist as unknown as Json,
-        created_by: ctx.user.id,
-        updated_by: ctx.user.id,
-      });
+      const { data: articleRow, error } = await supabase
+        .from("articles")
+        .insert({
+          org_id: orgId,
+          title: input.payload.title,
+          content: input.payload.content,
+          summary: input.payload.summary,
+          category: input.payload.category,
+          status: "pending_unit_head_review",
+          author_user_id: ctx.user.id,
+          author_name_snapshot: ctx.profile?.display_name ?? input.payload.author,
+          social_url: input.payload.socialUrl ?? null,
+          values_checklist: input.payload.valuesChecklist as unknown as Json,
+          created_by: ctx.user.id,
+          updated_by: ctx.user.id,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      await recordWorkflowApproval(supabase, {
+        entityType: "article",
+        entityId: articleRow.id,
+        fromStatus: null,
+        toStatus: "pending_unit_head_review",
+        actorId: ctx.user.id,
+        actorRole: ctx.profile?.role || "unknown",
+      });
+
       return { ok: true };
     }
 
@@ -799,6 +881,17 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         review_notes: input.payload.reviewNotes ?? null,
       };
       await supabase.from("article_reviews").insert(reviewInsert);
+
+      await recordWorkflowApproval(supabase, {
+        entityType: "article",
+        entityId: input.payload.id,
+        fromStatus: articleRow.status,
+        toStatus: targetStatus,
+        actorId: ctx.user.id,
+        actorRole: ctx.profile?.role || "unknown",
+        remarks: input.payload.reviewNotes,
+        metadata: { edits: input.payload.edits },
+      });
 
       if (input.payload.status === "Published") {
         await supabase.from("article_publications").insert({

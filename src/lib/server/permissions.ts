@@ -215,12 +215,32 @@ export function canReviewEventAtAayam(ctx: RequestAuthContext, event: EventRow) 
   );
 }
 
-export function canPublishEvent(ctx: RequestAuthContext, event: EventRow) {
+export function canReviewAtVibhag(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
   return hasScopedRole(
     ctx,
     ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh", "vibhag_pramukh"],
-    eventEntity(event),
+    entity,
   );
+}
+
+export function canAuthorizeAtPrant(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
+  return hasScopedRole(
+    ctx,
+    ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh"],
+    entity,
+  );
+}
+
+export function canEscalateToKshetra(ctx: RequestAuthContext, entity: { org_id: string; unit_id: string | null; department_id: string | null }) {
+  return hasScopedRole(
+    ctx,
+    ["super_admin", "org_admin", "kshetra_reviewer"],
+    entity,
+  );
+}
+
+export function canPublishEvent(ctx: RequestAuthContext, event: EventRow) {
+  return canAuthorizeAtPrant(ctx, eventEntity(event));
 }
 
 export function canFinalizePoll(ctx: RequestAuthContext, event: EventRow, _poll: PollRow) {
@@ -252,7 +272,7 @@ export function canCreateArticle(ctx: RequestAuthContext, input: { orgId: string
 
 export function canViewArticle(ctx: RequestAuthContext, article: ArticleRow) {
   if (article.author_user_id && article.author_user_id === ctx.user.id) return true;
-  if (article.status === "published") {
+  if (article.status === "authorized_public" || article.status === "published") {
     return hasScopedRole(
       ctx,
       [
@@ -285,23 +305,29 @@ export function canReviewArticleAtUnit(ctx: RequestAuthContext, article: Article
 }
 
 export function canPublishArticle(ctx: RequestAuthContext, article: ArticleRow) {
-  return hasScopedRole(
-    ctx,
-    ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh", "vibhag_pramukh", "aayam_pramukh"],
-    articleEntity(article),
-  );
+  return canAuthorizeAtPrant(ctx, articleEntity(article));
 }
 
 export function canTransitionEventStatus(ctx: RequestAuthContext, event: EventRow, target: EventRow["status"]) {
+  const entity = eventEntity(event);
   if (target === "pending_aayam_review") return canManageEventDraft(ctx, event);
+  if (target === "pending_vibhag_review") return canReviewEventAtAayam(ctx, event);
+  if (target === "pending_prant_authorization") return canReviewAtVibhag(ctx, entity);
+  if (target === "pending_prant_dual_authorization") return canAuthorizeAtPrant(ctx, entity);
+  if (target === "authorized_public" || target === "published") return canAuthorizeAtPrant(ctx, entity);
+  if (target === "escalated_kshetra") return canAuthorizeAtPrant(ctx, entity);
+  if (target === "returned_for_revision") return canReviewEventAtAayam(ctx, event) || canReviewAtVibhag(ctx, entity);
+  if (target === "rejected") return canReviewAtVibhag(ctx, entity) || canAuthorizeAtPrant(ctx, entity);
+
+  // Legacy support
   if (target === "pending_final_approval") return canReviewEventAtAayam(ctx, event);
-  if (target === "published") return canPublishEvent(ctx, event);
   if (target === "draft") return canManageEventDraft(ctx, event) || canReviewEventAtAayam(ctx, event);
   if (target === "cancelled") return canPublishEvent(ctx, event);
   return false;
 }
 
 export function canTransitionArticleStatus(ctx: RequestAuthContext, article: ArticleRow, target: ArticleRow["status"]) {
+  const entity = articleEntity(article);
   if (target === "pending_unit_head_review") {
     return (
       article.author_user_id === ctx.user.id ||
@@ -313,7 +339,12 @@ export function canTransitionArticleStatus(ctx: RequestAuthContext, article: Art
     );
   }
   if (target === "pending_aayam_review") return canReviewArticleAtUnit(ctx, article);
-  if (target === "published") return canPublishArticle(ctx, article);
+  if (target === "pending_vibhag_review") return canReviewArticleAtUnit(ctx, article);
+  if (target === "pending_prant_authorization") return canReviewAtVibhag(ctx, entity);
+  if (target === "authorized_public" || target === "published") return canAuthorizeAtPrant(ctx, entity);
+  if (target === "returned_for_revision") return canReviewArticleAtUnit(ctx, article) || canReviewAtVibhag(ctx, entity);
+  if (target === "rejected") return canReviewAtVibhag(ctx, entity) || canAuthorizeAtPrant(ctx, entity);
+
   if (target === "draft") return canReviewArticleAtUnit(ctx, article) || article.author_user_id === ctx.user.id;
   if (target === "archived") return canPublishArticle(ctx, article);
   return false;
