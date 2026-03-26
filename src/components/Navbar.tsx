@@ -276,6 +276,7 @@ export function Navbar() {
         {mounted && (
           <button
             onClick={toggleTheme}
+            aria-label={theme === 'dark' ? t('Switch to light mode', 'लाइट मोड पर स्विच करें') : t('Switch to dark mode', 'डार्क मोड पर स्विच करें')}
             className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
             title={theme === 'dark' ? t('Light Mode', 'लाइट मोड') : t('Dark Mode', 'डार्क मोड')}
           >
@@ -375,6 +376,7 @@ export function Navbar() {
         {/* Language Toggle */}
         <button
           onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
+          aria-label={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
           className="relative flex h-9 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-xs font-bold transition-all hover:border-primary/40"
           title={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
         >

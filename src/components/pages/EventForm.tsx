@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
+import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 import {
   CheckCircle2, ChevronRight, ChevronLeft,
   Calendar, MapPin, Users, Flame, Phone,
@@ -34,40 +36,7 @@ export default function EventForm({ eventId }: Props) {
   const { events, addRegistration } = useAppContext();
   const t = useT();
   const contextEvent = events.find(e => e.id === eventId);
-  const [publicEvent, setPublicEvent] = useState<GatividhiEvent | null>(null);
-  const [publicLoading, setPublicLoading] = useState(false);
-  const [publicLoadError, setPublicLoadError] = useState<string | null>(null);
-  const event = contextEvent ?? publicEvent;
-
-  useEffect(() => {
-    if (contextEvent) return;
-    let cancelled = false;
-    setPublicLoading(true);
-    setPublicLoadError(null);
-    fetch(`/api/public/events/${eventId}`, { cache: 'no-store' })
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.error || 'Failed to load event.');
-        }
-        return res.json() as Promise<{ event: GatividhiEvent }>;
-      })
-      .then((data) => {
-        if (!cancelled) setPublicEvent(data.event);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          setPublicLoadError(error instanceof Error ? error.message : 'Failed to load event.');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setPublicLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [contextEvent, eventId]);
+  const { event, loading: publicLoading, error: publicLoadError } = usePublicEvent(eventId, contextEvent);
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -502,7 +471,7 @@ export default function EventForm({ eventId }: Props) {
                         ...(showSpecialNeeds && form.hasSpecialNeeds ? [{ label: t('Special Needs', 'विशेष ज़रूरत'), value: t('Required', 'हाँ'), icon: AlertTriangle }] : []),
                         ...(form.notes ? [{ label: t('Notes', 'टिप्पणी'), value: form.notes, icon: FileText }] : []),
                         ...customQs.map(q => ({ label: t(q.question, q.questionHi), value: form.customAnswers[q.id] ?? '—', icon: Compass })),
-                      ] as { label: string; value: string; icon: any }[]).map((row, i, arr) => (
+                      ] as { label: string; value: string; icon: LucideIcon }[]).map((row, i, arr) => (
                         <div
                           key={row.label}
                           className={cn(

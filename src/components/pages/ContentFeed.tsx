@@ -11,77 +11,29 @@ import {
   MessagesSquare, ExternalLink, TrendingUp, Newspaper, Flame,
   Clock, Eye, Sparkles, Compass, Library
 } from 'lucide-react';
+import { useMemo } from 'react';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
-
-// ── ContentFeed Context Types ─────────────────────────────────────────────
-
-type ContentFeedContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
-
-function ContentFeedMasthead({
-  t,
-  contexts,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: ContentFeedContextItem[];
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Public Intellectual Record', 'सार्वजनिक बौद्धिक अभिलेख')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Aalekh & Shodh Feed', 'आलेख एवं शोध फ़ीड')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'A combined chronicle of institutional activities and scholarly research, providing a window into the intellectual momentum of Pragya Pravah.',
-                'संस्थागत गतिविधियों और विद्वत्तापूर्ण शोध का एक संयुक्त विवरण, जो प्रज्ञा प्रवाह की बौद्धिक गतिशीलता का प्रतिबिंब है।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Masthead } from '@/components/Masthead';
 
 export default function ContentFeed() {
   const { events, articles, lang } = useAppContext();
   const t = useT();
   const isHi = lang === 'hi';
-  const publishedEvents = events.filter(e => e.status === 'Published');
-  const publishedArticles = articles.filter(a => a.status === 'Published');
+  const publishedEvents = useMemo(() => events.filter(e => e.status === 'Published'), [events]);
+  const publishedArticles = useMemo(() => articles.filter(a => a.status === 'Published'), [articles]);
 
   const handleShare = (title: string) => {
     const text = encodeURIComponent(`Check out: ${title} - Pragya Pravah, Bhopal Vibhag`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
-  const allItems = [
+  const allItems = useMemo(() => [
     ...publishedEvents.map(e => ({ type: 'event' as const, ...e })),
     ...publishedArticles.map(a => ({ type: 'article' as const, ...a })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [publishedEvents, publishedArticles]);
 
-  const contexts: ContentFeedContextItem[] = [
+  const contexts = [
     {
       labelEn: "Archive Status",
       labelHi: "अभिलेख स्थिति",
@@ -110,7 +62,15 @@ export default function ContentFeed() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 pb-10">
-      <ContentFeedMasthead t={t} contexts={contexts} />
+      <Masthead
+        seal="Public Intellectual Record"
+        sealHi="सार्वजनिक बौद्धिक अभिलेख"
+        title="Aalekh & Shodh Feed"
+        titleHi="आलेख एवं शोध फ़ीड"
+        subtitle="A combined chronicle of institutional activities and scholarly research, providing a window into the intellectual momentum of Pragya Pravah."
+        subtitleHi="संस्थागत गतिविधियों और विद्वत्तापूर्ण शोध का एक संयुक्त विवरण, जो प्रज्ञा प्रवाह की बौद्धिक गतिशीलता का प्रतिबिंब है।"
+        contexts={contexts}
+      />
 
       {/* Featured / Latest */}
       {allItems.length > 0 && (

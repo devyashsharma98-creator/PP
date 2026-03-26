@@ -18,7 +18,7 @@ function Mandala({ className }: { className?: string }) {
   const rays16 = Array.from({ length: 16 }, (_, i) => i * 22.5);
   
   return (
-    <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <circle cx="120" cy="120" r="116" stroke="currentColor" strokeWidth="0.5" opacity="0.15" />
       {petals8.map((angle, i) => (
         <ellipse key={i} cx="120" cy="62" rx="14" ry="52"

@@ -227,7 +227,7 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
 export default function Prachar() {
   const { role, events, permissions, pracharStatuses, updatePracharPlatform } = useAppContext();
   const t = useT();
-  const publishedEvents = events.filter(e => e.status === 'Published');
+  const publishedEvents = useMemo(() => events.filter(e => e.status === 'Published'), [events]);
 
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);

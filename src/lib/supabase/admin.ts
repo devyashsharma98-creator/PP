@@ -1,20 +1,19 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { getSupabasePublicEnv } from "./env";
+
+let adminClient: SupabaseClient<Database> | null = null;
 
 export function getSupabaseAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !serviceRoleKey) {
-    throw new Error(
-      "Supabase admin client is not configured. Missing NEXT_PUBLIC_SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY.",
-    );
+  if (!adminClient) {
+    const { url: publicUrl, anonKey } = getSupabasePublicEnv();
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.");
+    }
+    adminClient = createClient<Database>(publicUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
   }
-
-  return createClient<Database>(url, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  return adminClient;
 }

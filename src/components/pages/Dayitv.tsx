@@ -11,56 +11,7 @@ import {
 } from 'lucide-react';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
-
-// ── Dayitv Context Types ──────────────────────────────────────────────────
-
-type DayitvContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
-
-function DayitvMasthead({
-  t,
-  contexts,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: DayitvContextItem[];
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Organizational Command', 'संगठनात्मक संचालन')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Structure & Responsibility', 'संरचना एवं कार्य का स्वरूप')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'A disciplined multi-tier hierarchy ensuring the flow of civilisational thought from the national level to every local unit.',
-                'एक अनुशासित बहु-स्तरीय संरचना जो राष्ट्रीय स्तर से प्रत्येक स्थानीय इकाई तक सभ्यतागत चिंतन के प्रवाह को सुनिश्चित करती है।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Masthead } from '@/components/Masthead';
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -172,7 +123,7 @@ export default function Dayitv() {
     });
   };
 
-  const contexts: DayitvContextItem[] = [
+  const contexts = [
     {
       labelEn: "Core Units",
       labelHi: "मुख्य इकाइयाँ",
@@ -201,7 +152,15 @@ export default function Dayitv() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
-      <DayitvMasthead t={t} contexts={contexts} />
+      <Masthead
+        seal="Organizational Command"
+        sealHi="संगठनात्मक संचालन"
+        title="Structure & Responsibility"
+        titleHi="संरचना एवं कार्य का स्वरूप"
+        subtitle="A disciplined multi-tier hierarchy ensuring the flow of civilisational thought from the national level to every local unit."
+        subtitleHi="एक अनुशासित बहु-स्तरीय संरचना जो राष्ट्रीय स्तर से प्रत्येक स्थानीय इकाई तक सभ्यतागत चिंतन के प्रवाह को सुनिश्चित करती है।"
+        contexts={contexts}
+      />
 
       {/* ── SECTION: कार्य का स्वरूप ─────────────────────────────────── */}
       <section className="space-y-5">

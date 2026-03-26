@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
+import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,40 +23,7 @@ export default function VotePage({ eventId }: Props) {
   const { events, castVote } = useAppContext();
   const t = useT();
   const contextEvent = events.find(e => e.id === eventId);
-  const [publicEvent, setPublicEvent] = useState<GatividhiEvent | null>(null);
-  const [publicLoading, setPublicLoading] = useState(false);
-  const [publicLoadError, setPublicLoadError] = useState<string | null>(null);
-  const event = contextEvent ?? publicEvent;
-
-  useEffect(() => {
-    if (contextEvent) return;
-    let cancelled = false;
-    setPublicLoading(true);
-    setPublicLoadError(null);
-    fetch(`/api/public/events/${eventId}`, { cache: 'no-store' })
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.error || 'Failed to load event.');
-        }
-        return res.json() as Promise<{ event: GatividhiEvent }>;
-      })
-      .then((data) => {
-        if (!cancelled) setPublicEvent(data.event);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          setPublicLoadError(error instanceof Error ? error.message : 'Failed to load event.');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setPublicLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [contextEvent, eventId]);
+  const { event, loading: publicLoading, error: publicLoadError, setEvent: setPublicEvent } = usePublicEvent(eventId, contextEvent);
 
   // Track which option user has selected per poll (before submitting)
   const [selected, setSelected] = useState<Record<string, string>>({});

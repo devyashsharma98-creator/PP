@@ -1,153 +1,42 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type {
+  AalekhArticle,
   AppActionRequest,
   AppBootstrapPayload,
   AppPermissionSummary,
   AppViewerContext,
+  EventRegistration,
+  EventStatus,
+  FormConfig,
+  GatividhiEvent,
+  Lang,
+  PracharPlatform,
+  PracharStatus,
+  Role,
   VimarshTopic,
   VrittStatus,
+  VotePoll,
+  VotePollOption,
+  ArticleStatus,
 } from '@/lib/app/contracts';
 
-export type Role = 'unit_head' | 'aayam_pramukh' | 'vibhag_pramukh' | 'karyakarta';
-export type Lang = 'en' | 'hi';
-
-export type EventStatus =
-  | "Draft"
-  | "Submitted by Unit"
-  | "Pending Aayam Review"
-  | "Pending Vibhag Review"
-  | "Pending Prant Authorization"
-  | "Pending Prant Dual Authorization"
-  | "Published"
-  | "Escalated to Kshetra"
-  | "Returned for Revision"
-  | "Rejected"
-  | "Cancelled";
-
-export type ArticleStatus =
-  | "Draft"
-  | "Pending Unit Head Review"
-  | "Pending Aayam Review"
-  | "Pending Vibhag Review"
-  | "Pending Prant Authorization"
-  | "Published"
-  | "Escalated to Kshetra"
-  | "Returned for Revision"
-  | "Rejected"
-  | "Archived";
-
-export type PracharPlatform = 'whatsapp' | 'facebook' | 'instagram' | 'telegram';
-
-export type { VrittStatus };
-
-export interface PracharStatus {
-  eventId: string;
-  platforms: Record<PracharPlatform, boolean>;
-  skipReasons: {
-    whatsapp: string | null;
-    facebook: string | null;
-    instagram: string | null;
-    telegram: string | null;
-  };
-  templateReference?: string | null;
-}
-
-export interface FormConfig {
-  fields: {
-    phone: boolean;
-    city: boolean;
-    attendingCount: boolean;
-    specialNeeds: boolean;
-  };
-  customQuestions: { id: string; question: string; questionHi: string; type: 'text' | 'yesno' }[];
-}
-
-export interface VotePollOption {
-  id: string;
-  label: string;
-  votes: number;
-  scheduledAtIso?: string | null;
-}
-
-export interface VotePoll {
-  id: string;
-  question: string;
-  questionHi: string;
-  type: 'date' | 'general';
-  options: VotePollOption[];
-  isFinalized: boolean;
-  winnerOptionId?: string;
-}
-
-export interface EventRegistration {
-  id: string;
-  name: string;
-  phone: string;
-  city: string;
-  attendingCount: number;
-  hasSpecialNeeds: boolean;
-  notes?: string;
-  submittedAt: string;
-  customAnswers?: Record<string, string>;
-}
-
-export interface GatividhiEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  dateIso?: string;
-  unit: string;
-  submittedBy: string;
-  status: EventStatus;
-  checklist: {
-    designing: boolean;
-    food: boolean;
-    seating: boolean;
-    transport: boolean;
-    accommodation: boolean;
-    soundMic: boolean;
-    camera: boolean;
-    screen: boolean;
-    lights: boolean;
-  };
-  report?: string;
-  photos?: string[];
-  poster?: string;
-  videoUrl?: string;
-  imageUrl?: string;
-  registrations?: EventRegistration[];
-  formConfig?: FormConfig;
-  polls?: VotePoll[];
-  vrittAttendanceCount?: number;
-  vrittCheckedInCount?: number;
-  vrittMediaUrls?: string[];
-  vrittContent?: string;
-  vrittStatus?: VrittStatus;
-}
-
-export interface AalekhArticle {
-  id: string;
-  title: string;
-  content: string;
-  summary: string;
-  author: string;
-  date: string;
-  category: string;
-  status: ArticleStatus;
-  socialUrl?: string;
-  imageUrl?: string;
-  documentUrl?: string | null;
-  latestReviewNotes?: string | null;
-  valuesChecklist: {
-    rashtraPratham: boolean;
-    culturallyGrounded: boolean;
-    balancedTone: boolean;
-    noDivisiveContent: boolean;
-  };
-}
+export type {
+  Role,
+  Lang,
+  EventStatus,
+  ArticleStatus,
+  PracharPlatform,
+  PracharStatus,
+  FormConfig,
+  VotePollOption,
+  VotePoll,
+  EventRegistration,
+  GatividhiEvent,
+  AalekhArticle,
+  VrittStatus,
+};
 
 interface AppState {
   role: Role;
@@ -617,29 +506,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [persistAppAction]);
 
   const markAttendance = useCallback((eventId: string, options?: { skipRemote?: boolean }) => {
-    if (options?.skipRemote !== false) {
-      setEvents(prev => prev.map(e => 
-        e.id === eventId 
-          ? { ...e, vrittCheckedInCount: (e.vrittCheckedInCount || 0) + 1 } 
-          : e
-      ));
-    }
-    if (!options?.skipRemote) {
+    setEvents(prev => prev.map(e =>
+      e.id === eventId
+        ? { ...e, vrittCheckedInCount: (e.vrittCheckedInCount ?? 0) + 1 }
+        : e
+    ));
+    if (options?.skipRemote !== true) {
       void persistAppAction({ action: 'markAttendance', payload: { eventId } });
     }
   }, [persistAppAction]);
 
+  const contextValue = useMemo(() => ({
+    role, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
+    lang, setLang,
+    events, addEvent, updateEventStatus, markAttendance, addRegistration,
+    updateFormConfig, addPoll, castVote, finalizePoll, updateVritt,
+    articles, addArticle, updateArticleStatus,
+    pracharStatuses, updatePracharPlatform,
+    vimarshTopics,
+  }), [
+    role, setRole, viewer, permissions, authReady,
+    lang, setLang,
+    events, addEvent, updateEventStatus, markAttendance, addRegistration,
+    updateFormConfig, addPoll, castVote, finalizePoll, updateVritt,
+    articles, addArticle, updateArticleStatus,
+    pracharStatuses, updatePracharPlatform,
+    vimarshTopics,
+  ]);
+
   return (
-    <AppContext.Provider value={{
-      role, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
-      lang, setLang,
-      events, addEvent, updateEventStatus, updateVritt, addRegistration,
-      updateFormConfig, addPoll, castVote, finalizePoll,
-      pracharStatuses, updatePracharPlatform,
-      articles, addArticle, updateArticleStatus,
-      markAttendance,
-      vimarshTopics,
-    }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

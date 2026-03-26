@@ -19,7 +19,7 @@ export function MobileBottomNav() {
   const t = useT();
 
   return (
-    <nav className="institution-ledger-rail safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border md:hidden">
+    <nav aria-label="Mobile navigation" className="institution-ledger-rail safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border md:hidden">
       <div className="flex items-center justify-between px-4 pt-2 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/55">
         <span>Bhopal Vibhag</span>
         <span>Pragya Pravah</span>

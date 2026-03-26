@@ -30,6 +30,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { cn } from "@/lib/utils";
+import { Masthead } from "@/components/Masthead";
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -62,63 +63,7 @@ const eventStatusHi: Record<string, string> = {
   Cancelled: "रद्द",
 };
 
-type DashboardContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
 
-function DashboardMasthead({
-  t,
-  sealEn,
-  sealHi,
-  titleEn,
-  titleHi,
-  descriptionEn,
-  descriptionHi,
-  contexts,
-  action,
-}: {
-  t: (en: string, hi: string) => string;
-  sealEn: string;
-  sealHi: string;
-  titleEn: string;
-  titleHi: string;
-  descriptionEn: string;
-  descriptionHi: string;
-  contexts: DashboardContextItem[];
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t(sealEn, sealHi)}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t(titleEn, titleHi)}</h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(descriptionEn, descriptionHi)}
-            </p>
-          </div>
-        </div>
-        {action ? <div className="lg:pb-1">{action}</div> : null}
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function Dashboard() {
   const { role, lang, permissions, events, addEvent, updateEventStatus, updateVritt, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
@@ -359,14 +304,13 @@ export default function Dashboard() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <DashboardMasthead
-          t={t}
-          sealEn="Bhopal Vibhag Activity Console"
+        <Masthead
+          seal="Bhopal Vibhag Activity Console"
           sealHi="भोपाल विभाग गतिविधि डेस्क"
-          titleEn="Vibhag Review Board"
+          title="Vibhag Review Board"
           titleHi="विभाग समीक्षा मंडल"
-          descriptionEn="Vibhag review, Prant forwarding, and unit coordination in one operational view."
-          descriptionHi="विभाग समीक्षा, प्रांत को अग्रेषण और इकाई समन्वय।"
+          subtitle="Vibhag review, Prant forwarding, and unit coordination in one operational view."
+          subtitleHi="विभाग समीक्षा, प्रांत को अग्रेषण और इकाई समन्वय।"
           contexts={[
             {
               labelEn: "Scope",
@@ -569,14 +513,13 @@ export default function Dashboard() {
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <DashboardMasthead
-          t={t}
-          sealEn="Aayam Review Desk"
+        <Masthead
+          seal="Aayam Review Desk"
           sealHi="आयाम समीक्षा डेस्क"
-          titleEn="Aayam Review Board"
+          title="Aayam Review Board"
           titleHi="आयाम समीक्षा मंडल"
-          descriptionEn="Review incoming programmes, forward for vibhag review, and keep the organisational lane clear."
-          descriptionHi="आगत कार्यक्रमों की समीक्षा करें, विभाग समीक्षा हेतु आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
+          subtitle="Review incoming programmes, forward for vibhag review, and keep the organisational lane clear."
+          subtitleHi="आगत कार्यक्रमों की समीक्षा करें, विभाग समीक्षा हेतु आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
           contexts={[
             {
               labelEn: "Review queue",
@@ -752,14 +695,13 @@ export default function Dashboard() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <DashboardMasthead
-        t={t}
-        sealEn="Unit Activity Desk"
+      <Masthead
+        seal="Unit Activity Desk"
         sealHi="इकाई गतिविधि डेस्क"
-        titleEn="Gatividhi Dashboard"
+        title="Gatividhi Dashboard"
         titleHi="गतिविधि डैशबोर्ड"
-        descriptionEn="Programme planning, review movement, and post-event follow-through for your unit in one place."
-        descriptionHi="आपकी इकाई के लिए कार्यक्रम योजना, समीक्षा प्रवाह और कार्यक्रमोत्तर अनुवर्ती एक ही स्थान पर।"
+        subtitle="Programme planning, review movement, and post-event follow-through for your unit in one place."
+        subtitleHi="आपकी इकाई के लिए कार्यक्रम योजना, समीक्षा प्रवाह और कार्यक्रमोत्तर अनुवर्ती एक ही स्थान पर।"
         contexts={[
           {
             labelEn: "Operational scope",

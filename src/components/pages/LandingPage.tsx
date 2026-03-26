@@ -21,7 +21,7 @@ function Mandala({ className }: { className?: string }) {
   const petals = [0, 45, 90, 135, 180, 225, 270, 315];
 
   return (
-    <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <circle cx="120" cy="120" r="112" stroke="currentColor" strokeWidth="0.8" opacity="0.18" />
       <circle cx="120" cy="120" r="78" stroke="currentColor" strokeWidth="0.8" opacity="0.22" />
       <circle cx="120" cy="120" r="42" stroke="currentColor" strokeWidth="0.8" opacity="0.28" />

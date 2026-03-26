@@ -63,9 +63,9 @@ export function AppSidebar() {
           <AnimatePresence>
             {!collapsed && (
               <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
+                initial={{ opacity: 0, maxWidth: 0 }}
+                animate={{ opacity: 1, maxWidth: 256 }}
+                exit={{ opacity: 0, maxWidth: 0 }}
                 className="overflow-hidden whitespace-nowrap"
               >
                 <h1 className="text-sm font-bold tracking-tight text-sidebar-accent-foreground font-devanagari">
@@ -137,6 +137,7 @@ export function AppSidebar() {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="ml-auto flex rounded-full p-2 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

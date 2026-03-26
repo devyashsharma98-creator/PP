@@ -38,6 +38,8 @@ const CANONICAL_ROLE_PRECEDENCE: CanonicalRoleCode[] = [
   "karyakarta",
 ];
 
+const CANONICAL_ROLE_SET = new Set<string>(CANONICAL_ROLE_PRECEDENCE);
+
 const UI_ROLE_FROM_CANONICAL: Record<CanonicalRoleCode, UiRole> = {
   super_admin: "vibhag_pramukh",
   org_admin: "vibhag_pramukh",
@@ -51,7 +53,7 @@ const UI_ROLE_FROM_CANONICAL: Record<CanonicalRoleCode, UiRole> = {
 };
 
 function toCanonicalRoleCode(value: string): CanonicalRoleCode | null {
-  if ((CANONICAL_ROLE_PRECEDENCE as string[]).includes(value)) {
+  if (CANONICAL_ROLE_SET.has(value)) {
     return value as CanonicalRoleCode;
   }
   return null;
@@ -76,10 +78,9 @@ function buildUnitParentMap(units: UnitRow[]) {
   return parentById;
 }
 
-function unitIsAncestorOrSelf(units: UnitRow[], candidateAncestorId: string | null | undefined, unitId: string | null | undefined) {
+function unitIsAncestorOrSelf(units: UnitRow[], candidateAncestorId: string | null | undefined, unitId: string | null | undefined, parentById: Map<string, string | null>) {
   if (!candidateAncestorId || !unitId) return false;
   if (candidateAncestorId === unitId) return true;
-  const parentById = buildUnitParentMap(units);
   let current = parentById.get(unitId) ?? null;
   const guard = new Set<string>();
   while (current) {
@@ -91,7 +92,7 @@ function unitIsAncestorOrSelf(units: UnitRow[], candidateAncestorId: string | nu
   return false;
 }
 
-function assignmentMatchesEntity(ctx: RequestAuthContext, assignment: ActiveRoleAssignment, entity: ScopedEntity) {
+function assignmentMatchesEntity(ctx: RequestAuthContext, assignment: ActiveRoleAssignment, entity: ScopedEntity, parentById: Map<string, string | null>) {
   if (assignment.org_id && entity.orgId && assignment.org_id !== entity.orgId) return false;
 
   switch (assignment.scope_type) {
@@ -99,14 +100,14 @@ function assignmentMatchesEntity(ctx: RequestAuthContext, assignment: ActiveRole
       return true;
     case "unit": {
       const assignedUnitId = assignment.unit_id ?? assignment.scope_entity_id;
-      return unitIsAncestorOrSelf(ctx.units, assignedUnitId, entity.unitId);
+      return unitIsAncestorOrSelf(ctx.units, assignedUnitId, entity.unitId, parentById);
     }
     case "department": {
       const assignedDepartmentId = assignment.department_id ?? assignment.scope_entity_id;
       if (!assignedDepartmentId) return false;
       if (entity.departmentId && assignedDepartmentId !== entity.departmentId) return false;
       if (assignment.unit_id && entity.unitId) {
-        return unitIsAncestorOrSelf(ctx.units, assignment.unit_id, entity.unitId);
+        return unitIsAncestorOrSelf(ctx.units, assignment.unit_id, entity.unitId, parentById);
       }
       return true;
     }
@@ -119,10 +120,11 @@ function assignmentMatchesEntity(ctx: RequestAuthContext, assignment: ActiveRole
 }
 
 function hasScopedRole(ctx: RequestAuthContext, roles: CanonicalRoleCode[], entity: ScopedEntity) {
+  const parentById = buildUnitParentMap(ctx.units);
   return ctx.assignments.some((assignment) => {
     const code = toCanonicalRoleCode(assignment.role_code);
     if (!code || !roles.includes(code)) return false;
-    return assignmentMatchesEntity(ctx, assignment, entity);
+    return assignmentMatchesEntity(ctx, assignment, entity, parentById);
   });
 }
 

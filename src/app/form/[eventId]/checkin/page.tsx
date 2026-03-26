@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
+import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,50 +17,24 @@ export default function CheckinPage() {
   const { events, markAttendance } = useAppContext();
   const t = useT();
   const contextEvent = events.find(e => e.id === eventId);
-  const [publicEvent, setPublicEvent] = useState<GatividhiEvent | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { event, loading } = usePublicEvent(eventId, contextEvent);
   const [checkedIn, setCheckedIn] = useState(false);
-  const event = contextEvent ?? publicEvent;
-
-  useEffect(() => {
-    if (contextEvent) return;
-    let cancelled = false;
-    setLoading(true);
-    fetch(`/api/public/events/${eventId}`, { cache: 'no-store' })
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to load event.');
-        return res.json() as Promise<{ event: GatividhiEvent }>;
-      })
-      .then((data) => {
-        if (!cancelled) setPublicEvent(data.event);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [contextEvent, eventId]);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleCheckin = async () => {
-    setLoading(true);
+    setSubmitting(true);
     try {
-      // Logic for remote markAttendance goes here (API call)
       const res = await fetch(`/api/public/events/${eventId}/checkin`, {
         method: 'POST',
       });
-      
-      // Local state update for immediate feedback
+
       markAttendance(eventId, { skipRemote: true });
       setCheckedIn(true);
     } catch (error) {
-      // Fallback for demo
       markAttendance(eventId, { skipRemote: true });
       setCheckedIn(true);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,57 +15,8 @@ import {
 import { useT } from '@/lib/useT';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
+import { Masthead } from '@/components/Masthead';
 
-
-// ── Vimarsh Context Types ──────────────────────────────────────────────────
-
-type VimarshContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
-
-function VimarshMasthead({
-  t,
-  contexts,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: VimarshContextItem[];
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Vimarsh Command Center', 'विमर्श संचालन कक्ष')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Discourse, Assertion & Counter', 'विमर्श, मंडन एवं खंडन')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'Shape the narrative, affirm the civilisational truth, and counter misinformation through disciplined intellectual action.',
-                'कथ्य को आकार दें, सभ्यतागत सत्य का मंडन करें और अनुशासित बौद्धिक कार्य के माध्यम से कुप्रचार का खंडन करें।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ── Vimarsh Bindu data ──────────────────────────────────────────────────────
 
@@ -153,12 +104,12 @@ export default function Vimarsh() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const filtered = vimarshTopics.filter(t =>
+  const filtered = useMemo(() => vimarshTopics.filter(t =>
     t.title.toLowerCase().includes(search.toLowerCase()) ||
     (t.description?.toLowerCase().includes(search.toLowerCase()) ?? false)
-  );
+  ), [vimarshTopics, search]);
 
-  const contexts: VimarshContextItem[] = [
+  const contexts = [
     {
       labelEn: "Core Framework",
       labelHi: "मूल ढाँचा",
@@ -187,7 +138,15 @@ export default function Vimarsh() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
-      <VimarshMasthead t={tr} contexts={contexts} />
+      <Masthead
+        seal="Vimarsh Command Center"
+        sealHi="विमर्श संचालन कक्ष"
+        title="Discourse, Assertion & Counter"
+        titleHi="विमर्श, मंडन एवं खंडन"
+        subtitle="Shape the narrative, affirm the civilisational truth, and counter misinformation through disciplined intellectual action."
+        subtitleHi="कथ्य को आकार दें, सभ्यतागत सत्य का मंडन करें और अनुशासित बौद्धिक कार्य के माध्यम से कुप्रचार का खंडन करें।"
+        contexts={contexts}
+      />
 
       {/* ── SECTION: Mandan-Khandan Framework ─────────────────────────────── */}
       <section className="space-y-5">

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Search, BookOpen, Download, FileText, Filter, Star, Eye,
   ChevronRight, Library, BookMarked, Sparkles, Compass, TrendingUp
@@ -13,56 +14,7 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
-
-// ── ELibrary Context Types ────────────────────────────────────────────────
-
-type ELibraryContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
-
-function ELibraryMasthead({
-  t,
-  contexts,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: ELibraryContextItem[];
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Knowledge Preservation', 'ज्ञान परंपरा संरक्षण')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Institutional E-Library', 'संस्थागत ई-पुस्तकालय')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'A curated repository of foundational Bharatiya Knowledge Systems (IKS) texts, preserved for research and intellectual awakening.',
-                'भारतीय ज्ञान परंपरा (IKS) के आधारभूत ग्रंथों का एक संकलित भंडार, जो शोध और बौद्धिक जागरण हेतु सुरक्षित है।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Masthead } from '@/components/Masthead';
 
 // ── Book Data ────────────────────────────────────────────────────────────────
 
@@ -201,7 +153,7 @@ export default function ELibrary() {
     return matchCategory && matchSearch;
   });
 
-  const contexts: ELibraryContextItem[] = [
+  const contexts = [
     {
       labelEn: "Collection Depth",
       labelHi: "संग्रह गहराई",
@@ -230,7 +182,15 @@ export default function ELibrary() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
-      <ELibraryMasthead t={t} contexts={contexts} />
+      <Masthead
+        seal="Knowledge Preservation"
+        sealHi="ज्ञान परंपरा संरक्षण"
+        title="Institutional E-Library"
+        titleHi="संस्थागत ई-पुस्तकालय"
+        subtitle="A curated repository of foundational Bharatiya Knowledge Systems (IKS) texts, preserved for research and intellectual awakening."
+        subtitleHi="भारतीय ज्ञान परंपरा (IKS) के आधारभूत ग्रंथों का एक संकलित भंडार, जो शोध और बौद्धिक जागरण हेतु सुरक्षित है।"
+        contexts={contexts}
+      />
 
       {/* Search + Category Filters */}
       <section className="space-y-5">
@@ -368,14 +328,26 @@ export default function ELibrary() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 pt-2">
-                    <Button size="lg" className="gap-2 px-8 rounded-full shadow-lg shadow-primary/20">
-                      <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
-                    </Button>
-                    <Button size="lg" variant="outline" className="gap-2 px-8 rounded-full border-border/60 hover:bg-muted/50">
-                      <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
-                    </Button>
-                  </div>
+                  <TooltipProvider>
+                    <div className="flex items-center gap-3 pt-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="lg" disabled className="gap-2 px-8 rounded-full shadow-lg shadow-primary/20">
+                            <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="lg" variant="outline" disabled className="gap-2 px-8 rounded-full border-border/60 hover:bg-muted/50">
+                            <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
                 </div>
               </CardContent>
             </Card>

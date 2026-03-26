@@ -279,9 +279,20 @@ export default function AnnualCalendar() {
       return d.getMonth() === month && d.getFullYear() === year;
     }), [allEvents, month, year]);
 
+  // Pre-computed date-to-events map for O(1) day cell lookups
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, CalEvent[]>();
+    for (const e of monthEvents) {
+      const list = map.get(e.date) ?? [];
+      list.push(e);
+      map.set(e.date, list);
+    }
+    return map;
+  }, [monthEvents]);
+
   // Selected-day events
   const selStr   = `${year}-${String(month + 1).padStart(2, '0')}-${String(selDay).padStart(2, '0')}`;
-  const selEvents = allEvents.filter(e => e.date === selStr);
+  const selEvents = eventsByDate.get(selStr) ?? [];
 
   // Upcoming (from today)
   const upcoming = useMemo(() =>
@@ -525,10 +536,8 @@ export default function AnnualCalendar() {
                 ))}
                 {Array.from({ length: days }).map((_, i) => {
                   const d = i + 1;
-                  const dayEvts = monthEvents.filter(e => {
-                    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                    return e.date === ds;
-                  });
+                  const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                  const dayEvts = eventsByDate.get(ds) ?? [];
                   const isToday    = isCurrentMonth && today.getDate() === d;
                   const isSelected = selDay === d;
                   const hasPending = dayEvts.some(e => e.status === 'Pending Aayam Review' || e.status === 'Pending Final Approval');

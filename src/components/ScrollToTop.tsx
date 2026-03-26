@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 
@@ -10,31 +10,30 @@ import { ChevronUp } from "lucide-react";
  */
 export function ScrollToTop() {
     const [visible, setVisible] = useState(false);
+    const mainRef = useRef<Element | null>(null);
 
     useEffect(() => {
+        mainRef.current = document.querySelector("main");
+
         let ticking = false;
         const onScroll = () => {
             if (ticking) return;
             ticking = true;
             requestAnimationFrame(() => {
-                // Check the main scrollable element (the <main> tag)
-                const main = document.querySelector("main");
-                const scrollY = main ? main.scrollTop : window.scrollY;
+                const scrollY = mainRef.current ? mainRef.current.scrollTop : window.scrollY;
                 setVisible(scrollY > 300);
                 ticking = false;
             });
         };
 
-        const main = document.querySelector("main");
-        const target = main || window;
+        const target = mainRef.current || window;
         target.addEventListener("scroll", onScroll, { passive: true });
         return () => target.removeEventListener("scroll", onScroll);
     }, []);
 
     const scrollUp = useCallback(() => {
-        const main = document.querySelector("main");
-        if (main) {
-            main.scrollTo({ top: 0, behavior: "smooth" });
+        if (mainRef.current) {
+            mainRef.current.scrollTo({ top: 0, behavior: "smooth" });
         } else {
             window.scrollTo({ top: 0, behavior: "smooth" });
         }

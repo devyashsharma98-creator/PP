@@ -13,56 +13,7 @@ import {
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
-
-// ── Directory Context Types ─────────────────────────────────────────────
-
-type DirectoryContextItem = {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi?: string;
-  detailEn: string;
-  detailHi: string;
-};
-
-function DirectoryMasthead({
-  t,
-  contexts,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: DirectoryContextItem[];
-}) {
-  return (
-    <div className="dashboard-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Institutional Sampark', 'संस्थागत सम्पर्क')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Sampark Directory', 'सम्पर्क निर्देशिका')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'A unified contact point for karyakartas across all aayams and units, enabling seamless organisational coordination.',
-                'सभी आयामों और इकाइयों के कार्यकर्ताओं हेतु एक एकीकृत सम्पर्क सूत्र, जो निर्बाध संगठनात्मक समन्वय सुनिश्चित करता है।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Masthead } from '@/components/Masthead';
 
 // ── Member Data ──────────────────────────────────────────────────────────────
 
@@ -127,7 +78,7 @@ export default function Directory() {
     return matchAayam && matchSearch;
   });
 
-  const contexts: DirectoryContextItem[] = [
+  const contexts = [
     {
       labelEn: "Network Strength",
       labelHi: "नेटवर्क शक्ति",
@@ -156,7 +107,15 @@ export default function Directory() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
-      <DirectoryMasthead t={t} contexts={contexts} />
+      <Masthead
+        seal="Institutional Sampark"
+        sealHi="संस्थागत सम्पर्क"
+        title="Sampark Directory"
+        titleHi="सम्पर्क निर्देशिका"
+        subtitle="A unified contact point for karyakartas across all aayams and units, enabling seamless organisational coordination."
+        subtitleHi="सभी आयामों और इकाइयों के कार्यकर्ताओं हेतु एक एकीकृत सम्पर्क सूत्र, जो निर्बाध संगठनात्मक समन्वय सुनिश्चित करता है।"
+        contexts={contexts}
+      />
 
       {/* Search + Filter */}
       <section className="space-y-5">

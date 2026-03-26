@@ -127,6 +127,7 @@ export interface GatividhiEvent {
   formConfig?: FormConfig;
   polls?: VotePoll[];
   vrittAttendanceCount?: number;
+  vrittCheckedInCount?: number;
   vrittMediaUrls?: string[];
   vrittContent?: string;
   vrittStatus?: VrittStatus;

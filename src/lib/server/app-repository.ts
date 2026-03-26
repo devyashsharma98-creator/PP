@@ -107,16 +107,18 @@ function toBool(value: unknown, fallback = false) {
   return typeof value === "boolean" ? value : fallback;
 }
 
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Kolkata",
+});
+
 function formatDisplayDate(iso: string | null | undefined) {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
+  return dateFormatter.format(d);
 }
 
 function toDateOnlyIso(dateInput?: string) {
@@ -275,25 +277,26 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
     pracharRows = pracharRes.data ?? [];
 
     const formConfigIds = formConfigs.map((fc) => fc.id);
-    if (formConfigIds.length > 0) {
-      const formQuestionsRes = await supabase.from("event_form_questions").select("*").in("form_config_id", formConfigIds);
-      if (formQuestionsRes.error) throw formQuestionsRes.error;
-      formQuestions = formQuestionsRes.data ?? [];
-    }
-
     const visiblePollIds = polls.map((p) => p.id);
-    if (visiblePollIds.length > 0) {
-      const pollOptionsRes = await supabase.from("event_poll_options").select("*").in("poll_id", visiblePollIds);
-      if (pollOptionsRes.error) throw pollOptionsRes.error;
-      pollOptions = pollOptionsRes.data ?? [];
+    const manageablePollIds = polls.filter((p) => manageableEventIdSet.has(p.event_id)).map((p) => p.id);
 
-      const manageablePollIds = polls.filter((p) => manageableEventIdSet.has(p.event_id)).map((p) => p.id);
-      if (manageablePollIds.length > 0) {
-        const pollVotesRes = await supabase.from("event_poll_votes").select("*").in("poll_id", manageablePollIds);
-        if (pollVotesRes.error) throw pollVotesRes.error;
-        pollVotes = pollVotesRes.data ?? [];
-      }
-    }
+    const [formQuestionsRes, pollOptionsRes, pollVotesRes] = await Promise.all([
+      formConfigIds.length > 0
+        ? supabase.from("event_form_questions").select("*").in("form_config_id", formConfigIds)
+        : Promise.resolve({ data: [], error: null }),
+      visiblePollIds.length > 0
+        ? supabase.from("event_poll_options").select("*").in("poll_id", visiblePollIds)
+        : Promise.resolve({ data: [], error: null }),
+      manageablePollIds.length > 0
+        ? supabase.from("event_poll_votes").select("*").in("poll_id", manageablePollIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (formQuestionsRes.error) throw formQuestionsRes.error;
+    if (pollOptionsRes.error) throw pollOptionsRes.error;
+    if (pollVotesRes.error) throw pollVotesRes.error;
+    formQuestions = formQuestionsRes.data ?? [];
+    pollOptions = pollOptionsRes.data ?? [];
+    pollVotes = pollVotesRes.data ?? [];
   }
 
   if (manageableEventIds.length > 0) {
@@ -303,10 +306,7 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
 
     const registrationIds = registrations.map((r) => r.id);
     if (registrationIds.length > 0) {
-      const regAnswersRes = await supabase
-        .from("event_registration_answers")
-        .select("*")
-        .in("registration_id", registrationIds);
+      const regAnswersRes = await supabase.from("event_registration_answers").select("*").in("registration_id", registrationIds);
       if (regAnswersRes.error) throw regAnswersRes.error;
       registrationAnswers = regAnswersRes.data ?? [];
     }
@@ -340,6 +340,19 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
     pollsByEvent.set(p.event_id, list);
   }
   const pracharByEvent = new Map(pracharRows.map((p) => [p.event_id, p]));
+
+  const optionsByPoll = new Map<string, Db["event_poll_options"]["Row"][]>();
+  for (const o of pollOptions) {
+    const list = optionsByPoll.get(o.poll_id) ?? [];
+    list.push(o);
+    optionsByPoll.set(o.poll_id, list);
+  }
+  const votesByPoll = new Map<string, Db["event_poll_votes"]["Row"][]>();
+  for (const v of pollVotes) {
+    const list = votesByPoll.get(v.poll_id) ?? [];
+    list.push(v);
+    votesByPoll.set(v.poll_id, list);
+  }
 
   const events = visibleEventRows.map<GatividhiEvent>((e) => {
     const fc = formConfigByEventId.get(e.id);
@@ -375,11 +388,10 @@ export async function getAppBootstrapPayload(ctx: RequestAuthContext): Promise<A
       })
       : [];
 
-    const polls = buildPolls(
-      pollsByEvent.get(e.id) ?? [],
-      pollOptions.filter((o) => (pollsByEvent.get(e.id) ?? []).some((p) => p.id === o.poll_id)),
-      pollVotes.filter((v) => (pollsByEvent.get(e.id) ?? []).some((p) => p.id === v.poll_id)),
-    );
+    const eventPolls = pollsByEvent.get(e.id) ?? [];
+    const eventOptions = eventPolls.flatMap(p => optionsByPoll.get(p.id) ?? []);
+    const eventVotes = eventPolls.flatMap(p => votesByPoll.get(p.id) ?? []);
+    const polls = buildPolls(eventPolls, eventOptions, eventVotes);
 
     return {
       id: e.id,
@@ -526,18 +538,22 @@ async function recordWorkflowApproval(
     metadata?: Record<string, unknown>;
   },
 ) {
-  await supabase.from("workflow_approvals").insert({
-    entity_type: params.entityType,
-    entity_id: params.entityId,
-    from_status: params.fromStatus,
-    to_status: params.toStatus,
-    actor_id: params.actorId,
-    actor_role: params.actorRole,
-    step_label: params.stepLabel,
-    remarks: params.remarks,
-    is_final_step: !!params.isFinalStep,
-    metadata: (params.metadata || {}) as Json,
-  });
+  try {
+    await supabase.from("workflow_approvals").insert({
+      entity_type: params.entityType,
+      entity_id: params.entityId,
+      from_status: params.fromStatus,
+      to_status: params.toStatus,
+      actor_id: params.actorId,
+      actor_role: params.actorRole,
+      step_label: params.stepLabel,
+      remarks: params.remarks,
+      is_final_step: !!params.isFinalStep,
+      metadata: (params.metadata || {}) as Json,
+    });
+  } catch (err) {
+    console.error("Failed to record workflow approval:", err);
+  }
 }
 
 async function insertEventStatusHistory(
@@ -656,13 +672,18 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         .single();
       if (selectError) throw selectError;
 
+      const nextCount = ((event as any).vritt_checked_in_count || 0) + 1;
       const { error } = await supabase
         .from("events")
-        .update({
-          vritt_checked_in_count: ((event as any).vritt_checked_in_count || 0) + 1,
-        } as any)
-        .eq("id", input.payload.eventId);
-      if (error) throw error;
+        .update({ vritt_checked_in_count: nextCount } as any)
+        .eq("id", input.payload.eventId)
+        .eq("vritt_checked_in_count", (event as any).vritt_checked_in_count ?? 0);
+      if (error) {
+        if ((error as any).code === 'PGRST116' || (error as any).code === '21000') {
+          throw new Error("Attendance update conflict — please retry.");
+        }
+        throw error;
+      }
       return { ok: true };
     }
 
@@ -899,7 +920,8 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         edits: (input.payload.edits ?? {}) as unknown as Json,
         review_notes: input.payload.reviewNotes ?? null,
       };
-      await supabase.from("article_reviews").insert(reviewInsert);
+      const { error: reviewError } = await supabase.from("article_reviews").insert(reviewInsert);
+      if (reviewError) throw reviewError;
 
       await recordWorkflowApproval(supabase, {
         entityType: "article",
@@ -913,11 +935,12 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
       });
 
       if (input.payload.status === "Published") {
-        await supabase.from("article_publications").insert({
+        const { error: pubError } = await supabase.from("article_publications").insert({
           article_id: input.payload.id,
           channel: "feed",
           published_by: ctx.user.id,
         });
+        if (pubError) throw pubError;
       }
 
       return { ok: true };
@@ -1042,7 +1065,7 @@ export async function submitPublicRegistration(eventId: string, body: PublicRegi
   }
 
   const answerHash = hashVoterFingerprint(
-    `${eventId}:${body.name}:${body.phone ?? ""}:${body.city ?? ""}:${Date.now()}`,
+    `${eventId}:${body.name}:${body.phone ?? ""}:${body.city ?? ""}`,
   );
 
   const { data: registrationRow, error: regError } = await supabase
