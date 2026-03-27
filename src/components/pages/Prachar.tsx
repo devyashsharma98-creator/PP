@@ -39,7 +39,7 @@ interface PracharContextItem {
 }
 
 const platforms: Platform[] = [
-  { key: 'whatsapp', label: 'WhatsApp Groups', labelHi: 'WhatsApp à¤—à¥à¤°à¥à¤ª', icon: MessageCircle, color: 'text-success' },
+  { key: 'whatsapp', label: 'WhatsApp Groups', labelHi: 'WhatsApp ग्रुप', icon: MessageCircle, color: 'text-success' },
   { key: 'facebook', label: 'Facebook Page', labelHi: 'Facebook à¤ªà¥‡à¤œ', icon: Globe, color: 'text-info' },
   { key: 'instagram', label: 'Instagram', labelHi: 'Instagram', icon: Camera, color: 'text-destructive' },
   { key: 'telegram', label: 'Telegram Channel', labelHi: 'Telegram à¤šà¥ˆà¤¨à¤²', icon: Navigation, color: 'text-primary' },
@@ -47,10 +47,10 @@ const platforms: Platform[] = [
 
 const templates = [
   { id: 't1', name: 'Event Poster', nameHi: 'à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤ªà¥‹à¤¸à¥à¤Ÿà¤°', desc: 'Standard event announcement', descHi: 'à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤•à¥€ à¤®à¤¾à¤¨à¤• à¤˜à¥‹à¤·à¤£à¤¾', icon: Layout, gradient: 'from-orange-500 to-amber-500' },
-  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'à¤µà¤¿à¤®à¤°à¥à¤¶ à¤‰à¤¦à¥à¤§à¤°à¤£ à¤•à¤¾à¤°à¥à¤¡', desc: 'Quote card for discourse topics', descHi: 'à¤µà¤¿à¤®à¤°à¥à¤¶ à¤µà¤¿à¤·à¤¯à¥‹à¤‚ à¤•à¥‡ à¤²à¤¿à¤ à¤‰à¤¦à¥à¤§à¤°à¤£ à¤•à¤¾à¤°à¥à¤¡', icon: Palette, gradient: 'from-violet-500 to-purple-500' },
-  { id: 't3', name: 'Book Discussion', nameHi: 'à¤ªà¥à¤¸à¥à¤¤à¤• à¤šà¤°à¥à¤šà¤¾', desc: 'Book review announcement', descHi: 'à¤ªà¥à¤¸à¥à¤¤à¤• à¤¸à¤®à¥€à¤•à¥à¤·à¤¾ à¤˜à¥‹à¤·à¤£à¤¾', icon: Layout, gradient: 'from-blue-500 to-cyan-500' },
-  { id: 't4', name: 'Youth Program', nameHi: 'à¤¯à¥à¤µà¤¾ à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤®', desc: 'Yuva aayam event template', descHi: 'à¤¯à¥à¤µà¤¾ à¤†à¤¯à¤¾à¤® à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤Ÿà¥‡à¤®à¥à¤ªà¤²à¥‡à¤Ÿ', icon: Palette, gradient: 'from-emerald-500 to-green-500' },
-  { id: 't5', name: 'Sammelan Invite', nameHi: 'à¤¸à¤®à¥à¤®à¥‡à¤²à¤¨ à¤†à¤®à¤‚à¤¤à¥à¤°à¤£', desc: 'Conference invitation template', descHi: 'à¤¸à¤®à¥à¤®à¥‡à¤²à¤¨ à¤†à¤®à¤‚à¤¤à¥à¤°à¤£ à¤ªà¤¤à¥à¤°', icon: Layout, gradient: 'from-rose-500 to-pink-500' },
+  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'विमर्श उद्धरण कार्ड', desc: 'Quote card for discourse topics', descHi: 'à¤µà¤¿à¤®à¤°à¥à¤¶ à¤µà¤¿à¤·à¤¯à¥‹à¤‚ à¤•à¥‡ à¤²à¤¿à¤ à¤‰à¤¦à¥à¤§à¤°à¤£ à¤•à¤¾à¤°à¥à¤¡', icon: Palette, gradient: 'from-violet-500 to-purple-500' },
+  { id: 't3', name: 'Book Discussion', nameHi: 'पुस्तक चर्चा', desc: 'Book review announcement', descHi: 'à¤ªà¥à¤¸à¥à¤¤à¤• à¤¸à¤®à¥€à¤•à¥à¤·à¤¾ à¤˜à¥‹à¤·à¤£à¤¾', icon: Layout, gradient: 'from-blue-500 to-cyan-500' },
+  { id: 't4', name: 'Youth Program', nameHi: 'युवा कार्यक्रम', desc: 'Yuva aayam event template', descHi: 'युवा आयाम कार्यक्रम टेम्पलेट', icon: Palette, gradient: 'from-emerald-500 to-green-500' },
+  { id: 't5', name: 'Sammelan Invite', nameHi: 'सम्मेलन आमंत्रण', desc: 'Conference invitation template', descHi: '  पत्र', icon: Layout, gradient: 'from-rose-500 to-pink-500' },
 ];
 
 function PracharMasthead({
@@ -66,10 +66,10 @@ function PracharMasthead({
     <div className="prachar-masthead space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
-          <p className="section-seal">{t('Prachar Command Center', 'à¤ªà¥à¤°à¤šà¤¾à¤° à¤¸à¤‚à¤šà¤¾à¤²à¤¨ à¤•à¤•à¥à¤·')}</p>
+          <p className="section-seal">{t('Prachar Command Center', 'प्रचार संचालन कक्ष')}</p>
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
-              {t('Distribute and Confirm Reach', 'à¤µà¤¿à¤¤à¤°à¤£ à¤•à¤°à¥‡à¤‚ à¤”à¤° à¤ªà¤¹à¥à¤‚à¤š à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤•à¤°à¥‡à¤‚')}
+              {t('Distribute and Confirm Reach', 'वितरण करें और पहुँच सुनिश्चित करें')}
             </h1>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
               {t(
@@ -113,7 +113,7 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
     return [
       {
         labelEn: 'Current lane',
-        labelHi: 'à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤§à¤¾à¤°à¤¾',
+        labelHi: 'वर्तमान धारा',
         valueEn: 'Final dissemination oversight',
         valueHi: 'à¤…à¤‚à¤¤à¤¿à¤® à¤ªà¥à¤°à¤¸à¤¾à¤° à¤…à¤¨à¥à¤¶à¥à¤°à¤µà¤£',
         detailEn: 'Track completion across units and keep every published campaign moving.',
@@ -142,7 +142,7 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
     return [
       {
         labelEn: 'Current lane',
-        labelHi: 'à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤§à¤¾à¤°à¤¾',
+        labelHi: 'वर्तमान धारा',
         valueEn: 'Campaign ownership desk',
         valueHi: 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¸à¥à¤µà¤¾à¤®à¤¿à¤¤à¥à¤µ à¤•à¤•à¥à¤·',
         detailEn: 'Carry approved work into organised circulation and follow through platform by platform.',
@@ -171,7 +171,7 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
     return [
       {
         labelEn: 'Current lane',
-        labelHi: 'à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤§à¤¾à¤°à¤¾',
+        labelHi: 'वर्तमान धारा',
         valueEn: 'Unit dissemination visibility',
         valueHi: 'à¤‡à¤•à¤¾à¤ˆ à¤ªà¥à¤°à¤¸à¤¾à¤° à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾',
         detailEn: 'Review how approved work is progressing into outreach after publication.',
@@ -199,7 +199,7 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
   return [
     {
       labelEn: 'Current lane',
-      labelHi: 'à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤§à¤¾à¤°à¤¾',
+      labelHi: 'वर्तमान धारा',
       valueEn: 'Public reach visibility',
       valueHi: 'à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤• à¤ªà¤¹à¥à¤‚à¤š à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾',
       detailEn: 'See how approved work becomes organised public communication.',

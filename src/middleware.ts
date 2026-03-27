@@ -10,6 +10,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/history",
   "/vimarsh",
   "/library",
+  "/feed",
 ]);
 
 const PUBLIC_PREFIXES = ["/form/", "/vote/", "/api/public/"];

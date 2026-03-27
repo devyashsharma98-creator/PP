@@ -644,13 +644,13 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
         .from("events")
         .update({
           status: dbStatus,
-          published_at: dbStatus === "published" ? new Date().toISOString() : null,
+          published_at: dbStatus === "authorized_public" ? new Date().toISOString() : null,
           updated_by: ctx.user.id,
         })
         .eq("id", input.payload.id);
       if (error) throw error;
 
-      if (dbStatus === "published") {
+      if (dbStatus === "authorized_public") {
         await supabase.from("prachar_statuses").upsert(
           {
             event_id: input.payload.id,
@@ -1036,6 +1036,9 @@ export async function runAppAction(ctx: RequestAuthContext, input: AppActionRequ
 
       return { ok: true };
     }
+
+    default:
+      throw new Error(`Unknown action: ${(input as any).action}`);
   }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -244,6 +245,7 @@ export default function AnnualCalendar() {
 
   const { events, role, lang } = useAppContext();
   const t = useT();
+  const router = useRouter();
 
   // Convert AppContext GatividhiEvents → CalEvent
   const dynamicEvents: CalEvent[] = useMemo(() =>
@@ -626,7 +628,7 @@ export default function AnnualCalendar() {
                       event={e}
                       lang={lang}
                       actionLabel={getActionLabel(e)}
-                      onAction={() => {}}
+                      onAction={() => router.push('/dashboard')}
                     />
                   ))}
                 </div>

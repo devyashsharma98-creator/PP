@@ -20,19 +20,23 @@ export default function CheckinPage() {
   const { event, loading } = usePublicEvent(eventId, contextEvent);
   const [checkedIn, setCheckedIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState<string | null>(null);
 
   const handleCheckin = async () => {
     setSubmitting(true);
+    setCheckinError(null);
     try {
       const res = await fetch(`/api/public/events/${eventId}/checkin`, {
         method: 'POST',
       });
-
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Check-in failed.');
+      }
       markAttendance(eventId, { skipRemote: true });
       setCheckedIn(true);
     } catch (error) {
-      markAttendance(eventId, { skipRemote: true });
-      setCheckedIn(true);
+      setCheckinError(error instanceof Error ? error.message : 'Check-in failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -143,6 +147,10 @@ export default function CheckinPage() {
                     </>
                   )}
                 </Button>
+
+                {checkinError && (
+                  <p className="text-sm text-destructive font-devanagari">{checkinError}</p>
+                )}
 
                 <div className="pt-2 flex items-center justify-center gap-2 text-muted-foreground/40">
                   <Flame className="w-3.5 h-3.5" />

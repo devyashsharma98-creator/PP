@@ -157,27 +157,6 @@ const workstreams = [
   },
 ] as const;
 
-const urgencyPoints = [
-  {
-    titleEn: "Public narratives need rooted clarity",
-    titleHi: "लोक-विमर्श को जड़ों से जुड़ी स्पष्टता चाहिए",
-    bodyEn: "Ideas shape institutions. The organisation works where public discourse, civilisational memory, and national confidence intersect.",
-    bodyHi: "विचार संस्थाओं को आकार देते हैं। प्रज्ञा प्रवाह वहीं काम करता है जहाँ लोक-विमर्श, सभ्यतागत स्मृति और राष्ट्रीय आत्मविश्वास एक-दूसरे से जुड़ते हैं।",
-  },
-  {
-    titleEn: "Knowledge systems must speak in present terms",
-    titleHi: "ज्ञान-परंपरा को वर्तमान भाषा में बोलना होगा",
-    bodyEn: "The task is not nostalgia. It is to render Bharatiya knowledge intelligible, rigorous, and active in contemporary life.",
-    bodyHi: "यह केवल स्मृति का आग्रह नहीं है। भारतीय ज्ञान-परंपरा को समकालीन जीवन में बोधगम्य, प्रासंगिक और सक्रिय बनाना आवश्यक है।",
-  },
-  {
-    titleEn: "Institutions require disciplined follow-through",
-    titleHi: "संस्थाओं को अनुशासित कार्य-प्रवाह चाहिए",
-    bodyEn: "Philosophy must translate into review, publication, outreach, and coordination if it is to shape society.",
-    bodyHi: "यदि विचार समाज को दिशा देना चाहते हैं, तो उन्हें समीक्षा, प्रकाशन, प्रचार और समन्वय की ठोस प्रणाली में बदलना होगा।",
-  },
-] as const;
-
 const audiencePaths = [
   {
     titleEn: "Visitor",
