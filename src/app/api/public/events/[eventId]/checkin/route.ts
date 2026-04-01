@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { neon } from "@neondatabase/serverless";
+
+const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
+const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -8,46 +10,21 @@ export async function POST(
   _req: Request,
   { params }: { params: Promise<{ eventId: string }> },
 ) {
-  if (!isSupabaseConfigured) {
-    return NextResponse.json({ error: "Supabase env is not configured." }, { status: 503 });
-  }
+  if (!sql) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
 
   try {
     const { eventId } = await params;
-    if (!UUID_RE.test(eventId)) {
-      return NextResponse.json({ error: "Invalid event ID format." }, { status: 400 });
-    }
-    const supabase = getSupabaseAdminClient();
+    if (!UUID_RE.test(eventId)) return NextResponse.json({ error: "Invalid event ID." }, { status: 400 });
 
-    const { data: event, error: fetchError } = await supabase
-      .from("events")
-      .select("id, status, vritt_checked_in_count")
-      .eq("id", eventId)
-      .single();
-
-    if (fetchError || !event) {
-      return NextResponse.json({ error: "Event not found." }, { status: 404 });
-    }
-
-    const eventAny = event as any;
-
-    if (eventAny.status !== "authorized_public" && eventAny.status !== "published") {
+    const rows = await sql`SELECT status, vritt_checked_in_count FROM public.events WHERE id = ${eventId} LIMIT 1`;
+    const event = rows[0];
+    if (!event) return NextResponse.json({ error: "Event not found." }, { status: 404 });
+    if (event.status !== "authorized_public" && event.status !== "published") {
       return NextResponse.json({ error: "Event is not open for check-in." }, { status: 403 });
     }
 
-    const currentCount = eventAny.vritt_checked_in_count || 0;
-    const { error: updateError } = await supabase
-      .from("events")
-      .update({ vritt_checked_in_count: currentCount + 1 } as any)
-      .eq("id", eventId)
-      .eq("vritt_checked_in_count", currentCount);
-
-    if (updateError) {
-      if ((updateError as any).code === 'PGRST116' || (updateError as any).code === '21000') {
-        return NextResponse.json({ error: "Check-in conflict — please retry." }, { status: 409 });
-      }
-      throw updateError;
-    }
+    const currentCount = event.vritt_checked_in_count || 0;
+    await sql`UPDATE public.events SET vritt_checked_in_count = ${currentCount + 1} WHERE id = ${eventId} AND vritt_checked_in_count = ${currentCount}`;
 
     return NextResponse.json({ ok: true });
   } catch (error) {

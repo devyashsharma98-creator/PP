@@ -46,14 +46,69 @@ const roleColors: Record<string, string> = {
 
 const aayams = ['All', 'Yuva', 'Mahila', 'Shodh', 'Prachar', 'Vimarsh'];
 
-// ── Avatar Initials ──────────────────────────────────────────────────────────
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+interface DirectoryContextItem {
+  labelEn: string;
+  labelHi: string;
+  valueEn: string;
+  valueHi?: string;
+  detailEn: string;
+  detailHi: string;
+}
+
+function DirectoryMasthead({
+  t,
+  contexts,
+}: {
+  t: (en: string, hi: string) => string;
+  contexts: DirectoryContextItem[];
+}) {
+  return (
+    <div className="directory-masthead space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-3">
+          <p className="section-seal">{t('Institutional Sampark', 'संस्थागत सम्पर्क')}</p>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+              {t('Sampark Directory', 'सम्पर्क निर्देशिका')}
+            </h1>
+            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
+              {t(
+                'A unified contact point for karyakartas across all aayams and units, enabling seamless organisational coordination.',
+                'सभी आयामों और इकाइयों के कार्यकर्ताओं हेतु एक एकीकृत सम्पर्क सूत्र, जो निर्बाध संगठनात्मक समन्वय सुनिश्चित करता है।'
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="directory-context-grid">
+        {contexts.map((ctx) => (
+          <div key={ctx.labelEn} className="directory-context-card">
+            <p className="shell-copy">{t(ctx.labelEn, ctx.labelHi)}</p>
+            <p className="directory-context-value">
+              {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}
+            </p>
+            <p className="directory-context-detail">
+              {t(ctx.detailEn, ctx.detailHi)}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function AvatarInitials({ name, aayam }: { name: string; aayam: string }) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2);
   const cfg = aayamConfig[aayam] || aayamConfig.Yuva;
   return (
-    <div className={`w-12 h-12 rounded-full ${cfg.bg} border ${cfg.border} flex items-center justify-center shrink-0`}>
-      <span className={`text-sm font-bold ${cfg.color}`}>{initials}</span>
+    <div className={cn(
+      "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-2 transition-transform duration-500 group-hover:scale-105",
+      cfg.bg, cfg.border, cfg.color
+    )}>
+      <span className="text-lg font-bold tracking-tighter">{initials}</span>
     </div>
   );
 }
@@ -78,7 +133,7 @@ export default function Directory() {
     return matchAayam && matchSearch;
   });
 
-  const contexts = [
+  const contexts: DirectoryContextItem[] = [
     {
       labelEn: "Network Strength",
       labelHi: "नेटवर्क शक्ति",
@@ -106,37 +161,29 @@ export default function Directory() {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
-      <Masthead
-        seal="Institutional Sampark"
-        sealHi="संस्थागत सम्पर्क"
-        title="Sampark Directory"
-        titleHi="सम्पर्क निर्देशिका"
-        subtitle="A unified contact point for karyakartas across all aayams and units, enabling seamless organisational coordination."
-        subtitleHi="सभी आयामों और इकाइयों के कार्यकर्ताओं हेतु एक एकीकृत सम्पर्क सूत्र, जो निर्बाध संगठनात्मक समन्वय सुनिश्चित करता है।"
-        contexts={contexts}
-      />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 pb-10">
+      <DirectoryMasthead t={t} contexts={contexts} />
 
       {/* Search + Filter */}
-      <section className="space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="relative w-full sm:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-b border-border/40 pb-6">
+          <div className="relative w-full sm:w-[28rem]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t('Search by name, unit or role...', 'नाम, इकाई या दायित्व से खोजें...')}
-              className="pl-10 h-11 rounded-xl bg-background/50 border-border/60 focus:border-primary/40 focus:ring-primary/10 transition-all"
+              className="pl-11 h-12 rounded-2xl bg-background/50 border-border/70 focus:border-primary/40 focus:ring-primary/10 transition-all shadow-sm"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs gap-1.5 py-1 px-3 bg-muted/30 border-border/60">
-              <Filter className="w-3.5 h-3.5 opacity-60" /> {t('Filter by Aayam', 'आयाम अनुसार')}
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-[0.2em] py-1.5 px-4 bg-muted/40 border-border/60">
+              <Filter className="w-3.5 h-3.5 mr-2 opacity-60" /> {t('Filter by Aayam', 'आयाम अनुसार')}
             </Badge>
           </div>
         </div>
 
-        <div className="flex gap-2 flex-wrap pb-2">
+        <div className="flex gap-2.5 flex-wrap overflow-x-auto pb-2 no-scrollbar">
           {aayams.map(a => {
             const cfg = a === 'All' ? null : aayamConfig[a];
             return (
@@ -144,10 +191,10 @@ export default function Directory() {
                 key={a}
                 onClick={() => setAayamFilter(a)}
                 className={cn(
-                  "text-[11px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all font-devanagari",
+                  "text-[10px] md:text-[11px] font-bold uppercase tracking-[0.18em] px-5 py-2.5 rounded-xl border transition-all font-devanagari shrink-0",
                   aayamFilter === a
-                    ? cfg ? `${cfg.bg} ${cfg.color} ${cfg.border} shadow-sm` : 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                    : 'bg-background/50 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground'
+                    ? cfg ? `${cfg.bg} ${cfg.color} ${cfg.border} shadow-md scale-105` : 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
+                    : 'bg-background/60 border-border/70 text-muted-foreground hover:border-primary/40 hover:text-foreground'
                 )}
               >
                 {a === 'All' ? t('All', 'सभी') : a}
@@ -158,12 +205,17 @@ export default function Directory() {
       </section>
 
       {/* Member Cards */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-3">
-          <span className="section-seal">{t('Karyakarta Registry', 'कार्यकर्ता पंजिका')}</span>
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="section-seal">{t('Karyakarta Registry', 'कार्यकर्ता पंजिका')}</span>
+          </div>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            {t(`Found ${filtered.length} Karyakartas`, `${filtered.length} कार्यकर्ता मिले`)}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <AnimatePresence mode="popLayout">
             {filtered.map((m, i) => {
               const cfg = aayamConfig[m.aayam] || aayamConfig.Yuva;
@@ -175,46 +227,52 @@ export default function Directory() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: i * 0.02 }}
                 >
                   <Card 
                     className={cn(
-                      "institution-panel hover-lift overflow-hidden cursor-pointer transition-all duration-300",
-                      isOpen ? `border-l-4 ${cfg.border.replace('/25', '/60')} ring-1 ring-primary/10 shadow-md` : "border-border/60"
+                      "institution-panel hover-lift overflow-hidden cursor-pointer transition-all duration-500 bg-background/30 group",
+                      isOpen ? `ring-2 ${cfg.border.replace('/25', '/60')} shadow-xl bg-background/60` : "border-border/60"
                     )}
                     onClick={() => setExpanded(isOpen ? null : m.id)}
                   >
-                    <CardContent className="py-4 px-5">
-                      <div className="flex items-center gap-4">
+                    <CardContent className="py-6 px-6">
+                      <div className="flex items-start gap-5">
                         <AvatarInitials name={m.name} aayam={m.aayam} />
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-bold text-sm truncate text-foreground/90">
-                              {isHi ? m.nameHi : m.name}
-                            </h3>
-                            <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-wider", roleColors[m.role])}>
-                              {isHi ? m.roleHi : m.role}
-                            </Badge>
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <h3 className="font-bold text-lg leading-none font-devanagari text-foreground/90 group-hover:text-primary transition-colors">
+                                {isHi ? m.nameHi : m.name}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-widest px-2 py-0.5", roleColors[m.role])}>
+                                  {isHi ? m.roleHi : m.role}
+                                </Badge>
+                                <span className="w-1 h-1 rounded-full bg-border" />
+                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{m.aayam} Aayam</span>
+                              </div>
+                            </div>
+                            <div className={cn(
+                              "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner",
+                              isOpen ? "bg-primary text-white scale-110" : "bg-muted/60 text-muted-foreground group-hover:bg-muted"
+                            )}>
+                              {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <Badge className={cn("text-[9px] border-0 font-bold", cfg.bg, cfg.color)}>{m.aayam}</Badge>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium">
-                              <MapPin className="w-3 h-3 opacity-60" />{m.unit}
+
+                          <div className="flex items-center gap-4 text-[11px] text-muted-foreground font-medium flex-wrap">
+                            <span className="flex items-center gap-1.5 bg-muted/40 px-2 py-0.5 rounded-lg border border-border/50">
+                              <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{m.unit}
                             </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(isHi ? m.vaksheHi : m.vakshe).map((v, idx) => (
+                                <span key={idx} className="text-[9px] bg-primary/5 text-primary/70 px-2 py-0.5 rounded-md border border-primary/10 font-bold uppercase tracking-widest">
+                                  {v}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {(isHi ? m.vaksheHi : m.vakshe).map((v, idx) => (
-                              <span key={idx} className="text-[9px] bg-primary/5 text-primary/70 px-1.5 py-0.5 rounded border border-primary/10 font-bold uppercase tracking-wider">
-                                {v}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                          isOpen ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                        )}>
-                          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </div>
                       </div>
 
@@ -225,32 +283,38 @@ export default function Directory() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            transition={{ duration: 0.35, ease: "easeInOut" }}
                             className="overflow-hidden"
                           >
-                            <div className="border-t border-border/50 mt-4 pt-4 space-y-4">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <a href={`tel:${m.contact}`} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 border border-border/40 hover:border-primary/20 transition-colors group">
-                                  <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
-                                    <Phone className="w-4 h-4 text-primary/60 group-hover:text-primary transition-colors" />
-                                  </div>
-                                  <span className="text-xs font-mono font-medium text-foreground/80">{m.contact}</span>
-                                </a>
-                                <a href={`mailto:${m.email}`} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 border border-border/40 hover:border-primary/20 transition-colors group">
-                                  <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
-                                    <Mail className="w-4 h-4 text-primary/60 group-hover:text-primary transition-colors" />
-                                  </div>
-                                  <span className="text-xs font-medium text-foreground/80 truncate">{m.email}</span>
-                                </a>
+                            <div className="border-t border-border/50 mt-6 pt-6 space-y-5">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <p className="shell-copy text-[9px] font-bold">{t('Contact Number', 'संपर्क नंबर')}</p>
+                                  <a href={`tel:${m.contact}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
+                                    <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
+                                      <Phone className="w-4 h-4 text-primary group-hover/link:animate-pulse" />
+                                    </div>
+                                    <span className="text-sm font-mono font-bold text-foreground/80 tracking-tight">{m.contact}</span>
+                                  </a>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <p className="shell-copy text-[9px] font-bold">{t('Email Address', 'ईमेल पता')}</p>
+                                  <a href={`mailto:${m.email}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
+                                    <div className="w-9 h-9 rounded-xl bg-blue-500/5 flex items-center justify-center border border-blue-500/10">
+                                      <Mail className="w-4 h-4 text-blue-500" />
+                                    </div>
+                                    <span className="text-sm font-bold text-foreground/80 truncate tracking-tight">{m.email}</span>
+                                  </a>
+                                </div>
                               </div>
                               
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="flex-1 text-[10px] h-9 gap-2 rounded-xl border-border/60 font-bold uppercase tracking-widest" asChild>
-                                  <a href={`tel:${m.contact}`}><Phone className="w-3.5 h-3.5" /> {t('Voice Call', 'कॉल करें')}</a>
+                              <div className="flex gap-3 pt-2">
+                                <Button size="lg" variant="outline" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl border-border/70 font-bold uppercase tracking-[0.16em] hover:bg-muted/50" asChild>
+                                  <a href={`tel:${m.contact}`}><Phone className="w-4 h-4" /> {t('Voice Call', 'कॉल करें')}</a>
                                 </Button>
-                                <Button size="sm" className="flex-1 text-[10px] h-9 gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/20 border-0" asChild>
+                                <Button size="lg" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-[0.16em] shadow-lg shadow-emerald-500/20 border-0 transition-all hover:-translate-y-0.5 active:translate-y-0" asChild>
                                   <a href={`https://wa.me/91${m.contact.replace(/X/g, '0')}`} target="_blank" rel="noopener noreferrer">
-                                    <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                                    <MessageCircle className="w-4 h-4" /> WhatsApp
                                   </a>
                                 </Button>
                               </div>
@@ -268,9 +332,14 @@ export default function Directory() {
       </section>
 
       {filtered.length === 0 && (
-        <div className="text-center py-24 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
-          <Users className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+        <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
+          <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/40">
+            <Users className="w-10 h-10 text-muted-foreground/20" />
+          </div>
           <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">{t('No members found matching your search.', 'आपकी खोज से मेल खाता कोई सदस्य नहीं मिला।')}</p>
+          <Button variant="link" onClick={() => { setAayamFilter('All'); setSearch(''); }} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+            {t('Clear all filters', 'फिल्टर हटाएँ')}
+          </Button>
         </div>
       )}
 
@@ -278,20 +347,20 @@ export default function Directory() {
 
       {/* Bottom coordination card */}
       <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-        <Card className="institution-panel border-amber-500/20 bg-amber-500/5 hover:border-amber-500/40 transition-colors shadow-sm">
-          <CardContent className="py-6 flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-              <Network className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+        <Card className="institution-panel border-amber-500/20 bg-amber-500/5 hover:border-amber-500/40 transition-all shadow-md group">
+          <CardContent className="py-8 flex flex-col md:flex-row items-center gap-8 px-8">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+              <Network className="w-8 h-8 text-amber-600 dark:text-amber-400" />
             </div>
-            <div className="flex-1 text-center sm:text-left space-y-1">
-              <p className="font-bold text-base font-devanagari text-foreground/90">
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <p className="font-bold text-lg font-devanagari text-foreground/90">
                 {t('Need help with coordination?', 'समन्वय में सहायता चाहिए?')}
               </p>
-              <p className="text-sm text-muted-foreground font-devanagari">
-                {t('Contact the Vibhag Sanyojak for institutional alignment and regional unit access.', 'संस्थागत समन्वय और क्षेत्रीय इकाई पहुंच के लिए विभाग संयोजक से संपर्क करें।')}
+              <p className="text-sm text-muted-foreground font-devanagari leading-relaxed max-w-2xl">
+                {t('Contact the Vibhag Sanyojak for institutional alignment and regional unit access. Our coordination team ensures that every karyakarta is connected to the right resource and thematic lead.', 'संस्थागत समन्वय और क्षेत्रीय इकाई पहुंच के लिए विभाग संयोजक से संपर्क करें। हमारी समन्वय टीम यह सुनिश्चित करती है कि प्रत्येक कार्यकर्ता सही संसाधन और विषयगत नेतृत्व से जुड़ा हो।')}
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 h-11 px-8 rounded-xl border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5 font-bold uppercase tracking-widest text-xs gap-2">
+            <Button variant="outline" className="shrink-0 h-12 px-10 rounded-2xl border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
               <Shield className="w-4 h-4" /> {t('Vibhag Sanyojak', 'विभाग संयोजक')}
             </Button>
           </CardContent>

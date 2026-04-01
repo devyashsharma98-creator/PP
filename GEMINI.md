@@ -23,9 +23,9 @@ The brand is **Civilisational, Institutional, and Disciplined**. It establishes 
 5. **Disciplined Motion**: Fast, tight transitions for internal operational screens; slower, atmospheric reveals for public-facing gateway surfaces.
 
 ## Phase 2 UI Refinement Tasks (Remaining)
-- [ ] **Vimarsh**: Upgrade to structured masthead, context grid, and institutional panel framing.
-- [ ] **Dayitv**: Implement the operational layer structure (Identity -> Context -> Data).
-- [ ] **Content Feed**: Refine hierarchy and share "institutional record" feel.
-- [ ] **E-Library**: Upgrade grid and detail views to match the "archival" aesthetic.
-- [ ] **Directory**: Refine member cards and organizational hierarchy visualization.
-- [ ] **Aap Ka Itihas**: Elevate the timeline and historical facts into a high-fidelity "institutional memory" view.
+- [x] **Vimarsh**: Upgrade to structured masthead, context grid, and institutional panel framing.
+- [x] **Dayitv**: Implement the operational layer structure (Identity -> Context -> Data).
+- [x] **Content Feed**: Refine hierarchy and share "institutional record" feel.
+- [x] **E-Library**: Upgrade grid and detail views to match the "archival" aesthetic.
+- [x] **Directory**: Refine member cards and organizational hierarchy visualization.
+- [x] **Aap Ka Itihas**: Elevate the timeline and historical facts into a high-fidelity "institutional memory" view.

@@ -13,24 +13,24 @@ import { cn } from '@/lib/utils';
 
 // ── AapKaItihas Context Types ───────────────────────────────────────────
 
-type AapKaItihasContextItem = {
+interface HistoryContextItem {
   labelEn: string;
   labelHi: string;
   valueEn: string;
   valueHi?: string;
   detailEn: string;
   detailHi: string;
-};
+}
 
-function AapKaItihasMasthead({
+function HistoryMasthead({
   t,
   contexts,
 }: {
   t: (en: string, hi: string) => string;
-  contexts: AapKaItihasContextItem[];
+  contexts: HistoryContextItem[];
 }) {
   return (
-    <div className="dashboard-masthead space-y-5">
+    <div className="history-masthead space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
           <p className="section-seal">{t('Institutional Memory', 'संस्थागत स्मृति')}</p>
@@ -48,12 +48,16 @@ function AapKaItihasMasthead({
         </div>
       </div>
 
-      <div className="dashboard-context-grid sm:grid-cols-2 lg:grid-cols-3">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="dashboard-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="dashboard-context-value">{t(context.valueEn, context.valueHi ?? context.valueEn)}</p>
-            <p className="dashboard-context-detail">{t(context.detailEn, context.detailHi)}</p>
+      <div className="history-context-grid">
+        {contexts.map((ctx) => (
+          <div key={ctx.labelEn} className="history-context-card">
+            <p className="shell-copy">{t(ctx.labelEn, ctx.labelHi)}</p>
+            <p className="history-context-value">
+              {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}
+            </p>
+            <p className="history-context-detail">
+              {t(ctx.detailEn, ctx.detailHi)}
+            </p>
           </div>
         ))}
       </div>
@@ -98,10 +102,8 @@ export default function AapKaItihas() {
 
   // Stats
   const eventCount = historyItems.filter(i => i.type === 'Event').length;
-  const milestoneCount = historyItems.filter(i => i.type === 'Milestone').length;
-  const contributionCount = historyItems.filter(i => i.type === 'Contribution').length;
 
-  const contexts: AapKaItihasContextItem[] = [
+  const contexts: HistoryContextItem[] = [
     {
       labelEn: "Service Span",
       labelHi: "सेवा अवधि",
@@ -130,7 +132,7 @@ export default function AapKaItihas() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 pb-10">
-      <AapKaItihasMasthead t={t} contexts={contexts} />
+      <HistoryMasthead t={t} contexts={contexts} />
 
       {/* ── SECTION: On This Day ─────────────────────────────────────── */}
       <section className="space-y-6">
@@ -142,24 +144,29 @@ export default function AapKaItihas() {
               {t('On This Day in History', 'इतिहास में आज का दिन')}
             </h2>
           </div>
-          <div className="bg-muted/50 px-4 py-1.5 rounded-full border border-border/40 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+          <div className="bg-muted/50 px-5 py-2 rounded-2xl border border-border/60 text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em] shadow-inner">
             {today}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {historicalFacts.map((fact, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-              <Card className="institution-panel hover-lift border-l-4 border-l-primary/40 h-full bg-background/40">
-                <CardContent className="py-5 px-5 flex gap-4">
+            <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+              <Card className="institution-panel hover-lift group border-l-4 border-l-primary/40 h-full bg-background/30 transition-all duration-500 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-primary/10 transition-colors" />
+                <CardContent className="py-6 px-6 flex gap-5 relative z-10">
                   <div className="shrink-0">
-                    <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
-                      <span className="text-sm font-bold text-primary">{fact.year}</span>
-                    </span>
+                    <div className="inline-flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner group-hover:scale-110 transition-transform">
+                      <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest leading-none mb-1">Year</span>
+                      <span className="text-lg font-bold text-primary leading-none">{fact.year}</span>
+                    </div>
                   </div>
-                  <p className={`text-sm leading-relaxed ${isHi ? 'font-devanagari' : ''} text-foreground/80`}>
-                    {isHi ? fact.event : fact.eventEn}
-                  </p>
+                  <div className="space-y-2">
+                    <div className="h-px w-8 bg-primary/30" />
+                    <p className={`text-sm md:text-base leading-relaxed ${isHi ? 'font-devanagari' : ''} text-foreground/80 font-medium`}>
+                      {isHi ? fact.event : fact.eventEn}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -180,62 +187,68 @@ export default function AapKaItihas() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/5 text-emerald-600 border-emerald-500/20">
-              <TrendingUp className="w-3 h-3 mr-1" /> {t('Growing Momentum', 'बढ़ती गति')}
+            <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-[0.2em] bg-emerald-500/5 text-emerald-600 border-emerald-500/20 px-3 py-1">
+              <TrendingUp className="w-3.5 h-3.5 mr-1.5" /> {t('Growing Momentum', 'बढ़ती गति')}
             </Badge>
           </div>
         </div>
 
-        <div className="relative pl-2 sm:pl-0">
+        <div className="relative pl-4 sm:pl-0 max-w-4xl mx-auto">
           {/* Timeline line */}
-          <div className="absolute left-[21px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 via-border to-transparent" />
+          <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary via-border to-transparent opacity-30" />
 
-          <div className="space-y-5">
+          <div className="space-y-8">
             {historyItems.map((item, i) => {
               const cfg = typeConfig[item.type] || typeConfig.Event;
               const Icon = cfg.icon;
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -15 }}
+                  initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.1 + i * 0.04 }}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-5 relative group"
+                  transition={{ delay: 0.1 + i * 0.03 }}
+                  className="flex flex-col sm:flex-row gap-6 sm:gap-8 relative group"
                 >
                   {/* Timeline dot */}
                   <div className={cn(
-                    "w-11 h-11 rounded-2xl flex items-center justify-center z-10 shrink-0 transition-all duration-300",
-                    "bg-background border-2 shadow-sm group-hover:scale-110 ml-[1px] sm:ml-0",
+                    "w-12 h-12 rounded-2xl flex items-center justify-center z-10 shrink-0 transition-all duration-500",
+                    "bg-background border-2 shadow-md group-hover:scale-110 group-hover:rotate-12 ml-[1px] sm:ml-0",
                     cfg.border
                   )}>
-                    <Icon className={cn("w-5 h-5", cfg.color)} />
+                    <Icon className={cn("w-6 h-6", cfg.color)} />
                   </div>
 
-                  <Card className="institution-panel flex-1 hover-lift border-border/60 hover:border-primary/30 transition-all duration-300">
-                    <CardContent className="py-4 px-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2">
+                  <Card className="institution-panel flex-1 hover-lift border-border/60 hover:border-primary/30 transition-all duration-500 bg-background/40">
+                    <CardContent className="py-6 px-6">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-[0.2em] py-1 px-2.5 mb-2", cfg.bg, cfg.color)}>
+                              {item.type}
+                            </Badge>
                             <h3 className={cn(
-                              "font-bold text-base tracking-tight",
+                              "font-bold text-lg md:text-xl tracking-tight text-foreground/90",
                               isHi ? "font-devanagari" : ""
                             )}>
                               {isHi ? item.titleHi : item.title}
                             </h3>
                           </div>
-                          <div className="flex items-center gap-4 text-[11px] text-muted-foreground font-medium">
-                            <span className="flex items-center gap-1.5 bg-muted/40 px-2 py-0.5 rounded-md">
-                              <Clock className="w-3 h-3 opacity-60" />{item.date}
+                          <div className="flex items-center gap-5 text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">
+                            <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
+                              <Clock className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.date}
                             </span>
-                            <span className="flex items-center gap-1.5 bg-muted/40 px-2 py-0.5 rounded-md">
-                              <MapPin className="w-3 h-3 opacity-60" />{item.unit}
+                            <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
+                              <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.unit}
                             </span>
                           </div>
                         </div>
-                        <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-widest py-1", cfg.bg, cfg.color)}>
-                          {item.type}
-                        </Badge>
+                        
+                        <div className="hidden md:block">
+                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity", cfg.bg)}>
+                            <CheckCircle2 className={cn("w-5 h-5", cfg.color)} />
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -247,23 +260,24 @@ export default function AapKaItihas() {
       </section>
 
       {/* Bottom alignment card */}
-      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-        <Card className="institution-panel border-primary/15 bg-primary/5 shadow-sm">
-          <CardContent className="py-6 flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <Compass className="w-7 h-7 text-primary" />
+      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="pt-6">
+        <Card className="institution-panel border-primary/20 bg-primary/5 shadow-lg overflow-hidden group">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full -mr-24 -mt-24 blur-3xl group-hover:bg-primary/15 transition-colors" />
+          <CardContent className="py-10 flex flex-col md:flex-row items-center gap-8 px-10 relative z-10">
+            <div className="w-20 h-20 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-12 transition-transform duration-700">
+              <Landmark className="w-10 h-10 text-primary" />
             </div>
-            <div className="flex-1 text-center sm:text-left space-y-1">
-              <p className="font-bold text-base font-devanagari text-foreground/90">
+            <div className="flex-1 text-center md:text-left space-y-3">
+              <p className="font-bold text-xl font-devanagari text-foreground/90 tracking-tight">
                 {t('Aligned with the Institutional Vision', 'संस्थागत दृष्टिकोण के साथ संरेखित')}
               </p>
-              <p className="text-sm text-muted-foreground font-devanagari">
-                {t('Every organized event and documented thought contributes to the civilisational narrative of Pragya Pravah.', 'हर आयोजित कार्यक्रम और प्रलेखित विचार प्रज्ञा प्रवाह के सभ्यतागत कथ्य में योगदान देता है।')}
+              <p className="text-base text-muted-foreground font-devanagari leading-relaxed max-w-3xl">
+                {t('Every organized event and documented thought contributes to the civilisational narrative of Pragya Pravah. Your journey is a vital thread in the unfolding history of Bharatiya resurgence.', 'हर आयोजित कार्यक्रम और प्रलेखित विचार प्रज्ञा प्रवाह के सभ्यतागत कथ्य में योगदान देता है। आपकी यात्रा भारतीय पुनर्जागरण के उभरते इतिहास में एक महत्वपूर्ण सूत्र है।')}
               </p>
             </div>
-            <div className="shrink-0 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-success animate-ping" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-success">{t('Journey Continues', 'यात्रा निरंतर है')}</span>
+            <div className="shrink-0 flex items-center gap-3 bg-background/60 px-5 py-2.5 rounded-full border border-primary/20 shadow-sm">
+              <div className="w-3 h-3 rounded-full bg-success animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-success">{t('Journey Continues', 'यात्रा निरंतर है')}</span>
             </div>
           </CardContent>
         </Card>

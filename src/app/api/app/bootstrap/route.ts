@@ -1,31 +1,24 @@
 import { NextResponse } from "next/server";
-import { getAppBootstrapPayload } from "@/lib/server/app-repository";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireRequestAuthContext } from "@/lib/server/auth-context";
-import { assertCanReadInternalBootstrap } from "@/lib/server/permissions";
-import { isAuthRequiredError, isForbiddenError } from "@/lib/server/errors";
+import { getDemoAuthContext } from "@/lib/neon/auth";
+import { getBootstrapPayload } from "@/lib/neon/repository";
+
+const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 
 export async function GET() {
-  if (!isSupabaseConfigured) {
+  if (!isNeonConfigured) {
     return NextResponse.json(
-      { error: "Supabase env is not configured." },
+      { error: "Neon database is not configured." },
       { status: 503 },
     );
   }
 
   try {
-    const auth = await requireRequestAuthContext();
-    assertCanReadInternalBootstrap(auth);
-    const data = await getAppBootstrapPayload(auth);
+    const auth = await getDemoAuthContext();
+    const data = await getBootstrapPayload(auth);
     return NextResponse.json(data);
   } catch (error) {
-    if (isAuthRequiredError(error)) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-    if (isForbiddenError(error)) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
     const message = error instanceof Error ? error.message : "Failed to load bootstrap data.";
+    console.error("Bootstrap error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

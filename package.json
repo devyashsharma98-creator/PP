@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@neondatabase/api-client": "^2.7.1",
+    "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -48,28 +50,23 @@
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-
     "date-fns": "^3.6.0",
-
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.34.3",
-
     "lucide-react": "^0.462.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.4",
+    "pg": "^8.20.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-countup": "^6.5.3",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.61.1",
-
-
-
     "server-only": "^0.0.1",
-
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-
     "zod": "^3.25.76"
   },
   "devDependencies": {

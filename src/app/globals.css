@@ -650,6 +650,144 @@
     @apply flex items-start gap-2.5 rounded-xl border border-border/50 bg-background/70 px-3 py-2;
   }
 
+  .vimarsh-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(270 30% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.14), transparent 36%);
+  }
+
+  .vimarsh-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .vimarsh-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .vimarsh-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .vimarsh-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .dayitv-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(35 50% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .dayitv-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .dayitv-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .dayitv-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .dayitv-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .feed-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(210 30% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .feed-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .feed-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .feed-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .feed-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .library-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(35 40% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .library-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .library-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .library-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .library-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .directory-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(25 30% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .directory-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .directory-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .directory-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .directory-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .history-masthead {
+    @apply institution-panel p-6 md:p-7;
+    background:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.92), hsl(220 15% 96% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .history-context-grid {
+    @apply grid gap-4 md:grid-cols-3;
+  }
+
+  .history-context-card {
+    @apply institution-panel-muted px-4 py-3;
+  }
+
+  .history-context-value {
+    @apply mt-2 text-sm font-semibold text-foreground;
+  }
+
+  .history-context-detail {
+    @apply mt-1 text-sm leading-6 text-muted-foreground;
+  }
+
   .prachar-masthead {
     @apply institution-panel p-6 md:p-7;
     background:

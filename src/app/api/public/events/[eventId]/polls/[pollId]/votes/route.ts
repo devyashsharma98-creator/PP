@@ -1,48 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { PublicVoteRequest } from "@/lib/app/contracts";
-import { submitPublicVote } from "@/lib/server/app-repository";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { neon } from "@neondatabase/serverless";
+import { createHash } from "node:crypto";
+
+const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
+const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
 
 function isValidUuid(value: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(value);
-}
-
-function requestMeta(req: NextRequest) {
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  return {
-    ip: forwardedFor?.split(",")[0]?.trim() ?? null,
-    userAgent: req.headers.get("user-agent"),
-  };
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ eventId: string; pollId: string }> },
 ) {
-  if (!isSupabaseConfigured) {
-    return NextResponse.json({ error: "Supabase env is not configured." }, { status: 503 });
-  }
+  if (!sql) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
 
   try {
     const { eventId, pollId } = await params;
-    if (!isValidUuid(eventId)) {
-      return NextResponse.json({ error: "Invalid event ID format." }, { status: 400 });
+    if (!isValidUuid(eventId) || !isValidUuid(pollId)) {
+      return NextResponse.json({ error: "Invalid ID format." }, { status: 400 });
     }
-    if (!isValidUuid(pollId)) {
-      return NextResponse.json({ error: "Invalid poll ID format." }, { status: 400 });
+
+    const body = await req.json();
+    if (!body?.optionId || !isValidUuid(body.optionId)) {
+      return NextResponse.json({ error: "Valid optionId required." }, { status: 400 });
     }
-    const body = (await req.json()) as PublicVoteRequest;
-    if (!body?.optionId) {
-      return NextResponse.json({ error: "optionId is required." }, { status: 400 });
+
+    // Check poll is open
+    const [pollRows, eventRows] = await Promise.all([
+      sql`SELECT * FROM public.event_polls WHERE id = ${pollId} AND event_id = ${eventId} LIMIT 1`,
+      sql`SELECT status, voting_public_enabled FROM public.events WHERE id = ${eventId} LIMIT 1`,
+    ]);
+    const poll = pollRows[0];
+    const event = eventRows[0];
+    if (!poll || !event) return NextResponse.json({ error: "Not found." }, { status: 404 });
+    if (event.status !== "authorized_public" && event.status !== "published") {
+      return NextResponse.json({ error: "Voting not enabled." }, { status: 403 });
     }
-    if (!isValidUuid(body.optionId)) {
-      return NextResponse.json({ error: "Invalid optionId format." }, { status: 400 });
-    }
-    const result = await submitPublicVote(eventId, pollId, body, requestMeta(req));
-    return NextResponse.json(result);
+    if (poll.is_finalized) return NextResponse.json({ error: "Poll is finalized." }, { status: 400 });
+
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const ip = forwardedFor?.split(",")[0]?.trim() ?? "unknown";
+    const ua = req.headers.get("user-agent") ?? "unknown";
+    const fingerprint = createHash("sha256").update(`${eventId}:${pollId}:${ip}:${ua}`).digest("hex");
+
+    await sql`
+      INSERT INTO public.event_poll_votes (poll_id, option_id, voter_fingerprint_hash, submitted_from_ip, submitted_user_agent)
+      VALUES (${pollId}, ${body.optionId}, ${fingerprint}, ${ip}, ${ua})
+    `;
+
+    return NextResponse.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Vote submission failed.";
+    const message = error instanceof Error ? error.message : "Vote failed.";
     const status = /duplicate/i.test(message) ? 409 : 400;
     return NextResponse.json({ error: message }, { status });
   }

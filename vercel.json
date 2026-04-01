@@ -1,4 +1,0 @@
-{
-  "framework": "nextjs",
-  "ignoreCommand": "bash scripts/vercel-build-filter.sh"
-}
