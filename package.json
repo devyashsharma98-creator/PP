@@ -18,6 +18,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@neondatabase/api-client": "^2.7.1",
     "@neondatabase/serverless": "^1.0.2",
+    "@opennextjs/cloudflare": "^1.18.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -87,6 +88,7 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "wrangler": "^4.79.0"
   }
 }

@@ -1,0 +1,3 @@
+module.exports=[46176,a=>{"use strict";var b=a.i(87924);function c({error:a,reset:c}){return(0,b.jsxs)("div",{className:"flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center",children:[(0,b.jsx)("h2",{className:"text-xl font-semibold",children:"Unable to load articles"}),(0,b.jsx)("p",{className:"text-muted-foreground text-sm",children:a.message}),(0,b.jsx)("button",{onClick:c,className:"px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90",children:"Try again"})]})}a.s(["default",()=>c])}];
+
+//# sourceMappingURL=src_app_aalekh_error_tsx_9ba73442._.js.map

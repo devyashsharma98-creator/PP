@@ -1,0 +1,10 @@
+name = "pragya-pravah-ui"
+compatibility_date = "2026-04-01"
+pages_build_output_dir = ".next"
+
+[vars]
+NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK = "true"
+NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH = "true"
+
+[env.production]
+vars = {}

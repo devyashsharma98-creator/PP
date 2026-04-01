@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/aalekh/layout,_N_T_/aalekh/page,_N_T_/aalekh"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/aalekh/__PAGE__",
+    "/aalekh",
+    "/_index",
+    "/_head"
+  ]
+}
