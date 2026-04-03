@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/neon/client';
 import { AppError, NotFoundError, ValidationError } from '../errors/app-errors';
 import type { IService, PaginatedResult, CreateEventInput, EventFilters } from './types';
 
@@ -15,8 +15,6 @@ export interface Event {
 }
 
 export class EventService implements IService<EventFilters, PaginatedResult<Event>> {
-  private db = neon(process.env.DATABASE_URL!);
-
   async execute(filters: EventFilters): Promise<PaginatedResult<Event>> {
     return this.list(filters);
   }
@@ -25,48 +23,36 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
     const { page = 1, limit = 20 } = filters;
     const offset = (page - 1) * limit;
 
-    let query = this.db.from('events').select('*', { count: 'exact' });
-
-    if (filters.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters.unit_id) {
-      query = query.eq('unit_id', filters.unit_id);
-    }
-    if (filters.from_date) {
-      query = query.gte('starts_at', filters.from_date);
-    }
-    if (filters.to_date) {
-      query = query.lte('starts_at', filters.to_date);
-    }
-
-    const { data, error } = await query
-      .range(offset, offset + limit - 1)
-      .order('starts_at', { ascending: false });
-
-    if (error) {
-      throw new AppError(500, 'DB_ERROR', error.message);
-    }
+    let conditions: string[] = [];
+    if (filters.status) conditions.push(`status = '${filters.status}'`);
+    if (filters.unit_id) conditions.push(`unit_id = '${filters.unit_id}'`);
+    if (filters.from_date) conditions.push(`starts_at >= '${filters.from_date}'`);
+    if (filters.to_date) conditions.push(`starts_at <= '${filters.to_date}'`);
+    
+    const whereClause = conditions.length > 0 ? conditions.join(' AND ') : '';
+    const query = whereClause 
+      ? `SELECT * FROM events WHERE ${whereClause} ORDER BY starts_at DESC LIMIT ${limit} OFFSET ${offset}`
+      : `SELECT * FROM events ORDER BY starts_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await sql`${query}`;
+    const total = rows.length;
 
     return {
-      data: data || [],
+      data: rows as Event[],
       pagination: {
         page,
         limit,
-        total: 0,
-        hasMore: false,
+        total,
+        hasMore: offset + limit < total,
       },
     };
   }
 
   async getById(id: string): Promise<Event | null> {
-    const { data } = await this.db
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    return data as Event | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await sql`SELECT * FROM events WHERE id = ${id} LIMIT 1`;
+    return rows[0] as Event | null;
   }
 
   async create(input: CreateEventInput): Promise<Event> {
@@ -74,25 +60,17 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
       throw new ValidationError('Title is required');
     }
 
-    const { data, error } = await this.db
-      .from('events')
-      .insert({
-        title: input.title,
-        description: input.description,
-        starts_at: input.starts_at,
-        ends_at: input.ends_at,
-        unit_id: input.unit_id,
-        department_id: input.department_id,
-        status: 'draft',
-      })
-      .select()
-      .single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await sql`
+      INSERT INTO events (title, description, starts_at, ends_at, unit_id, department_id, status)
+      VALUES (${input.title}, ${input.description ?? null}, ${input.starts_at}, ${input.ends_at ?? null}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft')
+      RETURNING *`;
 
-    if (error) {
-      throw new AppError(500, 'DB_ERROR', error.message);
+    if (!rows[0]) {
+      throw new AppError(500, 'DB_ERROR', 'Failed to create event');
     }
 
-    return data as Event;
+    return rows[0] as Event;
   }
 
   async updateStatus(id: string, status: string): Promise<Event> {
@@ -101,17 +79,12 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
       throw new NotFoundError('Event', id);
     }
 
-    const { data, error } = await this.db
-      .from('events')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await sql`
+      UPDATE events SET status = ${status}, updated_at = ${new Date().toISOString()}
+      WHERE id = ${id}
+      RETURNING *`;
 
-    if (error) {
-      throw new AppError(500, 'DB_ERROR', error.message);
-    }
-
-    return data as Event;
+    return rows[0] as Event;
   }
 }

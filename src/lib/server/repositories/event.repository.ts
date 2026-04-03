@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/neon/client';
 import { BaseRepository } from './base.repository';
 
 export interface EventEntity {
@@ -20,6 +20,7 @@ export interface EventEntity {
 export class EventRepository extends BaseRepository<EventEntity> {
   tableName = 'events';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mapToEntity(row: any): EventEntity {
     return {
       id: row.id,
@@ -39,18 +40,20 @@ export class EventRepository extends BaseRepository<EventEntity> {
   }
 
   async findWithRelations(id: string): Promise<EventEntity | null> {
-    const { data } = await this.db
-      .from('events')
-      .select(`
-        *,
-        unit:units!events_unit_id_fkey(name),
-        department:departments_or_aayams!events_department_id_fkey(name),
-        location:locations!events_location_id_fkey(name, city)
-      `)
-      .eq('id', id)
-      .single();
-
-    return data ? this.mapToEntity(data) : null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await sql`
+      SELECT e.*, 
+        u.name as unit_name, 
+        d.name as department_name, 
+        l.name as location_name, 
+        l.city as location_city
+      FROM events e
+      LEFT JOIN units u ON e.unit_id = u.id
+      LEFT JOIN departments_or_aayams d ON e.department_id = d.id
+      LEFT JOIN locations l ON e.location_id = l.id
+      WHERE e.id = ${id}
+      LIMIT 1`;
+    return rows[0] ? this.mapToEntity(rows[0]) : null;
   }
 
   async findByUnit(unitId: string): Promise<EventEntity[]> {

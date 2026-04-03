@@ -1,4 +1,3 @@
-// @ts-expect-error - neon serverless types issue
 import { sql } from '@/lib/neon/client';
 import { AppError } from '../errors/app-errors';
 

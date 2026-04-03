@@ -136,3 +136,7 @@ export async function requireNeonAuthContext(req: Request): Promise<NeonAuthCont
     units: units as NeonAuthContext["units"],
   };
 }
+
+export async function getDemoAuthContext(): Promise<NeonAuthContext> {
+  throw new NeonAuthRequiredError("Demo auth not available in production");
+}
