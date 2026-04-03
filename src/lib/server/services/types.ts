@@ -29,3 +29,21 @@ export interface EventFilters {
   page?: number;
   limit?: number;
 }
+
+export interface CreateArticleInput {
+  title: string;
+  content: string;
+  summary?: string;
+  category: string;
+  unit_id?: string;
+  department_id?: string;
+}
+
+export interface ArticleFilters {
+  status?: string;
+  category?: string;
+  author_user_id?: string;
+  unit_id?: string;
+  page?: number;
+  limit?: number;
+}
