@@ -1,10 +1,10 @@
 import "server-only";
 import { neon } from "@neondatabase/serverless";
 import type { NeonAuthContext } from "./auth";
+import type { AppActionRequest, AppViewerContext, CanonicalRoleCode, UiRole } from "@/lib/app/contracts";
+import { requireDatabaseUrl } from "./env";
 
-const connectionString = process.env.NEON_DATABASE_URL;
-if (!connectionString) throw new Error("NEON_DATABASE_URL not set");
-const sql = neon(connectionString);
+const sql = neon(requireDatabaseUrl());
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
@@ -50,6 +50,64 @@ const dbToUiArticleStatus: Record<string, string> = {
   archived: "Archived",
 };
 
+const uiToDbEventStatus: Record<string, string> = {
+  Draft: "draft",
+  "Submitted by Unit": "submitted_by_unit",
+  "Pending Aayam Review": "pending_aayam_review",
+  "Pending Vibhag Review": "pending_vibhag_review",
+  "Pending Prant Authorization": "pending_prant_authorization",
+  "Pending Prant Dual Authorization": "pending_prant_dual_authorization",
+  Published: "authorized_public",
+  "Escalated to Kshetra": "escalated_kshetra",
+  "Returned for Revision": "returned_for_revision",
+  Rejected: "rejected",
+  Cancelled: "cancelled",
+};
+
+const uiToDbArticleStatus: Record<string, string> = {
+  Draft: "draft",
+  "Pending Unit Head Review": "pending_unit_head_review",
+  "Pending Aayam Review": "pending_aayam_review",
+  "Pending Vibhag Review": "pending_vibhag_review",
+  "Pending Prant Authorization": "pending_prant_authorization",
+  Published: "authorized_public",
+  "Escalated to Kshetra": "escalated_kshetra",
+  "Returned for Revision": "returned_for_revision",
+  Rejected: "rejected",
+  Archived: "archived",
+};
+
+const rolePriority: CanonicalRoleCode[] = [
+  "vibhag_pramukh",
+  "aayam_pramukh",
+  "unit_head",
+  "karyakarta",
+];
+
+const roleUiMap: Record<CanonicalRoleCode, UiRole> = {
+  super_admin: "vibhag_pramukh",
+  org_admin: "vibhag_pramukh",
+  karyakarta: "karyakarta",
+  unit_head: "unit_head",
+  aayam_pramukh: "aayam_pramukh",
+  vibhag_pramukh: "vibhag_pramukh",
+  prant_sanyojak: "vibhag_pramukh",
+  prant_aayam_pramukh: "aayam_pramukh",
+  kshetra_reviewer: "vibhag_pramukh",
+};
+
+const canonicalRoleSet = new Set<CanonicalRoleCode>([
+  "super_admin",
+  "org_admin",
+  "karyakarta",
+  "unit_head",
+  "aayam_pramukh",
+  "vibhag_pramukh",
+  "prant_sanyojak",
+  "prant_aayam_pramukh",
+  "kshetra_reviewer",
+]);
+
 function toBool(value: unknown, fallback = false) {
   return typeof value === "boolean" ? value : fallback;
 }
@@ -57,6 +115,99 @@ function toBool(value: unknown, fallback = false) {
 function asObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return value as Record<string, unknown>;
+}
+
+function toCanonicalRole(role: string): CanonicalRoleCode | null {
+  return canonicalRoleSet.has(role as CanonicalRoleCode) ? (role as CanonicalRoleCode) : null;
+}
+
+function buildViewer(ctx: NeonAuthContext): AppViewerContext {
+  const canonicalRoles = Array.from(
+    new Set(
+      ctx.effectiveRoles
+        .map((role) => toCanonicalRole(role))
+        .filter((role): role is CanonicalRoleCode => Boolean(role)),
+    ),
+  );
+
+  const primaryRoleCode =
+    rolePriority.find((role) => canonicalRoles.includes(role)) ?? canonicalRoles[0] ?? "karyakarta";
+  const uiRole = roleUiMap[primaryRoleCode] ?? "karyakarta";
+
+  const managerRoles: CanonicalRoleCode[] = [
+    "super_admin",
+    "org_admin",
+    "kshetra_reviewer",
+    "prant_sanyojak",
+    "prant_aayam_pramukh",
+    "vibhag_pramukh",
+    "aayam_pramukh",
+    "unit_head",
+  ];
+  const publishRoles: CanonicalRoleCode[] = [
+    "super_admin",
+    "org_admin",
+    "kshetra_reviewer",
+    "prant_sanyojak",
+    "prant_aayam_pramukh",
+    "vibhag_pramukh",
+    "aayam_pramukh",
+  ];
+  const hasAny = (roles: CanonicalRoleCode[]) => roles.some((r) => canonicalRoles.includes(r));
+  const assignmentSummaries: AppViewerContext["assignments"] = [];
+  for (const a of ctx.assignments) {
+    const roleCode = toCanonicalRole(a.role_code);
+    if (!roleCode) continue;
+    assignmentSummaries.push({
+      id: a.id,
+      roleCode,
+      roleName: a.role_name,
+      roleNameHi: a.role_name_hi,
+      scopeType: a.scope_type,
+      orgId: a.org_id,
+      unitId: a.unit_id,
+      departmentId: a.department_id,
+      scopeEntityId: a.scope_entity_id,
+      isPrimary: a.is_primary,
+    });
+  }
+
+  return {
+    userId: ctx.user.id,
+    email: ctx.user.email ?? ctx.profile?.email ?? null,
+    displayName: ctx.profile?.display_name ?? null,
+    isAuthenticated: true,
+    uiRole,
+    primaryRoleCode,
+    effectiveRoles: canonicalRoles,
+    assignments: assignmentSummaries,
+    permissions: {
+      canReadInternalBootstrap: true,
+      canCreateEvent: hasAny(managerRoles),
+      canCreateArticle: hasAny(managerRoles),
+      canFinalizePoll: hasAny(publishRoles),
+      canPublishEvent: hasAny(publishRoles),
+      canPublishArticle: hasAny(publishRoles),
+      canUpdatePrachar: hasAny(publishRoles),
+    },
+  };
+}
+
+function resolveActorOrgId(ctx: NeonAuthContext) {
+  if (ctx.profile?.org_id) return ctx.profile.org_id;
+  const fromAssignment = ctx.assignments.find((a) => a.org_id)?.org_id ?? null;
+  if (!fromAssignment) {
+    throw new Error("User has no organization scope.");
+  }
+  return fromAssignment;
+}
+
+function resolveEventStartIso(input: { date?: string; dateIso?: string }) {
+  const candidate = input.dateIso || input.date;
+  if (!candidate) return new Date().toISOString();
+  const parsed = new Date(candidate);
+  if (Number.isNaN(parsed.getTime())) return new Date().toISOString();
+  return parsed.toISOString();
 }
 
 export async function getBootstrapPayload(ctx: NeonAuthContext) {
@@ -314,24 +465,270 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     pracharStatuses: pracharStatusList,
     vimarshTopics: formattedVimarsh,
     notifications: [],
-    viewer: {
-      user: { id: ctx.user.id, email: ctx.user.email },
-      profile: ctx.profile,
-      effectiveRoles: ctx.effectiveRoles,
-      assignments: ctx.assignments.map((a) => ({
-        role_code: a.role_code,
-        role_name: a.role_name,
-        role_name_hi: a.role_name_hi,
-      })),
-      permissions: {
-        canReadInternalBootstrap: true,
-        canCreateEvent: true,
-        canCreateArticle: true,
-        canFinalizePoll: true,
-        canPublishEvent: true,
-        canPublishArticle: true,
-        canUpdatePrachar: true,
-      },
-    },
+    viewer: buildViewer(ctx),
   };
+}
+
+export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionRequest) {
+  const orgId = resolveActorOrgId(ctx);
+  const actorId = ctx.user.id;
+
+  switch (input.action) {
+    case "createEvent": {
+      const startsAt = resolveEventStartIso(input.payload);
+      const unitName = input.payload.unit?.trim() || "Unit";
+      const unitRows = await sql`
+        select id from public.units
+        where org_id = ${orgId} and lower(name) = lower(${unitName})
+        limit 1
+      `;
+      const unitId = (unitRows as Array<{ id: string }>)[0]?.id ?? null;
+
+      const result = await sql`
+        insert into public.events (
+          org_id, unit_id, title, description, status, starts_at, submitted_by_user_id, submitted_by_name_snapshot,
+          checklist, created_by, updated_by
+        )
+        values (
+          ${orgId}, ${unitId}, ${input.payload.title}, ${input.payload.description ?? ""}, 'draft', ${startsAt},
+          ${actorId}, ${ctx.profile?.display_name ?? input.payload.submittedBy ?? "Current User"},
+          ${JSON.stringify(input.payload.checklist ?? {})}::jsonb, ${actorId}, ${actorId}
+        )
+        returning id
+      `;
+      return { ok: true, id: (result as Array<{ id: string }>)[0]?.id };
+    }
+
+    case "updateEventStatus": {
+      const dbStatus = uiToDbEventStatus[input.payload.status];
+      if (!dbStatus) throw new Error("Unknown event status.");
+      await sql`
+        update public.events
+        set status = ${dbStatus}, updated_by = ${actorId}, updated_at = now(),
+            published_at = case when ${dbStatus} in ('authorized_public','published') then now() else published_at end
+        where id = ${input.payload.id}
+      `;
+      return { ok: true };
+    }
+
+    case "updateFormConfig": {
+      const eventId = input.payload.eventId;
+      const config = input.payload.config;
+      const configRes = await sql`
+        insert into public.event_form_configs (
+          event_id, collect_phone, collect_city, collect_attending_count, collect_special_needs, updated_by, created_by
+        )
+        values (
+          ${eventId}, ${config.fields.phone}, ${config.fields.city},
+          ${config.fields.attendingCount}, ${config.fields.specialNeeds}, ${actorId}, ${actorId}
+        )
+        on conflict (event_id)
+        do update set
+          collect_phone = excluded.collect_phone,
+          collect_city = excluded.collect_city,
+          collect_attending_count = excluded.collect_attending_count,
+          collect_special_needs = excluded.collect_special_needs,
+          updated_by = excluded.updated_by
+        returning id
+      `;
+      const formConfigId = (configRes as Array<{ id: string }>)[0]?.id;
+      if (!formConfigId) return { ok: false };
+
+      await sql`delete from public.event_form_questions where form_config_id = ${formConfigId}`;
+      if (config.customQuestions.length > 0) {
+        for (let i = 0; i < config.customQuestions.length; i += 1) {
+          const q = config.customQuestions[i];
+          await sql`
+            insert into public.event_form_questions (
+              event_id, form_config_id, question_key, label, label_hi, question_type, is_required, display_order, created_by, updated_by
+            )
+            values (
+              ${eventId}, ${formConfigId}, ${q.id}, ${q.question}, ${q.questionHi},
+              ${q.type === "yesno" ? "yesno" : "text"}, false, ${i}, ${actorId}, ${actorId}
+            )
+          `;
+        }
+      }
+      return { ok: true };
+    }
+
+    case "addPoll": {
+      const poll = input.payload.poll;
+      const pollRes = await sql`
+        insert into public.event_polls (
+          event_id, question, question_hi, poll_type, is_public_voting, created_by, updated_by
+        )
+        values (
+          ${input.payload.eventId}, ${poll.question}, ${poll.questionHi}, ${poll.type}, true, ${actorId}, ${actorId}
+        )
+        returning id
+      `;
+      const pollId = (pollRes as Array<{ id: string }>)[0]?.id;
+      if (!pollId) return { ok: false };
+
+      for (let i = 0; i < poll.options.length; i += 1) {
+        const opt = poll.options[i];
+        await sql`
+          insert into public.event_poll_options (poll_id, label, sort_order, scheduled_at, created_by, updated_by)
+          values (
+            ${pollId},
+            ${opt.label},
+            ${i},
+            ${poll.type === "date" ? (opt.scheduledAtIso ?? null) : null},
+            ${actorId},
+            ${actorId}
+          )
+        `;
+      }
+
+      return { ok: true, pollId };
+    }
+
+    case "castVote": {
+      await sql`
+        insert into public.event_poll_votes (poll_id, option_id, actor_user_id)
+        values (${input.payload.pollId}, ${input.payload.optionId}, ${actorId})
+      `;
+      return { ok: true };
+    }
+
+    case "finalizePoll": {
+      await sql`
+        update public.event_polls
+        set is_finalized = true, winner_option_id = ${input.payload.winnerOptionId}, finalized_by = ${actorId}, updated_by = ${actorId}, updated_at = now()
+        where id = ${input.payload.pollId} and event_id = ${input.payload.eventId}
+      `;
+      return { ok: true };
+    }
+
+    case "addArticle": {
+      await sql`
+        insert into public.articles (
+          org_id, title, content, summary, category, status, author_user_id, author_name_snapshot, social_url, values_checklist, created_by, updated_by
+        )
+        values (
+          ${orgId}, ${input.payload.title}, ${input.payload.content}, ${input.payload.summary},
+          ${input.payload.category}, 'pending_unit_head_review', ${actorId},
+          ${ctx.profile?.display_name ?? input.payload.author}, ${input.payload.socialUrl ?? null},
+          ${JSON.stringify(input.payload.valuesChecklist)}::jsonb, ${actorId}, ${actorId}
+        )
+      `;
+      return { ok: true };
+    }
+
+    case "updateArticleStatus": {
+      const dbStatus = uiToDbArticleStatus[input.payload.status];
+      if (!dbStatus) throw new Error("Unknown article status.");
+      await sql`
+        update public.articles
+        set
+          status = ${dbStatus},
+          title = coalesce(${input.payload.edits?.title ?? null}, title),
+          content = coalesce(${input.payload.edits?.content ?? null}, content),
+          summary = coalesce(${input.payload.edits?.summary ?? null}, summary),
+          document_url = coalesce(${input.payload.documentUrl ?? null}, document_url),
+          updated_by = ${actorId},
+          updated_at = now(),
+          published_at = case when ${dbStatus} in ('authorized_public','published') then now() else published_at end
+        where id = ${input.payload.id}
+      `;
+      await sql`
+        insert into public.article_reviews (article_id, reviewer_user_id, review_step, decision, review_notes, edits)
+        values (
+          ${input.payload.id},
+          ${actorId},
+          'app_action',
+          ${input.payload.status === "Published" ? "approved" : "forwarded"},
+          ${input.payload.reviewNotes ?? null},
+          ${JSON.stringify(input.payload.edits ?? {})}::jsonb
+        )
+      `;
+      return { ok: true };
+    }
+
+    case "updatePracharPlatform": {
+      const done = input.payload.done;
+      const skipReason = done ? null : input.payload.skipReason ?? null;
+      if (input.payload.platform === "whatsapp") {
+        await sql`
+          insert into public.prachar_statuses (event_id, whatsapp_done, whatsapp_skip_reason, last_updated_by, last_updated_at)
+          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
+          on conflict (event_id)
+          do update set
+            whatsapp_done = excluded.whatsapp_done,
+            whatsapp_skip_reason = excluded.whatsapp_skip_reason,
+            last_updated_by = excluded.last_updated_by,
+            last_updated_at = excluded.last_updated_at,
+            updated_at = now()
+        `;
+      } else if (input.payload.platform === "facebook") {
+        await sql`
+          insert into public.prachar_statuses (event_id, facebook_done, facebook_skip_reason, last_updated_by, last_updated_at)
+          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
+          on conflict (event_id)
+          do update set
+            facebook_done = excluded.facebook_done,
+            facebook_skip_reason = excluded.facebook_skip_reason,
+            last_updated_by = excluded.last_updated_by,
+            last_updated_at = excluded.last_updated_at,
+            updated_at = now()
+        `;
+      } else if (input.payload.platform === "instagram") {
+        await sql`
+          insert into public.prachar_statuses (event_id, instagram_done, instagram_skip_reason, last_updated_by, last_updated_at)
+          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
+          on conflict (event_id)
+          do update set
+            instagram_done = excluded.instagram_done,
+            instagram_skip_reason = excluded.instagram_skip_reason,
+            last_updated_by = excluded.last_updated_by,
+            last_updated_at = excluded.last_updated_at,
+            updated_at = now()
+        `;
+      } else {
+        await sql`
+          insert into public.prachar_statuses (event_id, telegram_done, telegram_skip_reason, last_updated_by, last_updated_at)
+          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
+          on conflict (event_id)
+          do update set
+            telegram_done = excluded.telegram_done,
+            telegram_skip_reason = excluded.telegram_skip_reason,
+            last_updated_by = excluded.last_updated_by,
+            last_updated_at = excluded.last_updated_at,
+            updated_at = now()
+        `;
+      }
+      return { ok: true };
+    }
+
+    case "updateVritt": {
+      await sql`
+        update public.events
+        set
+          vritt_content = coalesce(${input.payload.vrittContent ?? null}, vritt_content),
+          vritt_attendance_count = coalesce(${input.payload.vrittAttendanceCount ?? null}, vritt_attendance_count),
+          vritt_status = coalesce(${input.payload.vrittStatus ?? null}, vritt_status),
+          vritt_media_urls = coalesce(${input.payload.vrittMediaUrls ?? null}::text[], vritt_media_urls),
+          vritt_updated_at = now(),
+          updated_by = ${actorId},
+          updated_at = now()
+        where id = ${input.payload.eventId}
+      `;
+      return { ok: true };
+    }
+
+    case "markAttendance": {
+      await sql`
+        update public.events
+        set vritt_checked_in_count = coalesce(vritt_checked_in_count, 0) + 1,
+            updated_by = ${actorId},
+            updated_at = now()
+        where id = ${input.payload.eventId}
+      `;
+      return { ok: true };
+    }
+
+    default:
+      throw new Error("Unknown action.");
+  }
 }
