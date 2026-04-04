@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, type MotionValue } from "framer-motion";
 import { Compass, BookOpen, CheckCircle, Network, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppContext";
@@ -33,7 +33,17 @@ function StoryMandala({ className }: { className?: string }) {
   );
 }
 
-const chapters = [
+type Chapter = {
+  id: string;
+  date: string;
+  titleEn: string;
+  titleHi: string;
+  descEn: string;
+  descHi: string;
+  icon: typeof Compass;
+};
+
+const chapters: Chapter[] = [
   {
     id: "genesis",
     date: "1980s",
@@ -155,11 +165,6 @@ export default function StoryTimeline() {
 
               {/* Central Glowing Icon that shifts based on scroll */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6">
-                 {chapters.map((chapter, index) => {
-                    // Local state logic isn't easily doable directly in JSX without a client component wrapper tracking state,
-                    // but we can use CSS logic with framer-motion variants driven by scroll position.
-                    // Instead of complex Framer Motion logic right here without a dedicated sub-component, we'll use a simpler overlay approach.
-                 })}
                  <DynamicCenter displayIndex={activeChapterIndexRaw} chapters={chapters} isHi={isHi} />
               </div>
             </div>
@@ -171,13 +176,7 @@ export default function StoryTimeline() {
 }
 
 // Separate component to handle the dynamic visual center without violating hooks rules
-function DynamicCenter({ displayIndex, chapters, isHi }: any) {
-  // Use a neat trick to force re-render on activeChapterIndexRaw changes is hard without state.
-  // Instead, rely on the active Chapter's opacity intersecting. 
-  // Let's implement a simpler tracking mechanism: Local State inside DynamicCenter using useMotionValueEvent
-  import { useState } from "react";
-  import { useMotionValueEvent } from "framer-motion";
-  
+function DynamicCenter({ displayIndex, chapters, isHi }: { displayIndex: MotionValue<number>; chapters: Chapter[]; isHi: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   
   useMotionValueEvent(displayIndex, "change", (latest: number) => {

@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
+import StoryTimeline from "@/components/pages/StoryTimeline";
 
 function Mandala({ className }: { className?: string }) {
   const petals = [0, 45, 90, 135, 180, 225, 270, 315];
@@ -400,6 +401,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <StoryTimeline />
 
       <section className="pravah-lattice-bg border-y border-border/40 bg-muted/20">
         <div className="home-section-shell">
