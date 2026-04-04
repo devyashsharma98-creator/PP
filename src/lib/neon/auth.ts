@@ -1,9 +1,18 @@
 import "server-only";
 import { neon } from "@neondatabase/serverless";
 import { NEON_SESSION_COOKIE, parseSessionToken, readCookieValue } from "./session";
-import { requireDatabaseUrl } from "./env";
+import { getDatabaseUrl } from "./env";
 
-const sql = neon(requireDatabaseUrl());
+let _sql: ReturnType<typeof neon> | null = null;
+
+function getSql() {
+  if (!_sql) {
+    const url = getDatabaseUrl();
+    if (!url) return null;
+    _sql = neon(url);
+  }
+  return _sql;
+}
 
 export class NeonAuthRequiredError extends Error {
   constructor(message = "Authentication required.") {
@@ -55,6 +64,9 @@ function isActiveAssignment(row: { starts_at?: string | null; ends_at?: string |
 }
 
 export async function requireNeonAuthContext(req: Request): Promise<NeonAuthContext> {
+  const conn = getSql();
+  if (!conn) throw new NeonAuthRequiredError("Database not configured.");
+
   const token = readCookieValue(req.headers.get("cookie"), NEON_SESSION_COOKIE);
   const session = parseSessionToken(token);
   if (!session) {
@@ -62,19 +74,19 @@ export async function requireNeonAuthContext(req: Request): Promise<NeonAuthCont
   }
 
   const [profiles, roles, assignments, units] = await Promise.all([
-    sql`
+    conn`
       select id, org_id, display_name, email
       from public.profiles
       where id = ${session.userId} and is_active = true
       limit 1
     `,
-    sql`select id, code, name, name_hi from public.roles`,
-    sql`
+    conn`select id, code, name, name_hi from public.roles`,
+    conn`
       select id, role_id, scope_type, org_id, unit_id, department_id, scope_entity_id, is_primary, starts_at, ends_at
       from public.user_role_assignments
       where user_id = ${session.userId}
     `,
-    sql`select id, org_id, parent_unit_id, unit_kind, name from public.units`,
+    conn`select id, org_id, parent_unit_id, unit_kind, name from public.units`,
   ]);
 
   const profile = (profiles as Array<{
