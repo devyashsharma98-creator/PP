@@ -6,6 +6,8 @@ import Link from "next/link";
 import CountUp from "react-countup";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext, GatividhiEvent, FormConfig, VotePoll, VrittStatus } from "@/context/AppContext";
+import { useDashboardEvents, useCreateDashboardEvent, useUpdateEventStatus } from "@/hooks/api/use-dashboard";
+import { useUnreadCount } from "@/hooks/api/use-notifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,10 +68,20 @@ const eventStatusHi: Record<string, string> = {
 
 
 export default function Dashboard() {
-  const { role, lang, permissions, events, addEvent, updateEventStatus, updateVritt, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
+  const { role, lang, permissions, events: demoEvents, addEvent, updateEventStatus, updateVritt, updateFormConfig, addPoll, castVote, finalizePoll } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
   const t = useT();
+  
+  // Real data from API with TanStack Query
+  const { data: apiEvents = [], isLoading: eventsLoading, error: eventsError } = useDashboardEvents();
+  const createEventMutation = useCreateDashboardEvent();
+  const updateEventStatusMutation = useUpdateEventStatus();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  
+  // Use API data if available, fallback to demo data
+  const events = apiEvents.length > 0 ? apiEvents : demoEvents;
+  const isApiConnected = apiEvents.length > 0 || !eventsLoading;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState("pre");
   const [dateValue, setDateValue] = useState("");
@@ -100,6 +112,37 @@ export default function Dashboard() {
   const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
   const [qrEvent, setQrEvent] = useState<GatividhiEvent | null>(null);
   const [suggestedExperts, setSuggestedExperts] = useState<{ name: string; nameHi: string; vakshe: string[] }[]>([]);
+
+  // Loading state
+  if (eventsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="space-y-4 text-center">
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground font-devanagari">
+            {t('Loading dashboard data...', 'डैशबोर्ड डेटा लोड हो रहा है...')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (eventsError) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="space-y-4 text-center max-w-md">
+          <p className="text-sm text-destructive font-devanagari">
+            {t('Failed to load dashboard data.', 'डैशबोर्ड डेटा लोड करने में विफल।')}
+          </p>
+          <p className="text-xs text-muted-foreground">{(eventsError as Error).message}</p>
+          <p className="text-xs text-muted-foreground font-devanagari">
+            {t('Showing demo data.', 'डेमो डेटा दिखाया जा रहा है।')}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const EXPERT_POOL = [
     { name: 'Anil Verma', nameHi: 'अनिल वर्मा', vakshe: ['History', 'Colonialism'], keywords: ['seminar', 'study_circle'] },
@@ -191,6 +234,33 @@ export default function Dashboard() {
     const selectedDate = parseISO(dateValue);
     if (!form.title || !isValid(selectedDate)) return;
 
+    if (isApiConnected) {
+      try {
+        await createEventMutation.mutateAsync({
+          title: form.title,
+          description: form.description,
+          starts_at: selectedDate.toISOString(),
+          unit_id: form.unit || undefined,
+        });
+        setForm({
+          title: "", description: "", unit: "",
+          checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
+          report: "", fileName: "", videoUrl: "", posterName: "",
+        });
+        setDateValue("");
+        setFormTab("pre");
+        setDialogOpen(false);
+        setSubmitted(true);
+        addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
+        router.push("/dashboard");
+        return;
+      } catch {
+        addToast(t('Failed to submit event', 'कार्यक्रम भेजने में विफल'), 'error');
+        return;
+      }
+    }
+
+    // Fallback to demo mode
     const ok = await addEvent({
       title: form.title,
       description: form.description,
@@ -407,8 +477,17 @@ export default function Dashboard() {
                           variant="outline"
                           className="flex-1 sm:flex-none h-8 text-[11px] gap-1.5"
                           onClick={async () => {
-                            const ok = await updateEventStatus(event.id, "Pending Prant Authorization");
-                            if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
+                            if (isApiConnected) {
+                              try {
+                                await updateEventStatusMutation.mutateAsync({ id: event.id, action: 'approve' });
+                                addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
+                              } catch {
+                                addToast(t('Failed to forward', 'भेजने में विफल'), 'error');
+                              }
+                            } else {
+                              const ok = await updateEventStatus(event.id, "Pending Prant Authorization");
+                              if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
+                            }
                           }}
                         >
                           <ArrowRight className="w-3.5 h-3.5" /> {t('Forward', 'भेजें')}
@@ -420,13 +499,23 @@ export default function Dashboard() {
                           className="flex-1 sm:flex-none h-8 text-[11px] gap-1.5 saffron-gradient text-white border-0"
                           disabled={!permissions.canPublishEvent}
                           onClick={async () => {
-                            const ok = await updateEventStatus(event.id, "Published");
-                            if (!ok) {
-                              addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
-                              return;
+                            if (isApiConnected) {
+                              try {
+                                await updateEventStatusMutation.mutateAsync({ id: event.id, action: 'publish' });
+                                setLastPublished(event.title);
+                                addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
+                              } catch {
+                                addToast(t('Publish failed', 'प्रकाशन विफल'), 'error');
+                              }
+                            } else {
+                              const ok = await updateEventStatus(event.id, "Published");
+                              if (!ok) {
+                                addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
+                                return;
+                              }
+                              setLastPublished(event.title);
+                              addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
                             }
-                            setLastPublished(event.title);
-                            addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
                           }}
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" /> {t('Publish', 'प्रकाशित करें')}
@@ -576,12 +665,21 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground">{event.description}</p>
                     <div className="space-y-1">
                       <Button size="sm" onClick={async () => {
-                        const ok = await updateEventStatus(event.id, "Pending Vibhag Review");
-                        if (!ok) {
-                          addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
-                          return;
+                        if (isApiConnected) {
+                          try {
+                            await updateEventStatusMutation.mutateAsync({ id: event.id, action: 'approve' });
+                            addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
+                          } catch {
+                            addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
+                          }
+                        } else {
+                          const ok = await updateEventStatus(event.id, "Pending Vibhag Review");
+                          if (!ok) {
+                            addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
+                            return;
+                          }
+                          addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
                         }
-                        addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
                       }}>
                         {t('Review & Forward to Vibhag', 'समीक्षा करें और विभाग को भेजें')} <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>

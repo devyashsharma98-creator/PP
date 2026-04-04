@@ -1,4 +1,5 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Aalekh from "@/components/pages/Aalekh";
 export default function AalekhPage() {
-  return <Aalekh />;
+  return <ErrorBoundary><Aalekh /></ErrorBoundary>;
 }

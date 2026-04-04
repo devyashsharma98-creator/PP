@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import StoryTimeline from "@/components/pages/StoryTimeline";
+import CountUp from "react-countup";
 
 function Mandala({ className }: { className?: string }) {
   const petals = [0, 45, 90, 135, 180, 225, 270, 315];
@@ -249,44 +250,62 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute -left-[10%] top-0 h-[800px] w-[800px] rounded-full bg-saffron-glow/10 blur-[120px]" />
       <div className="pointer-events-none absolute -right-[10%] top-[20%] h-[600px] w-[600px] rounded-full bg-primary/10 blur-[100px]" />
 
-      <section className="home-hero-bg overflow-hidden border-b border-border/40 relative">
+      <section className="relative overflow-hidden border-b border-border/40 min-h-[95vh] flex items-center">
+        {/* Massive Dynamic Full-Screen Background */}
         <motion.div 
-          style={{ y: yHeroBg, opacity: opacityHeroBg }}
-          className="absolute inset-0 pointer-events-none cultural-bg bg-noise"
-        />
-        <div className="home-section-shell py-16 sm:py-24 relative z-10">
-          <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          style={{ y: yHeroBg, scale: useTransform(scrollYProgress, [0, 1], [1, 1.15]) }}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <img 
+            src="/assets/hero-bg.png" 
+            alt="Hero Background" 
+            className="w-full h-full object-cover opacity-70"
+          />
+          {/* Gradients to ensure text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
+        </motion.div>
+
+        {/* Ambient Floating SVGs */}
+        <div className="absolute -right-64 top-0 text-primary/5 pointer-events-none mix-blend-screen hidden lg:block">
+          <Mandala className="h-[800px] w-[800px] animate-spin-slow" />
+        </div>
+
+        <div className="home-section-shell py-16 sm:py-24 relative z-10 w-full">
+          <div className="grid gap-16 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
+            
+            {/* Left Content */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-8"
             >
               <p className="home-editorial-eyebrow">
                 <span>Pragya Pravah</span>
                 <span className="font-devanagari tracking-[0.12em]">प्रज्ञा प्रवाह</span>
               </p>
-              <div className="space-y-5">
-                <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl lg:leading-[1.05]">
-                  Civilisational thought.<br />
-                  <span className="text-primary">Organised action.</span>
+              <div className="space-y-6">
+                <h1 className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-[5.5rem] lg:leading-[1.05] text-white space-y-2 drop-shadow-lg">
+                  <span className="block">Civilisational thought.</span>
+                  <span className="block text-primary drop-shadow-[0_0_20px_rgba(234,115,23,0.3)]">Organised action.</span>
                 </h1>
-                <p className="max-w-2xl font-devanagari text-xl font-medium text-foreground/90 sm:text-2xl">
+                <p className="max-w-2xl font-devanagari text-2xl font-medium text-white/95 sm:text-3xl leading-snug drop-shadow-md">
                   भारत-केंद्रित चिंतन, संवाद और संगठित कार्य का समकालीन संस्थागत मंच।
                 </p>
-                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                <p className="max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl font-light drop-shadow-md">
                   A Bharatiya intellectual forum that converts philosophical reflection into disciplined 
                   review, research, publication, and coordinated public outreach.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="h-14 rounded-full px-8 text-base shadow-lg shadow-primary/20">
+              <div className="flex flex-wrap gap-5 pt-4">
+                <Button asChild size="lg" className="h-14 rounded-full px-8 text-lg shadow-[0_0_30px_-5px_hsl(var(--primary)/0.4)] hover:scale-105 transition-transform">
                   <Link href="/parichay">
                     {isHi ? "दृष्टि समझें" : "Understand the Vision"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-base bg-background/50 backdrop-blur-sm">
+                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-lg bg-background/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all text-shadow-sm">
                   <Link href="/login">
                     {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -295,41 +314,62 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
+            {/* Right Content: Interactive Statistics Widget */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 30 }}
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="home-hero-panel relative institution-panel-textured border border-primary/20 animate-float"
+              transition={{ delay: 0.25, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full"
             >
-              <div className="absolute -right-16 -top-16 text-primary/15">
-                <Mandala className="h-64 w-64 animate-spin-slow-reverse" />
-              </div>
-              <div className="relative space-y-6">
-                <p className="section-seal">Civilisational depth</p>
-                <div className="space-y-4">
-                  <h2 className="text-3xl font-semibold tracking-tight">The imperative for clarity</h2>
-                  <p className="font-devanagari text-lg text-foreground/80 leading-relaxed">
-                    भारतीय विचार को समकालीन समाज और संगठित कार्य से जोड़ना ही वर्तमान आवश्यकता है। 
-                  </p>
-                  <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    The task is not nostalgia. It is to articulate Bharatiya categories in contemporary 
-                    intellectual life with institutional rigour and public relevance.
-                  </p>
+              <div className="institution-panel-textured border border-primary/30 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] backdrop-blur-xl bg-black/50 hover:border-primary/50 transition-colors group">
+                <div className="absolute -left-10 -top-10 text-primary/20 z-[-1]">
+                  <Mandala className="h-40 w-40 animate-spin-slow-reverse" />
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 pt-2">
-                  <div className="rounded-2xl border border-border/60 bg-background/60 p-5 transition-colors hover:border-primary/30">
-                    <p className="shell-copy">Identity</p>
-                    <p className="mt-2 text-base font-semibold">Civilisational confidence</p>
-                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">Ideas anchored in Bharat's own categories and continuity.</p>
+                
+                <h3 className="text-xl font-serif font-bold text-primary tracking-widest uppercase mb-8 border-b border-primary/20 pb-4">
+                  Institutional Reach
+                </h3>
+
+                <div className="space-y-8">
+                  {/* Stat 1 */}
+                  <div className="group/stat">
+                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                      <CountUp end={12000} separator="," suffix="+" duration={3.5} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
+                    </p>
+                    <p className="text-lg text-slate-300 mt-1 font-light">Active Scholars Engaged</p>
+                    <p className="text-sm font-devanagari text-slate-400">सक्रिय विद्वान</p>
                   </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/60 p-5 transition-colors hover:border-primary/30">
-                    <p className="shell-copy">Method</p>
-                    <p className="mt-2 text-base font-semibold">Discourse into action</p>
-                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">Review, publication, and disciplined institutional follow-through.</p>
+
+                  {/* Stat 2 */}
+                  <div className="group/stat pt-4 border-t border-primary/10">
+                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                      <CountUp end={42} suffix="+" duration={3} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
+                    </p>
+                    <p className="text-lg text-slate-300 mt-1 font-light">Regional Chapters (Prants)</p>
+                    <p className="text-sm font-devanagari text-slate-400">प्रांतीय इकाइयाँ</p>
                   </div>
+
+                  {/* Stat 3 */}
+                  <div className="group/stat pt-4 border-t border-primary/10">
+                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                      <CountUp end={350} suffix="+" duration={4} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
+                    </p>
+                    <p className="text-lg text-slate-300 mt-1 font-light">Discourse Papers Published</p>
+                    <p className="text-sm font-devanagari text-slate-400">विमर्श आलेख</p>
+                  </div>
+                </div>
+
+                {/* Subtle scanning line effect */}
+                <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none opacity-30">
+                   <motion.div 
+                     animate={{ y: ["-100%", "200%"] }} 
+                     transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+                     className="w-full h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent"
+                   />
                 </div>
               </div>
             </motion.div>
+
           </div>
         </div>
       </section>
