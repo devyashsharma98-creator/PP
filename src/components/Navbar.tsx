@@ -15,7 +15,6 @@ import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 function getShellFrame(pathname: string, role: Role) {
   if (pathname === '/dashboard') {
@@ -184,12 +183,10 @@ export function Navbar() {
 
   const handleLogout = useCallback(async () => {
     try {
-      const supabase = getSupabaseBrowserClient();
-      await supabase.auth.signOut();
-      router.push('/login');
-      router.refresh();
+      await fetch('/api/auth/logout', { method: 'POST' });
     } catch {
-      // Best-effort — redirect anyway
+      // Best-effort
+    } finally {
       router.push('/login');
       router.refresh();
     }
