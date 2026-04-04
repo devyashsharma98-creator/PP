@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
@@ -65,28 +66,40 @@ function SectionHeading({
   align = "left",
 }: SectionHeadingProps) {
   return (
-    <div className={cn("max-w-4xl space-y-4", align === "center" && "mx-auto text-center")}>
-      <p className="home-editorial-eyebrow">
+    <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: { staggerChildren: 0.15, delayChildren: 0.1 }
+        }
+      }}
+      className={cn("max-w-4xl space-y-4", align === "center" && "mx-auto text-center")}
+    >
+      <motion.p variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 }}} className="home-editorial-eyebrow">
         <span>{eyebrowEn}</span>
         <span className="font-devanagari tracking-[0.12em]">{eyebrowHi}</span>
-      </p>
-      <div className="space-y-3">
+      </motion.p>
+      <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 }}} className="space-y-3">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl lg:leading-[1.1]">
           {titleEn}
         </h2>
         <p className="font-devanagari text-xl font-medium text-foreground/90">
           {titleHi}
         </p>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12">
+      </motion.div>
+      <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 }}} className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12">
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {bodyEn}
         </p>
         <p className="font-devanagari text-sm leading-relaxed text-foreground/80 sm:text-base">
           {bodyHi}
         </p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -225,10 +238,22 @@ export default function LandingPage() {
   const { lang } = useAppContext();
   const isHi = lang === "hi";
 
+  const { scrollYProgress } = useScroll();
+  const yHeroBg = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacityHeroBg = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
+
   return (
-    <div className="bg-background text-foreground">
-      <section className="home-hero-bg overflow-hidden border-b border-border/40">
-        <div className="home-section-shell py-16 sm:py-24">
+    <div className="bg-background text-foreground relative overflow-hidden">
+      {/* Dynamic atmospheric background blur */}
+      <div className="pointer-events-none absolute -left-[10%] top-0 h-[800px] w-[800px] rounded-full bg-saffron-glow/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-[10%] top-[20%] h-[600px] w-[600px] rounded-full bg-primary/10 blur-[100px]" />
+
+      <section className="home-hero-bg overflow-hidden border-b border-border/40 relative">
+        <motion.div 
+          style={{ y: yHeroBg, opacity: opacityHeroBg }}
+          className="absolute inset-0 pointer-events-none cultural-bg bg-noise"
+        />
+        <div className="home-section-shell py-16 sm:py-24 relative z-10">
           <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -270,13 +295,13 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.94, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="home-hero-panel relative border border-primary/20 bg-card/40 backdrop-blur-md"
+              className="home-hero-panel relative institution-panel-textured border border-primary/20 animate-float"
             >
               <div className="absolute -right-16 -top-16 text-primary/15">
-                <Mandala className="h-64 w-64 animate-spin-slow" />
+                <Mandala className="h-64 w-64 animate-spin-slow-reverse" />
               </div>
               <div className="relative space-y-6">
                 <p className="section-seal">Civilisational depth</p>
@@ -322,24 +347,29 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6 }}
-            className="home-band-card lg:col-span-5 flex flex-col justify-center space-y-6"
+            className="home-band-card lg:col-span-5 flex flex-col justify-center parchment-panel-textured rounded-3xl p-8 lg:p-10 border border-border/60 hover-lift relative overflow-hidden"
           >
-            <p className="section-seal">Institutional form</p>
-            <div className="space-y-4">
-              <h3 className="text-3xl font-bold tracking-tight leading-tight">
-                Thought must take form to shape society.
-              </h3>
-              <p className="font-devanagari text-lg leading-relaxed text-foreground/80">
-                यदि विचार समाज को दिशा देना चाहते हैं, तो उन्हें संस्था, अनुशासन और कार्यप्रवाह का रूप लेना होगा।
-              </p>
+            <div className="absolute -left-12 -bottom-12 text-primary/5 pointer-events-none">
+              <Mandala className="h-64 w-64 animate-spin-slow" />
             </div>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <span className="home-band-pill">Discourse</span>
-              <span className="home-band-pill">Research</span>
-              <span className="home-band-pill">Publication</span>
-              <span className="home-band-pill">Coordination</span>
+            <div className="relative z-10 space-y-6">
+              <p className="section-seal">Institutional form</p>
+              <div className="space-y-4">
+                <h3 className="text-3xl font-bold tracking-tight leading-tight">
+                  Thought must take form to shape society.
+                </h3>
+                <p className="font-devanagari text-lg leading-relaxed text-foreground/80">
+                  यदि विचार समाज को दिशा देना चाहते हैं, तो उन्हें संस्था, अनुशासन और कार्यप्रवाह का रूप लेना होगा।
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className="home-band-pill">Discourse</span>
+                <span className="home-band-pill">Research</span>
+                <span className="home-band-pill">Publication</span>
+                <span className="home-band-pill">Coordination</span>
+              </div>
             </div>
           </motion.div>
 
@@ -347,11 +377,12 @@ export default function LandingPage() {
             {institutionCards.map((card, index) => (
               <motion.div
                 key={card.titleEn}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="group rounded-3xl border border-border/60 bg-card/30 p-6 transition-all hover:border-primary/40 hover:bg-card/50"
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="group rounded-3xl border border-border/60 p-6 transition-all glass-card-enhanced hover:border-primary/40 hover:shadow-[0_12px_40px_-16px_hsl(var(--primary)/0.2)]"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                   <card.icon className="h-6 w-6" />
@@ -387,9 +418,10 @@ export default function LandingPage() {
                 key={stream.titleEn}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-background/80 p-8 shadow-sm transition-all hover:border-primary/40 lg:p-12"
+                whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
+                className="group relative overflow-hidden rounded-[2.5rem] border border-border/60 p-8 shadow-sm transition-all hover:border-primary/40 hover:shadow-xl lg:p-12 glass-card-enhanced"
               >
                 <div className="grid gap-8 lg:grid-cols-[1fr_2fr_1fr] lg:items-center">
                   <div className="flex items-center gap-6">
@@ -438,11 +470,12 @@ export default function LandingPage() {
           {audiencePaths.map((path, index) => (
             <motion.div
               key={path.titleEn}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08, duration: 0.5 }}
-              className="group flex h-full flex-col rounded-[2rem] border border-border/60 bg-card/40 p-8 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-card/60"
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -8, scale: 1.01, transition: { duration: 0.2 } }}
+              className="group flex h-full flex-col rounded-[2rem] border border-border/60 p-8 shadow-sm transition-all hover:border-primary/40 glass-card-enhanced hover:shadow-[0_12px_40px_-16px_hsl(var(--primary)/0.2)]"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary transition-transform group-hover:scale-105">
                 <path.icon className="h-7 w-7" />
@@ -487,11 +520,12 @@ export default function LandingPage() {
                   key={step.step}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="relative flex flex-col sm:flex-row gap-4 sm:gap-8 pl-1 pb-8 last:pb-0"
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ x: 6, transition: { duration: 0.2 } }}
+                  className="relative flex flex-col sm:flex-row gap-4 sm:gap-8 pl-1 pb-8 last:pb-0 group hover:cursor-default"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary z-10 font-bold border border-primary/20">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary z-10 font-bold border border-primary/20 transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[0_0_24px_-4px_hsl(var(--primary)/0.5)]">
                     {step.step}
                   </div>
                   <div className="space-y-4 pt-1">
@@ -510,11 +544,11 @@ export default function LandingPage() {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="home-hero-panel relative border border-primary/20"
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="home-hero-panel relative border border-primary/30 institution-panel-textured shadow-2xl hover-lift"
           >
             <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
               <Mandala className="h-[120%] w-[120%] text-primary/10 animate-spin-slow-reverse" />
@@ -564,8 +598,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-muted/30 px-4 py-24 sm:px-6">
-        <div className="mx-auto max-w-4xl text-center space-y-8">
+      <section className="relative bg-muted/30 px-4 py-24 sm:px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-noise opacity-30 pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
+        <div className="mx-auto max-w-4xl text-center space-y-8 relative z-10">
           <div className="mx-auto w-24 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           <p className="text-sm uppercase tracking-[0.3em] font-bold text-primary">Pragya Pravah</p>
           <div className="space-y-4">

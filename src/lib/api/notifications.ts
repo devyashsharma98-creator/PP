@@ -47,6 +47,6 @@ export async function markAllNotificationsRead() {
 }
 
 export async function fetchUnreadCount() {
-  const notifications = await fetchNotifications({ is_read: false });
-  return notifications.length;
+  const result = await fetchApi<{ unread_count: number }>('/notifications/unread-count');
+  return result.unread_count;
 }

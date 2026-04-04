@@ -15,6 +15,7 @@ import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUnreadCount } from '@/hooks/api/use-notifications';
 
 function getShellFrame(pathname: string, role: Role) {
   if (pathname === '/dashboard') {
@@ -122,6 +123,9 @@ export function Navbar() {
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
   const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
 
+  // Real unread count from API with 30s polling
+  const { data: unreadCount = 0 } = useUnreadCount();
+
   // Hydration guard for theme
   useEffect(() => setMounted(true), []);
 
@@ -157,7 +161,7 @@ export function Navbar() {
     return items;
   }, [role, events, articles]);
 
-  const totalPending = notifications.length;
+  const totalPending = Math.max(unreadCount, notifications.length);
 
   // Animate bell whenever count increases
   useEffect(() => {
