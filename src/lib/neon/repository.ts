@@ -15,29 +15,16 @@ function getSql() {
   return _sql;
 }
 
-function requireSql(): NeonQueryFunction<boolean, boolean> {
+function requireSql(): NeonQueryFunction<false, false> {
   const conn = getSql();
   if (!conn) throw new Error("Database URL is not set. Define DATABASE_URL (preferred) or NEON_DATABASE_URL.");
-  return conn;
+  return conn as NeonQueryFunction<false, false>;
 }
 
+// Lazy sql - only throws when actually called, not at module load time
 export const sql = ((...args: Parameters<NeonQueryFunction<false, false>>) => {
-  return (requireSql() as NeonQueryFunction<false, false>)(...args);
+  return requireSql()(...args);
 }) as NeonQueryFunction<false, false>;
-
-const _handler: ProxyHandler<NeonQueryFunction<boolean, boolean>> = {
-  get(_target, prop) {
-    return Reflect.get(requireSql(), prop);
-  },
-};
-
-Object.keys(requireSql() || {}).forEach((key) => {
-  try {
-    (sql as any)[key] = (requireSql() as any)[key];
-  } catch {
-    // ignore
-  }
-});
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
