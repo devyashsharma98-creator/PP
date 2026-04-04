@@ -286,14 +286,14 @@ export default function LandingPage() {
                 <span className="font-devanagari tracking-[0.12em]">प्रज्ञा प्रवाह</span>
               </p>
               <div className="space-y-6">
-                <h1 className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-[5.5rem] lg:leading-[1.05] text-white space-y-2 drop-shadow-lg">
+                <h1 className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-[5.5rem] lg:leading-[1.05] text-foreground space-y-2 drop-shadow-lg">
                   <span className="block">Civilisational thought.</span>
                   <span className="block text-primary drop-shadow-[0_0_20px_rgba(234,115,23,0.3)]">Organised action.</span>
                 </h1>
-                <p className="max-w-2xl font-devanagari text-2xl font-medium text-white/95 sm:text-3xl leading-snug drop-shadow-md">
+                <p className="max-w-2xl font-devanagari text-2xl font-medium text-foreground/90 sm:text-3xl leading-snug drop-shadow-md">
                   भारत-केंद्रित चिंतन, संवाद और संगठित कार्य का समकालीन संस्थागत मंच।
                 </p>
-                <p className="max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl font-light drop-shadow-md">
+                <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl font-light drop-shadow-md">
                   A Bharatiya intellectual forum that converts philosophical reflection into disciplined 
                   review, research, publication, and coordinated public outreach.
                 </p>
@@ -305,7 +305,7 @@ export default function LandingPage() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-lg bg-background/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all text-shadow-sm">
+                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-lg bg-background/50 backdrop-blur-md border-border text-foreground hover:bg-muted hover:text-foreground transition-all">
                   <Link href="/login">
                     {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -321,7 +321,7 @@ export default function LandingPage() {
               transition={{ delay: 0.25, duration: 1, ease: [0.16, 1, 0.3, 1] }}
               className="relative w-full"
             >
-              <div className="institution-panel-textured border border-primary/30 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] backdrop-blur-xl bg-black/50 hover:border-primary/50 transition-colors group">
+              <div className="institution-panel-textured border border-primary/30 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl bg-background/80 hover:border-primary/50 transition-colors group">
                 <div className="absolute -left-10 -top-10 text-primary/20 z-[-1]">
                   <Mandala className="h-40 w-40 animate-spin-slow-reverse" />
                 </div>
@@ -333,29 +333,29 @@ export default function LandingPage() {
                 <div className="space-y-8">
                   {/* Stat 1 */}
                   <div className="group/stat">
-                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
                       <CountUp end={12000} separator="," suffix="+" duration={3.5} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
                     </p>
-                    <p className="text-lg text-slate-300 mt-1 font-light">Active Scholars Engaged</p>
-                    <p className="text-sm font-devanagari text-slate-400">सक्रिय विद्वान</p>
+                    <p className="text-lg text-muted-foreground mt-1 font-light">Active Scholars Engaged</p>
+                    <p className="text-sm font-devanagari text-muted-foreground/70">सक्रिय विद्वान</p>
                   </div>
 
                   {/* Stat 2 */}
                   <div className="group/stat pt-4 border-t border-primary/10">
-                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
                       <CountUp end={42} suffix="+" duration={3} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
                     </p>
-                    <p className="text-lg text-slate-300 mt-1 font-light">Regional Chapters (Prants)</p>
-                    <p className="text-sm font-devanagari text-slate-400">प्रांतीय इकाइयाँ</p>
+                    <p className="text-lg text-muted-foreground mt-1 font-light">Regional Chapters (Prants)</p>
+                    <p className="text-sm font-devanagari text-muted-foreground/70">प्रांतीय इकाइयाँ</p>
                   </div>
 
                   {/* Stat 3 */}
                   <div className="group/stat pt-4 border-t border-primary/10">
-                    <p className="text-5xl font-bold text-white tabular-nums drop-shadow-md">
+                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
                       <CountUp end={350} suffix="+" duration={4} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
                     </p>
-                    <p className="text-lg text-slate-300 mt-1 font-light">Discourse Papers Published</p>
-                    <p className="text-sm font-devanagari text-slate-400">विमर्श आलेख</p>
+                    <p className="text-lg text-muted-foreground mt-1 font-light">Discourse Papers Published</p>
+                    <p className="text-sm font-devanagari text-muted-foreground/70">विमर्श आलेख</p>
                   </div>
                 </div>
 
