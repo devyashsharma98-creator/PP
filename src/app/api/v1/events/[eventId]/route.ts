@@ -29,15 +29,39 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return unauthorized();
   }
 
-  if (!auth.permissions.includes('event:update')) {
-    return forbidden('You do not have permission to update events');
-  }
-
   const { eventId } = await params;
-  const repo = new EventRepository();
+  const body = await req.json();
 
   try {
-    const body = await req.json();
+    if (body.action === 'submit') {
+      if (!auth.permissions.includes('event:create')) return forbidden();
+      const service = new (await import('@/lib/server/services/event.service')).EventService();
+      const event = await service.updateStatus(eventId, 'submitted_by_unit');
+      return json(event);
+    }
+    if (body.action === 'approve') {
+      if (!auth.permissions.includes('event:approve')) return forbidden();
+      const service = new (await import('@/lib/server/services/event.service')).EventService();
+      const event = await service.updateStatus(eventId, 'pending_vibhag_review');
+      return json(event);
+    }
+    if (body.action === 'reject') {
+      if (!auth.permissions.includes('event:approve')) return forbidden();
+      const service = new (await import('@/lib/server/services/event.service')).EventService();
+      const event = await service.updateStatus(eventId, 'rejected');
+      return json(event);
+    }
+    if (body.action === 'publish') {
+      if (!auth.permissions.includes('event:publish')) return forbidden();
+      const service = new (await import('@/lib/server/services/event.service')).EventService();
+      const event = await service.updateStatus(eventId, 'published');
+      return json(event);
+    }
+
+    if (!auth.permissions.includes('event:update')) {
+      return forbidden('You do not have permission to update events');
+    }
+    const repo = new EventRepository();
     const event = await repo.update(eventId, body);
     return json(event);
   } catch (error) {

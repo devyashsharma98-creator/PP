@@ -30,20 +30,30 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return unauthorized();
   }
 
-  if (!auth.permissions.includes('article:update')) {
-    return forbidden('You do not have permission to update articles');
-  }
-
   const { articleId } = await params;
+  const body = await req.json();
 
   try {
-    const body = await req.json();
+    const service = new ArticleService();
+
+    if (body.action === 'submit') {
+      const article = await service.submitForReview(articleId);
+      return json(article);
+    }
+    if (body.action === 'publish') {
+      if (!auth.permissions.includes('article:publish')) return forbidden();
+      const article = await service.publish(articleId);
+      return json(article);
+    }
+
+    if (!auth.permissions.includes('article:update')) {
+      return forbidden('You do not have permission to update articles');
+    }
     const parsed = updateArticleSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse(400, 'VALIDATION_ERROR', parsed.error.errors[0].message);
     }
 
-    const service = new ArticleService();
     const article = await service.update(articleId, parsed.data);
     return json(article);
   } catch (error) {
