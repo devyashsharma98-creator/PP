@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Search, ChevronDown, ChevronRight, ExternalLink, Youtube, BookOpen,
+  Search, ChevronDown, ChevronRight, ExternalLink, Play, BookOpen,
   Swords, Shield, Target, MessagesSquare, AlertTriangle, Globe,
   TrendingUp, Library, Sparkles, Compass
 } from 'lucide-react';
@@ -93,7 +93,7 @@ const OTHER_BINDU = [
 // Resource type → display config
 const RESOURCE_TYPE_CONFIG: Record<string, { label: string; labelHi: string; icon: typeof ExternalLink; color: string }> = {
   article: { label: 'Articles', labelHi: 'लेख', icon: ExternalLink, color: 'text-primary' },
-  video: { label: 'Videos', labelHi: 'वीडियो', icon: Youtube, color: 'text-destructive' },
+  video: { label: 'Videos', labelHi: 'वीडियो', icon: Play, color: 'text-destructive' },
   book: { label: 'E-Library', labelHi: 'ई-पुस्तकालय', icon: BookOpen, color: 'text-success' },
 };
 
