@@ -39,44 +39,59 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     const { page = 1, limit = 20 } = filters;
     const offset = (page - 1) * limit;
 
-    let conditions: string[] = [];
-    if (filters.is_active !== undefined) conditions.push(`p.is_active = ${filters.is_active}`);
-    if (filters.unit_id) conditions.push(`u.id = '${filters.unit_id}'`);
-    if (filters.search) conditions.push(`(p.display_name ILIKE '%${filters.search}%' OR p.email ILIKE '%${filters.search}%')`);
-    
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const query = whereClause 
-      ? `SELECT p.* FROM profiles p LEFT JOIN units u ON p.default_unit_id = u.id ${whereClause} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`
-      : `SELECT * FROM profiles ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await sql`${query}` as any[];
-    
-    // Get roles for each user
-    const usersWithRoles: UserWithRoles[] = await Promise.all(
-      rows.map(async (row) => {
-        const roleRows = await sql`
-          SELECT r.code FROM user_role_assignments ur
-          JOIN roles r ON ur.role_id = r.id
-          WHERE ur.user_id = ${row.id} AND (ur.ends_at IS NULL OR ur.ends_at > now())
-        ` as unknown as { code: string }[];
-        return { ...row as User, roles: roleRows.map(r => r.code) };
-      })
-    );
+    const whereParts: string[] = [];
+    const values: unknown[] = [];
+
+    if (filters.is_active !== undefined) {
+      whereParts.push(`p.is_active = $${values.length + 1}`);
+      values.push(filters.is_active);
+    }
+    if (filters.unit_id) {
+      whereParts.push(`u.id = $${values.length + 1}`);
+      values.push(filters.unit_id);
+    }
+    if (filters.search) {
+      whereParts.push(`(p.display_name ILIKE $${values.length + 1} OR p.email ILIKE $${values.length + 1})`);
+      values.push(`%${filters.search}%`);
+    }
+
+    const whereSql = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
+    const joinSql = filters.unit_id ? `LEFT JOIN units u ON p.default_unit_id = u.id` : '';
+    const v = [...values];
+
+    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM profiles p ${joinSql} ${whereSql}`, v);
+    const total = parseInt(countResult?.[0]?.count ?? '0', 10);
+
+    const rows = await (sql as any)(`SELECT p.* FROM profiles p ${joinSql} ${whereSql} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+
+    const userIds = rows.map((r: User) => r.id);
+    const roleRows = userIds.length > 0
+      ? await (sql as any)(`SELECT ur.user_id, r.code FROM user_role_assignments ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ANY($1) AND (ur.ends_at IS NULL OR ur.ends_at > now())`, [userIds]) as { user_id: string; code: string }[]
+      : [];
+
+    const rolesByUser = new Map<string, string[]>();
+    for (const rr of roleRows) {
+      if (!rolesByUser.has(rr.user_id)) rolesByUser.set(rr.user_id, []);
+      rolesByUser.get(rr.user_id)!.push(rr.code);
+    }
+
+    const usersWithRoles: UserWithRoles[] = rows.map((row: User) => ({
+      ...row,
+      roles: rolesByUser.get(row.id) ?? [],
+    }));
 
     return {
       data: usersWithRoles,
       pagination: {
         page,
         limit,
-        total: usersWithRoles.length,
-        hasMore: offset + limit < usersWithRoles.length,
+        total,
+        hasMore: offset + limit < total,
       },
     };
   }
 
   async getById(id: string): Promise<UserWithRoles | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1` as any[];
     if (!rows[0]) return null;
 
@@ -96,7 +111,6 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     default_unit_id?: string;
     default_department_id?: string;
   }): Promise<User> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       INSERT INTO profiles (email, display_name, phone, default_unit_id, default_department_id, preferred_language)
       VALUES (${input.email}, ${input.display_name}, ${input.phone ?? null}, ${input.default_unit_id ?? null}, ${input.default_department_id ?? null}, 'en')
@@ -115,19 +129,34 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
       throw new NotFoundError('User', id);
     }
 
-    const updates: string[] = [];
-    if (input.display_name) updates.push(`display_name = '${input.display_name}'`);
-    if (input.phone !== undefined) updates.push(`phone = '${input.phone ?? null}'`);
-    if (input.default_unit_id) updates.push(`default_unit_id = '${input.default_unit_id}'`);
-    if (input.default_department_id) updates.push(`default_department_id = '${input.default_department_id}'`);
-    if (input.preferred_language) updates.push(`preferred_language = '${input.preferred_language}'`);
-    updates.push(`updated_at = '${new Date().toISOString()}'`);
+    const setParts: string[] = [];
+    const values: unknown[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await sql`
-      UPDATE profiles SET ${updates.join(', ')}
-      WHERE id = ${id}
-      RETURNING *` as any[];
+    if (input.display_name) {
+      setParts.push(`display_name = $${values.length + 1}`);
+      values.push(input.display_name);
+    }
+    if (input.phone !== undefined) {
+      setParts.push(`phone = $${values.length + 1}`);
+      values.push(input.phone);
+    }
+    if (input.default_unit_id) {
+      setParts.push(`default_unit_id = $${values.length + 1}`);
+      values.push(input.default_unit_id);
+    }
+    if (input.default_department_id) {
+      setParts.push(`default_department_id = $${values.length + 1}`);
+      values.push(input.default_department_id);
+    }
+    if (input.preferred_language) {
+      setParts.push(`preferred_language = $${values.length + 1}`);
+      values.push(input.preferred_language);
+    }
+    setParts.push(`updated_at = $${values.length + 1}`);
+    values.push(new Date().toISOString());
+
+    const whereIdx = values.length + 1;
+    const rows = await (sql as any)(`UPDATE profiles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
     return rows[0] as User;
   }

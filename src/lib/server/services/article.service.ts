@@ -28,19 +28,33 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const { page = 1, limit = 20 } = filters;
     const offset = (page - 1) * limit;
 
-    let conditions: string[] = [];
-    if (filters.status) conditions.push(`status = '${filters.status}'`);
-    if (filters.category) conditions.push(`category = '${filters.category}'`);
-    if (filters.author_user_id) conditions.push(`author_user_id = '${filters.author_user_id}'`);
-    if (filters.unit_id) conditions.push(`unit_id = '${filters.unit_id}'`);
-    
-    const whereClause = conditions.length > 0 ? conditions.join(' AND ') : '';
-    const query = whereClause 
-      ? `SELECT * FROM articles WHERE ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
-      : `SELECT * FROM articles ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
-    
-    const rows = await sql`${query}` as any[];
-    const total = rows.length;
+    const whereParts: string[] = [];
+    const values: unknown[] = [];
+
+    if (filters.status) {
+      whereParts.push(`status = $${values.length + 1}`);
+      values.push(filters.status);
+    }
+    if (filters.category) {
+      whereParts.push(`category = $${values.length + 1}`);
+      values.push(filters.category);
+    }
+    if (filters.author_user_id) {
+      whereParts.push(`author_user_id = $${values.length + 1}`);
+      values.push(filters.author_user_id);
+    }
+    if (filters.unit_id) {
+      whereParts.push(`unit_id = $${values.length + 1}`);
+      values.push(filters.unit_id);
+    }
+
+    const whereSql = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
+    const v = [...values];
+
+    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM articles ${whereSql}`, v);
+    const total = parseInt(countResult?.[0]?.count ?? '0', 10);
+
+    const rows = await (sql as any)(`SELECT * FROM articles ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Article[],
@@ -54,7 +68,6 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
   }
 
   async getById(id: string): Promise<Article | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1` as any[];
     return rows[0] as Article | null;
   }
@@ -67,7 +80,6 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       throw new ValidationError('Content must be at least 10 characters');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       INSERT INTO articles (title, content, summary, category, unit_id, department_id, status, author_user_id, author_name_snapshot)
       VALUES (${input.title}, ${input.content}, ${input.summary ?? null}, ${input.category}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft', null, null)
@@ -86,18 +98,30 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       throw new NotFoundError('Article', id);
     }
 
-    const updates: string[] = [];
-    if (input.title) updates.push(`title = '${input.title}'`);
-    if (input.content) updates.push(`content = '${input.content}'`);
-    if (input.summary !== undefined) updates.push(`summary = '${input.summary ?? null}'`);
-    if (input.category) updates.push(`category = '${input.category}'`);
-    updates.push(`updated_at = '${new Date().toISOString()}'`);
+    const setParts: string[] = [];
+    const values: unknown[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await sql`
-      UPDATE articles SET ${updates.join(', ')}
-      WHERE id = ${id}
-      RETURNING *` as any[];
+    if (input.title) {
+      setParts.push(`title = $${values.length + 1}`);
+      values.push(input.title);
+    }
+    if (input.content) {
+      setParts.push(`content = $${values.length + 1}`);
+      values.push(input.content);
+    }
+    if (input.summary !== undefined) {
+      setParts.push(`summary = $${values.length + 1}`);
+      values.push(input.summary);
+    }
+    if (input.category) {
+      setParts.push(`category = $${values.length + 1}`);
+      values.push(input.category);
+    }
+    setParts.push(`updated_at = $${values.length + 1}`);
+    values.push(new Date().toISOString());
+
+    const whereIdx = values.length + 1;
+    const rows = await (sql as any)(`UPDATE articles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
     return rows[0] as Article;
   }
@@ -111,7 +135,6 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       throw new ValidationError('Only draft or returned articles can be submitted');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       UPDATE articles SET status = 'pending_unit_head_review', updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
@@ -129,7 +152,6 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       throw new ForbiddenError('Article cannot be published in current status');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       UPDATE articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}

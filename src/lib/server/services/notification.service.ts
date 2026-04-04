@@ -40,22 +40,25 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     const { page = 1, limit = 20 } = filters;
     const offset = (page - 1) * limit;
 
-    let conditions: string[] = [`recipient_user_id = '${userId}'`];
-    if (filters.is_read !== undefined) conditions.push(`is_read = ${filters.is_read}`);
-    if (filters.kind) conditions.push(`kind = '${filters.kind}'`);
-    
-    const whereClause = conditions.join(' AND ');
-    const query = `SELECT * FROM notifications WHERE ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await sql`${query}` as any[];
-    
-    // Get total unread count
-    const unreadResult = await sql`
-      SELECT COUNT(*) as total FROM notifications 
-      WHERE recipient_user_id = ${userId} AND is_read = false
-    ` as unknown as { total: number }[];
-    const total = Number(unreadResult[0]?.total ?? 0);
+    const whereParts = [`recipient_user_id = $1`];
+    const values: unknown[] = [userId];
+
+    if (filters.is_read !== undefined) {
+      whereParts.push(`is_read = $${values.length + 1}`);
+      values.push(filters.is_read);
+    }
+    if (filters.kind) {
+      whereParts.push(`kind = $${values.length + 1}`);
+      values.push(filters.kind);
+    }
+
+    const whereSql = `WHERE ${whereParts.join(' AND ')}`;
+    const v = [...values];
+
+    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM notifications ${whereSql}`, v);
+    const total = parseInt(countResult?.[0]?.count ?? '0', 10);
+
+    const rows = await (sql as any)(`SELECT * FROM notifications ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Notification[],
@@ -69,7 +72,6 @@ export class NotificationService implements IService<NotificationFilters, Pagina
   }
 
   async getById(id: string): Promise<Notification | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`SELECT * FROM notifications WHERE id = ${id} LIMIT 1` as any[];
     return rows[0] as Notification | null;
   }
@@ -87,7 +89,6 @@ export class NotificationService implements IService<NotificationFilters, Pagina
       throw new ValidationError('Title is required');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       INSERT INTO notifications (recipient_user_id, kind, title, body, link_path, entity_type, entity_id)
       VALUES (${input.recipient_user_id}, ${input.kind}, ${input.title}, ${input.body ?? null}, ${input.link_path ?? null}, ${input.entity_type ?? null}, ${input.entity_id ?? null})
@@ -106,7 +107,6 @@ export class NotificationService implements IService<NotificationFilters, Pagina
       throw new NotFoundError('Notification', id);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await sql`
       UPDATE notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
