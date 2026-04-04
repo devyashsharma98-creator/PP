@@ -1,0 +1,130 @@
+export const institutionCards = [
+  {
+    titleEn: "Intellectual forum",
+    titleHi: "बौद्धिक मंच",
+    bodyEn: "Pragya Pravah convenes discourse, reflection, and knowledge work rooted in Bharatiya civilisational memory.",
+    bodyHi: "प्रज्ञा प्रवाह भारत की सभ्यतागत स्मृति पर आधारित चिंतन, संवाद और ज्ञान-कार्य का मंच है।",
+    icon: "Compass",
+  },
+  {
+    titleEn: "Organised action",
+    titleHi: "संगठित कार्य",
+    bodyEn: "Its work moves from thought to review, publication, outreach, and institutional coordination.",
+    bodyHi: "यह कार्य केवल विचार तक सीमित नहीं रहता, बल्कि समीक्षा, प्रकाशन, प्रचार और संगठनात्मक समन्वय तक पहुँचता है।",
+    icon: "Network",
+  },
+  {
+    titleEn: "Bharatiya knowledge orientation",
+    titleHi: "भारतीय ज्ञान-दृष्टि",
+    bodyEn: "The organisation frames public questions through Bharatiya categories, cultural continuity, and social responsibility.",
+    bodyHi: "यह संगठन समकालीन प्रश्नों को भारतीय दृष्टि, सांस्कृतिक निरंतरता और सामाजिक दायित्व के साथ देखता है।",
+    icon: "Shield",
+  },
+] as const;
+
+export const workstreams = [
+  {
+    titleEn: "Vimarsh",
+    titleHi: "विमर्श",
+    bodyEn: "Structured discourse and narrative engagement on current public questions.",
+    bodyHi: "समकालीन सार्वजनिक प्रश्नों पर सुविचारित संवाद और कथ्य-निर्माण।",
+    ctaEn: "Read Current Vimarsh",
+    ctaHi: "वर्तमान विमर्श पढ़ें",
+    href: "/vimarsh",
+    icon: "MessagesSquare",
+  },
+  {
+    titleEn: "Shodh",
+    titleHi: "शोध",
+    bodyEn: "Research, reference work, and knowledge-building grounded in Bharatiya inquiry.",
+    bodyHi: "भारतीय ज्ञान-दृष्टि पर आधारित शोध, अध्ययन और संदर्भ-सामग्री का निर्माण।",
+    ctaEn: "Explore Shodh Work",
+    ctaHi: "शोध कार्य देखें",
+    href: "/library",
+    icon: "BookOpen",
+  },
+  {
+    titleEn: "Prachar",
+    titleHi: "प्रचार",
+    bodyEn: "Translating ideas into public reach across campaigns, media, and social platforms.",
+    bodyHi: "विचारों को अभियान, मीडिया और डिजिटल माध्यमों के द्वारा समाज तक पहुँचाना।",
+    ctaEn: "See Prachar Activity",
+    ctaHi: "प्रचार कार्य देखें",
+    href: "/prachar",
+    icon: "Megaphone",
+  },
+  {
+    titleEn: "Yuva",
+    titleHi: "युवा",
+    bodyEn: "Leadership formation and cultural confidence for the next generation of organisers and thinkers.",
+    bodyHi: "आगामी पीढ़ी के कार्यकर्ताओं और विचारकों के लिए नेतृत्व और सांस्कृतिक आत्मविश्वास का निर्माण।",
+    ctaEn: "See Organisational Work",
+    ctaHi: "कार्यप्रवाह देखें",
+    href: "/dashboard",
+    icon: "Flame",
+  },
+] as const;
+
+export const audiencePaths = [
+  {
+    titleEn: "Visitor",
+    titleHi: "प्रथम आगंतुक",
+    bodyEn: "Start with the organisation's civilisational vision and institutional purpose.",
+    bodyHi: "संस्था की दृष्टि, उद्देश्य और वैचारिक आधार से परिचय आरम्भ करें।",
+    ctaEn: "Understand the Vision",
+    ctaHi: "दृष्टि समझें",
+    href: "/parichay",
+    icon: "Compass",
+  },
+  {
+    titleEn: "Thinker",
+    titleHi: "चिंतक / वक्ता",
+    bodyEn: "See how discourse, research, and public thought are being framed now.",
+    bodyHi: "देखें कि समकालीन विमर्श, शोध और सार्वजनिक चिंतन को किस प्रकार रूप दिया जा रहा है।",
+    ctaEn: "Read Current Vimarsh",
+    ctaHi: "वर्तमान विमर्श पढ़ें",
+    href: "/vimarsh",
+    icon: "BookOpen",
+  },
+  {
+    titleEn: "Organiser",
+    titleHi: "आयोजक / कार्यकर्ता",
+    bodyEn: "Understand how mission becomes workflow through review, publishing, and coordination.",
+    bodyHi: "समझें कि विचार किस प्रकार समीक्षा, प्रकाशन और समन्वय के माध्यम से कार्य में बदलता है।",
+    ctaEn: "See Organisational Work",
+    ctaHi: "कार्यप्रवाह देखें",
+    href: "/dashboard",
+    icon: "Users",
+  },
+] as const;
+
+export const operationsSteps = [
+  {
+    step: "I",
+    titleEn: "Review",
+    titleHi: "समीक्षा",
+    bodyEn: "Ideas are checked, refined, and aligned before public release.",
+    bodyHi: "विचारों को सार्वजनिक प्रस्तुति से पहले परखा, सुधारा और सुसंगत किया जाता है।",
+  },
+  {
+    step: "II",
+    titleEn: "Publish",
+    titleHi: "प्रकाशन",
+    bodyEn: "Approved thought moves into aalekh, notes, and public-facing material.",
+    bodyHi: "स्वीकृत सामग्री आलेख, टिप्पणियों और सार्वजनिक प्रस्तुति के रूप में आगे बढ़ती है।",
+  },
+  {
+    step: "III",
+    titleEn: "Prachar",
+    titleHi: "प्रचार",
+    bodyEn: "Institutional messaging is carried into campaigns, media, and social reach.",
+    bodyHi: "संस्थागत कथ्य अभियान, मीडिया और सामाजिक पहुँच के माध्यम से आगे जाता है।",
+  },
+  {
+    step: "IV",
+    titleEn: "Coordinate",
+    titleHi: "समन्वय",
+    bodyEn: "Units, departments, and organisers follow through in disciplined workflow.",
+    bodyHi: "इकाइयाँ, आयाम और कार्यकर्ता अनुशासित कार्यप्रवाह में समन्वित रूप से आगे बढ़ते हैं।",
+  },
+] as const;

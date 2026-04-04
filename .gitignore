@@ -31,6 +31,14 @@ dist-ssr
 out/
 next-env.d.ts
 
+# Deployment / backup files
+*.bak
+.worktrees/
+artifacts/
+.netlify/
+nul
+ecosystem.config.cjs
+
 # QA test artifacts — never commit these
 *.png
 *.m4a
