@@ -39,8 +39,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       ? `SELECT * FROM articles WHERE ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
       : `SELECT * FROM articles ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`${query}`;
+    const rows = await sql`${query}` as any[];
     const total = rows.length;
 
     return {
@@ -56,7 +55,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
 
   async getById(id: string): Promise<Article | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1`;
+    const rows = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1` as any[];
     return rows[0] as Article | null;
   }
 
@@ -69,10 +68,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       INSERT INTO articles (title, content, summary, category, unit_id, department_id, status, author_user_id, author_name_snapshot)
       VALUES (${input.title}, ${input.content}, ${input.summary ?? null}, ${input.category}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft', null, null)
-      RETURNING *`;
+      RETURNING *` as any[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create article');
@@ -95,10 +94,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     updates.push(`updated_at = '${new Date().toISOString()}'`);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       UPDATE articles SET ${updates.join(', ')}
       WHERE id = ${id}
-      RETURNING *`;
+      RETURNING *` as any[];
 
     return rows[0] as Article;
   }
@@ -113,10 +112,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       UPDATE articles SET status = 'pending_unit_head_review', updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *`;
+      RETURNING *` as any[];
 
     return rows[0] as Article;
   }
@@ -131,10 +130,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       UPDATE articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *`;
+      RETURNING *` as any[];
 
     return rows[0] as Article;
   }

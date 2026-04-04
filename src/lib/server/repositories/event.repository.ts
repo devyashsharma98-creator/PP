@@ -40,8 +40,7 @@ export class EventRepository extends BaseRepository<EventEntity> {
   }
 
   async findWithRelations(id: string): Promise<EventEntity | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       SELECT e.*, 
         u.name as unit_name, 
         d.name as department_name, 
@@ -52,7 +51,7 @@ export class EventRepository extends BaseRepository<EventEntity> {
       LEFT JOIN departments_or_aayams d ON e.department_id = d.id
       LEFT JOIN locations l ON e.location_id = l.id
       WHERE e.id = ${id}
-      LIMIT 1`;
+      LIMIT 1` as any[];
     return rows[0] ? this.mapToEntity(rows[0]) : null;
   }
 

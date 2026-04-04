@@ -50,7 +50,7 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
       : `SELECT * FROM profiles ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`${query}`;
+    const rows = await sql`${query}` as any[];
     
     // Get roles for each user
     const usersWithRoles: UserWithRoles[] = await Promise.all(
@@ -77,7 +77,7 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
 
   async getById(id: string): Promise<UserWithRoles | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1`;
+    const rows = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1` as any[];
     if (!rows[0]) return null;
 
     const roleRows = await sql`
@@ -97,10 +97,10 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     default_department_id?: string;
   }): Promise<User> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       INSERT INTO profiles (email, display_name, phone, default_unit_id, default_department_id, preferred_language)
       VALUES (${input.email}, ${input.display_name}, ${input.phone ?? null}, ${input.default_unit_id ?? null}, ${input.default_department_id ?? null}, 'en')
-      RETURNING *`;
+      RETURNING *` as any[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create user');
@@ -124,10 +124,10 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     updates.push(`updated_at = '${new Date().toISOString()}'`);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       UPDATE profiles SET ${updates.join(', ')}
       WHERE id = ${id}
-      RETURNING *`;
+      RETURNING *` as any[];
 
     return rows[0] as User;
   }

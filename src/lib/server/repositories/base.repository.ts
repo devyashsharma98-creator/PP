@@ -7,8 +7,7 @@ export abstract class BaseRepository<T> {
   abstract mapToEntity(row: unknown): T;
 
   async findById(id: string): Promise<T | null> {
-    // @ts-expect-error - neon serverless types issue
-    const rows = await sql`SELECT * FROM ${sql(this.tableName)} WHERE id = ${id} LIMIT 1`;
+    const rows = await sql`SELECT * FROM ${this.tableName} WHERE id = ${id} LIMIT 1` as any[];
     return rows[0] ? this.mapToEntity(rows[0]) : null;
   }
 
@@ -26,8 +25,7 @@ export abstract class BaseRepository<T> {
     }
     
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    // @ts-expect-error - neon serverless types issue
-    const rows = await sql`SELECT * FROM ${sql(this.tableName)} ${whereClause ? sql(whereClause) : sql``}`;
+    const rows = await sql`SELECT * FROM ${this.tableName} ${whereClause}` as any[];
     return rows.map(this.mapToEntity.bind(this));
   }
 
@@ -36,8 +34,7 @@ export abstract class BaseRepository<T> {
     const values = Object.values(input);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
     
-    // @ts-expect-error - neon serverless types issue
-    const rows = await sql`INSERT INTO ${sql(this.tableName)} (${sql(keys.join(', '))}) VALUES (${sql(placeholders)}) RETURNING *`;
+    const rows = await sql`INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *` as any[];
     
     return this.mapToEntity(rows[0]);
   }
@@ -46,15 +43,13 @@ export abstract class BaseRepository<T> {
     const keys = Object.keys(input);
     const setClause = keys.map((key, i) => `${key} = $${i + 2}`).join(', ');
     
-    // @ts-expect-error - neon serverless types issue
-    const rows = await sql`UPDATE ${sql(this.tableName)} SET ${sql(setClause)} WHERE id = $1 RETURNING *`;
+    const rows = await sql`UPDATE ${this.tableName} SET ${setClause} WHERE id = $1 RETURNING *` as any[];
     
     return this.mapToEntity(rows[0]);
   }
 
   async delete(id: string): Promise<void> {
-    // @ts-expect-error - neon serverless types issue
-    await sql`DELETE FROM ${sql(this.tableName)} WHERE id = ${id}`;
+    await sql`DELETE FROM ${this.tableName} WHERE id = ${id}`;
   }
 
   async softDelete(id: string): Promise<T> {

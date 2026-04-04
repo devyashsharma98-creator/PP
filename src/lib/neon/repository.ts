@@ -1,5 +1,5 @@
 import "server-only";
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { NeonAuthContext } from "./auth";
 import type { AppActionRequest, AppViewerContext, CanonicalRoleCode, UiRole } from "@/lib/app/contracts";
 import { getDatabaseUrl } from "./env";
@@ -15,17 +15,28 @@ function getSql() {
   return _sql;
 }
 
-export const sql = new Proxy((() => {}) as ReturnType<typeof neon>, {
+function requireSql(): NeonQueryFunction<boolean, boolean> {
+  const conn = getSql();
+  if (!conn) throw new Error("Database URL is not set. Define DATABASE_URL (preferred) or NEON_DATABASE_URL.");
+  return conn;
+}
+
+export const sql = ((...args: Parameters<NeonQueryFunction<false, false>>) => {
+  return (requireSql() as NeonQueryFunction<false, false>)(...args);
+}) as NeonQueryFunction<false, false>;
+
+const _handler: ProxyHandler<NeonQueryFunction<boolean, boolean>> = {
   get(_target, prop) {
-    const conn = getSql();
-    if (!conn) throw new Error("Database URL is not set. Define DATABASE_URL (preferred) or NEON_DATABASE_URL.");
-    return Reflect.get(conn, prop);
+    return Reflect.get(requireSql(), prop);
   },
-  apply(_target, _thisArg, args) {
-    const conn = getSql();
-    if (!conn) throw new Error("Database URL is not set. Define DATABASE_URL (preferred) or NEON_DATABASE_URL.");
-    return conn(...args);
-  },
+};
+
+Object.keys(requireSql() || {}).forEach((key) => {
+  try {
+    (sql as any)[key] = (requireSql() as any)[key];
+  } catch {
+    // ignore
+  }
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {

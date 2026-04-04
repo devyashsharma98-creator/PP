@@ -35,7 +35,7 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
       : `SELECT * FROM events ORDER BY starts_at DESC LIMIT ${limit} OFFSET ${offset}`;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`${query}`;
+    const rows = await sql`${query}` as any[];
     const total = rows.length;
 
     return {
@@ -51,7 +51,7 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
 
   async getById(id: string): Promise<Event | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`SELECT * FROM events WHERE id = ${id} LIMIT 1`;
+    const rows = await sql`SELECT * FROM events WHERE id = ${id} LIMIT 1` as any[];
     return rows[0] as Event | null;
   }
 
@@ -61,10 +61,10 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       INSERT INTO events (title, description, starts_at, ends_at, unit_id, department_id, status)
       VALUES (${input.title}, ${input.description ?? null}, ${input.starts_at}, ${input.ends_at ?? null}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft')
-      RETURNING *`;
+      RETURNING *` as any[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create event');
@@ -80,10 +80,10 @@ export class EventService implements IService<EventFilters, PaginatedResult<Even
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: any[] = await sql`
+    const rows = await sql`
       UPDATE events SET status = ${status}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *`;
+      RETURNING *` as any[];
 
     return rows[0] as Event;
   }
