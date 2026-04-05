@@ -197,9 +197,9 @@ export function Navbar() {
   }, [router]);
 
   return (
-    <header className="sticky top-0 z-20 px-4 pt-4 md:px-6">
-      <div className="institution-panel-muted flex min-h-[78px] items-center justify-between gap-4 px-4 py-3 md:px-5">
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 px-3 pt-3 md:px-6 md:pt-4">
+      <div className="institution-panel-muted flex flex-wrap min-h-[78px] items-center justify-between gap-3 px-3 py-3 md:px-5">
+        <div className="flex items-center gap-2 md:gap-3">
         {/* Mobile Menu Trigger */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -272,7 +272,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+      <div className="flex flex-wrap items-center justify-end gap-1.5 md:gap-3 shrink-0">
         {/* ── Dark/Light Toggle ── */}
         {mounted && (
           <button

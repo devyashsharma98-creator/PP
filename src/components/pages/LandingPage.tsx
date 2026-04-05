@@ -19,6 +19,7 @@ import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import StoryTimeline from "@/components/pages/StoryTimeline";
 import CountUp from "react-countup";
+import { SutraMarquee, OrbitalNetwork, MagneticDashboard } from "@/components/ui/HeroInteractive";
 
 function Mandala({ className }: { className?: string }) {
   const petals = [0, 45, 90, 135, 180, 225, 270, 315];
@@ -251,6 +252,7 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute -right-[10%] top-[20%] h-[600px] w-[600px] rounded-full bg-primary/10 blur-[100px]" />
 
       <section className="relative overflow-hidden border-b border-border/40 min-h-[95vh] flex items-center">
+        <SutraMarquee />
         {/* Massive Dynamic Full-Screen Background */}
         <motion.div 
           style={{ y: yHeroBg, scale: useTransform(scrollYProgress, [0, 1], [1, 1.15]) }}
@@ -286,7 +288,7 @@ export default function LandingPage() {
                 <span className="font-devanagari tracking-[0.12em]">प्रज्ञा प्रवाह</span>
               </p>
               <div className="space-y-6">
-                <h1 className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-[5.5rem] lg:leading-[1.05] text-foreground space-y-2 drop-shadow-lg">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-7xl lg:text-[5.5rem] lg:leading-[1.05] text-foreground space-y-2 drop-shadow-lg">
                   <span className="block">Civilisational thought.</span>
                   <span className="block text-primary drop-shadow-[0_0_20px_rgba(234,115,23,0.3)]">Organised action.</span>
                 </h1>
@@ -298,14 +300,14 @@ export default function LandingPage() {
                   review, research, publication, and coordinated public outreach.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-5 pt-4">
-                <Button asChild size="lg" className="h-14 rounded-full px-8 text-lg shadow-[0_0_30px_-5px_hsl(var(--primary)/0.4)] hover:scale-105 transition-transform">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full">
+                <Button asChild size="lg" className="h-14 rounded-full px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto shadow-[0_0_30px_-5px_hsl(var(--primary)/0.4)] hover:scale-105 transition-transform flex justify-center">
                   <Link href="/parichay">
                     {isHi ? "दृष्टि समझें" : "Understand the Vision"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-8 text-lg bg-background/50 backdrop-blur-md border-border text-foreground hover:bg-muted hover:text-foreground transition-all">
+                <Button asChild size="lg" variant="outline" className="h-14 rounded-full px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto bg-background/50 backdrop-blur-md border-border text-foreground hover:bg-muted hover:text-foreground transition-all flex justify-center">
                   <Link href="/login">
                     {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -314,61 +316,35 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right Content: Interactive Statistics Widget */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full"
-            >
-              <div className="institution-panel-textured border border-primary/30 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl bg-background/80 hover:border-primary/50 transition-colors group">
-                <div className="absolute -left-10 -top-10 text-primary/20 z-[-1]">
-                  <Mandala className="h-40 w-40 animate-spin-slow-reverse" />
-                </div>
-                
-                <h3 className="text-xl font-serif font-bold text-primary tracking-widest uppercase mb-8 border-b border-primary/20 pb-4">
-                  Institutional Reach
-                </h3>
-
-                <div className="space-y-8">
-                  {/* Stat 1 */}
-                  <div className="group/stat">
-                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
-                      <CountUp end={12000} separator="," suffix="+" duration={3.5} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
-                    </p>
-                    <p className="text-lg text-muted-foreground mt-1 font-light">Active Scholars Engaged</p>
-                    <p className="text-sm font-devanagari text-muted-foreground/70">सक्रिय विद्वान</p>
-                  </div>
-
-                  {/* Stat 2 */}
-                  <div className="group/stat pt-4 border-t border-primary/10">
-                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
-                      <CountUp end={42} suffix="+" duration={3} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
-                    </p>
-                    <p className="text-lg text-muted-foreground mt-1 font-light">Regional Chapters (Prants)</p>
-                    <p className="text-sm font-devanagari text-muted-foreground/70">प्रांतीय इकाइयाँ</p>
-                  </div>
-
-                  {/* Stat 3 */}
-                  <div className="group/stat pt-4 border-t border-primary/10">
-                    <p className="text-5xl font-bold text-foreground tabular-nums drop-shadow-md">
-                      <CountUp end={350} suffix="+" duration={4} useEasing={true} enableScrollSpy={true} scrollSpyOnce={true} />
-                    </p>
-                    <p className="text-lg text-muted-foreground mt-1 font-light">Discourse Papers Published</p>
-                    <p className="text-sm font-devanagari text-muted-foreground/70">विमर्श आलेख</p>
-                  </div>
-                </div>
-
-                {/* Subtle scanning line effect */}
-                <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none opacity-30">
-                   <motion.div 
-                     animate={{ y: ["-100%", "200%"] }} 
-                     transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
-                     className="w-full h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent"
-                   />
-                </div>
-              </div>
-            </motion.div>
+            {/* Right Content: Advanced Orbital Stats */}
+            <div className="w-full max-w-[600px] mx-auto lg:mx-0">
+               <MagneticDashboard>
+                 <div className="absolute -left-10 -top-10 text-primary/20 z-[-1] pointer-events-none">
+                   <Mandala className="h-40 w-40 animate-spin-slow-reverse" />
+                 </div>
+                 <h3 className="text-xl md:text-2xl font-serif font-bold text-primary tracking-widest uppercase mb-2 border-b border-primary/20 pb-4 text-center md:text-left">
+                   Organised Action Network
+                 </h3>
+                 <div className="hidden sm:block">
+                   <OrbitalNetwork />
+                 </div>
+                 {/* Mobile Fallback if the orbital network is too large */}
+                 <div className="sm:hidden space-y-6 mt-6">
+                   <div className="flex border-b border-border/40 pb-4 items-center justify-between">
+                     <p className="text-sm uppercase tracking-widest text-muted-foreground">Scholars</p>
+                     <p className="text-3xl font-bold text-primary"><CountUp end={12000} separator="," />+</p>
+                   </div>
+                   <div className="flex border-b border-border/40 pb-4 items-center justify-between">
+                     <p className="text-sm uppercase tracking-widest text-muted-foreground">Regions</p>
+                     <p className="text-3xl font-bold text-primary"><CountUp end={42} />+</p>
+                   </div>
+                   <div className="flex items-center justify-between">
+                     <p className="text-sm uppercase tracking-widest text-muted-foreground">Published</p>
+                     <p className="text-3xl font-bold text-primary"><CountUp end={350} />+</p>
+                   </div>
+                 </div>
+               </MagneticDashboard>
+            </div>
 
           </div>
         </div>
@@ -398,7 +374,7 @@ export default function LandingPage() {
             <div className="relative z-10 space-y-6">
               <p className="section-seal">Institutional form</p>
               <div className="space-y-4">
-                <h3 className="text-3xl font-bold tracking-tight leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">
                   Thought must take form to shape society.
                 </h3>
                 <p className="font-devanagari text-lg leading-relaxed text-foreground/80">
@@ -472,8 +448,8 @@ export default function LandingPage() {
                       <stream.icon className="h-8 w-8" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold tracking-tight">{stream.titleEn}</h3>
-                      <p className="font-devanagari text-lg text-foreground/80">{stream.titleHi}</p>
+                      <h3 className="text-xl sm:text-2xl font-bold tracking-tight">{stream.titleEn}</h3>
+                      <p className="font-devanagari text-base sm:text-lg text-foreground/80">{stream.titleHi}</p>
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:border-l lg:border-border/40 lg:pl-8">
@@ -603,13 +579,13 @@ export default function LandingPage() {
                   देखें कि विचार किस प्रकार एक अनुशासित प्रणाली के माध्यम से समाज तक पहुँचते हैं।
                 </p>
                 <div className="mt-8 flex flex-col gap-3">
-                  <Button asChild size="lg" className="h-14 rounded-2xl px-8 shadow-xl shadow-primary/20">
+                  <Button asChild size="lg" className="h-14 rounded-2xl px-6 sm:px-8 w-full shadow-xl shadow-primary/20 flex justify-center">
                     <Link href="/login">
                       {isHi ? "डेमो प्रणाली खोलें" : "Enter Demo Console"}
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline" className="h-14 rounded-2xl px-8 bg-background/50">
+                  <Button asChild size="lg" variant="outline" className="h-14 rounded-2xl px-6 sm:px-8 w-full bg-background/50 flex justify-center">
                     <Link href="/dashboard">
                       {isHi ? "कार्यप्रवाह देखें" : "See Organisational Work"}
                       <ArrowRight className="ml-2 h-5 w-5" />
