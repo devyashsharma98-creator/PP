@@ -163,14 +163,14 @@ export default function Parichay() {
                     : "Defined at the All-India Chintan Shivir (November 2024) — a complete introduction to the organisation's vision, mission, and operational dimensions."}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-4 pt-4">
-                <Button asChild size="lg" className="h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base shadow-xl shadow-primary/20 flex-1 sm:flex-none">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button asChild size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base shadow-xl shadow-primary/20">
                   <Link href="/dashboard" className="flex items-center justify-center">
                     {isHi ? "कार्यप्रवाह देखें" : "View Operations"}
                     <ArrowRight className="ml-2 md:ml-3 h-4 md:h-5 w-4 md:w-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base border-white/20 hover:bg-white/5 text-white flex-1 sm:flex-none">
+                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base border-white/20 hover:bg-white/5 text-white">
                   <Link href="/vimarsh" className="flex items-center justify-center">
                     {isHi ? "विमर्श पढ़ें" : "Read Vimarsh"}
                   </Link>
