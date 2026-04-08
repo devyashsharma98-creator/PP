@@ -29,6 +29,12 @@ export function CursorGlow() {
   const mouseY = useMotionValue(-1000);
   const [isVisible, setIsVisible] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
+  const glowOpacity = useTransform(mouseX, [-1000, 0], [0, 1]);
+  const glowBackground = useTransform(
+    [mouseX, mouseY],
+    ([x, y]) =>
+      `radial-gradient(600px circle at ${x}px ${y}px, hsl(24 94% 52% / 0.025), transparent 40%)`
+  );
 
   useEffect(() => {
     setIsTouch(window.matchMedia("(pointer: coarse)").matches);
@@ -62,11 +68,8 @@ export function CursorGlow() {
     <motion.div
       className="fixed inset-0 pointer-events-none z-30"
       style={{
-        opacity: useTransform(mouseX, [-1000, 0], [0, 1]),
-        background: useTransform(
-          [mouseX, mouseY],
-          ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, hsl(24 94% 52% / 0.025), transparent 40%)`
-        ),
+        opacity: glowOpacity,
+        background: glowBackground,
       }}
     />
   );

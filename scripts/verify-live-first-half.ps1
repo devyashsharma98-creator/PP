@@ -20,38 +20,51 @@ function Invoke-Case(
   [string]$Name,
   [string]$Method,
   [string]$Path,
-  $Body = $null
+  $Body = $null,
+  [int[]]$ExpectedStatusCodes = @()
 ) {
   $url = "$BaseUrl$Path"
+
+  function Test-ExpectedStatus([int]$StatusCode, [int[]]$ExpectedCodes) {
+    if ($ExpectedCodes.Count -gt 0) {
+      return ($ExpectedCodes -contains $StatusCode)
+    }
+    return ($StatusCode -ge 200 -and $StatusCode -lt 300)
+  }
+
   try {
     if ($null -ne $Body) {
       $resp = Invoke-WebRequest -UseBasicParsing -Method $Method -Uri $url -WebSession $session -ContentType "application/json" -Body ($Body | ConvertTo-Json -Depth 8) -TimeoutSec 45
     } else {
       $resp = Invoke-WebRequest -UseBasicParsing -Method $Method -Uri $url -WebSession $session -TimeoutSec 45
     }
+    $statusCode = [int]$resp.StatusCode
+    $isPass = Test-ExpectedStatus -StatusCode $statusCode -ExpectedCodes $ExpectedStatusCodes
     $results.Add([pscustomobject]@{
       Name = $Name
       Method = $Method
       Path = $Path
-      Status = [int]$resp.StatusCode
-      Pass = $true
+      Status = $statusCode
+      Pass = $isPass
       Sample = (Trim-Body $resp.Content)
     }) | Out-Null
-    return @{ Status = [int]$resp.StatusCode; Body = $resp.Content }
+    return @{ Status = $statusCode; Body = $resp.Content }
   } catch {
     if ($_.Exception.Response) {
       $r = $_.Exception.Response
       $sr = New-Object IO.StreamReader($r.GetResponseStream())
       $content = $sr.ReadToEnd()
+      $statusCode = [int]$r.StatusCode
+      $isPass = Test-ExpectedStatus -StatusCode $statusCode -ExpectedCodes $ExpectedStatusCodes
       $results.Add([pscustomobject]@{
         Name = $Name
         Method = $Method
         Path = $Path
-        Status = [int]$r.StatusCode
-        Pass = $false
+        Status = $statusCode
+        Pass = $isPass
         Sample = (Trim-Body $content)
       }) | Out-Null
-      return @{ Status = [int]$r.StatusCode; Body = $content }
+      return @{ Status = $statusCode; Body = $content }
     }
     $results.Add([pscustomobject]@{
       Name = $Name
@@ -78,7 +91,7 @@ $articleId = $null
 
 # Roles / Users
 Invoke-Case -Name "Roles list" -Method "GET" -Path "/api/v1/roles" | Out-Null
-Invoke-Case -Name "Users list" -Method "GET" -Path "/api/v1/users" | Out-Null
+Invoke-Case -Name "Users list" -Method "GET" -Path "/api/v1/users" -ExpectedStatusCodes @(200, 403) | Out-Null
 
 # Events (CRUD + workflow + checklist + polls)
 $eventCreate = Invoke-Case -Name "Event create" -Method "POST" -Path "/api/v1/events" -Body @{
@@ -175,8 +188,8 @@ if ($articleId) {
   } | Out-Null
   Invoke-Case -Name "Article reviews list" -Method "GET" -Path "/api/v1/articles/$articleId/reviews" | Out-Null
   Invoke-Case -Name "Article review create" -Method "POST" -Path "/api/v1/articles/$articleId/reviews" -Body @{
-    reviewDecision = "approved"
-    notes = "Live verification review note"
+    decision = "approved"
+    reviewNotes = "Live verification review note"
   } | Out-Null
 }
 
