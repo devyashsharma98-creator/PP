@@ -1,85 +1,161 @@
-import { NextRequest } from 'next/server';
-import { EventService } from '@/lib/server/services/event.service';
-import { createEventSchema, updateEventSchema } from '@/lib/server/validation/events';
-import { json, errorResponse, unauthorized } from '@/lib/server/api/response';
-import { requireAuth } from '@/lib/server/middleware/auth';
+/**
+ * GET  /api/v1/events  — List events with filters + pagination
+ * POST /api/v1/events  — Create a new event (unit_head+)
+ */
+import "server-only";
 
-export async function GET(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
+import { NextRequest } from "next/server";
+import { and, eq, gte, lte, ilike, count, desc } from "drizzle-orm";
+
+import { db } from "@/db/client";
+import { events, eventStatusHistory } from "@/db/schema/index";
+import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-auth";
+import { withApiRateLimit } from "@/lib/middleware/rate-limit";
+import { createEventSchema, listEventsQuerySchema } from "@/lib/validators/events";
+import {
+  apiSuccess, apiCreated, badRequest, serverError,
+  parsePagination, paginationMeta,
+} from "@/lib/response";
+import { auditAndActivity } from "@/lib/audit";
+import type { EventStatus } from "@/lib/permissions/event-workflow";
+
+// ── GET ───────────────────────────────────────────────────────────────────────
+export const GET = withAuth(async (req: NextRequest, ctx) => {
+  const ip = getClientIp(req);
+  const rateRes = withApiRateLimit(ip);
+  if (rateRes) return rateRes;
+
+  const sp = req.nextUrl.searchParams;
+  const query = listEventsQuerySchema.safeParse(Object.fromEntries(sp));
+  if (!query.success) return badRequest(query.error.errors[0]?.message ?? "Invalid query.");
+  const q = query.data;
+
+  const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
+
+  // Scope: karyakarta can only see their unit's events
+  const conditions: ReturnType<typeof eq>[] = [eq(events.orgId, ctx.session.orgId)];
+
+  if (q.status) conditions.push(eq(events.status, q.status as EventStatus));
+  if (q.unitId) conditions.push(eq(events.unitId, q.unitId));
+  if (q.departmentId) conditions.push(eq(events.departmentId, q.departmentId));
+  if (q.fromDate) conditions.push(gte(events.startsAt, new Date(q.fromDate)));
+  if (q.toDate) conditions.push(lte(events.startsAt, new Date(q.toDate)));
+  if (q.search) conditions.push(ilike(events.title, `%${q.search}%`));
+
+  // Karyakarta: scope to own unit only
+  const isKaryakartaOnly =
+    ctx.session.effectiveRoleCodes.length === 1 &&
+    ctx.session.effectiveRoleCodes[0] === "karyakarta";
+  if (isKaryakartaOnly && ctx.session.unitId) {
+    conditions.push(eq(events.unitId, ctx.session.unitId));
   }
 
-  const { searchParams } = new URL(req.url);
-  const filters = {
-    status: searchParams.get('status') || undefined,
-    unit_id: searchParams.get('unit_id') || undefined,
-    from_date: searchParams.get('from_date') || undefined,
-    to_date: searchParams.get('to_date') || undefined,
-    page: parseInt(searchParams.get('page') || '1'),
-    limit: parseInt(searchParams.get('limit') || '20'),
-  };
+  const whereClause = and(...conditions);
 
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({
+        id: events.id,
+        title: events.title,
+        description: events.description,
+        startsAt: events.startsAt,
+        endsAt: events.endsAt,
+        status: events.status,
+        unitId: events.unitId,
+        departmentId: events.departmentId,
+        submittedByNameSnapshot: events.submittedByNameSnapshot,
+        checklist: events.checklist,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
+      })
+      .from(events)
+      .where(whereClause)
+      .orderBy(desc(events.createdAt))
+      .limit(limit)
+      .offset(offset),
+
+    db.select({ value: count() }).from(events).where(whereClause),
+  ]);
+
+  const total = Number(totalRow[0]?.value ?? 0);
+
+  return apiSuccess(rows, { meta: paginationMeta(page, limit, total) });
+});
+
+// ── POST ──────────────────────────────────────────────────────────────────────
+export const POST = withPermission("canCreateEvent", async (req: NextRequest, ctx) => {
+  const ip = getClientIp(req);
+  const rateRes = withApiRateLimit(ip);
+  if (rateRes) return rateRes;
+
+  let body: unknown;
   try {
-    const service = new EventService();
-    const result = await service.list(filters);
-    return json(result.data, { meta: result.pagination });
-  } catch (error) {
-    console.error('Events list error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to fetch events');
-  }
-}
-
-export async function POST(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
+    body = await req.json();
+  } catch {
+    return badRequest("Request body must be valid JSON.");
   }
 
-  if (!auth.permissions.includes('event:create')) {
-    return unauthorized('You do not have permission to create events');
-  }
+  const parsed = createEventSchema.safeParse(body);
+  if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid input.");
+  const input = parsed.data;
 
-  try {
-    const body = await req.json();
-    const parsed = createEventSchema.safeParse(body);
-    if (!parsed.success) {
-      return errorResponse(400, 'VALIDATION_ERROR', parsed.error.errors[0].message);
+  // Default unitId to the creator's unit if not provided
+  const unitId = input.unitId ?? ctx.session.unitId ?? null;
+
+  const [newEvent] = await db
+    .insert(events)
+    .values({
+      orgId: ctx.session.orgId,
+      unitId,
+      departmentId: input.departmentId ?? ctx.session.departmentId ?? null,
+      locationId: input.locationId ?? null,
+      title: input.title,
+      description: input.description,
+      startsAt: input.startsAt ? new Date(input.startsAt) : null,
+      endsAt: input.endsAt ? new Date(input.endsAt) : null,
+      status: "draft",
+      submittedByNameSnapshot: ctx.session.displayName ?? ctx.session.email,
+      checklist: input.checklist ?? {},
+      metadata: input.metadata ?? null,
+      createdBy: ctx.session.userId,
+      updatedBy: ctx.session.userId,
+    })
+    .returning({
+      id: events.id,
+      title: events.title,
+      status: events.status,
+      startsAt: events.startsAt,
+      createdAt: events.createdAt,
+    });
+
+  if (!newEvent) return serverError("Failed to create event.");
+
+  // Initial status history entry
+  await db.insert(eventStatusHistory).values({
+    eventId: newEvent.id,
+    fromStatus: null,
+    toStatus: "draft",
+    actorUserId: ctx.session.userId,
+    actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
+    notes: "Event created.",
+  });
+
+  await auditAndActivity(
+    {
+      orgId: ctx.session.orgId,
+      action: "event.created",
+      actorUserId: ctx.session.userId,
+      actorEmail: ctx.session.email,
+      actorIp: ip,
+      entityType: "event",
+      entityId: newEvent.id,
+      changeSummary: `Event created: "${input.title}".`,
+    },
+    {
+      summary: `${ctx.session.displayName ?? ctx.session.email} created event: "${input.title}".`,
+      actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
     }
+  );
 
-    const service = new EventService();
-    const event = await service.create(parsed.data);
-    return json(event, { status: 201 });
-  } catch (error) {
-    console.error('Events create error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to create event');
-  }
-}
-
-export async function PUT(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
-  }
-
-  try {
-    const body = await req.json();
-    const parsed = updateEventSchema.safeParse(body);
-    if (!parsed.success) {
-      return errorResponse(400, 'VALIDATION_ERROR', parsed.error.errors[0].message);
-    }
-
-    if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
-      return errorResponse(400, 'VALIDATION_ERROR', 'ids array is required');
-    }
-
-    const service = new EventService();
-    const updated = await Promise.all(
-      body.ids.map((id: string) => service.updateStatus(id, body.status || 'draft'))
-    );
-    return json(updated);
-  } catch (error) {
-    console.error('Events bulk update error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to update events');
-  }
-}
+  return apiCreated(newEvent);
+});

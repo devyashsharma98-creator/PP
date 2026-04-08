@@ -1,93 +1,128 @@
-import { NextRequest } from 'next/server';
-import { EventRepository } from '@/lib/server/repositories/event.repository';
-import { json, errorResponse, notFound, unauthorized, forbidden } from '@/lib/server/api/response';
-import { requireAuth } from '@/lib/server/middleware/auth';
+/**
+ * GET   /api/v1/events/[eventId]  — Get event with full details
+ * PATCH /api/v1/events/[eventId]  — Update event metadata (unit_head+)
+ */
+import "server-only";
 
-interface RouteParams {
-  params: Promise<{ eventId: string }>;
-}
+import { NextRequest } from "next/server";
+import { and, eq } from "drizzle-orm";
 
-export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { eventId } = await params;
-  const repo = new EventRepository();
+import { db } from "@/db/client";
+import {
+  events, eventStatusHistory, eventFormConfigs,
+  eventFormQuestions, eventPolls, eventVritt,
+} from "@/db/schema/index";
+import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-auth";
+import { withApiRateLimit } from "@/lib/middleware/rate-limit";
+import { hasRoleOrAbove } from "@/lib/permissions";
+import { updateEventSchema } from "@/lib/validators/events";
+import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
+import { auditAndActivity } from "@/lib/audit";
 
+type Params = { eventId: string };
+
+// ── GET ───────────────────────────────────────────────────────────────────────
+export const GET = withAuth(async (req: NextRequest, ctx, params) => {
+  const ip = getClientIp(req);
+  const rateRes = withApiRateLimit(ip);
+  if (rateRes) return rateRes;
+
+  const { eventId } = params as Params;
+
+  // Validate UUID format before querying (prevents 500 on malformed IDs)
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(eventId)) return notFound("Event not found.");
+
+  const event = await db.query.events.findFirst({
+    where: and(eq(events.id, eventId), eq(events.orgId, ctx.session.orgId)),
+    with: {
+      formConfig: true,
+      formQuestions: { orderBy: (q, { asc }) => [asc(q.displayOrder)] },
+      polls: {
+        with: {
+          options: { orderBy: (o, { asc }) => [asc(o.displayOrder)] },
+        },
+      },
+      statusHistory: { orderBy: (h, { desc }) => [desc(h.createdAt)] },
+      vritt: true,
+    },
+  });
+
+  if (!event) return notFound("Event not found.");
+
+  return apiSuccess(event);
+});
+
+// ── PATCH ─────────────────────────────────────────────────────────────────────
+export const PATCH = withPermission("canUpdateEvent", async (req: NextRequest, ctx, params) => {
+  const ip = getClientIp(req);
+  const rateRes = withApiRateLimit(ip);
+  if (rateRes) return rateRes;
+
+  const { eventId } = params as Params;
+
+  const event = await db.query.events.findFirst({
+    where: and(eq(events.id, eventId), eq(events.orgId, ctx.session.orgId)),
+    columns: { id: true, status: true, unitId: true, createdBy: true },
+  });
+  if (!event) return notFound("Event not found.");
+
+  // Karyakarta can only edit events they created
+  const isOwner = event.createdBy === ctx.session.userId;
+  const isAdmin = hasRoleOrAbove(ctx.session.effectiveRoleCodes, "aayam_pramukh");
+  if (!isOwner && !isAdmin) return forbidden("You may only edit events you created.");
+
+  // Cannot edit published or cancelled events
+  if (event.status === "authorized_public" || event.status === "cancelled") {
+    return forbidden(`Cannot edit an event with status '${event.status}'.`);
+  }
+
+  let body: unknown;
   try {
-    const event = await repo.findById(eventId);
-    if (!event) {
-      return notFound('Event', eventId);
-    }
-    return json(event);
-  } catch (error) {
-    console.error('Event get error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to fetch event');
-  }
-}
-
-export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
+    body = await req.json();
+  } catch {
+    return badRequest("Request body must be valid JSON.");
   }
 
-  const { eventId } = await params;
-  const body = await req.json();
+  const parsed = updateEventSchema.safeParse(body);
+  if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid input.");
+  const input = parsed.data;
 
-  try {
-    if (body.action === 'submit') {
-      if (!auth.permissions.includes('event:create')) return forbidden();
-      const service = new (await import('@/lib/server/services/event.service')).EventService();
-      const event = await service.updateStatus(eventId, 'submitted_by_unit');
-      return json(event);
+  const [updated] = await db
+    .update(events)
+    .set({
+      ...(input.title !== undefined && { title: input.title }),
+      ...(input.description !== undefined && { description: input.description }),
+      ...(input.startsAt !== undefined && { startsAt: input.startsAt ? new Date(input.startsAt) : null }),
+      ...(input.endsAt !== undefined && { endsAt: input.endsAt ? new Date(input.endsAt) : null }),
+      ...(input.locationId !== undefined && { locationId: input.locationId }),
+      ...(input.checklist !== undefined && { checklist: input.checklist }),
+      ...(input.metadata !== undefined && { metadata: input.metadata }),
+      updatedBy: ctx.session.userId,
+      updatedAt: new Date(),
+    })
+    .where(eq(events.id, eventId))
+    .returning({ id: events.id, title: events.title, updatedAt: events.updatedAt });
+
+  if (!updated) return serverError("Failed to update event.");
+
+  await auditAndActivity(
+    {
+      orgId: ctx.session.orgId,
+      action: "event.updated",
+      actorUserId: ctx.session.userId,
+      actorEmail: ctx.session.email,
+      actorIp: ip,
+      entityType: "event",
+      entityId: eventId,
+      payload: input as Record<string, unknown>,
+      changeSummary: `Event updated: "${updated.title}".`,
+    },
+    {
+      summary: `${ctx.session.displayName ?? ctx.session.email} updated event: "${updated.title}".`,
+      actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
     }
-    if (body.action === 'approve') {
-      if (!auth.permissions.includes('event:approve')) return forbidden();
-      const service = new (await import('@/lib/server/services/event.service')).EventService();
-      const event = await service.updateStatus(eventId, 'pending_vibhag_review');
-      return json(event);
-    }
-    if (body.action === 'reject') {
-      if (!auth.permissions.includes('event:approve')) return forbidden();
-      const service = new (await import('@/lib/server/services/event.service')).EventService();
-      const event = await service.updateStatus(eventId, 'rejected');
-      return json(event);
-    }
-    if (body.action === 'publish') {
-      if (!auth.permissions.includes('event:publish')) return forbidden();
-      const service = new (await import('@/lib/server/services/event.service')).EventService();
-      const event = await service.updateStatus(eventId, 'published');
-      return json(event);
-    }
+  );
 
-    if (!auth.permissions.includes('event:update')) {
-      return forbidden('You do not have permission to update events');
-    }
-    const repo = new EventRepository();
-    const event = await repo.update(eventId, body);
-    return json(event);
-  } catch (error) {
-    console.error('Event update error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to update event');
-  }
-}
-
-export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
-  }
-
-  if (!auth.permissions.includes('event:delete')) {
-    return forbidden('You do not have permission to delete events');
-  }
-
-  const { eventId } = await params;
-  const repo = new EventRepository();
-
-  try {
-    await repo.softDelete(eventId);
-    return json({ success: true });
-  } catch (error) {
-    console.error('Event delete error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to delete event');
-  }
-}
+  return apiSuccess(updated);
+});

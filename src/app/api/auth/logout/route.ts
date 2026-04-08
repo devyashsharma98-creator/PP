@@ -1,15 +1,29 @@
-import { NextResponse } from "next/server";
-import { NEON_SESSION_COOKIE } from "@/lib/neon/session";
+/**
+ * POST /api/auth/logout
+ *
+ * Clears the session cookie, ending the authenticated session.
+ */
+import "server-only";
 
-export async function POST() {
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(NEON_SESSION_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 0,
-  });
-  return res;
+import { clearSessionCookie, getSession } from "@/lib/auth/session";
+import { writeAuditLog } from "@/lib/audit";
+import { apiSuccess } from "@/lib/response";
+
+export async function POST(): Promise<Response> {
+  const session = await getSession();
+
+  if (session) {
+    await writeAuditLog({
+      orgId: session.orgId,
+      action: "auth.logout",
+      actorUserId: session.userId,
+      actorEmail: session.email,
+      entityType: "profile",
+      entityId: session.userId,
+      changeSummary: "User logged out.",
+    });
+  }
+
+  await clearSessionCookie();
+  return apiSuccess({ loggedOut: true });
 }
-

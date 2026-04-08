@@ -1,0 +1,11 @@
+/**
+ * Pragya Pravah — Schema Barrel Export
+ * Re-exports all tables and relations so drizzle.config.ts has a single entry point.
+ */
+
+export * from "./enums";
+export * from "./org";
+export * from "./users";
+export * from "./events";
+export * from "./articles";
+export * from "./shared";
