@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext, type Role } from '@/context/AppContext';
-import { roleLabels, roleLabelsHi } from '@/lib/app/constants';
+import { canonicalRoleLabels, canonicalRoleLabelsHi, roleLabels, roleLabelsHi } from '@/lib/app/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { navItems } from '@/components/AppSidebar';
+import { getNavItems } from '@/lib/app/navigation';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -46,6 +46,20 @@ function getShellFrame(pathname: string, role: Role) {
   }
 
   const routeFrames = [
+    {
+      match: '/super-admin',
+      titleEn: 'Access Governance',
+      titleHi: 'प्रवेश संचालन',
+      subtitleEn: 'Account creation, authority boundaries, and role-based system access in one controlled surface.',
+      subtitleHi: 'एक ही नियंत्रित सतह पर खाते बनाना, अधिकार सीमाएँ और भूमिका-आधारित प्रणाली पहुँच।',
+    },
+    {
+      match: '/users',
+      titleEn: 'Access Governance',
+      titleHi: 'प्रवेश संचालन',
+      subtitleEn: 'Account creation, authority boundaries, and role-based system access in one controlled surface.',
+      subtitleHi: 'एक ही नियंत्रित सतह पर खाते बनाना, अधिकार सीमाएँ और भूमिका-आधारित प्रणाली पहुँच।',
+    },
     {
       match: '/prachar',
       titleEn: 'Prachar Desk',
@@ -109,7 +123,7 @@ function getShellFrame(pathname: string, role: Role) {
 }
 
 export function Navbar() {
-  const { role, setRole, lang, setLang, events, articles, isAuthenticated } = useAppContext();
+  const { role, setRole, lang, setLang, events, articles, isAuthenticated, permissions, viewer } = useAppContext();
   const pathname = usePathname();
   const router = useRouter();
   const t = useT();
@@ -122,6 +136,13 @@ export function Navbar() {
   const notifRef = useRef<HTMLDivElement>(null);
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
   const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
+  const showAdminControls = permissions.canManageUsers || Boolean(
+    viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
+  );
+  const navigationItems = useMemo(() => getNavItems(showAdminControls), [showAdminControls]);
+  const currentRoleLabel = viewer?.primaryRoleCode
+    ? (lang === 'hi' ? canonicalRoleLabelsHi[viewer.primaryRoleCode] : canonicalRoleLabels[viewer.primaryRoleCode])
+    : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]);
 
   // Real unread count from API with 30s polling
   const { data: unreadCount = 0 } = useUnreadCount();
@@ -230,7 +251,7 @@ export function Navbar() {
               </div>
             </div>
             <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-              {navItems.map((item) => {
+              {navigationItems.map((item) => {
                 const active = pathname === item.path;
                 return (
                   <Link
@@ -413,7 +434,7 @@ export function Navbar() {
               </Select>
             ) : (
               <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
-                {lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]}
+                {currentRoleLabel}
               </span>
             )}
           </div>

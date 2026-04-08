@@ -5,12 +5,13 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
-import { and, eq, ilike, or, count } from "drizzle-orm";
+import { and, count, eq, gt, ilike, inArray, isNull, lte, or } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { profiles, roles, userRoleAssignments } from "@/db/schema/index";
 import { withPermission, getClientIp } from "@/lib/middleware/with-auth";
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
+import { getPrimaryRole } from "@/lib/permissions";
 import { hashPassword } from "@/lib/auth/password";
 import { createUserSchema, listUsersQuerySchema } from "@/lib/validators/users";
 import {
@@ -71,8 +72,61 @@ export const GET = withPermission("canManageUsers", async (req: NextRequest, ctx
   ]);
 
   const total = Number(totalRow[0]?.value ?? 0);
+  const userIds = rows.map((row) => row.id);
+  const now = new Date();
 
-  return apiSuccess(rows, { meta: paginationMeta(page, limit, total) });
+  const assignmentRows = userIds.length
+    ? await db
+        .select({
+          userId: userRoleAssignments.userId,
+          roleCode: roles.code,
+          roleName: roles.name,
+          roleNameHi: roles.nameHi,
+          isPrimary: userRoleAssignments.isPrimary,
+        })
+        .from(userRoleAssignments)
+        .innerJoin(roles, eq(userRoleAssignments.roleId, roles.id))
+        .where(
+          and(
+            inArray(userRoleAssignments.userId, userIds),
+            lte(userRoleAssignments.startsAt, now),
+            or(isNull(userRoleAssignments.endsAt), gt(userRoleAssignments.endsAt, now)),
+          ),
+        )
+    : [];
+
+  const rolesByUser = new Map<
+    string,
+    Array<{
+      code: string;
+      name: string;
+      nameHi: string | null;
+      isPrimary: boolean;
+    }>
+  >();
+
+  for (const assignment of assignmentRows) {
+    const current = rolesByUser.get(assignment.userId) ?? [];
+    current.push({
+      code: assignment.roleCode,
+      name: assignment.roleName,
+      nameHi: assignment.roleNameHi,
+      isPrimary: assignment.isPrimary,
+    });
+    rolesByUser.set(assignment.userId, current);
+  }
+
+  const payload = rows.map((row) => {
+    const activeRoles = rolesByUser.get(row.id) ?? [];
+    const roleCodes = activeRoles.map((role) => role.code) as Parameters<typeof getPrimaryRole>[0];
+    return {
+      ...row,
+      roles: activeRoles,
+      primaryRoleCode: activeRoles.length ? getPrimaryRole(roleCodes) : null,
+    };
+  });
+
+  return apiSuccess(payload, { meta: paginationMeta(page, limit, total) });
 });
 
 // ── POST ──────────────────────────────────────────────────────────────────────

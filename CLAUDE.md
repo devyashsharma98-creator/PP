@@ -32,6 +32,7 @@
 - Every screen should guide the user in this order where possible: identity cue, context cue, main action, evidence/data, deeper detail.
 - Buttons, labels, and section headings should sound like the organisation's work, not generic startup SaaS language.
 - Preserve bilingual intentionality: English for immediate comprehension, Hindi for grounding and resonance.
+- Administrative surfaces should make authority, scope, and consequences legible before action.
 - Avoid visual and tonal drift into:
   - spiritual app aesthetics
   - festival poster styling

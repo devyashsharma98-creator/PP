@@ -98,6 +98,11 @@ const uiToDbArticleStatus: Record<string, string> = {
 };
 
 const rolePriority: CanonicalRoleCode[] = [
+  "super_admin",
+  "org_admin",
+  "kshetra_reviewer",
+  "prant_sanyojak",
+  "prant_aayam_pramukh",
   "vibhag_pramukh",
   "aayam_pramukh",
   "unit_head",
@@ -209,6 +214,7 @@ function buildViewer(ctx: NeonAuthContext): AppViewerContext {
       canPublishEvent: hasAny(publishRoles),
       canPublishArticle: hasAny(publishRoles),
       canUpdatePrachar: hasAny(publishRoles),
+      canManageUsers: hasAny(["super_admin", "org_admin"]),
     },
   };
 }

@@ -1,56 +1,150 @@
-import { fetchApi } from './events';
+import type { CanonicalRoleCode } from "@/lib/app/contracts";
+import { fetchApi } from "./events";
 
-export interface User {
+export interface UserRolePreview {
+  code: CanonicalRoleCode;
+  name: string;
+  nameHi: string | null;
+  isPrimary: boolean;
+}
+
+export interface UserRoleAssignment {
+  id: string;
+  roleCode: CanonicalRoleCode;
+  roleName: string;
+  roleNameHi: string | null;
+  scopeType: "org" | "unit" | "department" | "event" | "article";
+  unitId: string | null;
+  departmentId: string | null;
+  isPrimary: boolean;
+  startsAt: string;
+  endsAt: string | null;
+  createdAt?: string;
+}
+
+export interface UserSummary {
   id: string;
   email: string | null;
+  displayName: string | null;
+  displayNameHi: string | null;
   phone: string | null;
-  display_name: string | null;
-  org_id: string | null;
-  default_unit_id: string | null;
-  default_department_id: string | null;
-  preferred_language: string;
-  is_active: boolean;
-  roles: string[];
+  isActive: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  roles: UserRolePreview[];
+  primaryRoleCode: CanonicalRoleCode | null;
+}
+
+export interface UserDetail {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  displayNameHi: string | null;
+  phone: string | null;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  roleAssignments: UserRoleAssignment[];
+}
+
+export interface RoleOption {
+  id: string;
+  code: CanonicalRoleCode;
+  name: string;
+  nameHi: string | null;
+  description: string | null;
+  priority: string;
+  isActive: boolean;
 }
 
 export interface UserFilters {
-  is_active?: boolean;
-  unit_id?: string;
-  department_id?: string;
-  role_code?: string;
+  isActive?: boolean;
   search?: string;
   page?: number;
   limit?: number;
 }
 
-export interface UpdateUserInput {
-  display_name?: string;
+export interface CreateUserInput {
+  email: string;
+  password: string;
+  displayName?: string;
+  displayNameHi?: string;
   phone?: string;
-  default_unit_id?: string;
-  default_department_id?: string;
-  preferred_language?: string;
+  roleCode: CanonicalRoleCode;
+}
+
+export interface UpdateUserInput {
+  displayName?: string;
+  displayNameHi?: string;
+  phone?: string;
+  isActive?: boolean;
+}
+
+export interface AssignRoleInput {
+  roleCode: CanonicalRoleCode;
+  scopeType?: "org" | "unit" | "department" | "event" | "article";
+  unitId?: string;
+  departmentId?: string;
+  scopeEntityId?: string;
+  startsAt?: string;
+  endsAt?: string;
+  isPrimary?: boolean;
+}
+
+export interface UserRolesPayload {
+  all: UserRoleAssignment[];
+  active: UserRoleAssignment[];
 }
 
 export async function fetchUsers(filters?: UserFilters) {
   const params = new URLSearchParams();
-  if (filters?.is_active !== undefined) params.set('is_active', String(filters.is_active));
-  if (filters?.unit_id) params.set('unit_id', filters.unit_id);
-  if (filters?.department_id) params.set('department_id', filters.department_id);
-  if (filters?.search) params.set('search', filters.search);
-  if (filters?.page) params.set('page', String(filters.page));
-  if (filters?.limit) params.set('limit', String(filters.limit));
-  
-  const query = params.toString() ? `?${params}` : '';
-  return fetchApi<User[]>(`/users${query}`);
+  if (filters?.isActive !== undefined) params.set("isActive", String(filters.isActive));
+  if (filters?.search) params.set("search", filters.search);
+  if (filters?.page) params.set("page", String(filters.page));
+  if (filters?.limit) params.set("limit", String(filters.limit));
+
+  const query = params.toString() ? `?${params}` : "";
+  return fetchApi<UserSummary[]>(`/users${query}`);
 }
 
 export async function fetchUser(id: string) {
-  return fetchApi<User>(`/users/${id}`);
+  return fetchApi<UserDetail>(`/users/${id}`);
+}
+
+export async function createUser(input: CreateUserInput) {
+  return fetchApi<UserSummary>(`/users`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export async function updateUser(id: string, input: UpdateUserInput) {
-  return fetchApi<User>(`/users/${id}`, {
-    method: 'PATCH',
+  return fetchApi<UserSummary>(`/users/${id}`, {
+    method: "PATCH",
     body: JSON.stringify(input),
+  });
+}
+
+export async function fetchRoles() {
+  return fetchApi<RoleOption[]>(`/users/roles`);
+}
+
+export async function fetchUserRoles(userId: string) {
+  return fetchApi<UserRolesPayload>(`/users/${userId}/roles`);
+}
+
+export async function assignRole(userId: string, input: AssignRoleInput) {
+  return fetchApi<{ assignmentId?: string; roleCode: CanonicalRoleCode }>(`/users/${userId}/roles`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function removeRole(userId: string, assignmentId: string) {
+  return fetchApi<{ assignmentId: string; removed: boolean }>(`/users/${userId}/roles`, {
+    method: "DELETE",
+    body: JSON.stringify({ assignmentId }),
   });
 }

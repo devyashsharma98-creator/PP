@@ -1,3 +1,0 @@
-module.exports=[31752,a=>{"use strict";var b=a.i(7997);function c(){return(0,b.jsx)("div",{className:"flex items-center justify-center min-h-[60vh]",children:(0,b.jsxs)("div",{className:"animate-pulse space-y-4 w-full max-w-lg px-6",children:[(0,b.jsx)("div",{className:"h-8 bg-muted rounded w-1/2"}),(0,b.jsx)("div",{className:"space-y-3 mt-6",children:[1,2,3].map(a=>(0,b.jsx)("div",{className:"h-14 bg-muted rounded"},a))})]})})}a.s(["default",()=>c])}];
-
-//# sourceMappingURL=src_app_vote_%5BeventId%5D_loading_tsx_3c8ebc68._.js.map

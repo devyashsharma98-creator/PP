@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 const DEMO_ACCOUNTS = [
+  { label: "Super Admin", email: "demo.superadmin@example.com" },
   { label: "Vibhag Pramukh", email: "demo.vibhag@example.com" },
   { label: "Aayam Pramukh", email: "demo.aayam@example.com" },
   { label: "Unit Head", email: "demo.unithead@example.com" },

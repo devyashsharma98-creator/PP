@@ -1,6 +1,6 @@
 ﻿/**
  * src/db/seed.ts
- * Seeds: org, all 9 roles, 3 demo users (super_admin, vibhag_pramukh, karyakarta)
+ * Seeds: org, all 9 roles, and demo users across super-admin and workflow lanes
  * Run: npx tsx src/db/seed.ts
  */
 
@@ -103,6 +103,12 @@ async function seed() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   const demoUsers = [
+    {
+      email: "demo.superadmin@example.com",
+      displayName: "Demo Super Admin",
+      displayNameHi: "डेमो सुपर एडमिन",
+      roleCode: "super_admin" as const,
+    },
     {
       email: "demo.vibhag@example.com",
       displayName: "Demo Vibhag Pramukh",

@@ -90,6 +90,7 @@ const defaultPermissions: AppPermissionSummary = {
   canPublishEvent: false,
   canPublishArticle: false,
   canUpdatePrachar: false,
+  canManageUsers: false,
 };
 
 const defaultVrittFields = {

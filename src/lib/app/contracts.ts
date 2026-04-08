@@ -200,6 +200,7 @@ export interface AppPermissionSummary {
   canPublishEvent: boolean;
   canPublishArticle: boolean;
   canUpdatePrachar: boolean;
+  canManageUsers: boolean;
 }
 
 export interface AppViewerContext {

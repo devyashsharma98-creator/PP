@@ -1,3 +1,0 @@
-{
-  "/api/public/events/[eventId]/polls/[pollId]/votes/route": "app/api/public/events/[eventId]/polls/[pollId]/votes/route.js"
-}
