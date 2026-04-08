@@ -7,6 +7,7 @@ import "server-only";
 
 import { clearSessionCookie, getSession } from "@/lib/auth/session";
 import { writeAuditLog } from "@/lib/audit";
+import { clearNeonSessionCookie } from "@/lib/neon/session";
 import { apiSuccess } from "@/lib/response";
 
 export async function POST(): Promise<Response> {
@@ -25,5 +26,6 @@ export async function POST(): Promise<Response> {
   }
 
   await clearSessionCookie();
+  await clearNeonSessionCookie();
   return apiSuccess({ loggedOut: true });
 }

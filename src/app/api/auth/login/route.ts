@@ -17,6 +17,7 @@ import { profiles, userRoleAssignments } from "@/db/schema/index";
 import { verifyPassword } from "@/lib/auth/password";
 import { signJwt } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
+import { setNeonSessionCookie } from "@/lib/neon/session";
 import { resolvePermissions, getPrimaryRole } from "@/lib/permissions";
 import { loginSchema } from "@/lib/validators/auth";
 import { withPublicRateLimit } from "@/lib/middleware/rate-limit";
@@ -116,6 +117,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   });
 
   await setSessionCookie(token);
+  await setNeonSessionCookie(profile.id, profile.email);
 
   // Update lastLoginAt
   await db

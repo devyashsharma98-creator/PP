@@ -13,7 +13,8 @@ const PUBLIC_EXACT_PATHS = new Set([
 
 const PUBLIC_PREFIXES = ["/form/", "/vote/", "/api/public/"];
 
-const SESSION_COOKIE = "pp_neon_session";
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "pp_session";
+const NEON_SESSION_COOKIE = "pp_neon_session";
 
 function isStaticAsset(pathname: string) {
   return (
@@ -49,7 +50,9 @@ export async function middleware(req: NextRequest) {
   }
 
   // For protected pages: check if session cookie exists
-  const sessionCookie = req.cookies.get(SESSION_COOKIE)?.value;
+  const sessionCookie =
+    req.cookies.get(SESSION_COOKIE)?.value ??
+    req.cookies.get(NEON_SESSION_COOKIE)?.value;
   const demoFallback = process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === "true";
 
   // If no session cookie AND demo fallback is disabled, redirect to login

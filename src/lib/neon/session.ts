@@ -1,8 +1,10 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { cookies } from "next/headers";
 
 export const NEON_SESSION_COOKIE = "pp_neon_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 12; // 12 hours
+const IS_PROD = process.env.NODE_ENV === "production";
 
 export interface NeonSessionPayload {
   userId: string;
@@ -66,3 +68,24 @@ export function readCookieValue(cookieHeader: string | null, name: string) {
   return null;
 }
 
+export async function setNeonSessionCookie(userId: string, email: string | null): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(NEON_SESSION_COOKIE, createSessionToken(userId, email), {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: "lax",
+    maxAge: SESSION_TTL_SECONDS,
+    path: "/",
+  });
+}
+
+export async function clearNeonSessionCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(NEON_SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+}
