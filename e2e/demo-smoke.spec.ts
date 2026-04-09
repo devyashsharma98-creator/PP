@@ -58,7 +58,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByRole("button", { name: "Karyakarta" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Unit Head" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Aayam Pramukh" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Super Admin" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Super Admin" })).toBeVisible();
   });
 
   test("2 — demo account pill fills email and password", async ({ page }) => {
@@ -205,7 +205,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     await expect(page.getByText(/Live Distribution Command Center/i)).toBeVisible();
     await expect(page.getByText(/Campaign Dissemination Queue/i)).toBeVisible();
-    await expect(page.getByText(/platform accountability across published events/i)).toBeVisible();
+    await expect(page.getByText(/skipped with reason/i)).toBeVisible();
   });
 
   test("8d - prachar exposes the creative studio", async ({ page }) => {
@@ -269,10 +269,10 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/First Editorial Review Desk/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Review and Route Aalekh/i })).toBeVisible();
     await expect(page.getByText(/Pending first-review queue/i).first()).toBeVisible();
-    await expect(page.getByText(/Return with notes or forward to aayam/i).first()).toBeVisible();
+    await expect(page.getByText(/Return with notes or send to aayam/i).first()).toBeVisible();
   });
 
-  test("9d - aalekh presents the aayam publication lane", async ({ page }) => {
+  test("9d - aalekh presents the aayam thematic review lane", async ({ page }) => {
     await loginAs(page, AAYAM_EMAIL, DEMO_PASSWORD);
 
     if (!page.url().includes("/dashboard")) {
@@ -283,10 +283,10 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await page.goto("/aalekh");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText(/Aalekh Publication Desk/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Approve and Publish Aalekh/i })).toBeVisible();
-    await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
-    await expect(page.getByText(/Published Aalekh Archive/i)).toBeVisible();
+    await expect(page.getByText(/Aalekh Thematic Review Desk/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Review and Route Aalekh/i })).toBeVisible();
+    await expect(page.getByText(/Forward to Vibhag Pramukh/i)).toBeVisible();
+    await expect(page.getByText(/Aayam Review Queue/i)).toBeVisible();
   });
 
   test("9e - calendar presents the institutional planning masthead", async ({ page }) => {
@@ -379,9 +379,9 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
     await expect(page.getByText(/Vibhag Pramukh|विभाग प्रमुख/i)).toBeVisible();
     await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Institutional Overview/i })).toBeVisible();
-    await expect(page.getByText(/Final approval and publication lane/i)).toBeVisible();
-    await expect(page.getByText(/Final Approvals Queue/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Vibhag Review Board/i })).toBeVisible();
+    await expect(page.getByText(/Vibhag & Prant Review Lane/i)).toBeVisible();
+    await expect(page.getByText(/Vibhag & Prant Approval Queue/i)).toBeVisible();
     await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
   });
 
@@ -408,9 +408,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     const main = page.locator("main");
 
     await expect(main.getByText(/Pragya Pravah/i).first()).toBeVisible();
-    await expect(
-      main.getByText(/civilisational|Bharatiya|intellectual forum/i).first(),
-    ).toBeVisible();
+    await expect(main.getByText(/global network|वैश्विक तंत्र/i).first()).toBeVisible();
     await expect(
       main
         .getByRole("link", { name: /Understand the Vision|दृष्टि समझें/i })
@@ -441,10 +439,34 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
   });
 
-  test("14 - public routes render without internal app chrome", async ({ page }) => {
+  test("13b - authenticated / shows ERP launchpad (not public landing)", async ({ page }) => {
+    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+
+    if (!page.url().includes("/dashboard")) {
+      test.skip(true, "Login did not succeed - auth service issue");
+      return;
+    }
+
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    await expect(page.locator("header")).toContainText(/Internal institutional console/i);
+    await expect(page.locator("main")).toContainText(/ERP Launchpad|Operational Home/i);
+    await expect(page.getByRole("link", { name: /Enter Demo Console/i })).toHaveCount(0);
+  });
+
+  test("14 - /directory redirects unauthenticated user to /login", async ({ page }) => {
+    await page.context().clearCookies();
+
+    await page.goto("/directory");
+
+    await page.waitForURL("**/login**", { timeout: 10_000 });
+    expect(page.url()).toContain("/login");
+    expect(page.url()).toContain("returnTo");
+  });
+
+  test("15 - public routes render without internal app chrome", async ({ page }) => {
     const publicRoutes = [
       { path: "/parichay", heading: /Pragya Pravah|प्रज्ञा प्रवाह|Organisation Overview/i },
-      { path: "/directory", heading: /Sampark Directory|सम्पर्क निर्देशिका/i },
       { path: "/vimarsh", heading: /Vimarsh|विमर्श/i },
     ];
 

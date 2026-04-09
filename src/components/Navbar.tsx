@@ -219,12 +219,23 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 md:px-6 md:pt-4">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 rounded-xl bg-background px-4 py-2 text-sm font-semibold shadow-lg ring-2 ring-primary"
+      >
+        {t("Skip to content", "मुख्य सामग्री पर जाएँ")}
+      </a>
       <div className="institution-panel-muted flex flex-wrap min-h-[78px] items-center justify-between gap-3 px-3 py-3 md:px-5">
         <div className="flex items-center gap-2 md:gap-3">
         {/* Mobile Menu Trigger */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
+            >
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
@@ -320,6 +331,7 @@ export function Navbar() {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => totalPending > 0 && setNotifOpen(o => !o)}
+            aria-label={t("Open notifications", "सूचनाएँ खोलें")}
             className={cn(
               'relative rounded-full p-2 transition-colors hover:bg-muted',
               totalPending > 0 ? 'cursor-pointer' : 'cursor-default',
@@ -444,6 +456,7 @@ export function Navbar() {
         {isAuthenticated && (
           <button
             onClick={handleLogout}
+            aria-label={t('Sign Out', 'लॉग आउट')}
             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
             title={t('Sign Out', 'लॉग आउट')}
           >

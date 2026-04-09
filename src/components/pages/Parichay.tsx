@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import {
-  ArrowRight, BookOpen, Flame, MessagesSquare,
+  ArrowRight, BookOpen, Flame,
   Megaphone, Compass, Sparkles, Star,
   Heart, Home, Leaf, Shield, Zap, ChevronRight,
   Lightbulb, Network, GraduationCap,
@@ -110,7 +110,6 @@ const AAYAMS = [
   { name: "महिला आयाम", en: "Mahila Aayam", icon: Heart },
   { name: "शोध आयाम", en: "Shodh Aayam", icon: GraduationCap },
   { name: "प्रचार आयाम", en: "Prachar Aayam", icon: Megaphone },
-  { name: "विमर्श आयाम", en: "Vimarsh Aayam", icon: MessagesSquare },
 ];
 
 const PANCH = [

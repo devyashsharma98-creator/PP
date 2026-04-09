@@ -232,7 +232,7 @@ export default function Prachar() {
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
   const [pendingSkipText, setPendingSkipText] = useState('');
-const getStatus = useCallback((eventId: string) =>
+  const getStatus = useCallback((eventId: string) =>
   pracharStatuses.find(p => p.eventId === eventId) ?? {
     eventId,
     platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
@@ -241,7 +241,9 @@ const getStatus = useCallback((eventId: string) =>
 
   const isDone = (eventId: string) => {
     const s = getStatus(eventId);
-    return Object.values(s.platforms).every(Boolean);
+    return platforms.every((platform) =>
+      s.platforms[platform.key] || Boolean(s.skipReasons?.[platform.key]?.trim()),
+    );
   };
 
   const incompleteCount = publishedEvents.filter(e => !isDone(e.id)).length;

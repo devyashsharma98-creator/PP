@@ -68,14 +68,14 @@ Login as `demo.vibhag@example.com` and verify:
 
 ### F. No Empty Screens on Safe Routes
 
-- [ ] `/` — Landing hero, aayam cards, mission sections render
+- [ ] `/` — Landing page (public) OR ERP Launchpad (after login)
 - [ ] `/parichay` — Bhopal Vibhag hierarchy renders
 - [ ] `/vimarsh` — ATMA BODH BINDU topic groups visible
 - [ ] `/dashboard` — Events tab loads with data
 - [ ] `/aalekh` — Article list loads
 - [ ] `/prachar` — Prachar table loads
 - [ ] `/feed` — Content cards load
-- [ ] `/directory` — Contact cards load
+- [ ] `/directory` — Sampark directory loads (login required)
 
 ### G. Browser Prep
 
@@ -191,7 +191,7 @@ Login as `demo.vibhag@example.com` and verify:
 | 7:30 | Login back as Vibhag Pramukh | *"Wapas Vibhag Pramukh view me."* |
 | 7:45 | Toggle dark mode (Moon/Sun icon in navbar) | *"Dark mode — ek click me toggle. Professional look."* |
 | 8:00 | Toggle language (EN/हि button) — show Hindi labels | *"Hindi-English bilingual — labels, sublabels, navigation sab switch hote hain."* |
-| 8:15 | Quick flash: `/feed` (published articles), `/directory` (contacts) | *"Aur bhi modules — published feed, member directory, E-Library, Aaj ka Itihas calendar."* |
+| 8:15 | Quick flash: `/feed` (published articles), `/directory` (Sampark — login-only) | *"Aur bhi modules — published feed, member directory (protected), E-Library, Aaj ka Itihas calendar."* |
 | 8:30 | Come back to `/dashboard` | *"Summary: Events, reports, articles, review workflow, social media tracking, intellectual topics — sab ek jagah, role-based, real database."* |
 | 9:00 | Show `/login` page one more time | *"Aur proper login/logout hai — no console hacks, production-ready auth flow."* |
 | 9:30 | Closing statement (see Section 6) | |
@@ -290,14 +290,14 @@ LOGOUT: Click LogOut icon (right end of navbar) → returns to /login
 
 SAFE DEMO ROUTES:
   /login       Login page (public)
-  /            Landing page (public)
+  /            Landing page (public) / ERP Launchpad (after login)
   /parichay    Org structure (public)
   /vimarsh     Discourse topics (public)
   /feed        Published articles (public)
   /dashboard   Events + reports (protected)
   /aalekh      Article management (protected)
   /prachar     Social distribution (protected)
-  /directory   Member contacts (public)
+  /directory   Sampark directory (protected)
 
 DO NOT OPEN:
   /dayitv      Not wired to real data
