@@ -34,12 +34,23 @@ function isApiPath(pathname: string) {
   return pathname.startsWith("/api/");
 }
 
+function noStore(response: NextResponse) {
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Skip auth checks for static assets and public paths
-  if (isStaticAsset(pathname) || isPublicPath(pathname)) {
+  if (isStaticAsset(pathname)) {
     return NextResponse.next();
+  }
+
+  if (isPublicPath(pathname)) {
+    return noStore(NextResponse.next());
   }
 
   // For API routes, let the route handler deal with auth (returns 401)
@@ -57,10 +68,10 @@ export async function middleware(req: NextRequest) {
   if (!sessionCookie && !demoFallback) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("returnTo", pathname);
-    return NextResponse.redirect(loginUrl);
+    return noStore(NextResponse.redirect(loginUrl));
   }
 
-  return NextResponse.next();
+  return noStore(NextResponse.next());
 }
 
 export const config = {
