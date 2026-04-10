@@ -20,6 +20,7 @@ export default {
         display: ['Fraunces', 'serif'],
         body: ['Inter', 'sans-serif'],
         devanagari: ['Noto Sans Devanagari', 'sans-serif'],
+        devanagariDisplay: ['Anek Devanagari', 'Noto Sans Devanagari', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

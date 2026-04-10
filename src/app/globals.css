@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -61,29 +61,43 @@
     --font-display: 'Fraunces', serif;
     --font-body: 'Inter', sans-serif;
     --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+    --font-devanagari-display: 'Anek Devanagari', 'Noto Sans Devanagari', sans-serif;
     }
 
     .dark {
     --background: 220 30% 8%;
-    --foreground: 220 15% 90%;
-    --card: 220 28% 12%;
+    --foreground: 220 18% 94%;
+    --card: 222 30% 12%;
     --card-foreground: 220 15% 90%;
-    --popover: 220 28% 12%;
+    --popover: 222 30% 11%;
     --popover-foreground: 220 15% 90%;
     --primary: 27 100% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 25% 18%;
     --secondary-foreground: 220 15% 90%;
     --muted: 220 20% 16%;
-    --muted-foreground: 220 10% 70%;
+    --muted-foreground: 220 16% 80%;
 
     --accent: 27 40% 15%;
     --accent-foreground: 27 90% 70%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
+    --border: 220 20% 24%;
+    --input: 220 20% 24%;
     --ring: 27 100% 50%;
+
+    --sidebar-background: 222 34% 9%;
+    --sidebar-foreground: 220 18% 88%;
+    --sidebar-accent: 222 28% 15%;
+    --sidebar-accent-foreground: 220 16% 92%;
+    --sidebar-border: 222 24% 18%;
+    --sidebar-muted: 222 18% 28%;
+
+    --navy: 220 30% 8%;
+    --navy-light: 220 26% 16%;
+    --saffron-glow: 31 100% 58%;
+    --success: 152 58% 52%;
+    --warning: 43 95% 58%;
   }
 }
 
@@ -120,8 +134,9 @@
   html[data-app-lang="hi"] h4,
   html[data-app-lang="hi"] h5,
   html[data-app-lang="hi"] h6 {
-    font-family: var(--font-devanagari), var(--font-display), sans-serif;
+    font-family: var(--font-devanagari-display), var(--font-devanagari), sans-serif;
     letter-spacing: -0.01em;
+    line-height: 1.22;
   }
 }
 
@@ -302,13 +317,15 @@
 
   /* Hindi text — Baloo 2 for warmth and cultural feel */
   .devanagari, .font-devanagari {
-    font-family: 'Baloo 2', 'Noto Sans Devanagari', sans-serif;
-    line-height: 1.7;
+    font-family: var(--font-devanagari), var(--font-body), sans-serif;
+    line-height: 1.72;
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
   }
 
   /* Fine body Hindi text */
   .devanagari-body {
-    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-family: var(--font-devanagari), var(--font-body), sans-serif;
     line-height: 1.8;
   }
 
@@ -967,6 +984,120 @@
       linear-gradient(90deg, transparent, hsl(var(--primary) / 0.34), transparent);
     height: 1px;
   }
+
+  .dark .app-frame {
+    background:
+      radial-gradient(circle at top left, hsl(var(--primary) / 0.11), transparent 30%),
+      radial-gradient(circle at top right, hsl(220 90% 24% / 0.16), transparent 34%),
+      linear-gradient(180deg, hsl(222 36% 7%), hsl(var(--background)));
+  }
+
+  .dark .app-main-shell {
+    background:
+      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--background))),
+      radial-gradient(circle at top, hsl(var(--primary) / 0.08), transparent 42%);
+  }
+
+  .dark .institution-panel {
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.94), hsl(222 30% 10% / 0.98)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.08), transparent 42%);
+    border-color: hsl(var(--border) / 0.82);
+    box-shadow: 0 22px 58px -34px hsl(0 0% 0% / 0.72);
+  }
+
+  .dark .institution-panel-muted {
+    background: hsl(var(--card) / 0.72);
+    border-color: hsl(var(--border) / 0.72);
+  }
+
+  .dark .institution-kpi,
+  .dark .dashboard-masthead,
+  .dark .calendar-masthead,
+  .dark .aalekh-masthead,
+  .dark .vimarsh-masthead,
+  .dark .dayitv-masthead,
+  .dark .feed-masthead,
+  .dark .library-masthead,
+  .dark .directory-masthead,
+  .dark .history-masthead,
+  .dark .prachar-masthead,
+  .dark .home-hero-panel,
+  .dark .home-band-card,
+  .dark .home-path-card {
+    background:
+      linear-gradient(135deg, hsl(var(--card) / 0.96), hsl(222 30% 10% / 0.98)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 38%);
+  }
+
+  .dark .demo-bridge-bg,
+  .dark .home-hero-bg {
+    background:
+      radial-gradient(circle at 15% 15%, hsl(var(--primary) / 0.16), transparent 30%),
+      radial-gradient(circle at 85% 18%, hsl(220 85% 25% / 0.22), transparent 34%),
+      linear-gradient(135deg, hsl(222 38% 7%), hsl(222 30% 10%));
+  }
+
+  .dark .demo-bridge-copy {
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.9), hsl(222 30% 10% / 0.96)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .dark .calendar-summary-card,
+  .dark .calendar-grid-card,
+  .dark .calendar-side-card,
+  .dark .aalekh-article-card,
+  .dark .prachar-campaign-card,
+  .dark .prachar-studio-card {
+    background-color: hsl(var(--card) / 0.78);
+    border-color: hsl(var(--border) / 0.76);
+  }
+
+  .dark .shell-role-chip,
+  .dark .demo-account-chip,
+  .dark .aalekh-values-item,
+  .dark .home-process-step {
+    background-color: hsl(var(--card) / 0.72);
+    border-color: hsl(var(--border) / 0.78);
+  }
+
+  .dark .glass-card {
+    background-color: hsl(var(--card) / 0.76);
+    border-color: hsl(var(--border) / 0.72);
+  }
+
+  .dark .status-draft {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--border));
+  }
+
+  .dark .text-foreground\/70 {
+    color: hsl(var(--foreground) / 0.8);
+  }
+
+  .dark .text-foreground\/75,
+  .dark .text-foreground\/80 {
+    color: hsl(var(--foreground) / 0.86);
+  }
+
+  .dark .text-foreground\/85,
+  .dark .text-foreground\/90 {
+    color: hsl(var(--foreground) / 0.94);
+  }
+
+  .dark .text-muted-foreground\/55,
+  .dark .text-muted-foreground\/60 {
+    color: hsl(var(--muted-foreground) / 0.72);
+  }
+
+  .dark .text-muted-foreground\/70,
+  .dark .text-muted-foreground\/72,
+  .dark .text-muted-foreground\/75,
+  .dark .text-muted-foreground\/80 {
+    color: hsl(var(--muted-foreground) / 0.86);
+  }
 }
 
 /* ── Reduced-motion guard ────────────────────────────────────────────────── */
@@ -989,3 +1120,5 @@
     animation: none !important;
   }
 }
+
+
