@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
-import { canAccessPathForRoles, getRoleLandingPath } from "@/lib/app/role-routing";
+import { canAccessPathForPrimaryRole, getRoleLandingPath } from "@/lib/app/role-routing";
 import type { RoleCode } from "@/lib/permissions/types";
 
 const DEMO_ACCOUNTS = [
@@ -21,7 +21,7 @@ const DEMO_ACCOUNTS = [
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo") || "/dashboard";
+  const requestedReturnTo = searchParams.get("returnTo");
   const { lang, setLang } = useAppContext();
   const isHi = lang === "hi";
 
@@ -62,14 +62,15 @@ function LoginForm() {
           : [authPayload?.primaryRoleCode]
       ).filter(Boolean) as RoleCode[];
 
-      const roleLandingPath = getRoleLandingPath(roleCodes);
-      const destination = new URL(returnTo, window.location.origin);
+      const primaryRoleCode = authPayload?.primaryRoleCode as RoleCode | undefined;
+      const roleLandingPath = getRoleLandingPath(roleCodes, primaryRoleCode);
+      const destination = new URL(requestedReturnTo || roleLandingPath, window.location.origin);
       if (destination.origin !== window.location.origin) {
         destination.pathname = roleLandingPath;
         destination.search = "";
         destination.hash = "";
       }
-      if (!canAccessPathForRoles(destination.pathname, roleCodes)) {
+      if (!canAccessPathForPrimaryRole(destination.pathname, primaryRoleCode)) {
         destination.pathname = roleLandingPath;
         destination.search = "";
         destination.hash = "";

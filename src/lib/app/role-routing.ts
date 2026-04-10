@@ -57,8 +57,8 @@ export function getHighestRole(roleCodes: readonly RoleCode[] | null | undefined
   return roles.reduce((best, role) => (ROLE_PRIORITY[role] < ROLE_PRIORITY[best] ? role : best), roles[0]);
 }
 
-export function getRoleLandingPath(roleCodes: readonly RoleCode[] | null | undefined) {
-  const primaryRole = getHighestRole(roleCodes);
+export function getRoleLandingPath(roleCodes: readonly RoleCode[] | null | undefined, primaryRoleCode?: RoleCode | null) {
+  const primaryRole = primaryRoleCode ?? getHighestRole(roleCodes);
 
   if (primaryRole === "super_admin" || primaryRole === "org_admin") return "/super-admin";
   if (
@@ -83,4 +83,9 @@ export function canAccessPathForRoles(pathname: string, roleCodes: readonly Role
   if (!allowedRoles) return true;
   const roles = roleCodes ?? [];
   return roles.some((role) => allowedRoles.includes(role));
+}
+
+export function canAccessPathForPrimaryRole(pathname: string, primaryRoleCode: RoleCode | null | undefined) {
+  if (!primaryRoleCode) return false;
+  return canAccessPathForRoles(pathname, [primaryRoleCode]);
 }

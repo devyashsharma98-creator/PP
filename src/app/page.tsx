@@ -16,5 +16,5 @@ export default async function Page() {
   if (!session) return <LoginPageClient />;
 
   const verifiedSession = await getSession();
-  redirect(getRoleLandingPath(verifiedSession?.effectiveRoleCodes));
+  redirect(getRoleLandingPath(verifiedSession?.effectiveRoleCodes, verifiedSession?.primaryRoleCode));
 }

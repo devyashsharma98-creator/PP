@@ -21,21 +21,22 @@ export function MobileBottomNav() {
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
   );
 
-  const primaryNav = useMemo(() => getMobilePrimaryNav(viewer?.effectiveRoles ?? null), [viewer?.effectiveRoles]);
+  const primaryRoleCodes = useMemo(() => (viewer?.primaryRoleCode ? [viewer.primaryRoleCode] : null), [viewer?.primaryRoleCode]);
+  const primaryNav = useMemo(() => getMobilePrimaryNav(primaryRoleCodes), [primaryRoleCodes]);
   const primaryPaths = useMemo(() => new Set(primaryNav.map((item) => item.path)), [primaryNav]);
   const overflowGroups = useMemo(
     () =>
-      getNavGroups(showAdminControls, viewer?.effectiveRoles ?? null)
+      getNavGroups(showAdminControls, primaryRoleCodes)
         .map((group) => ({
           ...group,
           items: group.items.filter((item) => !primaryPaths.has(item.path)),
         }))
         .filter((group) => group.items.length > 0),
-    [primaryPaths, showAdminControls, viewer?.effectiveRoles],
+    [primaryPaths, primaryRoleCodes, showAdminControls],
   );
   const overflowItems = useMemo(
-    () => getOverflowNavItems(showAdminControls, viewer?.effectiveRoles ?? null).filter((item) => !primaryPaths.has(item.path)),
-    [primaryPaths, showAdminControls, viewer?.effectiveRoles],
+    () => getOverflowNavItems(showAdminControls, primaryRoleCodes).filter((item) => !primaryPaths.has(item.path)),
+    [primaryPaths, primaryRoleCodes, showAdminControls],
   );
   const overflowActive = overflowItems.some((item) => pathname === item.path);
 

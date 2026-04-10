@@ -2,7 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getRoleLandingPath, canAccessPathForRoles } from "@/lib/app/role-routing";
+import { getRoleLandingPath, canAccessPathForPrimaryRole } from "@/lib/app/role-routing";
 import { getSession } from "@/lib/auth/session";
 import type { RoleCode } from "@/lib/permissions/types";
 
@@ -17,13 +17,14 @@ export async function requirePageSession(
   }
 
   const roleCodes = session.effectiveRoleCodes;
+  const primaryRoleCode = session.primaryRoleCode;
   const isAllowedByExplicitRule = options.allowedRoles
-    ? roleCodes.some((role) => options.allowedRoles?.includes(role))
+    ? options.allowedRoles.includes(primaryRoleCode)
     : true;
-  const isAllowedByRouteRule = canAccessPathForRoles(returnTo, roleCodes);
+  const isAllowedByRouteRule = canAccessPathForPrimaryRole(returnTo, primaryRoleCode);
 
   if (!isAllowedByExplicitRule || !isAllowedByRouteRule) {
-    redirect(getRoleLandingPath(roleCodes));
+    redirect(getRoleLandingPath(roleCodes, primaryRoleCode));
   }
 
   return session;
