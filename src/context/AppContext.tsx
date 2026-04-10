@@ -406,6 +406,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [loadRemoteBootstrap, demoDataFallbackEnabled]);
 
   useEffect(() => {
+    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+    document.documentElement.dataset.appLang = lang;
+    window.localStorage.setItem('pp_lang', lang);
+  }, [lang]);
+
+  useEffect(() => {
+    const savedLang = window.localStorage.getItem('pp_lang');
+    if (savedLang === 'hi' || savedLang === 'en') {
+      setLang(savedLang);
+    }
+  }, []);
+
+  useEffect(() => {
     if (pathname === '/login') {
       setViewer(null);
       setPermissions(defaultPermissions);

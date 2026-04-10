@@ -19,7 +19,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         display: ['Fraunces', 'serif'],
         body: ['Inter', 'sans-serif'],
-        devanagari: ['Noto Serif Devanagari', 'serif'],
+        devanagari: ['Noto Sans Devanagari', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
