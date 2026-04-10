@@ -17,12 +17,13 @@ export function AppLayoutShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { authReady } = useAppContext();
+  const { authReady, isAuthenticated } = useAppContext();
 
   const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
+  const isGuestRootEntry = pathname === "/" && !isAuthenticated;
   const isPaddedPublicRoute = PADDED_PUBLIC_PATHS.has(pathname);
 
-  if (isFullBleedPublicRoute) {
+  if (isFullBleedPublicRoute || isGuestRootEntry) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden">
         <PageTransition>{children}</PageTransition>

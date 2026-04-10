@@ -52,8 +52,15 @@ function LoginForm() {
         return;
       }
 
-      // Force a full reload so the root app provider re-bootstraps with the new auth session.
-      window.location.assign(returnTo);
+      // Force a fresh page load so Hostinger cannot serve stale protected-page HTML/chunk references after deploys.
+      const destination = new URL(returnTo, window.location.origin);
+      if (destination.origin !== window.location.origin) {
+        destination.pathname = "/dashboard";
+        destination.search = "";
+        destination.hash = "";
+      }
+      destination.searchParams.set("loginAt", String(Date.now()));
+      window.location.replace(`${destination.pathname}${destination.search}${destination.hash}`);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
