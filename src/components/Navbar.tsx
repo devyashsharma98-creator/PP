@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { getNavGroups } from '@/lib/app/navigation';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
@@ -249,6 +249,10 @@ export function Navbar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="institution-ledger-rail w-[300px] border-r border-sidebar-border p-0 text-sidebar-foreground">
+            <SheetTitle className="sr-only">{t("Mobile navigation", "मोबाइल नेविगेशन")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {t("Primary app navigation links.", "मुख्य ऐप नेविगेशन लिंक।")}
+            </SheetDescription>
             <div className="border-b border-sidebar-border px-6 py-4">
               <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">
                 {t('Bhopal Vibhag', 'भोपाल विभाग')}

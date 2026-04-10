@@ -6,11 +6,11 @@ import { QRCodeSVG } from "qrcode.react";
 
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/useT";
 import type { GatividhiEvent, VrittStatus } from "@/lib/app/contracts";
@@ -51,6 +51,9 @@ export function DashboardReviewOverlays({
                 <SheetTitle className="flex items-center gap-2 text-base font-devanagari">
                   <FileText className="h-4 w-4 text-primary" /> {t("Vritt — Post-Event Report", "वृत्त — कार्यक्रम विवरण")}
                 </SheetTitle>
+                <SheetDescription>
+                  {t("Update the post-event report, attendance count, and supporting media links.", "कार्यक्रमोत्तर विवरण, उपस्थिति संख्या और मीडिया लिंक अद्यतन करें।")}
+                </SheetDescription>
                 <p className="text-xs text-muted-foreground">
                   {vrittEvent.title} · {vrittEvent.date}
                 </p>
@@ -153,6 +156,9 @@ export function DashboardReviewOverlays({
             <DialogTitle className="flex items-center gap-2 font-devanagari">
               <QrCode className="h-5 w-5 text-amber-600" /> {t("Venue Check-in QR", "उपस्थिति क्यूआर कोड")}
             </DialogTitle>
+            <DialogDescription>
+              {t("Share this QR code for event attendance check-in.", "कार्यक्रम उपस्थिति चेक-इन के लिए यह क्यूआर साझा करें।")}
+            </DialogDescription>
             {qrEvent && <p className="mt-1 text-xs text-muted-foreground">{qrEvent.title}</p>}
           </DialogHeader>
 
@@ -191,3 +197,4 @@ export function DashboardReviewOverlays({
     </>
   );
 }
+

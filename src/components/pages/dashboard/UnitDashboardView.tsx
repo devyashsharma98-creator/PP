@@ -16,11 +16,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -342,6 +342,9 @@ export function UnitDashboardView({
             <DialogContent className="bg-popover sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="font-devanagari">{t("New Gatividhi", "नई गतिविधि")}</DialogTitle>
+                <DialogDescription>
+                  {t("Create a programme record and send it into the review workflow.", "कार्यक्रम रिकॉर्ड बनाकर समीक्षा प्रवाह में भेजें।")}
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -702,6 +705,9 @@ export function UnitDashboardView({
             <DialogTitle className="flex items-center gap-2 font-devanagari">
               <Vote className="h-4 w-4 text-amber-500" /> {t("Create Poll — Matdan", "मतदान बनाएं")}
             </DialogTitle>
+            <DialogDescription>
+              {t("Add a date or option poll for this event.", "इस कार्यक्रम के लिए तारीख या विकल्प मतदान जोड़ें।")}
+            </DialogDescription>
             {pollCreateEvent && <p className="mt-1 text-xs text-muted-foreground">{pollCreateEvent.title}</p>}
           </DialogHeader>
           <div className="space-y-4">
@@ -761,6 +767,9 @@ export function UnitDashboardView({
                 <SheetTitle className="flex items-center gap-2 text-base font-devanagari">
                   <Vote className="h-4 w-4 text-amber-500" /> {t("Poll Results — Matdan", "मतदान परिणाम")}
                 </SheetTitle>
+                <SheetDescription>
+                  {t("Review member votes and finalize the selected option.", "सदस्य मतदान देखें और चुने हुए विकल्प को अंतिम करें।")}
+                </SheetDescription>
                 <p className="text-xs text-muted-foreground">{pollResultsEvent.title}</p>
               </SheetHeader>
 
@@ -853,6 +862,9 @@ export function UnitDashboardView({
                 <SheetTitle className="text-base font-devanagari leading-snug">
                   {t("Registrations", "पंजीकरण")} — {responseEvent.title}
                 </SheetTitle>
+                <SheetDescription>
+                  {t("Review registration responses and participant details.", "पंजीकरण प्रतिक्रियाएँ और सहभागी विवरण देखें।")}
+                </SheetDescription>
                 <p className="text-xs text-muted-foreground">{responseEvent.date} · {responseEvent.unit}</p>
               </SheetHeader>
 
@@ -935,3 +947,4 @@ export function UnitDashboardView({
     </motion.div>
   );
 }
+

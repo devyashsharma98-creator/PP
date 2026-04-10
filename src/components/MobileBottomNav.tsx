@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Grid2x2, MoreHorizontal } from "lucide-react";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAppContext } from "@/context/AppContext";
 import { getMobilePrimaryNav, getNavGroups, getOverflowNavItems } from "@/lib/app/navigation";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,9 @@ export function MobileBottomNav() {
                 <Grid2x2 className="h-4 w-4 text-primary" />
                 {t("More Navigation", "अधिक नेविगेशन")}
               </SheetTitle>
+              <SheetDescription className="text-left">
+                {t("Secondary coordination and reference pages.", "द्वितीयक समन्वय और संदर्भ पृष्ठ।")}
+              </SheetDescription>
             </SheetHeader>
 
             <div className="space-y-5">

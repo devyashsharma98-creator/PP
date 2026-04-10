@@ -114,14 +114,6 @@ export function AppSidebar() {
       </nav>
 
       <div className="px-3 pb-4">
-        {!collapsed ? (
-          <div className="institution-panel-muted mb-3 space-y-2 px-3 py-3 text-xs text-sidebar-foreground/72">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/55">Current lane</p>
-            <p className="leading-5 text-sidebar-foreground/75">
-              Start at Overview for system health. Use Events, Aalekh, and Prachar to execute work.
-            </p>
-          </div>
-        ) : null}
         <button
           onClick={() => setCollapsed((current) => !current)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
