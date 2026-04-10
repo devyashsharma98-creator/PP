@@ -35,6 +35,13 @@ const workflowNavItems: NavItem[] = [
   { label: "Prachar", sublabel: "à¤ªà¥à¤°à¤šà¤¾à¤° à¤«à¥‰à¤²à¥‹-à¤¥à¥à¤°à¥‚", icon: Megaphone, path: "/prachar" },
 ];
 
+const mobilePrimaryNavItems: NavItem[] = [
+  { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Aalekh", sublabel: "आलेख", icon: PenLine, path: "/aalekh" },
+  { label: "Prachar", sublabel: "प्रचार", icon: Megaphone, path: "/prachar" },
+  { label: "Calendar", sublabel: "कैलेंडर", icon: Calendar, path: "/calendar" },
+];
+
 const coordinationNavItems: NavItem[] = [
   { label: "Calendar", sublabel: "à¤¯à¥‹à¤œà¤¨à¤¾ à¤µ à¤¤à¤¿à¤¥à¤¿à¤¯à¤¾à¤", icon: Calendar, path: "/calendar" },
   { label: "People", sublabel: "à¤¸à¤®à¥à¤ªà¤°à¥à¤• à¤µ à¤¸à¤®à¤¨à¥à¤µà¤¯", icon: Users, path: "/directory" },
@@ -72,7 +79,7 @@ export function getNavItems(showAdminControls: boolean) {
 }
 
 export function getMobilePrimaryNav() {
-  return workflowNavItems;
+  return mobilePrimaryNavItems;
 }
 
 export function getOverflowNavItems(showAdminControls: boolean) {

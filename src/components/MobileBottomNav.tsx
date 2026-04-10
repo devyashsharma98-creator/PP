@@ -22,8 +22,21 @@ export function MobileBottomNav() {
   );
 
   const primaryNav = useMemo(() => getMobilePrimaryNav(), []);
-  const overflowGroups = useMemo(() => getNavGroups(showAdminControls).slice(1), [showAdminControls]);
-  const overflowItems = useMemo(() => getOverflowNavItems(showAdminControls), [showAdminControls]);
+  const primaryPaths = useMemo(() => new Set(primaryNav.map((item) => item.path)), [primaryNav]);
+  const overflowGroups = useMemo(
+    () =>
+      getNavGroups(showAdminControls)
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => !primaryPaths.has(item.path)),
+        }))
+        .filter((group) => group.items.length > 0),
+    [primaryPaths, showAdminControls],
+  );
+  const overflowItems = useMemo(
+    () => getOverflowNavItems(showAdminControls).filter((item) => !primaryPaths.has(item.path)),
+    [primaryPaths, showAdminControls],
+  );
   const overflowActive = overflowItems.some((item) => pathname === item.path);
 
   return (
