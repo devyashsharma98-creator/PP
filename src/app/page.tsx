@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import Launchpad from "@/components/pages/Launchpad";
 import LoginPageClient from "@/components/pages/LoginPageClient";
 
 const NEON_SESSION_COOKIE = "pp_neon_session";
@@ -13,5 +13,5 @@ export default async function Page() {
 
   if (!session) return <LoginPageClient />;
 
-  return <Launchpad />;
+  redirect("/overview");
 }

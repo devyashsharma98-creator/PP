@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadCount } from '@/hooks/api/use-notifications';
 
 function getShellFrame(pathname: string, role: Role) {
-  if (pathname === '/') {
+  if (pathname === '/' || pathname === '/overview') {
     return {
       titleEn: 'Overview',
       titleHi: 'अवलोकन',
