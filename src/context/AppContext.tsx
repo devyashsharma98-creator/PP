@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import type {
   AalekhArticle,
   AppActionRequest,
@@ -247,6 +248,7 @@ const initialArticles: AalekhArticle[] = [
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
   const demoDataFallbackEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === 'true';
 
@@ -404,8 +406,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [loadRemoteBootstrap, demoDataFallbackEnabled]);
 
   useEffect(() => {
+    if (pathname === '/login') {
+      setViewer(null);
+      setPermissions(defaultPermissions);
+      setServerRole('karyakarta');
+      setAuthReady(true);
+      if (!demoDataFallbackEnabled) {
+        clearInternalData();
+      }
+      return;
+    }
     void loadRemoteBootstrap();
-  }, [loadRemoteBootstrap]);
+  }, [clearInternalData, demoDataFallbackEnabled, loadRemoteBootstrap, pathname]);
 
   const addEvent = useCallback(async (event: Omit<GatividhiEvent, 'id' | 'status'>) => {
     if (!permissions.canCreateEvent) return false;
