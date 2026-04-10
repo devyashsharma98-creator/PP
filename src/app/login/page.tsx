@@ -18,7 +18,7 @@ const DEMO_ACCOUNTS = [
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo") || "/dashboard";
+  const returnTo = searchParams.get("returnTo") || "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,7 +46,11 @@ function LoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || data.message || 'Invalid credentials');
+        const message =
+          (typeof data?.error === "string" ? data.error : data?.error?.message) ||
+          data?.message ||
+          "Invalid credentials";
+        setError(message);
         setLoading(false);
         return;
       }

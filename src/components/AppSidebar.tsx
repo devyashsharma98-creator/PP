@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { useAppContext } from "@/context/AppContext";
-import { getNavItems } from "@/lib/app/navigation";
+import { getNavGroups } from "@/lib/app/navigation";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +24,7 @@ export function AppSidebar() {
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
   );
-  const navItems = useMemo(() => getNavItems(showAdminControls), [showAdminControls]);
+  const navGroups = useMemo(() => getNavGroups(showAdminControls), [showAdminControls]);
 
   return (
     <aside
@@ -54,7 +54,7 @@ export function AppSidebar() {
                   Internal institutional console
                 </p>
                 <p className="text-[11px] leading-5 text-sidebar-foreground/72">
-                  Civilisational discourse, organised action.
+                  ERP workflow, approvals, and coordination.
                 </p>
               </motion.div>
             ) : null}
@@ -62,46 +62,55 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
-        {navItems.map((item) => {
-          const active = pathname === item.path;
+      <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-4">
+        {navGroups.map((group) => (
+          <div key={group.title} className="space-y-1">
+            {!collapsed ? (
+              <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">
+                {t(group.title, group.titleHi)}
+              </p>
+            ) : null}
+            {group.items.map((item) => {
+              const active = pathname === item.path;
 
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                active
-                  ? "bg-sidebar-primary/95 text-sidebar-primary-foreground shadow-[0_14px_32px_-24px_hsl(27_100%_50%/0.95)]"
-                  : "text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-            >
-              {active ? (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute bottom-2 left-0 top-2 w-[3px] rounded-full bg-primary shadow-[0_0_10px_hsl(27_100%_50%/0.7)]"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                />
-              ) : null}
-              <item.icon className={cn("h-4 w-4 shrink-0", active ? "drop-shadow-sm" : "")} />
-              <AnimatePresence>
-                {!collapsed ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <span className={cn("text-xs", lang === "hi" ? "font-devanagari" : "")}>
-                      {t(item.label, item.sublabel)}
-                    </span>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                    active
+                      ? "bg-sidebar-primary/95 text-sidebar-primary-foreground shadow-[0_14px_32px_-24px_hsl(27_100%_50%/0.95)]"
+                      : "text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  )}
+                >
+                  {active ? (
+                    <motion.div
+                      layoutId="sidebar-active"
+                      className="absolute bottom-2 left-0 top-2 w-[3px] rounded-full bg-primary shadow-[0_0_10px_hsl(27_100%_50%/0.7)]"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  ) : null}
+                  <item.icon className={cn("h-4 w-4 shrink-0", active ? "drop-shadow-sm" : "")} />
+                  <AnimatePresence>
+                    {!collapsed ? (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <span className={cn("text-xs", lang === "hi" ? "font-devanagari" : "")}>
+                          {t(item.label, item.sublabel)}
+                        </span>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="px-3 pb-4">
@@ -109,7 +118,7 @@ export function AppSidebar() {
           <div className="institution-panel-muted mb-3 space-y-2 px-3 py-3 text-xs text-sidebar-foreground/72">
             <p className="text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/55">Current lane</p>
             <p className="leading-5 text-sidebar-foreground/75">
-              Review, publication, unit coordination, and governed access.
+              Start at Overview for system health. Use Events, Aalekh, and Prachar to execute work.
             </p>
           </div>
         ) : null}

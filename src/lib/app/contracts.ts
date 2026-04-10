@@ -179,6 +179,87 @@ export interface AppBootstrapPayload {
   viewer?: AppViewerContext | null;
 }
 
+export interface AppOverviewLoginRecord {
+  userId: string;
+  displayName: string | null;
+  email: string | null;
+  lastLoginAt: string | null;
+  primaryRoleCode: CanonicalRoleCode | null;
+  isActive: boolean;
+}
+
+export interface AppOverviewActorRecord {
+  userId: string;
+  displayName: string | null;
+  email: string | null;
+  createdCount: number;
+  reviewCount: number;
+  publishedCount: number;
+  lastActionAt: string | null;
+}
+
+export interface AppOverviewWorkflowSummary {
+  pendingEvents: number;
+  pendingArticles: number;
+  openPracharCampaigns: number;
+  publishedEvents: number;
+  publishedArticles: number;
+  stalledEvents: number;
+  stalledArticles: number;
+  roleLaneCounts: Array<{
+    lane: string;
+    count: number;
+  }>;
+  ownership: {
+    eventCreators: number;
+    articleAuthors: number;
+    activeContributors: number;
+  };
+}
+
+export interface AppOverviewHierarchySummary {
+  totalWarnings: number;
+  missingOrgRoles: string[];
+  missingUnitHeads: number;
+  missingAayamHeads: number;
+  inactiveAssignees: number;
+  workflowGaps: number;
+  warningMessages: string[];
+}
+
+export interface AppOverviewAdminDetails {
+  recentLogins: AppOverviewLoginRecord[];
+  recentActors: AppOverviewActorRecord[];
+  missingUnits: string[];
+  missingAayams: string[];
+  inactiveAssignmentHolders: Array<{
+    displayName: string | null;
+    email: string | null;
+    roleCode: CanonicalRoleCode;
+    scopeType: "org" | "unit" | "department" | "event" | "article";
+  }>;
+  workflowGapDetails: Array<{
+    lane: string;
+    count: number;
+    reason: string;
+  }>;
+}
+
+export interface AppOverviewPayload {
+  generatedAt: string;
+  login: {
+    totalAccounts: number;
+    activeAccounts: number;
+    loggedInToday: number;
+    loggedInLast7Days: number;
+    successLast30Days: number;
+    failedLast30Days: number;
+  };
+  workflow: AppOverviewWorkflowSummary;
+  hierarchy: AppOverviewHierarchySummary;
+  admin: AppOverviewAdminDetails | null;
+}
+
 export interface AppRoleAssignmentSummary {
   id: string;
   roleCode: CanonicalRoleCode;

@@ -248,7 +248,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       sql`SELECT * FROM public.event_polls`,
       sql`SELECT * FROM public.event_poll_options`,
       sql`SELECT * FROM public.event_poll_votes`,
-      sql`SELECT * FROM public.prachar_statuses`,
+      sql`SELECT * FROM public.prachar_statuses WHERE entity_type = 'event'`,
       sql`SELECT * FROM public.event_registrations`,
       sql`SELECT * FROM public.event_registration_answers`,
       sql`SELECT article_id, review_notes, created_at FROM public.article_reviews ORDER BY created_at DESC`,
@@ -288,7 +288,51 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     pollsByEvent.set(p.event_id, list);
   }
 
-  const pracharByEvent = new Map(pracharStatuses.map((p: any) => [p.event_id, p]));
+  const pracharByEvent = new Map<
+    string,
+    {
+      platforms: {
+        whatsapp: boolean;
+        facebook: boolean;
+        instagram: boolean;
+        telegram: boolean;
+      };
+      skipReasons: {
+        whatsapp: string | null;
+        facebook: string | null;
+        instagram: string | null;
+        telegram: string | null;
+      };
+      templateReference: string | null;
+    }
+  >();
+
+  for (const status of pracharStatuses as any[]) {
+    const eventId = status.entity_id;
+    if (!eventId) continue;
+    const current = pracharByEvent.get(eventId) ?? {
+      platforms: {
+        whatsapp: false,
+        facebook: false,
+        instagram: false,
+        telegram: false,
+      },
+      skipReasons: {
+        whatsapp: null,
+        facebook: null,
+        instagram: null,
+        telegram: null,
+      },
+      templateReference: null,
+    };
+    const platformKey = status.platform as "whatsapp" | "facebook" | "instagram" | "telegram";
+    if (platformKey in current.platforms) {
+      current.platforms[platformKey] = status.is_done ?? false;
+      current.skipReasons[platformKey] = status.skip_reason ?? null;
+    }
+    current.templateReference = status.template_ref ?? current.templateReference;
+    pracharByEvent.set(eventId, current);
+  }
 
   const optionsByPoll = new Map<string, any[]>();
   for (const o of pollOptions) {
@@ -431,18 +475,18 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       return {
         eventId: e.id,
         platforms: {
-          whatsapp: p?.whatsapp_done ?? false,
-          facebook: p?.facebook_done ?? false,
-          instagram: p?.instagram_done ?? false,
-          telegram: p?.telegram_done ?? false,
+          whatsapp: p?.platforms.whatsapp ?? false,
+          facebook: p?.platforms.facebook ?? false,
+          instagram: p?.platforms.instagram ?? false,
+          telegram: p?.platforms.telegram ?? false,
         },
         skipReasons: {
-          whatsapp: p?.whatsapp_skip_reason ?? null,
-          facebook: p?.facebook_skip_reason ?? null,
-          instagram: p?.instagram_skip_reason ?? null,
-          telegram: p?.telegram_skip_reason ?? null,
+          whatsapp: p?.skipReasons.whatsapp ?? null,
+          facebook: p?.skipReasons.facebook ?? null,
+          instagram: p?.skipReasons.instagram ?? null,
+          telegram: p?.skipReasons.telegram ?? null,
         },
-        templateReference: p?.template_reference ?? null,
+        templateReference: p?.templateReference ?? null,
       };
     });
 
@@ -675,53 +719,42 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     case "updatePracharPlatform": {
       const done = input.payload.done;
       const skipReason = done ? null : input.payload.skipReason ?? null;
-      if (input.payload.platform === "whatsapp") {
+      const updated = await sql`
+        update public.prachar_statuses
+        set
+          is_done = ${done},
+          skip_reason = ${skipReason},
+          done_by = ${actorId},
+          done_at = case when ${done} then now() else done_at end,
+          updated_at = now()
+        where entity_type = 'event'
+          and entity_id = ${input.payload.eventId}
+          and platform = ${input.payload.platform}
+        returning id
+      `;
+
+      if (!(updated as Array<{ id: string }>).length) {
         await sql`
-          insert into public.prachar_statuses (event_id, whatsapp_done, whatsapp_skip_reason, last_updated_by, last_updated_at)
-          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
-          on conflict (event_id)
-          do update set
-            whatsapp_done = excluded.whatsapp_done,
-            whatsapp_skip_reason = excluded.whatsapp_skip_reason,
-            last_updated_by = excluded.last_updated_by,
-            last_updated_at = excluded.last_updated_at,
-            updated_at = now()
-        `;
-      } else if (input.payload.platform === "facebook") {
-        await sql`
-          insert into public.prachar_statuses (event_id, facebook_done, facebook_skip_reason, last_updated_by, last_updated_at)
-          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
-          on conflict (event_id)
-          do update set
-            facebook_done = excluded.facebook_done,
-            facebook_skip_reason = excluded.facebook_skip_reason,
-            last_updated_by = excluded.last_updated_by,
-            last_updated_at = excluded.last_updated_at,
-            updated_at = now()
-        `;
-      } else if (input.payload.platform === "instagram") {
-        await sql`
-          insert into public.prachar_statuses (event_id, instagram_done, instagram_skip_reason, last_updated_by, last_updated_at)
-          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
-          on conflict (event_id)
-          do update set
-            instagram_done = excluded.instagram_done,
-            instagram_skip_reason = excluded.instagram_skip_reason,
-            last_updated_by = excluded.last_updated_by,
-            last_updated_at = excluded.last_updated_at,
-            updated_at = now()
-        `;
-      } else {
-        await sql`
-          insert into public.prachar_statuses (event_id, telegram_done, telegram_skip_reason, last_updated_by, last_updated_at)
-          values (${input.payload.eventId}, ${done}, ${skipReason}, ${actorId}, now())
-          on conflict (event_id)
-          do update set
-            telegram_done = excluded.telegram_done,
-            telegram_skip_reason = excluded.telegram_skip_reason,
-            last_updated_by = excluded.last_updated_by,
-            last_updated_at = excluded.last_updated_at,
-            updated_at = now()
+          insert into public.prachar_statuses (
+            org_id,
+            entity_type,
+            entity_id,
+            platform,
+            is_done,
+            skip_reason,
+            done_by,
+            done_at
+          )
+          values (
+            ${orgId},
+            'event',
+            ${input.payload.eventId},
+            ${input.payload.platform},
+            ${done},
+            ${skipReason},
+            ${actorId},
+            case when ${done} then now() else null end
+          )
         `;
       }
       return { ok: true };

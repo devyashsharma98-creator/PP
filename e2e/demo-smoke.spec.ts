@@ -76,17 +76,17 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     );
   });
 
-  test("3 — login with demo account redirects to dashboard", async ({
+  test("3 - login with demo account redirects into the ERP flow", async ({
     page,
   }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    // Check if we made it to dashboard
+    // Check if we made it into the authenticated ERP flow
     const currentUrl = page.url();
-    if (currentUrl.includes("/dashboard")) {
-      // Success — dashboard loaded
+    if (!currentUrl.includes("/login")) {
+      // Success — authenticated flow loaded
       await expect(page.locator("body")).toContainText(
-        /dashboard|gatividhi|गतिविधि/i,
+        /Operational|ERP|Internal institutional console|Pragya Pravah/i,
       );
     } else if (currentUrl.includes("/login")) {
       // Login failed — check if there's an error message (auth service issue)
@@ -147,7 +147,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes("/dashboard")) {
+    if (currentUrl.includes("/login")) {
       test.skip(true, "Login did not succeed — auth service issue");
       return;
     }
@@ -164,7 +164,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes("/dashboard")) {
+    if (currentUrl.includes("/login")) {
       test.skip(true, "Login did not succeed — auth service issue");
       return;
     }
@@ -179,7 +179,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("8b - prachar presents the command center masthead", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -195,7 +195,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("8c - prachar shows campaign distribution accountability", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -211,7 +211,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("8d - prachar exposes the creative studio", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -226,7 +226,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes("/dashboard")) {
+    if (currentUrl.includes("/login")) {
       test.skip(true, "Login did not succeed — auth service issue");
       return;
     }
@@ -241,7 +241,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9b - aalekh presents the karyakarta writing lane", async ({ page }) => {
     await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -258,7 +258,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9c - aalekh presents the unit-head review lane", async ({ page }) => {
     await loginAs(page, UNITHEAD_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -275,7 +275,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9d - aalekh presents the aayam thematic review lane", async ({ page }) => {
     await loginAs(page, AAYAM_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -292,7 +292,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9e - calendar presents the institutional planning masthead", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -308,7 +308,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9f - calendar shows the hybrid planning surface", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -324,7 +324,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("9g - calendar exposes agenda and reminder framing", async ({ page }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -340,7 +340,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
     const currentUrl = page.url();
-    if (!currentUrl.includes("/dashboard")) {
+    if (currentUrl.includes("/login")) {
       test.skip(true, "Login did not succeed — auth service issue");
       return;
     }
@@ -371,10 +371,13 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   }) => {
     await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
+
+    await page.goto("/dashboard");
+    await page.waitForLoadState("networkidle");
 
     await expect(page.getByText(/Bhopal Vibhag/i).first()).toBeVisible();
     await expect(page.getByText(/Vibhag Pramukh|विभाग प्रमुख/i)).toBeVisible();
@@ -388,7 +391,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
   test("12b - admin account collapses to vibhag-pramukh UI", async ({ page }) => {
     await loginAs(page, ADMIN_EMAIL, DEMO_PASSWORD);
 
-    if (!page.url().includes("/dashboard")) {
+    if (page.url().includes("/login")) {
       test.skip(true, "Login did not succeed - auth service issue");
       return;
     }
@@ -400,61 +403,64 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
   });
 
-  test("13 - homepage introduces Pragya Pravah and offers three clear entry paths", async ({
-    page,
-  }) => {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+  test("13 - root redirects unauthenticated users to the ERP login entry", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const main = page.locator("main");
+  await page.waitForURL("**/login**", { timeout: 10_000 });
+  await expect(page.locator("main").getByRole("heading", { name: /Pragya Pravah/i })).toBeVisible();
+  await expect(page.locator("main")).toContainText(/Internal access panel|Secure access/i);
+  await expect(page.locator("body")).not.toContainText(/global network|Fields of Work|Choose Your Path/i);
+});
 
-    await expect(main.getByText(/Pragya Pravah/i).first()).toBeVisible();
-    await expect(main.getByText(/global network|वैश्विक तंत्र/i).first()).toBeVisible();
-    await expect(
-      main
-        .getByRole("link", { name: /Understand the Vision|दृष्टि समझें/i })
-        .first(),
-    ).toBeVisible();
-    await expect(
-      main
-        .getByRole("link", {
-          name: /Enter Demo Console|डेमो प्रणाली खोलें/i,
-        })
-        .first(),
-    ).toBeVisible();
-    await expect(
-      main
-        .getByRole("link", {
-          name: /Connect with the Network|संवाद से जुड़ें/i,
-        })
-        .first(),
-    ).toBeVisible();
-    await expect(main.getByText(/Fields of Work|कार्य के आयाम/i).first()).toBeVisible();
-    await expect(
-      main.getByText(/Choose Your Path|अपना मार्ग चुनें/i).first(),
-    ).toBeVisible();
-    await expect(
-      main.getByRole("heading", { name: /The flow of mission/i }).first(),
-    ).toBeVisible();
-    await expect(page.getByText(/Activity ledger/i)).toHaveCount(0);
-    await expect(page.getByText(/Karyakarta \(Writer\)/i)).toHaveCount(0);
-  });
+test("13b - authenticated / shows the ERP operational home", async ({ page }) => {
+  await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
-  test("13b - authenticated / shows ERP launchpad (not public landing)", async ({ page }) => {
-    await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
+  if (page.url().includes("/login")) {
+    test.skip(true, "Login did not succeed - auth service issue");
+    return;
+  }
 
-    if (!page.url().includes("/dashboard")) {
-      test.skip(true, "Login did not succeed - auth service issue");
-      return;
-    }
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("main")).toContainText(/Overview|Approval visibility|Hierarchy health/i, { timeout: 15000 });
+  await expect(page.locator("main")).not.toContainText(/Enter Demo Console/i);
+});
 
-    await expect(page.locator("header")).toContainText(/Internal institutional console/i);
-    await expect(page.locator("main")).toContainText(/ERP Launchpad|Operational Home/i);
-    await expect(page.getByRole("link", { name: /Enter Demo Console/i })).toHaveCount(0);
-  });
+test("13c - all logged-in roles see summary oversight without admin-only detail", async ({ page }) => {
+  await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
 
-  test("14 - /directory redirects unauthenticated user to /login", async ({ page }) => {
+  if (page.url().includes("/login")) {
+    test.skip(true, "Login did not succeed - auth service issue");
+    return;
+  }
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("main")).toContainText(/Login health/i, { timeout: 15000 });
+  await expect(page.locator("main")).toContainText(/Approval visibility/i, { timeout: 15000 });
+  await expect(page.locator("main")).toContainText(/Hierarchy health/i, { timeout: 15000 });
+  await expect(page.locator("main")).not.toContainText(/Recent logins|Recent workflow actors|Open System Access/i);
+});
+
+test("13d - admin roles can see exact login and actor detail", async ({ page }) => {
+  await loginAs(page, ADMIN_EMAIL, DEMO_PASSWORD);
+
+  if (page.url().includes("/login")) {
+    test.skip(true, "Login did not succeed - auth service issue");
+    return;
+  }
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("main")).toContainText(/Admin detail/i);
+  await expect(page.locator("main")).toContainText(/Recent logins/i);
+  await expect(page.locator("main")).toContainText(/Recent workflow actors/i);
+  await expect(page.locator("main")).toContainText(/Open System Access/i);
+});
+
+test("14 - /directory redirects unauthenticated user to /login", async ({ page }) => {
     await page.context().clearCookies();
 
     await page.goto("/directory");

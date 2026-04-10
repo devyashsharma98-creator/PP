@@ -1,56 +1,49 @@
-import { NextRequest } from 'next/server';
-import { NotificationService } from '@/lib/server/services/notification.service';
-import { notificationFiltersSchema } from '@/lib/server/validation/notifications';
-import { json, errorResponse, unauthorized } from '@/lib/server/api/response';
-import { requireAuth } from '@/lib/server/middleware/auth';
+import "server-only";
 
-export async function GET(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
-  }
+import { NextRequest } from "next/server";
 
+import { NotificationService } from "@/lib/server/services/notification.service";
+import { notificationFiltersSchema } from "@/lib/server/validation/notifications";
+import { withAuth } from "@/lib/middleware/with-auth";
+import { apiSuccess, badRequest, serverError } from "@/lib/response";
+
+export const GET = withAuth(async (req: NextRequest, ctx) => {
   const { searchParams } = new URL(req.url);
   const filters = {
-    is_read: searchParams.get('is_read') === 'true' ? true : searchParams.get('is_read') === 'false' ? false : undefined,
-    kind: searchParams.get('kind') || undefined,
-    page: parseInt(searchParams.get('page') || '1'),
-    limit: parseInt(searchParams.get('limit') || '20'),
+    is_read: searchParams.get("is_read") === "true" ? true : searchParams.get("is_read") === "false" ? false : undefined,
+    kind: searchParams.get("kind") || undefined,
+    page: parseInt(searchParams.get("page") || "1", 10),
+    limit: parseInt(searchParams.get("limit") || "20", 10),
   };
 
   const parsed = notificationFiltersSchema.safeParse(filters);
   if (!parsed.success) {
-    return errorResponse(400, 'VALIDATION_ERROR', parsed.error.errors[0].message);
+    return badRequest(parsed.error.errors[0]?.message ?? "Invalid notifications query.");
   }
 
   try {
     const service = new NotificationService();
-    const result = await service.listForUser(auth.userId, parsed.data);
-    return json(result.data, { meta: result.pagination });
+    const result = await service.listForUser(ctx.session.userId, parsed.data);
+    return apiSuccess(result.data, { meta: result.pagination });
   } catch (error) {
-    console.error('Notifications list error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to fetch notifications');
+    console.error("Notifications list error:", error);
+    return serverError("Failed to fetch notifications");
   }
-}
+});
 
-export async function PATCH(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) {
-    return unauthorized();
-  }
-
+export const PATCH = withAuth(async (req: NextRequest, ctx) => {
   try {
     const body = await req.json();
     const service = new NotificationService();
 
     if (body.mark_all_read) {
-      await service.markAllAsRead(auth.userId);
-      return json({ success: true });
+      await service.markAllAsRead(ctx.session.userId);
+      return apiSuccess({ success: true });
     }
 
-    return errorResponse(400, 'VALIDATION_ERROR', 'Invalid request');
+    return badRequest("Invalid notification update request.");
   } catch (error) {
-    console.error('Notifications update error:', error);
-    return errorResponse(500, 'INTERNAL_ERROR', 'Failed to update notifications');
+    console.error("Notifications update error:", error);
+    return serverError("Failed to update notifications");
   }
-}
+});

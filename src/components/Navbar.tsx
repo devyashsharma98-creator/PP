@@ -9,7 +9,7 @@ import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { getNavItems } from '@/lib/app/navigation';
+import { getNavGroups } from '@/lib/app/navigation';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -18,6 +18,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadCount } from '@/hooks/api/use-notifications';
 
 function getShellFrame(pathname: string, role: Role) {
+  if (pathname === '/') {
+    return {
+      titleEn: 'Overview',
+      titleHi: 'अवलोकन',
+      subtitleEn: 'Start here for system health, hierarchy checks, and cross-workflow visibility.',
+      subtitleHi: 'सिस्टम health, hierarchy checks और workflow visibility के लिए यहीं से शुरुआत करें।',
+    };
+  }
+
   if (pathname === '/dashboard') {
     if (role === 'vibhag_pramukh') {
       return {
@@ -38,10 +47,10 @@ function getShellFrame(pathname: string, role: Role) {
     }
 
     return {
-      titleEn: 'Gatividhi Desk',
-      titleHi: 'गतिविधि डेस्क',
-      subtitleEn: 'Programme planning, review movement, and follow-through for your unit in one place.',
-      subtitleHi: 'आपकी इकाई के लिए योजना, समीक्षा प्रवाह और अनुवर्ती कार्य एक ही स्थान पर।',
+      titleEn: 'Events & Approvals',
+      titleHi: 'कार्यक्रम व अनुमोदन',
+      subtitleEn: 'Plan programmes, move them through review, and complete the event workflow here.',
+      subtitleHi: 'कार्यक्रम योजना, review flow और final event execution यहीं से चलाएँ।',
     };
   }
 
@@ -64,15 +73,15 @@ function getShellFrame(pathname: string, role: Role) {
       match: '/prachar',
       titleEn: 'Prachar Desk',
       titleHi: 'प्रचार डेस्क',
-      subtitleEn: 'Publication follow-through, circulation records, and outreach rhythm.',
-      subtitleHi: 'प्रकाशन के बाद का प्रचार कार्य, प्रसार अभिलेख और संवाद लय।',
+      subtitleEn: 'Close distribution gaps, confirm channel coverage, and finish outreach follow-through.',
+      subtitleHi: 'distribution gaps बंद करें, channel coverage confirm करें, और outreach follow-through पूरा करें।',
     },
     {
       match: '/aalekh',
       titleEn: 'Aalekh Desk',
       titleHi: 'आलेख डेस्क',
-      subtitleEn: 'Drafts, review notes, and publication readiness for institutional writing.',
-      subtitleHi: 'संस्थागत लेखन के लिए प्रारूप, समीक्षा टिप्पणियाँ और प्रकाशन तैयारी।',
+      subtitleEn: 'Write, review, revise, and prepare institutional content for publication.',
+      subtitleHi: 'लेखन, समीक्षा, correction और publication-ready content यहीं तैयार करें।',
     },
     {
       match: '/feed',
@@ -139,7 +148,7 @@ export function Navbar() {
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
   );
-  const navigationItems = useMemo(() => getNavItems(showAdminControls), [showAdminControls]);
+  const navigationGroups = useMemo(() => getNavGroups(showAdminControls), [showAdminControls]);
   const currentRoleLabel = viewer?.primaryRoleCode
     ? (lang === 'hi' ? canonicalRoleLabelsHi[viewer.primaryRoleCode] : canonicalRoleLabels[viewer.primaryRoleCode])
     : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]);
@@ -261,28 +270,35 @@ export function Navbar() {
                 </div>
               </div>
             </div>
-            <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-              {navigationItems.map((item) => {
-                const active = pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <item.icon className={cn('w-4 h-4 shrink-0', active && 'text-primary')} />
-                    <span className={cn('block leading-none', lang === 'hi' && 'font-devanagari')}>
-                      {t(item.label, item.sublabel)}
-                    </span>
-                  </Link>
-                );
-              })}
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
+              {navigationGroups.map((group) => (
+                <div key={group.title} className="mb-4 space-y-1">
+                  <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">
+                    {t(group.title, group.titleHi)}
+                  </p>
+                  {group.items.map((item) => {
+                    const active = pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                          active
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        )}
+                      >
+                        <item.icon className={cn('w-4 h-4 shrink-0', active && 'text-primary')} />
+                        <span className={cn('block leading-none', lang === 'hi' && 'font-devanagari')}>
+                          {t(item.label, item.sublabel)}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
             </nav>
           </SheetContent>
         </Sheet>

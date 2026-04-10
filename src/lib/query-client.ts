@@ -27,4 +27,5 @@ export const queryKeys = {
   user: (id: string) => ['user', id] as const,
   notifications: (filters?: Record<string, unknown>) => ['notifications', filters] as const,
   unreadCount: () => ['notifications', 'unread-count'] as const,
+  overview: () => ['app', 'overview'] as const,
 };

@@ -27,12 +27,12 @@ export interface AuthContext {
   permissions: ReturnType<typeof resolvePermissions>;
 }
 
-type RouteParams = { params: Promise<Record<string, string>> };
+type RouteParams = { params: Promise<unknown> };
 
 export type AuthedHandler = (
   req: NextRequest,
   ctx: AuthContext,
-  params?: Record<string, string>
+  params?: Record<string, string> | unknown
 ) => Promise<NextResponse | Response>;
 
 // ── Core wrapper ──────────────────────────────────────────────────────────────
