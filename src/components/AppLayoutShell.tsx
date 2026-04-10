@@ -11,21 +11,15 @@ import { useAppContext } from "@/context/AppContext";
 const FULL_BLEED_PUBLIC_PATHS = new Set(["/login"]);
 const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh"]);
 
-type RootHomeMode = "public" | "internal";
-
 export function AppLayoutShell({
   children,
-  rootHomeMode = "public",
 }: {
   children: React.ReactNode;
-  rootHomeMode?: RootHomeMode;
 }) {
   const pathname = usePathname();
-  const { authReady, viewer } = useAppContext();
-  const isAuthenticated = Boolean(viewer);
+  const { authReady } = useAppContext();
 
-  const treatRootAsPublic = pathname === "/" && !isAuthenticated && rootHomeMode === "public";
-  const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname) || treatRootAsPublic;
+  const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
   const isPaddedPublicRoute = PADDED_PUBLIC_PATHS.has(pathname);
 
   if (isFullBleedPublicRoute) {
