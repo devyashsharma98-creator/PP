@@ -9,7 +9,12 @@ import { Skeleton } from "@/components/Skeletons";
 import { useAppContext } from "@/context/AppContext";
 
 const FULL_BLEED_PUBLIC_PATHS = new Set(["/login"]);
-const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh"]);
+const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh", "/library", "/feed", "/history"]);
+const PADDED_PUBLIC_PREFIXES = ["/form/", "/vote/"];
+
+function isPaddedPublicPath(pathname: string) {
+  return PADDED_PUBLIC_PATHS.has(pathname) || PADDED_PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
 
 export function AppLayoutShell({
   children,
@@ -21,7 +26,7 @@ export function AppLayoutShell({
 
   const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
   const isGuestRootEntry = pathname === "/" && !isAuthenticated;
-  const isPaddedPublicRoute = PADDED_PUBLIC_PATHS.has(pathname);
+  const isPaddedPublicRoute = isPaddedPublicPath(pathname);
 
   if (isFullBleedPublicRoute || isGuestRootEntry) {
     return (
