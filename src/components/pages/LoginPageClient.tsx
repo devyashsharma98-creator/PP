@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
+import { canAccessPathForRoles, getRoleLandingPath } from "@/lib/app/role-routing";
+import type { RoleCode } from "@/lib/permissions/types";
 
 const DEMO_ACCOUNTS = [
   { label: "Super Admin", email: "demo.superadmin@example.com" },
@@ -53,9 +55,22 @@ function LoginForm() {
       }
 
       // Force a fresh page load so Hostinger cannot serve stale protected-page HTML/chunk references after deploys.
+      const authPayload = data?.data ?? data;
+      const roleCodes = (
+        Array.isArray(authPayload?.effectiveRoleCodes)
+          ? authPayload.effectiveRoleCodes
+          : [authPayload?.primaryRoleCode]
+      ).filter(Boolean) as RoleCode[];
+
+      const roleLandingPath = getRoleLandingPath(roleCodes);
       const destination = new URL(returnTo, window.location.origin);
       if (destination.origin !== window.location.origin) {
-        destination.pathname = "/dashboard";
+        destination.pathname = roleLandingPath;
+        destination.search = "";
+        destination.hash = "";
+      }
+      if (!canAccessPathForRoles(destination.pathname, roleCodes)) {
+        destination.pathname = roleLandingPath;
         destination.search = "";
         destination.hash = "";
       }

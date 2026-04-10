@@ -21,21 +21,21 @@ export function MobileBottomNav() {
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
   );
 
-  const primaryNav = useMemo(() => getMobilePrimaryNav(), []);
+  const primaryNav = useMemo(() => getMobilePrimaryNav(viewer?.effectiveRoles ?? null), [viewer?.effectiveRoles]);
   const primaryPaths = useMemo(() => new Set(primaryNav.map((item) => item.path)), [primaryNav]);
   const overflowGroups = useMemo(
     () =>
-      getNavGroups(showAdminControls)
+      getNavGroups(showAdminControls, viewer?.effectiveRoles ?? null)
         .map((group) => ({
           ...group,
           items: group.items.filter((item) => !primaryPaths.has(item.path)),
         }))
         .filter((group) => group.items.length > 0),
-    [primaryPaths, showAdminControls],
+    [primaryPaths, showAdminControls, viewer?.effectiveRoles],
   );
   const overflowItems = useMemo(
-    () => getOverflowNavItems(showAdminControls).filter((item) => !primaryPaths.has(item.path)),
-    [primaryPaths, showAdminControls],
+    () => getOverflowNavItems(showAdminControls, viewer?.effectiveRoles ?? null).filter((item) => !primaryPaths.has(item.path)),
+    [primaryPaths, showAdminControls, viewer?.effectiveRoles],
   );
   const overflowActive = overflowItems.some((item) => pathname === item.path);
 

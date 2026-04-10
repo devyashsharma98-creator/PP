@@ -14,6 +14,8 @@
   Users,
   type LucideIcon,
 } from "lucide-react";
+import type { RoleCode } from "@/lib/permissions/types";
+import { canAccessPathForRoles } from "@/lib/app/role-routing";
 
 export type NavItem = {
   label: string;
@@ -60,7 +62,12 @@ const adminNavItems: NavItem[] = [
   { label: "System Access", sublabel: "à¤ªà¥à¤°à¤µà¥‡à¤¶ à¤¨à¤¿à¤¯à¤‚à¤¤à¥à¤°à¤£", icon: ShieldCheck, path: "/super-admin" },
 ];
 
-export function getNavGroups(showAdminControls: boolean): NavGroup[] {
+function filterItemsByRole(items: NavItem[], roleCodes?: readonly RoleCode[] | null) {
+  if (!roleCodes) return items;
+  return items.filter((item) => canAccessPathForRoles(item.path, roleCodes));
+}
+
+export function getNavGroups(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null): NavGroup[] {
   const groups: NavGroup[] = [
     { title: "Workflow", titleHi: "à¤®à¥à¤–à¥à¤¯ à¤•à¤¾à¤°à¥à¤¯", items: workflowNavItems },
     { title: "Coordination", titleHi: "à¤¸à¤®à¤¨à¥à¤µà¤¯", items: coordinationNavItems },
@@ -71,17 +78,22 @@ export function getNavGroups(showAdminControls: boolean): NavGroup[] {
     groups.push({ title: "Admin", titleHi: "à¤ªà¥à¤°à¤¶à¤¾à¤¸à¤¨", items: adminNavItems });
   }
 
-  return groups;
+  return groups
+    .map((group) => ({ ...group, items: filterItemsByRole(group.items, roleCodes) }))
+    .filter((group) => group.items.length > 0);
 }
 
-export function getNavItems(showAdminControls: boolean) {
-  return getNavGroups(showAdminControls).flatMap((group) => group.items);
+export function getNavItems(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null) {
+  return getNavGroups(showAdminControls, roleCodes).flatMap((group) => group.items);
 }
 
-export function getMobilePrimaryNav() {
-  return mobilePrimaryNavItems;
+export function getMobilePrimaryNav(roleCodes?: readonly RoleCode[] | null) {
+  return filterItemsByRole(mobilePrimaryNavItems, roleCodes);
 }
 
-export function getOverflowNavItems(showAdminControls: boolean) {
-  return [...coordinationNavItems, ...referenceNavItems, ...(showAdminControls ? adminNavItems : [])];
+export function getOverflowNavItems(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null) {
+  return filterItemsByRole(
+    [...coordinationNavItems, ...referenceNavItems, ...(showAdminControls ? adminNavItems : [])],
+    roleCodes,
+  );
 }

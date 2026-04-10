@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import LoginPageClient from "@/components/pages/LoginPageClient";
+import { getRoleLandingPath } from "@/lib/app/role-routing";
+import { getSession } from "@/lib/auth/session";
 
 const NEON_SESSION_COOKIE = "pp_neon_session";
 
@@ -13,5 +15,6 @@ export default async function Page() {
 
   if (!session) return <LoginPageClient />;
 
-  redirect("/overview");
+  const verifiedSession = await getSession();
+  redirect(getRoleLandingPath(verifiedSession?.effectiveRoleCodes));
 }

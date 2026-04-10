@@ -1,17 +1,30 @@
 import "server-only";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const NEON_SESSION_COOKIE = "pp_neon_session";
+import { getRoleLandingPath, canAccessPathForRoles } from "@/lib/app/role-routing";
+import { getSession } from "@/lib/auth/session";
+import type { RoleCode } from "@/lib/permissions/types";
 
-export async function requirePageSession(returnTo: string) {
-  const store = await cookies();
-  const sessionCookieName = process.env.SESSION_COOKIE_NAME ?? "pp_session";
-  const session =
-    store.get(sessionCookieName)?.value ?? store.get(NEON_SESSION_COOKIE)?.value;
+export async function requirePageSession(
+  returnTo: string,
+  options: { allowedRoles?: RoleCode[] } = {},
+) {
+  const session = await getSession();
 
   if (!session) {
     redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
+
+  const roleCodes = session.effectiveRoleCodes;
+  const isAllowedByExplicitRule = options.allowedRoles
+    ? roleCodes.some((role) => options.allowedRoles?.includes(role))
+    : true;
+  const isAllowedByRouteRule = canAccessPathForRoles(returnTo, roleCodes);
+
+  if (!isAllowedByExplicitRule || !isAllowedByRouteRule) {
+    redirect(getRoleLandingPath(roleCodes));
+  }
+
+  return session;
 }

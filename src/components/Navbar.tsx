@@ -148,7 +148,10 @@ export function Navbar() {
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
   );
-  const navigationGroups = useMemo(() => getNavGroups(showAdminControls), [showAdminControls]);
+  const navigationGroups = useMemo(
+    () => getNavGroups(showAdminControls, viewer?.effectiveRoles ?? null),
+    [showAdminControls, viewer?.effectiveRoles],
+  );
   const currentRoleLabel = viewer?.primaryRoleCode
     ? (lang === 'hi' ? canonicalRoleLabelsHi[viewer.primaryRoleCode] : canonicalRoleLabels[viewer.primaryRoleCode])
     : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]);

@@ -24,7 +24,10 @@ export function AppSidebar() {
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
   );
-  const navGroups = useMemo(() => getNavGroups(showAdminControls), [showAdminControls]);
+  const navGroups = useMemo(
+    () => getNavGroups(showAdminControls, viewer?.effectiveRoles ?? null),
+    [showAdminControls, viewer?.effectiveRoles],
+  );
 
   return (
     <aside
