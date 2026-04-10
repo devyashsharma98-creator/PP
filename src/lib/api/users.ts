@@ -59,6 +59,23 @@ export interface RoleOption {
   isActive: boolean;
 }
 
+export interface AccessScopeOption {
+  id: string;
+  code: string;
+  name: string;
+  nameHi: string | null;
+  unitKind?: string;
+  departmentKind?: string;
+  parentUnitId?: string | null;
+  unitId?: string | null;
+}
+
+export interface AccessScopePayload {
+  org: AccessScopeOption | null;
+  units: AccessScopeOption[];
+  departments: AccessScopeOption[];
+}
+
 export interface UserFilters {
   isActive?: boolean;
   search?: string;
@@ -129,6 +146,10 @@ export async function updateUser(id: string, input: UpdateUserInput) {
 
 export async function fetchRoles() {
   return fetchApi<RoleOption[]>(`/users/roles`);
+}
+
+export async function fetchAccessScopes() {
+  return fetchApi<AccessScopePayload>(`/users/scopes`);
 }
 
 export async function fetchUserRoles(userId: string) {

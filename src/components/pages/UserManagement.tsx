@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -55,11 +56,13 @@ import { useAppContext } from "@/context/AppContext";
 import {
   assignRole,
   createUser,
+  fetchAccessScopes,
   fetchRoles,
   fetchUser,
   fetchUsers,
   removeRole,
   updateUser,
+  type AssignRoleInput,
   type CreateUserInput,
   type UpdateUserInput,
   type UserDetail,
@@ -71,6 +74,7 @@ import { cn } from "@/lib/utils";
 
 type StatusFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | CanonicalRoleCode;
+type AssignmentScopeType = NonNullable<AssignRoleInput["scopeType"]>;
 
 const ADMIN_ROLE_CODES = new Set<CanonicalRoleCode>(["super_admin", "org_admin"]);
 
@@ -153,6 +157,17 @@ function isActiveRole(assignment: UserDetail["roleAssignments"][number]) {
   return true;
 }
 
+function getScopeTypeLabel(scopeType: AssignmentScopeType) {
+  const labels: Record<AssignmentScopeType, string> = {
+    org: "Whole organisation",
+    unit: "Specific unit",
+    department: "Specific aayam",
+    event: "Specific event",
+    article: "Specific article",
+  };
+  return labels[scopeType];
+}
+
 export default function UserManagement() {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
@@ -177,6 +192,10 @@ export default function UserManagement() {
     phone: "",
   });
   const [assignRoleCode, setAssignRoleCode] = useState<CanonicalRoleCode | "">("");
+  const [assignScopeType, setAssignScopeType] = useState<AssignmentScopeType>("org");
+  const [assignUnitId, setAssignUnitId] = useState("");
+  const [assignDepartmentId, setAssignDepartmentId] = useState("");
+  const [assignPrimary, setAssignPrimary] = useState(false);
 
   const deferredSearch = useDeferredValue(search.trim());
   const canManageUsers = permissions.canManageUsers || Boolean(viewer?.effectiveRoles.some((role) => ADMIN_ROLE_CODES.has(role)));
@@ -184,6 +203,13 @@ export default function UserManagement() {
   const rolesQuery = useQuery({
     queryKey: ["admin-role-options"],
     queryFn: fetchRoles,
+    enabled: canManageUsers,
+    staleTime: 300000,
+  });
+
+  const scopesQuery = useQuery({
+    queryKey: ["admin-access-scopes"],
+    queryFn: fetchAccessScopes,
     enabled: canManageUsers,
     staleTime: 300000,
   });
@@ -273,14 +299,18 @@ export default function UserManagement() {
   });
 
   const assignRoleMutation = useMutation({
-    mutationFn: ({ userId, roleCode }: { userId: string; roleCode: CanonicalRoleCode }) =>
-      assignRole(userId, { roleCode, scopeType: "org", isPrimary: false }),
+    mutationFn: ({ userId, input }: { userId: string; input: AssignRoleInput }) =>
+      assignRole(userId, input),
     onSuccess: async (_, vars) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
         queryClient.invalidateQueries({ queryKey: ["admin-user", vars.userId] }),
       ]);
       setAssignRoleCode("");
+      setAssignScopeType("org");
+      setAssignUnitId("");
+      setAssignDepartmentId("");
+      setAssignPrimary(false);
       addToast("Access role assigned", "success");
     },
     onError: (error) => {
@@ -304,6 +334,9 @@ export default function UserManagement() {
   });
 
   const roleOptions = rolesQuery.data ?? [];
+  const scopeOptions = scopesQuery.data;
+  const units = useMemo(() => scopeOptions?.units ?? [], [scopeOptions]);
+  const departments = useMemo(() => scopeOptions?.departments ?? [], [scopeOptions]);
   const activeAssignments = useMemo(
     () => (selectedUser?.roleAssignments ?? []).filter(isActiveRole),
     [selectedUser?.roleAssignments],
@@ -313,6 +346,43 @@ export default function UserManagement() {
   const effectivePermissions = resolvePermissions(effectiveRoleCodes);
   const effectivePrimaryRole = getPrimaryRole(effectiveRoleCodes);
   const createRolePreview = resolvePermissions([createForm.roleCode]);
+  const selectedAssignRolePreview = assignRoleCode ? resolvePermissions([assignRoleCode]) : null;
+  const scopeTargetReady =
+    assignScopeType === "unit" ? Boolean(assignUnitId) :
+    assignScopeType === "department" ? Boolean(assignDepartmentId) :
+    true;
+  const assignRoleReady = Boolean(assignRoleCode) && scopeTargetReady;
+
+  const unitNameById = useMemo(
+    () => new Map(units.map((unit) => [unit.id, lang === "hi" ? unit.nameHi ?? unit.name : unit.name])),
+    [lang, units],
+  );
+  const departmentNameById = useMemo(
+    () => new Map(departments.map((department) => [department.id, lang === "hi" ? department.nameHi ?? department.name : department.name])),
+    [departments, lang],
+  );
+
+  function formatAssignmentScope(assignment: UserDetail["roleAssignments"][number]) {
+    if (assignment.scopeType === "org") return scopeOptions?.org?.name ?? "Whole organisation";
+    if (assignment.scopeType === "unit") {
+      return assignment.unitId ? unitNameById.get(assignment.unitId) ?? "Selected unit" : "Unit scope";
+    }
+    if (assignment.scopeType === "department") {
+      return assignment.departmentId ? departmentNameById.get(assignment.departmentId) ?? "Selected aayam" : "Aayam scope";
+    }
+    return assignment.scopeType;
+  }
+
+  function buildAssignmentInput(): AssignRoleInput | null {
+    if (!assignRoleCode || !scopeTargetReady) return null;
+    return {
+      roleCode: assignRoleCode,
+      scopeType: assignScopeType,
+      unitId: assignScopeType === "unit" ? assignUnitId : undefined,
+      departmentId: assignScopeType === "department" ? assignDepartmentId : undefined,
+      isPrimary: assignPrimary,
+    };
+  }
 
   const totalUsers = usersQuery.data?.length ?? 0;
   const activeUsers = (usersQuery.data ?? []).filter((user) => user.isActive).length;
@@ -888,7 +958,7 @@ export default function UserManagement() {
                               {assignment.isPrimary ? <Badge>Primary</Badge> : null}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Scope: {assignment.scopeType} · Active from {formatDateTime(assignment.startsAt)}
+                              Scope: {getScopeTypeLabel(assignment.scopeType)} · {formatAssignmentScope(assignment)} · Active from {formatDateTime(assignment.startsAt)}
                             </p>
                           </div>
 
@@ -920,7 +990,7 @@ export default function UserManagement() {
                   )}
 
                   <div className="rounded-3xl border border-border/70 bg-muted/20 p-4">
-                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                    <div className="grid gap-4 lg:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="assign-role">Add role</Label>
                         <Select value={assignRoleCode} onValueChange={(value: CanonicalRoleCode) => setAssignRoleCode(value)}>
@@ -928,26 +998,105 @@ export default function UserManagement() {
                             <SelectValue placeholder="Choose a role to add" />
                           </SelectTrigger>
                           <SelectContent>
-                            {roleOptions
-                              .filter((role) => !activeAssignments.some((assignment) => assignment.roleCode === role.code))
-                              .map((role) => (
-                                <SelectItem key={role.id} value={role.code}>
-                                  {getRoleLabel(role.code, lang)}
-                                </SelectItem>
-                              ))}
+                            {roleOptions.map((role) => (
+                              <SelectItem key={role.id} value={role.code}>
+                                {getRoleLabel(role.code, lang)}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="assign-scope">Scope</Label>
+                        <Select
+                          value={assignScopeType}
+                          onValueChange={(value: AssignmentScopeType) => {
+                            setAssignScopeType(value);
+                            setAssignUnitId("");
+                            setAssignDepartmentId("");
+                          }}
+                        >
+                          <SelectTrigger id="assign-scope">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="org">Whole organisation</SelectItem>
+                            <SelectItem value="unit">Specific unit / vibhag</SelectItem>
+                            <SelectItem value="department">Specific aayam</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {assignScopeType === "unit" ? (
+                        <div className="space-y-2 lg:col-span-2">
+                          <Label htmlFor="assign-unit">Unit / Vibhag</Label>
+                          <Select value={assignUnitId} onValueChange={setAssignUnitId}>
+                            <SelectTrigger id="assign-unit">
+                              <SelectValue placeholder="Choose unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {units.map((unit) => (
+                                <SelectItem key={unit.id} value={unit.id}>
+                                  {lang === "hi" ? unit.nameHi ?? unit.name : unit.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : null}
+
+                      {assignScopeType === "department" ? (
+                        <div className="space-y-2 lg:col-span-2">
+                          <Label htmlFor="assign-aayam">Aayam / Department</Label>
+                          <Select value={assignDepartmentId} onValueChange={setAssignDepartmentId}>
+                            <SelectTrigger id="assign-aayam">
+                              <SelectValue placeholder="Choose aayam" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {departments.map((department) => (
+                                <SelectItem key={department.id} value={department.id}>
+                                  {lang === "hi" ? department.nameHi ?? department.name : department.name}
+                                  {department.unitId ? ` · ${unitNameById.get(department.unitId) ?? ""}` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : null}
+
+                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 lg:col-span-2">
+                        <div>
+                          <p className="text-sm font-medium">Make primary role</p>
+                          <p className="text-xs text-muted-foreground">Used for the default lane after next login.</p>
+                        </div>
+                        <Switch checked={assignPrimary} onCheckedChange={setAssignPrimary} />
+                      </div>
+
+                      {selectedAssignRolePreview ? (
+                        <div className="rounded-2xl border border-border/60 bg-background/70 px-3 py-3 text-xs text-muted-foreground lg:col-span-2">
+                          <p className="font-medium text-foreground">Preview: {getRoleLabel(assignRoleCode as CanonicalRoleCode, lang)}</p>
+                          <p className="mt-1">
+                            Scope: {getScopeTypeLabel(assignScopeType)}
+                            {assignScopeType === "unit" && assignUnitId ? ` · ${unitNameById.get(assignUnitId) ?? "Selected unit"}` : ""}
+                            {assignScopeType === "department" && assignDepartmentId ? ` · ${departmentNameById.get(assignDepartmentId) ?? "Selected aayam"}` : ""}
+                          </p>
+                          <p className="mt-1">
+                            Capabilities: {ACCESS_ROWS.filter((row) => selectedAssignRolePreview[row.key]).map((row) => row.area).join(", ") || "restricted"}
+                          </p>
+                        </div>
+                      ) : null}
+
                       <Button
-                        onClick={() =>
-                          assignRoleCode &&
-                          assignRoleMutation.mutate({ userId: selectedUser.id, roleCode: assignRoleCode })
-                        }
-                        disabled={!assignRoleCode || assignRoleMutation.isPending}
-                        className="gap-2"
+                        onClick={() => {
+                          const input = buildAssignmentInput();
+                          if (input) assignRoleMutation.mutate({ userId: selectedUser.id, input });
+                        }}
+                        disabled={!assignRoleReady || assignRoleMutation.isPending}
+                        className="gap-2 lg:col-span-2"
                       >
                         {assignRoleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                        Assign access
+                        Assign scoped access
                       </Button>
                     </div>
                   </div>
@@ -999,3 +1148,6 @@ export default function UserManagement() {
     </motion.div>
   );
 }
+
+
+

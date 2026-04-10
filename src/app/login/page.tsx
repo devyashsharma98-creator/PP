@@ -68,6 +68,29 @@ function LoginForm() {
 
   return (
     <div className="demo-bridge-bg min-h-screen px-4 py-8 sm:px-6 md:py-10">
+      <div className="mx-auto mb-4 flex max-w-6xl justify-end">
+        <div className="flex items-center gap-2 rounded-2xl border border-border/70 bg-background/90 px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur">
+          <span className="text-muted-foreground">{isHi ? "भाषा" : "Language"}</span>
+          <div className="flex rounded-full bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setLang("en")}
+              className={`rounded-full px-3 py-1.5 transition-colors ${!isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={!isHi}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang("hi")}
+              className={`rounded-full px-3 py-1.5 font-devanagari transition-colors ${isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={isHi}
+            >
+              Hindi
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <section className="space-y-6">
           <div className="demo-bridge-copy">
