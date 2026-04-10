@@ -11,10 +11,7 @@ export default async function Page() {
   const session =
     store.get(sessionCookieName)?.value ?? store.get(NEON_SESSION_COOKIE)?.value;
 
-  const demoFallback =
-    process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === "true";
-
-  if (!session && !demoFallback) {
+  if (!session) {
     redirect("/login");
   }
 
