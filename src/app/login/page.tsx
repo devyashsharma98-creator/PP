@@ -18,7 +18,7 @@ const DEMO_ACCOUNTS = [
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo") || "/";
+  const returnTo = searchParams.get("returnTo") || "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,12 +29,6 @@ function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === 'true') {
-      // Bypass real auth for demo purposes
-      window.location.assign(returnTo);
-      return;
-    }
 
     try {
       const res = await fetch('/api/auth/login', {
