@@ -403,12 +403,11 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
   });
 
-  test("13 - root redirects unauthenticated users to the ERP login entry", async ({
+  test("13 - root renders the ERP login entry for unauthenticated users", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await page.waitForURL("**/login**", { timeout: 10_000 });
   await expect(page.locator("main").getByRole("heading", { name: /Pragya Pravah/i })).toBeVisible();
   await expect(page.locator("main")).toContainText(/Internal access panel|Secure access/i);
   await expect(page.locator("body")).not.toContainText(/global network|Fields of Work|Choose Your Path/i);
@@ -423,6 +422,7 @@ test("13b - authenticated / shows the ERP operational home", async ({ page }) =>
   }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.waitForURL("**/overview**", { timeout: 10_000 });
 
   await expect(page.locator("main")).toContainText(/Overview|Approval visibility|Hierarchy health/i, { timeout: 15000 });
   await expect(page.locator("main")).not.toContainText(/Enter Demo Console/i);
@@ -436,7 +436,7 @@ test("13c - all logged-in roles see summary oversight without admin-only detail"
     return;
   }
 
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/overview", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator("main")).toContainText(/Login health/i, { timeout: 15000 });
   await expect(page.locator("main")).toContainText(/Approval visibility/i, { timeout: 15000 });
@@ -452,7 +452,7 @@ test("13d - admin roles can see exact login and actor detail", async ({ page }) 
     return;
   }
 
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/overview", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator("main")).toContainText(/Admin detail/i);
   await expect(page.locator("main")).toContainText(/Recent logins/i);

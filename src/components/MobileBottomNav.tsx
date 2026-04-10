@@ -39,6 +39,7 @@ export function MobileBottomNav() {
             <Link
               key={item.path}
               href={item.path}
+              prefetch={false}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-2xl text-center transition-all duration-150 active:scale-95",
                 active
@@ -96,6 +97,7 @@ export function MobileBottomNav() {
                         <Link
                           key={item.path}
                           href={item.path}
+                          prefetch={false}
                           onClick={() => setOpen(false)}
                           className={cn(
                             "flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all",

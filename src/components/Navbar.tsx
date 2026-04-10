@@ -286,6 +286,7 @@ export function Navbar() {
                       <Link
                         key={item.path}
                         href={item.path}
+                        prefetch={false}
                         onClick={() => setOpen(false)}
                         className={cn(
                           'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
@@ -391,6 +392,7 @@ export function Navbar() {
                     <Link
                       key={n.id}
                       href={n.link}
+                      prefetch={false}
                       onClick={() => setNotifOpen(false)}
                       className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group"
                     >
@@ -418,7 +420,7 @@ export function Navbar() {
                   ))}
                 </div>
                 <div className="border-t border-border/60 px-4 py-2.5">
-                  <Link href="/dashboard" onClick={() => setNotifOpen(false)} className="text-xs text-primary hover:underline font-devanagari">
+                  <Link href="/dashboard" prefetch={false} onClick={() => setNotifOpen(false)} className="text-xs text-primary hover:underline font-devanagari">
                     {t('View all in Dashboard →', 'डैशबोर्ड में सब देखें →')}
                   </Link>
                 </div>
