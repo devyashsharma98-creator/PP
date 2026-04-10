@@ -3,6 +3,15 @@ import { requireNeonAuthContext, isNeonAuthRequiredError } from "@/lib/neon/auth
 import { getBootstrapPayload } from "@/lib/neon/repository";
 import { isDatabaseConfigured } from "@/lib/neon/env";
 
+const emptyBootstrapPayload = {
+  events: [],
+  articles: [],
+  pracharStatuses: [],
+  vimarshTopics: [],
+  notifications: [],
+  viewer: null,
+};
+
 export async function GET(req: NextRequest) {
   if (!isDatabaseConfigured) {
     return NextResponse.json(
@@ -17,7 +26,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     if (isNeonAuthRequiredError(error)) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+      return NextResponse.json(emptyBootstrapPayload);
     }
     const message = error instanceof Error ? error.message : "Failed to load bootstrap data.";
     console.error("Bootstrap error:", message);

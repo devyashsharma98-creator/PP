@@ -4,6 +4,10 @@ import type { NeonAuthContext } from "./auth";
 import type { AppActionRequest, AppViewerContext, CanonicalRoleCode, UiRole } from "@/lib/app/contracts";
 import { filterRowsByScope, resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 import { getDatabaseUrl } from "./env";
+import { validateEventTransition, type EventStatus } from "@/lib/permissions/event-workflow";
+import { validateArticleTransition, type ArticleStatus } from "@/lib/permissions/article-workflow";
+import type { RoleCode } from "@/lib/permissions/types";
+import { writeAuditLog, writeEventStatusHistory } from "./audit";
 
 let _sql: ReturnType<typeof neon> | null = null;
 
@@ -603,19 +607,60 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         )
         returning id
       `;
-      return { ok: true, id: (result as Array<{ id: string }>)[0]?.id };
+      const newEventId = (result as Array<{ id: string }>)[0]?.id;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "event.created",
+        entityType: "event", entityId: newEventId,
+        payload: { title: input.payload.title },
+      });
+      return { ok: true, id: newEventId };
     }
 
     case "updateEventStatus": {
-      await assertEventScope(input.payload.id);
-      const dbStatus = uiToDbEventStatus[input.payload.status];
-      if (!dbStatus) throw new Error("Unknown event status.");
+      // ── Fetch current event (scope check + current status) ──────────────
+      const evtRows = await sql`
+        select id, status, title, unit_id, department_id, created_by, submitted_by_user_id
+        from public.events
+        where id = ${input.payload.id} and org_id = ${orgId}
+        limit 1
+      `;
+      const evt = (evtRows as any[])[0];
+      if (!evt || !rowMatchesScope(scopedAccess, evt, actorId)) {
+        throw new Error("You do not have access to this event scope.");
+      }
+
+      const evtTargetDbStatus = uiToDbEventStatus[input.payload.status];
+      if (!evtTargetDbStatus) throw new Error("Unknown event status.");
+      const evtCurrentDbStatus = evt.status as string;
+
+      // ── Validate transition using existing workflow state machine ───────
+      const evtTransitionError = validateEventTransition(
+        evtCurrentDbStatus as EventStatus,
+        evtTargetDbStatus as EventStatus,
+        ctx.effectiveRoles as RoleCode[],
+      );
+      if (evtTransitionError) {
+        throw new Error(`Workflow violation: ${evtTransitionError}`);
+      }
+
+      // ── Perform the update ──────────────────────────────────────────────
       await sql`
         update public.events
-        set status = ${dbStatus}, updated_by = ${actorId}, updated_at = now(),
-            published_at = case when ${dbStatus} in ('authorized_public','published') then now() else published_at end
+        set status = ${evtTargetDbStatus}, updated_by = ${actorId}, updated_at = now(),
+            published_at = case when ${evtTargetDbStatus} in ('authorized_public','published') then now() else published_at end
         where id = ${input.payload.id}
       `;
+
+      // ── Audit trail ────────────────────────────────────────────────────
+      await writeEventStatusHistory(
+        input.payload.id, evtCurrentDbStatus, evtTargetDbStatus, actorId,
+      );
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "event.status_changed",
+        entityType: "event", entityId: input.payload.id,
+        changeSummary: { from: evtCurrentDbStatus, to: evtTargetDbStatus },
+      });
+
       return { ok: true };
     }
 
@@ -658,6 +703,10 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           `;
         }
       }
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "event.form_updated",
+        entityType: "event", entityId: eventId,
+      });
       return { ok: true };
     }
 
@@ -691,6 +740,11 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         `;
       }
 
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "poll.created",
+        entityType: "event", entityId: input.payload.eventId,
+        payload: { pollId, question: poll.question },
+      });
       return { ok: true, pollId };
     }
 
@@ -699,6 +753,11 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         insert into public.event_poll_votes (poll_id, option_id, actor_user_id)
         values (${input.payload.pollId}, ${input.payload.optionId}, ${actorId})
       `;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "poll.vote_cast",
+        entityType: "poll", entityId: input.payload.pollId,
+        payload: { optionId: input.payload.optionId },
+      });
       return { ok: true };
     }
 
@@ -709,11 +768,16 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         set is_finalized = true, winner_option_id = ${input.payload.winnerOptionId}, finalized_by = ${actorId}, updated_by = ${actorId}, updated_at = now()
         where id = ${input.payload.pollId} and event_id = ${input.payload.eventId}
       `;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "poll.finalized",
+        entityType: "poll", entityId: input.payload.pollId,
+        payload: { winnerOptionId: input.payload.winnerOptionId },
+      });
       return { ok: true };
     }
 
     case "addArticle": {
-      await sql`
+      const artInsertResult = await sql`
         insert into public.articles (
           org_id, title, content, summary, category, status, author_user_id, author_name_snapshot, social_url, values_checklist, created_by, updated_by
         )
@@ -723,25 +787,66 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           ${ctx.profile?.display_name ?? input.payload.author}, ${input.payload.socialUrl ?? null},
           ${JSON.stringify(input.payload.valuesChecklist)}::jsonb, ${actorId}, ${actorId}
         )
+        returning id
       `;
+      const newArticleId = (artInsertResult as Array<{ id: string }>)[0]?.id;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "article.created",
+        entityType: "article", entityId: newArticleId,
+        payload: { title: input.payload.title, category: input.payload.category },
+      });
       return { ok: true };
     }
 
     case "updateArticleStatus": {
-      await assertArticleScope(input.payload.id);
-      const dbStatus = uiToDbArticleStatus[input.payload.status];
-      if (!dbStatus) throw new Error("Unknown article status.");
+      // ── Fetch current article (scope check + current status) ────────────
+      const artRows = await sql`
+        select id, status, title, unit_id, department_id, author_user_id, created_by, values_checklist
+        from public.articles
+        where id = ${input.payload.id} and org_id = ${orgId}
+        limit 1
+      `;
+      const art = (artRows as any[])[0];
+      if (!art || !rowMatchesScope(scopedAccess, art, actorId)) {
+        throw new Error("You do not have access to this article scope.");
+      }
+
+      const artTargetDbStatus = uiToDbArticleStatus[input.payload.status];
+      if (!artTargetDbStatus) throw new Error("Unknown article status.");
+      const artCurrentDbStatus = art.status as string;
+
+      // ── Validate transition using existing article workflow state machine ──
+      const artChecklist = asObject(art.values_checklist);
+      const artTransitionError = validateArticleTransition(
+        artCurrentDbStatus as ArticleStatus,
+        artTargetDbStatus as ArticleStatus,
+        ctx.effectiveRoles as RoleCode[],
+        {
+          note: input.payload.reviewNotes ?? undefined,
+          valuesChecklist: {
+            rashtraPratham: toBool(artChecklist.rashtraPratham),
+            culturallyGrounded: toBool(artChecklist.culturallyGrounded),
+            balancedTone: toBool(artChecklist.balancedTone),
+            noDivisiveContent: toBool(artChecklist.noDivisiveContent),
+          },
+        },
+      );
+      if (artTransitionError) {
+        throw new Error(`Workflow violation: ${artTransitionError}`);
+      }
+
+      // ── Perform the update ──────────────────────────────────────────────
       await sql`
         update public.articles
         set
-          status = ${dbStatus},
+          status = ${artTargetDbStatus},
           title = coalesce(${input.payload.edits?.title ?? null}, title),
           content = coalesce(${input.payload.edits?.content ?? null}, content),
           summary = coalesce(${input.payload.edits?.summary ?? null}, summary),
           document_url = coalesce(${input.payload.documentUrl ?? null}, document_url),
           updated_by = ${actorId},
           updated_at = now(),
-          published_at = case when ${dbStatus} in ('authorized_public','published') then now() else published_at end
+          published_at = case when ${artTargetDbStatus} in ('authorized_public','published') then now() else published_at end
         where id = ${input.payload.id}
       `;
       await sql`
@@ -755,6 +860,14 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           ${JSON.stringify(input.payload.edits ?? {})}::jsonb
         )
       `;
+
+      // ── Audit trail ────────────────────────────────────────────────────
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "article.status_changed",
+        entityType: "article", entityId: input.payload.id,
+        changeSummary: { from: artCurrentDbStatus, to: artTargetDbStatus },
+      });
+
       return { ok: true };
     }
 
@@ -800,6 +913,11 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           )
         `;
       }
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "prachar.updated",
+        entityType: "event", entityId: input.payload.eventId,
+        payload: { platform: input.payload.platform, done },
+      });
       return { ok: true };
     }
 
@@ -817,6 +935,10 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           updated_at = now()
         where id = ${input.payload.eventId}
       `;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "event.vritt_updated",
+        entityType: "event", entityId: input.payload.eventId,
+      });
       return { ok: true };
     }
 
@@ -829,6 +951,10 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
             updated_at = now()
         where id = ${input.payload.eventId}
       `;
+      await writeAuditLog({
+        orgId, actorUserId: actorId, action: "event.attendance_marked",
+        entityType: "event", entityId: input.payload.eventId,
+      });
       return { ok: true };
     }
 

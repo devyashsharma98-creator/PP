@@ -186,7 +186,7 @@ export function VibhagDashboardView({
                         size="sm"
                         className="saffron-gradient h-8 flex-1 gap-1.5 border-0 text-[11px] text-white sm:flex-none"
                         disabled={!permissions.canPublishEvent}
-                        onClick={() => void onPublishEvent(event.id, event.title)}
+                        onClick={() => void onPublishEvent(event.id, event.title, event.status)}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" /> {t("Publish", "प्रकाशित करें")}
                       </Button>

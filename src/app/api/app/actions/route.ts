@@ -3,6 +3,7 @@ import { requireNeonAuthContext, isNeonAuthRequiredError } from "@/lib/neon/auth
 import { runNeonAppAction } from "@/lib/neon/repository";
 import { isDatabaseConfigured } from "@/lib/neon/env";
 import type { AppActionRequest } from "@/lib/app/contracts";
+import { appActionSchema } from "@/lib/validators/app-actions";
 
 export async function POST(req: NextRequest) {
   if (!isDatabaseConfigured) {
@@ -11,8 +12,18 @@ export async function POST(req: NextRequest) {
 
   try {
     const auth = await requireNeonAuthContext(req);
-    const body = (await req.json()) as AppActionRequest;
-    const result = await runNeonAppAction(auth, body);
+    const rawBody = await req.json();
+
+    // ── Zod validation gate ────────────────────────────────────────────────
+    const parseResult = appActionSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Invalid request payload.", details: parseResult.error.flatten() },
+        { status: 422 },
+      );
+    }
+
+    const result = await runNeonAppAction(auth, parseResult.data as AppActionRequest);
     return NextResponse.json(result);
   } catch (error) {
     if (isNeonAuthRequiredError(error)) {

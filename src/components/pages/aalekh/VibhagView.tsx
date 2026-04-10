@@ -7,22 +7,25 @@ import { useToast } from "@/components/ToastProvider";
 import { Masthead } from "@/components/Masthead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle2, Clock, ArrowRight, BarChart3,
   Users, TrendingUp, X
 } from "lucide-react";
-import type { AalekhArticle } from "@/context/AppContext";
+import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
+import type { AppPermissionSummary } from "@/lib/app/contracts";
 import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared";
 
 interface VibhagViewProps {
   articles: AalekhArticle[];
-  updateArticleStatus: (id: string, status: any, edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>, opts?: { reviewNotes?: string | null }) => Promise<boolean>;
+  permissions: AppPermissionSummary;
+  updateArticleStatus: (id: string, status: ArticleStatus, edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>, opts?: { reviewNotes?: string | null }) => Promise<boolean>;
   lastPublished: string | null;
   setLastPublished: (val: string | null) => void;
 }
 
-export function VibhagView({ articles, updateArticleStatus, lastPublished, setLastPublished }: VibhagViewProps) {
+export function VibhagView({ articles, permissions, updateArticleStatus, lastPublished, setLastPublished }: VibhagViewProps) {
   const t = useT();
   const { addToast } = useToast();
 
@@ -131,6 +134,7 @@ export function VibhagView({ articles, updateArticleStatus, lastPublished, setLa
                         </Button>
                       )}
                       {(a.status === "Pending Prant Authorization") && (
+                        permissions.canPublishArticle ? (
                         <EditForwardDialog
                           article={a}
                           targetStatus="Published"
@@ -143,6 +147,11 @@ export function VibhagView({ articles, updateArticleStatus, lastPublished, setLa
                             return true;
                           }}
                         />
+                        ) : (
+                          <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-[10px] text-violet-700 dark:text-violet-300">
+                            {t("Waiting for Prant authorization", "प्रांत अनुमोदन प्रतीक्षित")}
+                          </Badge>
+                        )
                       )}
                       <ReturnWithNotesDialog
                         articleId={a.id}

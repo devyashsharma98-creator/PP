@@ -12,11 +12,12 @@ export function useNotifications(filters?: NotificationFilters) {
   });
 }
 
-export function useUnreadCount() {
+export function useUnreadCount(enabled = true) {
   return useQuery({
     queryKey: queryKeys.unreadCount(),
     queryFn: () => api.fetchUnreadCount(),
-    refetchInterval: 30000, // Poll every 30 seconds
+    enabled,
+    refetchInterval: enabled ? 30000 : false, // Poll every 30 seconds only after auth is ready
   });
 }
 

@@ -154,7 +154,7 @@ export function Navbar() {
     : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]);
 
   // Real unread count from API with 30s polling
-  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: unreadCount = 0 } = useUnreadCount(isAuthenticated);
 
   // Hydration guard for theme
   useEffect(() => setMounted(true), []);

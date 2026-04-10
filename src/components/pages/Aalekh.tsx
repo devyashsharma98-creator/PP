@@ -11,7 +11,7 @@ import { AayamView } from "./aalekh/AayamView";
 import { VibhagView } from "./aalekh/VibhagView";
 
 export default function Aalekh() {
-  const { role, articles, addArticle, updateArticleStatus } = useAppContext();
+  const { role, articles, addArticle, updateArticleStatus, permissions } = useAppContext();
   const { addToast } = useToast();
   const t = useT();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
@@ -48,6 +48,7 @@ export default function Aalekh() {
   return (
     <VibhagView
       articles={articles}
+      permissions={permissions}
       updateArticleStatus={updateArticleStatus}
       lastPublished={lastPublished}
       setLastPublished={setLastPublished}

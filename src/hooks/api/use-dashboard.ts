@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import type { GatividhiEvent, FormConfig } from '@/context/AppContext';
+import { dbToUiEventStatus } from '@/lib/app/status-maps';
 
 const API_BASE = '/api/v1';
 
@@ -17,8 +18,14 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
-  const dateStr = row.starts_at as string;
-  let dateFormatted = dateStr;
+  const startsAt = row.startsAt ?? row.starts_at;
+  const dateStr =
+    startsAt instanceof Date
+      ? startsAt.toISOString()
+      : typeof startsAt === 'string'
+        ? startsAt
+        : '';
+  let dateFormatted = dateStr || 'Date not set';
   let dateIso = dateStr;
   try {
     const d = parseISO(dateStr);
@@ -32,10 +39,20 @@ function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
     description: (row.description as string) || '',
     date: dateFormatted,
     dateIso,
-    unit: (row.unit_id as string) || 'Unknown',
-    submittedBy: 'API',
-    status: ((row.status as string) || 'Draft') as GatividhiEvent['status'],
-    checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
+    unit: ((row.unitId ?? row.unit_id) as string) || 'Unknown',
+    submittedBy: (row.submittedByNameSnapshot as string) || 'API',
+    status: (dbToUiEventStatus[String(row.status ?? '')] ?? 'Draft') as GatividhiEvent['status'],
+    checklist: {
+      designing: Boolean((row.checklist as Record<string, unknown> | undefined)?.designing),
+      food: Boolean((row.checklist as Record<string, unknown> | undefined)?.food),
+      seating: Boolean((row.checklist as Record<string, unknown> | undefined)?.seating),
+      transport: Boolean((row.checklist as Record<string, unknown> | undefined)?.transport),
+      accommodation: Boolean((row.checklist as Record<string, unknown> | undefined)?.accommodation),
+      soundMic: Boolean((row.checklist as Record<string, unknown> | undefined)?.soundMic),
+      camera: Boolean((row.checklist as Record<string, unknown> | undefined)?.camera),
+      screen: Boolean((row.checklist as Record<string, unknown> | undefined)?.screen),
+      lights: Boolean((row.checklist as Record<string, unknown> | undefined)?.lights),
+    },
     registrations: [],
     polls: [],
     vrittStatus: undefined,
@@ -77,10 +94,10 @@ export function useCreateDashboardEvent() {
 export function useUpdateEventStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, action }: { id: string; action: string }) => {
-      return fetchApi<Record<string, unknown>>(`/events/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ action }),
+    mutationFn: async ({ id, toStatus, notes }: { id: string; toStatus: string; notes?: string }) => {
+      return fetchApi<Record<string, unknown>>(`/events/${id}/workflow`, {
+        method: 'POST',
+        body: JSON.stringify({ toStatus, notes }),
       });
     },
     onSuccess: () => {

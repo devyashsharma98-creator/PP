@@ -10,6 +10,7 @@ import { VibhagDashboardView } from "@/components/pages/dashboard/VibhagDashboar
 import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardView";
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
+import { uiToDbEventStatus } from "@/lib/app/status-maps";
 
 
 
@@ -139,7 +140,7 @@ export default function Dashboard() {
   const handleForwardToPrant = async (eventId: string) => {
     if (isApiConnected) {
       try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, action: 'approve' });
+        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'pending_prant_authorization' });
         addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
       } catch {
         addToast(t('Failed to forward', 'भेजने में विफल'), 'error');
@@ -151,10 +152,15 @@ export default function Dashboard() {
     if (ok) addToast(t('Forwarded to Prant', 'प्रांत को भेजा'), 'info');
   };
 
-  const handlePublishFromVibhag = async (eventId: string, title: string) => {
+  const handlePublishFromVibhag = async (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => {
+    const dbStatus = uiToDbEventStatus[currentStatus] ?? currentStatus;
+    const nextStatus = dbStatus === 'pending_prant_authorization'
+      ? 'pending_prant_dual_authorization'
+      : 'authorized_public';
+
     if (isApiConnected) {
       try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, action: 'publish' });
+        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: nextStatus });
         setLastPublished(title);
         addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
       } catch {
@@ -175,7 +181,7 @@ export default function Dashboard() {
   const handleForwardToVibhag = async (eventId: string) => {
     if (isApiConnected) {
       try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, action: 'approve' });
+        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'pending_vibhag_review' });
         addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
       } catch {
         addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');

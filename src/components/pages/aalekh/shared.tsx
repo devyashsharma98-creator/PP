@@ -8,7 +8,7 @@ import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -204,6 +204,9 @@ export function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof empty
       <DialogContent className="sm:max-w-lg bg-popover max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("New Aalekh", "नया आलेख")}</DialogTitle>
+          <DialogDescription>
+            {t("Draft an article and submit it into the review chain.", "आलेख लिखकर समीक्षा श्रृंखला में भेजें।")}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -321,6 +324,9 @@ export function EditForwardDialog({
       <DialogContent className="sm:max-w-lg bg-popover max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{actionLabel}</DialogTitle>
+          <DialogDescription>
+            {t("Review, edit if needed, then move this aalekh to the next authority.", "समीक्षा करें, आवश्यकता हो तो सुधारें, फिर अगले दायित्व को भेजें।")}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-xs text-muted-foreground font-devanagari">{t('Review it here and edit if needed before sending ahead.', 'यहां समीक्षा करें और जरूरत हो तो सुधारकर आगे भेजें।')}</p>
@@ -384,6 +390,9 @@ export function ReturnWithNotesDialog({
       <DialogContent className="sm:max-w-md bg-popover">
         <DialogHeader>
           <DialogTitle className="font-devanagari">{t('Return Article for Revision', 'आलेख संशोधन के लिए वापस करें')}</DialogTitle>
+          <DialogDescription>
+            {t("Add clear notes so the writer knows what to improve.", "स्पष्ट टिप्पणी दें ताकि लेखक सुधार समझ सके।")}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>

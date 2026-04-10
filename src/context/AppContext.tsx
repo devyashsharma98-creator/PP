@@ -282,6 +282,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (Array.isArray(payload.pracharStatuses)) setPracharStatuses(payload.pracharStatuses as PracharStatus[]);
     if (Array.isArray(payload.articles)) setArticles(payload.articles as AalekhArticle[]);
     if (Array.isArray(payload.vimarshTopics)) setVimarshTopics(payload.vimarshTopics);
+    if ("viewer" in payload && !payload.viewer) {
+      setViewer(null);
+      setPermissions(defaultPermissions);
+      setServerRole('karyakarta');
+    }
     if (payload.viewer) {
       setViewer(payload.viewer);
       setPermissions(payload.viewer.permissions);

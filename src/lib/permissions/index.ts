@@ -43,7 +43,7 @@ export function resolvePermissions(effectiveRoleCodes: RoleCode[]): AppPermissio
     canUpdateEvent: is("unit_head"),
     canSubmitEvent: is("unit_head"),
     canReviewEvent: is("aayam_pramukh"),
-    canPublishEvent: is("vibhag_pramukh"),
+    canPublishEvent: is("prant_sanyojak"),
     canCancelEvent: is("vibhag_pramukh"),
     canManageEventForm: is("unit_head"),
     canManagePolls: is("unit_head"),
@@ -55,7 +55,7 @@ export function resolvePermissions(effectiveRoleCodes: RoleCode[]): AppPermissio
     canUpdateArticle: is("karyakarta"),
     canSubmitArticle: is("karyakarta"),
     canReviewArticle: is("unit_head"),
-    canPublishArticle: is("vibhag_pramukh"),
+    canPublishArticle: is("prant_sanyojak"),
     canArchiveArticle: is("vibhag_pramukh"),
 
     // ── Prachar ──────────────────────────────────────────────────────────────

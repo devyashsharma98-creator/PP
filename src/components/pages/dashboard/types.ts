@@ -18,7 +18,7 @@ export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
   lastPublished: string | null;
   onDismissPublished: () => void;
   onForwardToPrant: (eventId: string) => void | Promise<void>;
-  onPublishEvent: (eventId: string, title: string) => void | Promise<void>;
+  onPublishEvent: (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
 }
 
 export interface AayamDashboardViewProps extends DashboardRoleViewProps {
