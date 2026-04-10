@@ -1,4 +1,8 @@
-"use client";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AnnualCalendar from "@/components/pages/AnnualCalendar";
-export default function Page() { return <ErrorBoundary><AnnualCalendar /></ErrorBoundary>; }
+import { requirePageSession } from "@/lib/server/require-page-session";
+
+export default async function Page() {
+  await requirePageSession("/calendar");
+  return <ErrorBoundary><AnnualCalendar /></ErrorBoundary>;
+}

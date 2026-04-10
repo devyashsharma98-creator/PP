@@ -1,4 +1,8 @@
-"use client";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Prachar from "@/components/pages/Prachar";
-export default function Page() { return <ErrorBoundary><Prachar /></ErrorBoundary>; }
+import { requirePageSession } from "@/lib/server/require-page-session";
+
+export default async function Page() {
+  await requirePageSession("/prachar");
+  return <ErrorBoundary><Prachar /></ErrorBoundary>;
+}

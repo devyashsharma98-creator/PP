@@ -1,7 +1,10 @@
-"use client";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Dashboard from "@/components/pages/Dashboard";
-export default function DashboardPage() {
+import { requirePageSession } from "@/lib/server/require-page-session";
+
+export default async function DashboardPage() {
+  await requirePageSession("/dashboard");
+
   return (
     <ErrorBoundary>
       <Dashboard />

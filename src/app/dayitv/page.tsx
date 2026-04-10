@@ -1,4 +1,8 @@
-"use client";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Dayitv from "@/components/pages/Dayitv";
-export default function Page() { return <ErrorBoundary><Dayitv /></ErrorBoundary>; }
+import { requirePageSession } from "@/lib/server/require-page-session";
+
+export default async function Page() {
+  await requirePageSession("/dayitv");
+  return <ErrorBoundary><Dayitv /></ErrorBoundary>;
+}
