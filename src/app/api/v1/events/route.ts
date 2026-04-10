@@ -5,7 +5,7 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
-import { and, eq, gte, lte, ilike, count, desc } from "drizzle-orm";
+import { and, eq, gte, lte, ilike, count, desc, inArray, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { events, eventStatusHistory } from "@/db/schema/index";
@@ -13,11 +13,12 @@ import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-aut
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { createEventSchema, listEventsQuerySchema } from "@/lib/validators/events";
 import {
-  apiSuccess, apiCreated, badRequest, serverError,
+  apiSuccess, apiCreated, badRequest, forbidden, serverError,
   parsePagination, paginationMeta,
 } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
 import type { EventStatus } from "@/lib/permissions/event-workflow";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx) => {
@@ -33,7 +34,7 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
 
   // Scope: karyakarta can only see their unit's events
-  const conditions: ReturnType<typeof eq>[] = [eq(events.orgId, ctx.session.orgId)];
+  const conditions: SQL<unknown>[] = [eq(events.orgId, ctx.session.orgId)];
 
   if (q.status) conditions.push(eq(events.status, q.status as EventStatus));
   if (q.unitId) conditions.push(eq(events.unitId, q.unitId));
@@ -42,12 +43,14 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   if (q.toDate) conditions.push(lte(events.startsAt, new Date(q.toDate)));
   if (q.search) conditions.push(ilike(events.title, `%${q.search}%`));
 
-  // Karyakarta: scope to own unit only
-  const isKaryakartaOnly =
-    ctx.session.effectiveRoleCodes.length === 1 &&
-    ctx.session.effectiveRoleCodes[0] === "karyakarta";
-  if (isKaryakartaOnly && ctx.session.unitId) {
-    conditions.push(eq(events.unitId, ctx.session.unitId));
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!scopedAccess.orgWide) {
+    const scopeConditions: SQL<unknown>[] = [eq(events.createdBy, ctx.session.userId)];
+    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(events.unitId, [...scopedAccess.unitIds]));
+    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(events.departmentId, [...scopedAccess.departmentIds]));
+    if (scopedAccess.eventIds.size > 0) scopeConditions.push(inArray(events.id, [...scopedAccess.eventIds]));
+    const scopeClause = or(...scopeConditions);
+    if (scopeClause) conditions.push(scopeClause);
   }
 
   const whereClause = and(...conditions);
@@ -101,13 +104,18 @@ export const POST = withPermission("canCreateEvent", async (req: NextRequest, ct
 
   // Default unitId to the creator's unit if not provided
   const unitId = input.unitId ?? ctx.session.unitId ?? null;
+  const departmentId = input.departmentId ?? ctx.session.departmentId ?? null;
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, { unitId, departmentId, createdBy: ctx.session.userId }, ctx.session.userId)) {
+    return forbidden("You cannot create an event outside your assigned scope.");
+  }
 
   const [newEvent] = await db
     .insert(events)
     .values({
       orgId: ctx.session.orgId,
       unitId,
-      departmentId: input.departmentId ?? ctx.session.departmentId ?? null,
+      departmentId,
       locationId: input.locationId ?? null,
       title: input.title,
       description: input.description,

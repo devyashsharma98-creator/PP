@@ -5,7 +5,7 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
-import { and, eq, ilike, or, count, desc } from "drizzle-orm";
+import { and, eq, ilike, or, count, desc, inArray, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { articles } from "@/db/schema/index";
@@ -13,11 +13,12 @@ import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-aut
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { createArticleSchema, listArticlesQuerySchema } from "@/lib/validators/articles";
 import {
-  apiSuccess, apiCreated, badRequest, serverError,
+  apiSuccess, apiCreated, badRequest, forbidden, serverError,
   parsePagination, paginationMeta,
 } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
 import type { ArticleStatus } from "@/lib/permissions/article-workflow";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx) => {
@@ -32,7 +33,7 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
 
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
 
-  const conditions: ReturnType<typeof eq>[] = [eq(articles.orgId, ctx.session.orgId)];
+  const conditions: SQL<unknown>[] = [eq(articles.orgId, ctx.session.orgId)];
 
   if (q.status) conditions.push(eq(articles.status, q.status as ArticleStatus));
   if (q.category) conditions.push(eq(articles.category, q.category));
@@ -44,12 +45,14 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
     ? or(ilike(articles.title, `%${q.search}%`), ilike(articles.summary, `%${q.search}%`))
     : undefined;
 
-  // Karyakarta: only see their own articles
-  const isKaryakartaOnly =
-    ctx.session.effectiveRoleCodes.length === 1 &&
-    ctx.session.effectiveRoleCodes[0] === "karyakarta";
-  if (isKaryakartaOnly) {
-    conditions.push(eq(articles.authorUserId, ctx.session.userId));
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!scopedAccess.orgWide) {
+    const scopeConditions: SQL<unknown>[] = [eq(articles.authorUserId, ctx.session.userId)];
+    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(articles.unitId, [...scopedAccess.unitIds]));
+    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(articles.departmentId, [...scopedAccess.departmentIds]));
+    if (scopedAccess.articleIds.size > 0) scopeConditions.push(inArray(articles.id, [...scopedAccess.articleIds]));
+    const scopeClause = or(...scopeConditions);
+    if (scopeClause) conditions.push(scopeClause);
   }
 
   const whereClause = searchCondition
@@ -105,13 +108,19 @@ export const POST = withPermission("canCreateArticle", async (req: NextRequest, 
   const parsed = createArticleSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid input.");
   const input = parsed.data;
+  const unitId = input.unitId ?? ctx.session.unitId ?? null;
+  const departmentId = input.departmentId ?? ctx.session.departmentId ?? null;
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, { unitId, departmentId, authorUserId: ctx.session.userId, createdBy: ctx.session.userId }, ctx.session.userId)) {
+    return forbidden("You cannot create an article outside your assigned scope.");
+  }
 
   const [newArticle] = await db
     .insert(articles)
     .values({
       orgId: ctx.session.orgId,
-      unitId: input.unitId ?? ctx.session.unitId ?? null,
-      departmentId: input.departmentId ?? ctx.session.departmentId ?? null,
+      unitId,
+      departmentId,
       title: input.title,
       content: input.content ?? null,
       summary: input.summary ?? null,

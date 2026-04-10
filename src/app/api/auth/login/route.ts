@@ -114,6 +114,15 @@ export async function POST(req: NextRequest): Promise<Response> {
     effectiveRoleCodes,
     unitId: primaryAssignment?.unitId ?? null,
     departmentId: primaryAssignment?.departmentId ?? null,
+    assignments: activeAssignments.map((assignment) => ({
+      roleCode: assignment.role?.code as RoleCode,
+      scopeType: assignment.scopeType,
+      orgId: assignment.orgId ?? profile.orgId,
+      unitId: assignment.unitId ?? null,
+      departmentId: assignment.departmentId ?? null,
+      scopeEntityId: assignment.scopeEntityId ?? null,
+      isPrimary: assignment.isPrimary,
+    })),
   });
 
   await setSessionCookie(token);

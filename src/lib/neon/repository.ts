@@ -2,6 +2,7 @@ import "server-only";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { NeonAuthContext } from "./auth";
 import type { AppActionRequest, AppViewerContext, CanonicalRoleCode, UiRole } from "@/lib/app/contracts";
+import { filterRowsByScope, resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 import { getDatabaseUrl } from "./env";
 
 let _sql: ReturnType<typeof neon> | null = null;
@@ -256,6 +257,11 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       sql`SELECT * FROM public.vimarsh_resources`,
     ]);
 
+  const scopedAccess = resolveScopedAccess(ctx.assignments, ctx.units);
+  const scopedEvents = filterRowsByScope(events as any[], scopedAccess, ctx.user.id);
+  const scopedArticles = filterRowsByScope(articles as any[], scopedAccess, ctx.user.id);
+  const scopedEventIds = new Set(scopedEvents.map((event: any) => event.id));
+
   const unitsById = new Map(units.map((u: any) => [u.id, u.name]));
   const formConfigByEventId = new Map(formConfigs.map((fc: any) => [fc.event_id, fc]));
 
@@ -309,6 +315,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
 
   for (const status of pracharStatuses as any[]) {
     const eventId = status.entity_id;
+    if (!scopedEventIds.has(eventId)) continue;
     if (!eventId) continue;
     const current = pracharByEvent.get(eventId) ?? {
       platforms: {
@@ -359,7 +366,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   }
 
   // Build events
-  const formattedEvents = events.map((e: any) => {
+  const formattedEvents = scopedEvents.map((e: any) => {
     const fc = formConfigByEventId.get(e.id);
     const questions = fc ? questionsByConfigId.get(fc.id) ?? [] : [];
     const regs = (regsByEvent.get(e.id) ?? []).map((r: any) => {
@@ -491,7 +498,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     });
 
   // Articles
-  const formattedArticles = articles.map((a: any) => {
+  const formattedArticles = scopedArticles.map((a: any) => {
     const values = asObject(a.values_checklist);
     return {
       id: a.id,
@@ -542,6 +549,33 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
 export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionRequest) {
   const orgId = resolveActorOrgId(ctx);
   const actorId = ctx.user.id;
+  const scopedAccess = resolveScopedAccess(ctx.assignments, ctx.units);
+
+  async function assertEventScope(eventId: string) {
+    const rows = await sql`
+      select id, unit_id, department_id, created_by, submitted_by_user_id
+      from public.events
+      where id = ${eventId} and org_id = ${orgId}
+      limit 1
+    `;
+    const row = (rows as any[])[0];
+    if (!row || !rowMatchesScope(scopedAccess, row, actorId)) {
+      throw new Error("You do not have access to this event scope.");
+    }
+  }
+
+  async function assertArticleScope(articleId: string) {
+    const rows = await sql`
+      select id, unit_id, department_id, author_user_id, created_by
+      from public.articles
+      where id = ${articleId} and org_id = ${orgId}
+      limit 1
+    `;
+    const row = (rows as any[])[0];
+    if (!row || !rowMatchesScope(scopedAccess, row, actorId)) {
+      throw new Error("You do not have access to this article scope.");
+    }
+  }
 
   switch (input.action) {
     case "createEvent": {
@@ -553,6 +587,9 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         limit 1
       `;
       const unitId = (unitRows as Array<{ id: string }>)[0]?.id ?? null;
+      if (!rowMatchesScope(scopedAccess, { unit_id: unitId, created_by: actorId }, actorId)) {
+        throw new Error("You cannot create an event outside your assigned scope.");
+      }
 
       const result = await sql`
         insert into public.events (
@@ -570,6 +607,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "updateEventStatus": {
+      await assertEventScope(input.payload.id);
       const dbStatus = uiToDbEventStatus[input.payload.status];
       if (!dbStatus) throw new Error("Unknown event status.");
       await sql`
@@ -583,6 +621,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
 
     case "updateFormConfig": {
       const eventId = input.payload.eventId;
+      await assertEventScope(eventId);
       const config = input.payload.config;
       const configRes = await sql`
         insert into public.event_form_configs (
@@ -623,6 +662,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "addPoll": {
+      await assertEventScope(input.payload.eventId);
       const poll = input.payload.poll;
       const pollRes = await sql`
         insert into public.event_polls (
@@ -663,6 +703,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "finalizePoll": {
+      await assertEventScope(input.payload.eventId);
       await sql`
         update public.event_polls
         set is_finalized = true, winner_option_id = ${input.payload.winnerOptionId}, finalized_by = ${actorId}, updated_by = ${actorId}, updated_at = now()
@@ -687,6 +728,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "updateArticleStatus": {
+      await assertArticleScope(input.payload.id);
       const dbStatus = uiToDbArticleStatus[input.payload.status];
       if (!dbStatus) throw new Error("Unknown article status.");
       await sql`
@@ -717,6 +759,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "updatePracharPlatform": {
+      await assertEventScope(input.payload.eventId);
       const done = input.payload.done;
       const skipReason = done ? null : input.payload.skipReason ?? null;
       const updated = await sql`
@@ -761,6 +804,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "updateVritt": {
+      await assertEventScope(input.payload.eventId);
       await sql`
         update public.events
         set
@@ -777,6 +821,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     }
 
     case "markAttendance": {
+      await assertEventScope(input.payload.eventId);
       await sql`
         update public.events
         set vritt_checked_in_count = coalesce(vritt_checked_in_count, 0) + 1,

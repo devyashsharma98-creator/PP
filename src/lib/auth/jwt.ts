@@ -25,6 +25,17 @@ export interface AppJwtPayload extends JWTPayload {
   effectiveRoleCodes: RoleCode[];
   unitId: string | null;
   departmentId: string | null;
+  assignments?: SessionAssignment[];
+}
+
+export interface SessionAssignment {
+  roleCode: RoleCode;
+  scopeType: "org" | "unit" | "department" | "event" | "article";
+  orgId: string | null;
+  unitId: string | null;
+  departmentId: string | null;
+  scopeEntityId: string | null;
+  isPrimary: boolean;
 }
 
 export interface VerifiedSession {
@@ -37,6 +48,7 @@ export interface VerifiedSession {
   effectiveRoleCodes: RoleCode[];
   unitId: string | null;
   departmentId: string | null;
+  assignments: SessionAssignment[];
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -89,6 +101,16 @@ export async function verifyJwt(token: string): Promise<VerifiedSession | null> 
       return null;
     }
 
+    const fallbackAssignment: SessionAssignment = {
+      roleCode: p.primaryRoleCode,
+      scopeType: "org",
+      orgId: p.orgId,
+      unitId: p.unitId ?? null,
+      departmentId: p.departmentId ?? null,
+      scopeEntityId: null,
+      isPrimary: true,
+    };
+
     return {
       userId: p.userId,
       email: p.email,
@@ -99,6 +121,7 @@ export async function verifyJwt(token: string): Promise<VerifiedSession | null> 
       effectiveRoleCodes: p.effectiveRoleCodes ?? [p.primaryRoleCode],
       unitId: p.unitId ?? null,
       departmentId: p.departmentId ?? null,
+      assignments: Array.isArray(p.assignments) && p.assignments.length ? p.assignments : [fallbackAssignment],
     };
   } catch {
     return null;
