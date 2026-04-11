@@ -33,6 +33,7 @@ export interface UnitDashboardViewProps {
   vrittStatusLabel: (status: "draft" | "submitted" | "reviewed") => string;
   onOpenVrittEditor: (event: GatividhiEvent) => void;
   onOpenQr: (event: GatividhiEvent) => void;
+  onSubmitForReview: (eventId: string) => void | Promise<void>;
 }
 
 export interface VrittEditorState {

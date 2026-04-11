@@ -196,6 +196,25 @@ export default function Dashboard() {
     }
     addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
   };
+  const handleSubmitFromUnit = async (eventId: string) => {
+    if (isApiConnected) {
+      try {
+        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'submitted_by_unit' });
+        addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
+      } catch {
+        addToast(t('Submit not allowed', 'भेजने की अनुमति नहीं है'), 'error');
+      }
+      return;
+    }
+
+    const ok = await updateEventStatus(eventId, "Submitted by Unit");
+    if (!ok) {
+      addToast(t('Submit not allowed', 'भेजने की अनुमति नहीं है'), 'error');
+      return;
+    }
+    addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
+  };
+
   const saveVritt = async () => {
     if (!vrittEvent) return;
     const urls = vrittForm.mediaUrls.filter((url) => url.trim());
@@ -274,6 +293,7 @@ export default function Dashboard() {
         vrittStatusLabel={vrittStatusLabel}
         onOpenVrittEditor={openVrittEditor}
         onOpenQr={setQrEvent}
+        onSubmitForReview={handleSubmitFromUnit}
       />
       {reviewOverlays}
     </>

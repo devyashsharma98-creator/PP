@@ -38,6 +38,7 @@ export function UnitDashboardView({
   vrittStatusLabel,
   onOpenVrittEditor,
   onOpenQr,
+  onSubmitForReview,
 }: UnitDashboardViewProps) {
   const { permissions, lang, addEvent, addPoll, finalizePoll } = useAppContext();
   const router = useRouter();
@@ -87,16 +88,18 @@ export function UnitDashboardView({
     posterName: "",
   });
 
-  const myEvents = events.filter(
-    (event) =>
-      event.submittedBy === "Current User" ||
-      event.submittedBy === "Unit Head" ||
-      event.submittedBy === "Ramesh Sharma" ||
-      event.submittedBy === "Priya Patel" ||
-      event.submittedBy === "Anil Verma" ||
-      event.submittedBy === "Kavita Singh" ||
-      event.submittedBy === "Suresh Yadav",
-  );
+  const myEvents = isApiConnected
+    ? events
+    : events.filter(
+        (event) =>
+          event.submittedBy === "Current User" ||
+          event.submittedBy === "Unit Head" ||
+          event.submittedBy === "Ramesh Sharma" ||
+          event.submittedBy === "Priya Patel" ||
+          event.submittedBy === "Anil Verma" ||
+          event.submittedBy === "Kavita Singh" ||
+          event.submittedBy === "Suresh Yadav",
+      );
 
   const activeWorkflowCount = myEvents.filter((event) => event.status !== "Published").length;
   const publishedUnitEvents = myEvents.filter((event) => event.status === "Published").length;
@@ -622,6 +625,12 @@ export function UnitDashboardView({
                     <User className="h-3 w-3" /> {event.submittedBy}
                   </div>
                   <div className="flex flex-wrap gap-1.5 pt-1">
+                    {event.status === "Draft" && permissions.canCreateEvent && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)}>
+                        <ArrowRight className="mr-1 h-3 w-3" />
+                        {t("Submit", "भेजें")}
+                      </Button>
+                    )}
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => copyFormLink(event.id)}>
                       {copiedId === event.id ? (
                         <>
