@@ -29,15 +29,27 @@ export async function POST(
     const hash = createHash("sha256").update(`${eventId}:${body.name}:${body.phone ?? ""}:${body.city ?? ""}`).digest("hex");
 
     const result = await sql`
-      INSERT INTO public.event_registrations (event_id, name, phone, city, attending_count, has_special_needs, notes, answers_payload, public_submission_key_hash, submitted_from_ip, submitted_user_agent)
-      VALUES (${eventId}, ${body.name.trim()}, ${body.phone?.trim() || null}, ${body.city?.trim() || null}, ${Math.max(1, body.attendingCount ?? 1)}, ${Boolean(body.hasSpecialNeeds)}, ${body.notes?.trim() || null}, ${JSON.stringify(body.customAnswers ?? {})}, ${hash}, ${ip}, ${ua})
+      INSERT INTO public.event_registrations (event_id, name, phone, city, attending_count, has_special_needs, notes, public_submission_key_hash, submitted_from_ip, submitted_user_agent)
+      VALUES (${eventId}, ${body.name.trim()}, ${body.phone?.trim() || null}, ${body.city?.trim() || null}, ${Math.max(1, body.attendingCount ?? 1)}, ${Boolean(body.hasSpecialNeeds)}, ${body.notes?.trim() || null}, ${hash}, ${ip}, ${ua})
       RETURNING id
     `;
 
-    return NextResponse.json({ ok: true, registrationId: result[0].id });
+    const registrationId = result[0]?.id as string | undefined;
+    const customAnswers = body.customAnswers && typeof body.customAnswers === "object" ? body.customAnswers : null;
+
+    if (registrationId && customAnswers) {
+      for (const [questionKey, answer] of Object.entries(customAnswers)) {
+        if (!questionKey || typeof answer !== "string" || !answer.trim()) continue;
+        await sql`
+          INSERT INTO public.event_registration_answers (registration_id, event_id, question_key, answer)
+          VALUES (${registrationId}, ${eventId}, ${questionKey}, ${answer.trim()})
+        `;
+      }
+    }
+
+    return NextResponse.json({ ok: true, registrationId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Registration failed.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
-
