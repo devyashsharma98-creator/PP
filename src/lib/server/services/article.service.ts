@@ -1,4 +1,4 @@
-import { sql } from '@/lib/neon/client';
+import { executeSqlQuery, sql } from '@/lib/neon/client';
 import { AppError, NotFoundError, ValidationError, ForbiddenError } from '../errors/app-errors';
 import type { IService, PaginatedResult, CreateArticleInput, ArticleFilters } from '../services/types';
 
@@ -51,10 +51,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const whereSql = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
     const v = [...values];
 
-    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM articles ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM articles ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await (sql as any)(`SELECT * FROM articles ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<Article>(`SELECT * FROM articles ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Article[],
@@ -68,8 +68,8 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
   }
 
   async getById(id: string): Promise<Article | null> {
-    const rows = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1` as any[];
-    return rows[0] as Article | null;
+    const rows = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1` as unknown as Article[];
+    return rows[0] ?? null;
   }
 
   async create(input: CreateArticleInput): Promise<Article> {
@@ -83,13 +83,13 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const rows = await sql`
       INSERT INTO articles (title, content, summary, category, unit_id, department_id, status, author_user_id, author_name_snapshot)
       VALUES (${input.title}, ${input.content}, ${input.summary ?? null}, ${input.category}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft', null, null)
-      RETURNING *` as any[];
+      RETURNING *` as unknown as Article[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create article');
     }
 
-    return rows[0] as Article;
+    return rows[0];
   }
 
   async update(id: string, input: Partial<CreateArticleInput>): Promise<Article> {
@@ -121,9 +121,9 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     values.push(new Date().toISOString());
 
     const whereIdx = values.length + 1;
-    const rows = await (sql as any)(`UPDATE articles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
+    const rows = await executeSqlQuery<Article>(`UPDATE articles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
-    return rows[0] as Article;
+    return rows[0];
   }
 
   async submitForReview(id: string): Promise<Article> {
@@ -138,9 +138,9 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const rows = await sql`
       UPDATE articles SET status = 'pending_unit_head_review', updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *` as any[];
+      RETURNING *` as unknown as Article[];
 
-    return rows[0] as Article;
+    return rows[0];
   }
 
   async publish(id: string): Promise<Article> {
@@ -155,9 +155,9 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const rows = await sql`
       UPDATE articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *` as any[];
+      RETURNING *` as unknown as Article[];
 
-    return rows[0] as Article;
+    return rows[0];
   }
 
   async delete(id: string): Promise<void> {

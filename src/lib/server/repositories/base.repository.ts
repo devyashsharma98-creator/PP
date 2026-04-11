@@ -1,13 +1,14 @@
 import { sql } from '@/lib/neon/client';
-import { AppError } from '../errors/app-errors';
+
+type DatabaseRow = Record<string, unknown>;
 
 export abstract class BaseRepository<T> {
   protected abstract tableName: string;
 
-  abstract mapToEntity(row: unknown): T;
+  abstract mapToEntity(row: DatabaseRow): T;
 
   async findById(id: string): Promise<T | null> {
-    const rows = await sql`SELECT * FROM ${this.tableName} WHERE id = ${id} LIMIT 1` as any[];
+    const rows = await sql`SELECT * FROM ${this.tableName} WHERE id = ${id} LIMIT 1` as unknown as DatabaseRow[];
     return rows[0] ? this.mapToEntity(rows[0]) : null;
   }
 
@@ -25,8 +26,8 @@ export abstract class BaseRepository<T> {
     }
     
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const rows = await sql`SELECT * FROM ${this.tableName} ${whereClause}` as any[];
-    return rows.map(this.mapToEntity.bind(this));
+    const rows = await sql`SELECT * FROM ${this.tableName} ${whereClause}` as unknown as DatabaseRow[];
+    return rows.map((row) => this.mapToEntity(row));
   }
 
   async create(input: Partial<T>): Promise<T> {
@@ -34,7 +35,7 @@ export abstract class BaseRepository<T> {
     const values = Object.values(input);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
     
-    const rows = await sql`INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *` as any[];
+    const rows = await sql`INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *` as unknown as DatabaseRow[];
     
     return this.mapToEntity(rows[0]);
   }
@@ -43,7 +44,7 @@ export abstract class BaseRepository<T> {
     const keys = Object.keys(input);
     const setClause = keys.map((key, i) => `${key} = $${i + 2}`).join(', ');
     
-    const rows = await sql`UPDATE ${this.tableName} SET ${setClause} WHERE id = $1 RETURNING *` as any[];
+    const rows = await sql`UPDATE ${this.tableName} SET ${setClause} WHERE id = $1 RETURNING *` as unknown as DatabaseRow[];
     
     return this.mapToEntity(rows[0]);
   }

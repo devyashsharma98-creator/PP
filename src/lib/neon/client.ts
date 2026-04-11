@@ -26,3 +26,10 @@ export const sql = ((...args: Parameters<NeonQueryFunction<false, false>>) => {
 export function getNeonConnection() {
   return getSql();
 }
+
+type SqlExecutor = <T = Record<string, unknown>>(query: string, params?: unknown[]) => Promise<T[]>;
+
+export function executeSqlQuery<T = Record<string, unknown>>(query: string, params: unknown[] = []) {
+  const conn = requireSql() as unknown as SqlExecutor;
+  return conn<T>(query, params);
+}

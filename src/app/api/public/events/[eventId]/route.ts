@@ -4,6 +4,50 @@ import { neon } from "@neondatabase/serverless";
 const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
 
+type PublicEventRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  starts_at: string;
+  unit_id: string | null;
+  submitted_by_name_snapshot: string | null;
+  checklist: unknown;
+};
+
+type UnitRow = { id: string; name: string };
+type FormConfigRow = {
+  id: string;
+  collect_phone: boolean;
+  collect_city: boolean;
+  collect_attending_count: boolean;
+  collect_special_needs: boolean;
+};
+type FormQuestionRow = {
+  id: string;
+  event_id: string;
+  question_key: string;
+  label: string;
+  label_hi: string | null;
+  question_type: string;
+  display_order: number;
+};
+type PollRow = {
+  id: string;
+  question: string;
+  question_hi: string | null;
+  poll_type: string;
+  is_finalized: boolean;
+  winner_option_id: string | null;
+};
+type PollOptionRow = {
+  id: string;
+  poll_id: string;
+  label: string;
+  scheduled_at: string | null;
+};
+type PollVoteRow = { option_id: string };
+
 function isValidUuid(value: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(value);
@@ -34,20 +78,36 @@ export async function GET(
         sql`SELECT * FROM public.event_poll_votes`,
       ]);
 
-    const event = eventRows[0];
-    if (!event || event.status !== "published") {
+    const event = (eventRows as unknown as PublicEventRow[])[0];
+    if (!event || !["published", "authorized_public"].includes(event.status)) {
       return NextResponse.json({ error: "Event not available." }, { status: 404 });
     }
 
-    const unitsById = new Map(unitRows.map((u: any) => [u.id, u.name]));
-    const fc = formConfigRows[0];
-    const polls = pollRows.map((p: any) => {
-      const opts = pollOptionRows.filter((o: any) => o.poll_id === p.id).map((o: any) => ({
-        id: o.id, label: o.label,
-        votes: pollVoteRows.filter((v: any) => v.option_id === o.id).length,
-        scheduledAtIso: o.scheduled_at,
+    const typedUnits = unitRows as unknown as UnitRow[];
+    const typedFormConfigs = formConfigRows as unknown as FormConfigRow[];
+    const typedQuestions = formQuestionRows as unknown as FormQuestionRow[];
+    const typedPolls = pollRows as unknown as PollRow[];
+    const typedPollOptions = pollOptionRows as unknown as PollOptionRow[];
+    const typedPollVotes = pollVoteRows as unknown as PollVoteRow[];
+
+    const unitsById = new Map(typedUnits.map((unit) => [unit.id, unit.name]));
+    const fc = typedFormConfigs[0];
+    const polls = typedPolls.map((poll) => {
+      const opts = typedPollOptions.filter((option) => option.poll_id === poll.id).map((option) => ({
+        id: option.id,
+        label: option.label,
+        votes: typedPollVotes.filter((vote) => vote.option_id === option.id).length,
+        scheduledAtIso: option.scheduled_at,
       }));
-      return { id: p.id, question: p.question, questionHi: p.question_hi ?? p.question, type: p.poll_type, options: opts, isFinalized: p.is_finalized, winnerOptionId: p.winner_option_id ?? undefined };
+      return {
+        id: poll.id,
+        question: poll.question,
+        questionHi: poll.question_hi ?? poll.question,
+        type: poll.poll_type,
+        options: opts,
+        isFinalized: poll.is_finalized,
+        winnerOptionId: poll.winner_option_id ?? undefined,
+      };
     });
 
     return NextResponse.json({
@@ -57,11 +117,18 @@ export async function GET(
         dateIso: event.starts_at,
         unit: event.unit_id ? (unitsById.get(event.unit_id) ?? "Unknown") : "Unknown",
         submittedBy: event.submitted_by_name_snapshot ?? "Organizer",
-        status: event.status === "authorized_public" ? "Published" : event.status,
-        checklist: typeof event.checklist === "object" ? event.checklist : {},
+        status: ["authorized_public", "published"].includes(event.status) ? "Published" : event.status,
+        checklist: typeof event.checklist === "object" && event.checklist !== null ? event.checklist : {},
         formConfig: fc ? {
           fields: { phone: fc.collect_phone, city: fc.collect_city, attendingCount: fc.collect_attending_count, specialNeeds: fc.collect_special_needs },
-          customQuestions: formQuestionRows.sort((a: any, b: any) => a.display_order - b.display_order).map((q: any) => ({ id: q.question_key, question: q.label, questionHi: q.label_hi ?? q.label, type: q.question_type === "yesno" ? "yesno" : "text" })),
+          customQuestions: typedQuestions
+            .sort((first, second) => first.display_order - second.display_order)
+            .map((question) => ({
+              id: question.question_key,
+              question: question.label,
+              questionHi: question.label_hi ?? question.label,
+              type: question.question_type === "yesno" ? "yesno" : "text",
+            })),
         } : undefined,
         polls: polls.length ? polls : undefined,
       },
@@ -71,4 +138,3 @@ export async function GET(
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
-

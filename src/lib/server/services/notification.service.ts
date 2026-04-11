@@ -1,4 +1,4 @@
-import { sql } from '@/lib/neon/client';
+import { executeSqlQuery, sql } from '@/lib/neon/client';
 import { AppError, NotFoundError, ValidationError } from '../errors/app-errors';
 import type { IService, PaginatedResult } from '../services/types';
 
@@ -55,10 +55,10 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     const whereSql = `WHERE ${whereParts.join(' AND ')}`;
     const v = [...values];
 
-    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM notifications ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM notifications ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await (sql as any)(`SELECT * FROM notifications ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<Notification>(`SELECT * FROM notifications ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Notification[],
@@ -72,8 +72,8 @@ export class NotificationService implements IService<NotificationFilters, Pagina
   }
 
   async getById(id: string): Promise<Notification | null> {
-    const rows = await sql`SELECT * FROM notifications WHERE id = ${id} LIMIT 1` as any[];
-    return rows[0] as Notification | null;
+    const rows = await sql`SELECT * FROM notifications WHERE id = ${id} LIMIT 1` as unknown as Notification[];
+    return rows[0] ?? null;
   }
 
   async create(input: {
@@ -92,13 +92,13 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     const rows = await sql`
       INSERT INTO notifications (recipient_user_id, kind, title, body, link_path, entity_type, entity_id)
       VALUES (${input.recipient_user_id}, ${input.kind}, ${input.title}, ${input.body ?? null}, ${input.link_path ?? null}, ${input.entity_type ?? null}, ${input.entity_id ?? null})
-      RETURNING *` as any[];
+      RETURNING *` as unknown as Notification[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create notification');
     }
 
-    return rows[0] as Notification;
+    return rows[0];
   }
 
   async markAsRead(id: string): Promise<Notification> {
@@ -110,9 +110,9 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     const rows = await sql`
       UPDATE notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
-      RETURNING *` as any[];
+      RETURNING *` as unknown as Notification[];
 
-    return rows[0] as Notification;
+    return rows[0];
   }
 
   async markAllAsRead(userId: string): Promise<void> {

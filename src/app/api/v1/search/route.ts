@@ -1,12 +1,33 @@
-import { sql } from '@/lib/neon/client';
+import { executeSqlQuery } from '@/lib/neon/client';
 import { json, errorResponse, unauthorized } from '@/lib/server/api/response';
 import { requireAuth } from '@/lib/server/middleware/auth';
 import { NextRequest } from 'next/server';
 
+type SearchEventRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  starts_at: string;
+};
+
+type SearchArticleRow = {
+  id: string;
+  title: string;
+  content: string | null;
+  status: string;
+  created_at: string;
+};
+
+type SearchUserRow = {
+  id: string;
+  display_name: string | null;
+  email: string | null;
+};
+
 export async function GET(req: NextRequest) {
   const auth = requireAuth(req);
   if (!auth) return unauthorized();
-
   const { searchParams } = new URL(req.url);
   const q = searchParams.get('q');
   const type = searchParams.get('type');
@@ -19,10 +40,10 @@ export async function GET(req: NextRequest) {
     const results: { type: string; id: string; title: string; subtitle: string; status?: string; date?: string }[] = [];
 
     if (!type || type === 'events') {
-      const events = await (sql as any)(
+      const events = await executeSqlQuery<SearchEventRow>(
         `SELECT id, title, description, status, starts_at FROM events WHERE title ILIKE $1 OR description ILIKE $1 ORDER BY starts_at DESC LIMIT 20`,
         [`%${q}%`]
-      ) as { id: string; title: string; description: string | null; status: string; starts_at: string }[];
+      );
 
       for (const e of events) {
         results.push({
@@ -37,10 +58,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (!type || type === 'articles') {
-      const articles = await (sql as any)(
+      const articles = await executeSqlQuery<SearchArticleRow>(
         `SELECT id, title, content, status, created_at FROM articles WHERE title ILIKE $1 OR content ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
         [`%${q}%`]
-      ) as { id: string; title: string; content: string | null; status: string; created_at: string }[];
+      );
 
       for (const a of articles) {
         results.push({
@@ -55,10 +76,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (!type || type === 'users') {
-      const users = await (sql as any)(
+      const users = await executeSqlQuery<SearchUserRow>(
         `SELECT id, display_name, email FROM profiles WHERE display_name ILIKE $1 OR email ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
         [`%${q}%`]
-      ) as { id: string; display_name: string | null; email: string | null }[];
+      );
 
       for (const u of users) {
         results.push({

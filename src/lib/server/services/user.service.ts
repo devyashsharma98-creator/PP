@@ -1,4 +1,4 @@
-import { sql } from '@/lib/neon/client';
+import { executeSqlQuery, sql } from '@/lib/neon/client';
 import { AppError, NotFoundError, ValidationError } from '../errors/app-errors';
 import type { IService, PaginatedResult } from '../services/types';
 
@@ -59,14 +59,14 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     const joinSql = filters.unit_id ? `LEFT JOIN units u ON p.default_unit_id = u.id` : '';
     const v = [...values];
 
-    const countResult = await (sql as any)(`SELECT COUNT(*) as count FROM profiles p ${joinSql} ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM profiles p ${joinSql} ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await (sql as any)(`SELECT p.* FROM profiles p ${joinSql} ${whereSql} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<User>(`SELECT p.* FROM profiles p ${joinSql} ${whereSql} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     const userIds = rows.map((r: User) => r.id);
     const roleRows = userIds.length > 0
-      ? await (sql as any)(`SELECT ur.user_id, r.code FROM user_role_assignments ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ANY($1) AND (ur.ends_at IS NULL OR ur.ends_at > now())`, [userIds]) as { user_id: string; code: string }[]
+      ? await executeSqlQuery<{ user_id: string; code: string }>(`SELECT ur.user_id, r.code FROM user_role_assignments ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ANY($1) AND (ur.ends_at IS NULL OR ur.ends_at > now())`, [userIds])
       : [];
 
     const rolesByUser = new Map<string, string[]>();
@@ -92,7 +92,7 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
   }
 
   async getById(id: string): Promise<UserWithRoles | null> {
-    const rows = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1` as any[];
+    const rows = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1` as unknown as User[];
     if (!rows[0]) return null;
 
     const roleRows = await sql`
@@ -101,7 +101,7 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
       WHERE ur.user_id = ${id} AND (ur.ends_at IS NULL OR ur.ends_at > now())
     ` as unknown as { code: string }[];
 
-    return { ...rows[0] as User, roles: roleRows.map(r => r.code) };
+    return { ...rows[0], roles: roleRows.map(r => r.code) };
   }
 
   async create(input: {
@@ -114,13 +114,13 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     const rows = await sql`
       INSERT INTO profiles (email, display_name, phone, default_unit_id, default_department_id, preferred_language)
       VALUES (${input.email}, ${input.display_name}, ${input.phone ?? null}, ${input.default_unit_id ?? null}, ${input.default_department_id ?? null}, 'en')
-      RETURNING *` as any[];
+      RETURNING *` as unknown as User[];
 
     if (!rows[0]) {
       throw new AppError(500, 'DB_ERROR', 'Failed to create user');
     }
 
-    return rows[0] as User;
+    return rows[0];
   }
 
   async update(id: string, input: Partial<User>): Promise<User> {
@@ -156,9 +156,9 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     values.push(new Date().toISOString());
 
     const whereIdx = values.length + 1;
-    const rows = await (sql as any)(`UPDATE profiles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
+    const rows = await executeSqlQuery<User>(`UPDATE profiles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
-    return rows[0] as User;
+    return rows[0];
   }
 
   async assignRole(userId: string, roleId: string, scopeType: string = 'org'): Promise<void> {

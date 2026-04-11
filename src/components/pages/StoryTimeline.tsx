@@ -16,6 +16,13 @@ type Chapter = {
   bgImage: string;
 };
 
+type TimelineProgressProps = {
+  chapter: Chapter;
+  index: number;
+  total: number;
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+};
+
 const chapters: Chapter[] = [
   {
     id: "genesis",
@@ -123,7 +130,7 @@ export default function StoryTimeline() {
 }
 
 // Background layer crossfade + scale
-function ScrollBackgroundImage({ chapter, index, total, scrollYProgress }: any) {
+function ScrollBackgroundImage({ chapter, index, total, scrollYProgress }: TimelineProgressProps) {
   const center = index / (total - 1);
   const step = 1 / (total - 1);
 
@@ -154,7 +161,7 @@ function ScrollBackgroundImage({ chapter, index, total, scrollYProgress }: any) 
 }
 
 // Glass-morphism card taking full advantage of textures.css
-function ChapterCard({ chapter, index, total, scrollYProgress }: any) {
+function ChapterCard({ chapter, index, total, scrollYProgress }: TimelineProgressProps) {
   const Icon = chapter.icon;
 
   const center = index / (total - 1);

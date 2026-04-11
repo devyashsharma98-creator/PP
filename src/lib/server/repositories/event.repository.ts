@@ -20,22 +20,21 @@ export interface EventEntity {
 export class EventRepository extends BaseRepository<EventEntity> {
   tableName = 'events';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapToEntity(row: any): EventEntity {
+  mapToEntity(row: Record<string, unknown>): EventEntity {
     return {
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      starts_at: row.starts_at,
-      ends_at: row.ends_at,
-      status: row.status,
-      unit_id: row.unit_id,
-      department_id: row.department_id,
-      location_id: row.location_id,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-      is_deleted: row.is_deleted ?? false,
-      deleted_at: row.deleted_at ?? null,
+      id: String(row.id ?? ''),
+      title: String(row.title ?? ''),
+      description: typeof row.description === 'string' ? row.description : null,
+      starts_at: String(row.starts_at ?? ''),
+      ends_at: typeof row.ends_at === 'string' ? row.ends_at : null,
+      status: String(row.status ?? ''),
+      unit_id: typeof row.unit_id === 'string' ? row.unit_id : null,
+      department_id: typeof row.department_id === 'string' ? row.department_id : null,
+      location_id: typeof row.location_id === 'string' ? row.location_id : null,
+      created_at: String(row.created_at ?? ''),
+      updated_at: String(row.updated_at ?? ''),
+      is_deleted: typeof row.is_deleted === 'boolean' ? row.is_deleted : false,
+      deleted_at: typeof row.deleted_at === 'string' ? row.deleted_at : null,
     };
   }
 
@@ -51,7 +50,7 @@ export class EventRepository extends BaseRepository<EventEntity> {
       LEFT JOIN departments_or_aayams d ON e.department_id = d.id
       LEFT JOIN locations l ON e.location_id = l.id
       WHERE e.id = ${id}
-      LIMIT 1` as any[];
+      LIMIT 1` as unknown as Record<string, unknown>[];
     return rows[0] ? this.mapToEntity(rows[0]) : null;
   }
 

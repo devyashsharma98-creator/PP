@@ -6,12 +6,17 @@ import { useToast } from "@/components/ToastProvider";
 import { Masthead } from "@/components/Masthead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, TrendingUp } from "lucide-react";
-import type { AalekhArticle } from "@/context/AppContext";
+import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
 import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared";
 
 interface AayamViewProps {
   articles: AalekhArticle[];
-  updateArticleStatus: (id: string, status: any, edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>, opts?: { reviewNotes?: string | null }) => Promise<boolean>;
+  updateArticleStatus: (
+    id: string,
+    status: ArticleStatus,
+    edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>,
+    opts?: { reviewNotes?: string | null },
+  ) => Promise<boolean>;
 }
 
 export function AayamView({ articles, updateArticleStatus }: AayamViewProps) {

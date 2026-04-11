@@ -2,7 +2,7 @@ import "server-only";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { NeonAuthContext } from "./auth";
 import type { AppActionRequest, AppViewerContext, CanonicalRoleCode, UiRole } from "@/lib/app/contracts";
-import { filterRowsByScope, resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
+import { filterRowsByScope, resolveScopedAccess, rowMatchesScope, type ScopedRowLike, type UnitTreeLike } from "@/lib/app/scope";
 import { getDatabaseUrl } from "./env";
 import { validateEventTransition, type EventStatus } from "@/lib/permissions/event-workflow";
 import { validateArticleTransition, type ArticleStatus } from "@/lib/permissions/article-workflow";
@@ -151,6 +151,55 @@ function toCanonicalRole(role: string): CanonicalRoleCode | null {
   return canonicalRoleSet.has(role as CanonicalRoleCode) ? (role as CanonicalRoleCode) : null;
 }
 
+type EventRow = ScopedRowLike & {
+  id: string;
+  title: string;
+  description: string | null;
+  starts_at: string;
+  unit_id: string | null;
+  status: string;
+  submitted_by_name_snapshot: string | null;
+  checklist: unknown;
+  report: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  vritt_attendance_count: number | null;
+  vritt_checked_in_count: number | null;
+  vritt_media_urls: string[] | null;
+  vritt_content: string | null;
+  vritt_status: string | null;
+};
+
+type ArticleRow = ScopedRowLike & {
+  id: string;
+  title: string;
+  content: string;
+  summary: string | null;
+  category: string;
+  status: string;
+  author_name_snapshot: string | null;
+  social_url: string | null;
+  document_url: string | null;
+  values_checklist: unknown;
+  created_at: string | null;
+};
+
+type UnitRow = { id: string; name: string; org_id?: string; parent_unit_id?: string | null; unit_kind?: string };
+type FormConfigRow = { id: string; event_id: string; collect_phone: boolean; collect_city: boolean; collect_attending_count: boolean; collect_special_needs: boolean };
+type FormQuestionRow = { id: string; form_config_id: string; event_id: string; question_key: string; label: string; label_hi: string | null; question_type: string; display_order: number };
+type PollRow = { id: string; event_id: string; question: string; question_hi: string | null; poll_type: string; is_finalized: boolean; winner_option_id: string | null };
+type PollOptionRow = { id: string; poll_id: string; label: string; sort_order: number; scheduled_at: string | null };
+type PollVoteRow = { poll_id: string; option_id: string };
+type PracharStatusRow = { entity_id: string | null; platform: string; is_done: boolean | null; skip_reason: string | null; template_ref: string | null };
+type RegistrationRow = { id: string; event_id: string; name: string; phone: string | null; city: string | null; attending_count: number; has_special_needs: boolean; notes: string | null; created_at: string | null; answers_payload: unknown };
+type RegistrationAnswerRow = { registration_id: string; question_id: string; answer_text: string | null };
+type ArticleReviewRow = { article_id: string; review_notes: string | null; created_at: string | null };
+type VimarshTopicRow = { id: string; title: string; description: string | null; sort_order: number | null };
+type VimarshResourceRow = { id: string; topic_id: string; title: string; url: string; resource_type: string };
+type TopicResource = { id: string; topicId: string; title: string; url: string; resourceType: string };
+type EventScopeRow = ScopedRowLike & { id: string; status?: string; title?: string; values_checklist?: unknown };
+type ArticleScopeRow = ScopedRowLike & { id: string; status: string; title: string; values_checklist: unknown };
+
 function buildViewer(ctx: NeonAuthContext): AppViewerContext {
   const canonicalRoles = Array.from(
     new Set(
@@ -261,38 +310,53 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       sql`SELECT * FROM public.vimarsh_resources`,
     ]);
 
-  const scopedAccess = resolveScopedAccess(ctx.assignments, ctx.units);
-  const scopedEvents = filterRowsByScope(events as any[], scopedAccess, ctx.user.id);
-  const scopedArticles = filterRowsByScope(articles as any[], scopedAccess, ctx.user.id);
-  const scopedEventIds = new Set(scopedEvents.map((event: any) => event.id));
+  const typedEvents = events as unknown as EventRow[];
+  const typedUnits = units as unknown as UnitRow[];
+  const typedArticles = articles as unknown as ArticleRow[];
+  const typedFormConfigs = formConfigs as unknown as FormConfigRow[];
+  const typedFormQuestions = formQuestions as unknown as FormQuestionRow[];
+  const typedPolls = polls as unknown as PollRow[];
+  const typedPollOptions = pollOptions as unknown as PollOptionRow[];
+  const typedPollVotes = pollVotes as unknown as PollVoteRow[];
+  const typedPracharStatuses = pracharStatuses as unknown as PracharStatusRow[];
+  const typedRegistrations = registrations as unknown as RegistrationRow[];
+  const typedRegAnswers = regAnswers as unknown as RegistrationAnswerRow[];
+  const typedArticleReviews = articleReviews as unknown as ArticleReviewRow[];
+  const typedVimarshTopics = vimarshTopics as unknown as VimarshTopicRow[];
+  const typedVimarshResources = vimarshResources as unknown as VimarshResourceRow[];
 
-  const unitsById = new Map(units.map((u: any) => [u.id, u.name]));
-  const formConfigByEventId = new Map(formConfigs.map((fc: any) => [fc.event_id, fc]));
+  const scopedAccess = resolveScopedAccess(ctx.assignments, ctx.units as UnitTreeLike[]);
+  const scopedEvents = filterRowsByScope(typedEvents, scopedAccess, ctx.user.id);
+  const scopedArticles = filterRowsByScope(typedArticles, scopedAccess, ctx.user.id);
+  const scopedEventIds = new Set(scopedEvents.map((event) => event.id));
 
-  const questionsByConfigId = new Map<string, any[]>();
-  for (const q of formQuestions) {
+  const unitsById = new Map(typedUnits.map((unit) => [unit.id, unit.name]));
+  const formConfigByEventId = new Map(typedFormConfigs.map((config) => [config.event_id, config]));
+
+  const questionsByConfigId = new Map<string, FormQuestionRow[]>();
+  for (const q of typedFormQuestions) {
     const list = questionsByConfigId.get(q.form_config_id) ?? [];
     list.push(q);
     questionsByConfigId.set(q.form_config_id, list);
   }
 
-  const questionById = new Map(formQuestions.map((q: any) => [q.id, q]));
-  const regAnswersByReg = new Map<string, any[]>();
-  for (const a of regAnswers) {
+  const questionById = new Map(typedFormQuestions.map((question) => [question.id, question]));
+  const regAnswersByReg = new Map<string, RegistrationAnswerRow[]>();
+  for (const a of typedRegAnswers) {
     const list = regAnswersByReg.get(a.registration_id) ?? [];
     list.push(a);
     regAnswersByReg.set(a.registration_id, list);
   }
 
-  const regsByEvent = new Map<string, any[]>();
-  for (const r of registrations) {
+  const regsByEvent = new Map<string, RegistrationRow[]>();
+  for (const r of typedRegistrations) {
     const list = regsByEvent.get(r.event_id) ?? [];
     list.push(r);
     regsByEvent.set(r.event_id, list);
   }
 
-  const pollsByEvent = new Map<string, any[]>();
-  for (const p of polls) {
+  const pollsByEvent = new Map<string, PollRow[]>();
+  for (const p of typedPolls) {
     const list = pollsByEvent.get(p.event_id) ?? [];
     list.push(p);
     pollsByEvent.set(p.event_id, list);
@@ -317,10 +381,10 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     }
   >();
 
-  for (const status of pracharStatuses as any[]) {
+  for (const status of typedPracharStatuses) {
     const eventId = status.entity_id;
+    if (typeof eventId !== "string") continue;
     if (!scopedEventIds.has(eventId)) continue;
-    if (!eventId) continue;
     const current = pracharByEvent.get(eventId) ?? {
       platforms: {
         whatsapp: false,
@@ -345,16 +409,16 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     pracharByEvent.set(eventId, current);
   }
 
-  const optionsByPoll = new Map<string, any[]>();
-  for (const o of pollOptions) {
+  const optionsByPoll = new Map<string, PollOptionRow[]>();
+  for (const o of typedPollOptions) {
     const list = optionsByPoll.get(o.poll_id) ?? [];
     list.push(o);
     optionsByPoll.set(o.poll_id, list);
   }
 
-  const votesByPoll = new Map<string, any[]>();
+  const votesByPoll = new Map<string, PollVoteRow[]>();
   const votesByOption = new Map<string, number>();
-  for (const v of pollVotes) {
+  for (const v of typedPollVotes) {
     const list = votesByPoll.get(v.poll_id) ?? [];
     list.push(v);
     votesByPoll.set(v.poll_id, list);
@@ -362,7 +426,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   }
 
   const latestReviewByArticle = new Map<string, string | null>();
-  for (const review of articleReviews) {
+  for (const review of typedArticleReviews) {
     if (latestReviewByArticle.has(review.article_id)) continue;
     if (review.review_notes?.trim()) {
       latestReviewByArticle.set(review.article_id, review.review_notes);
@@ -370,10 +434,10 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   }
 
   // Build events
-  const formattedEvents = scopedEvents.map((e: any) => {
+  const formattedEvents = scopedEvents.map((e) => {
     const fc = formConfigByEventId.get(e.id);
     const questions = fc ? questionsByConfigId.get(fc.id) ?? [] : [];
-    const regs = (regsByEvent.get(e.id) ?? []).map((r: any) => {
+    const regs = (regsByEvent.get(e.id) ?? []).map((r) => {
       const customAnswers: Record<string, string> = {};
       const answerRows = regAnswersByReg.get(r.id) ?? [];
       for (const answer of answerRows) {
@@ -400,18 +464,18 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     });
 
     const eventPolls = pollsByEvent.get(e.id) ?? [];
-    const eventOptions = eventPolls.flatMap((p: any) => optionsByPoll.get(p.id) ?? []);
-    const eventVotes = eventPolls.flatMap((p: any) => votesByPoll.get(p.id) ?? []);
+    const eventOptions = eventPolls.flatMap((poll) => optionsByPoll.get(poll.id) ?? []);
+    const eventVotes = eventPolls.flatMap((poll) => votesByPoll.get(poll.id) ?? []);
 
-    const builtPolls = eventPolls.map((poll: any) => {
+    const builtPolls = eventPolls.map((poll) => {
       const opts = eventOptions
-        .filter((o: any) => o.poll_id === poll.id)
-        .sort((a: any, b: any) => a.sort_order - b.sort_order)
-        .map((o: any) => ({
-          id: o.id,
-          label: o.label,
-          votes: votesByOption.get(o.id) ?? 0,
-          scheduledAtIso: o.scheduled_at,
+        .filter((option) => option.poll_id === poll.id)
+        .sort((first, second) => first.sort_order - second.sort_order)
+        .map((option) => ({
+          id: option.id,
+          label: option.label,
+          votes: votesByOption.get(option.id) ?? 0,
+          scheduledAtIso: option.scheduled_at,
         }));
       return {
         id: poll.id,
@@ -458,8 +522,8 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
               specialNeeds: fc.collect_special_needs,
             },
             customQuestions: questions
-              .sort((a: any, b: any) => a.display_order - b.display_order)
-              .map((q: any) => ({
+              .sort((first, second) => first.display_order - second.display_order)
+              .map((q) => ({
                 id: q.question_key,
                 question: q.label,
                 questionHi: q.label_hi ?? q.label,
@@ -480,8 +544,8 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
 
   // Prachar statuses for published events
   const pracharStatusList = formattedEvents
-    .filter((e: any) => e.status === "Published")
-    .map((e: any) => {
+    .filter((e) => e.status === "Published")
+    .map((e) => {
       const p = pracharByEvent.get(e.id);
       return {
         eventId: e.id,
@@ -502,7 +566,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
     });
 
   // Articles
-  const formattedArticles = scopedArticles.map((a: any) => {
+  const formattedArticles = scopedArticles.map((a) => {
     const values = asObject(a.values_checklist);
     return {
       id: a.id,
@@ -526,13 +590,13 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   });
 
   // Vimarsh
-  const resourcesByTopic = new Map<string, any[]>();
-  for (const r of vimarshResources) {
+  const resourcesByTopic = new Map<string, TopicResource[]>();
+  for (const r of typedVimarshResources) {
     const list = resourcesByTopic.get(r.topic_id) ?? [];
     list.push({ id: r.id, topicId: r.topic_id, title: r.title, url: r.url, resourceType: r.resource_type });
     resourcesByTopic.set(r.topic_id, list);
   }
-  const formattedVimarsh = vimarshTopics.map((t: any) => ({
+  const formattedVimarsh = typedVimarshTopics.map((t) => ({
     id: t.id,
     title: t.title,
     description: t.description ?? null,
@@ -562,7 +626,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       where id = ${eventId} and org_id = ${orgId}
       limit 1
     `;
-    const row = (rows as any[])[0];
+    const row = (rows as unknown as EventScopeRow[])[0];
     if (!row || !rowMatchesScope(scopedAccess, row, actorId)) {
       throw new Error("You do not have access to this event scope.");
     }
@@ -575,7 +639,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       where id = ${articleId} and org_id = ${orgId}
       limit 1
     `;
-    const row = (rows as any[])[0];
+    const row = (rows as unknown as ArticleScopeRow[])[0];
     if (!row || !rowMatchesScope(scopedAccess, row, actorId)) {
       throw new Error("You do not have access to this article scope.");
     }
@@ -624,7 +688,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         where id = ${input.payload.id} and org_id = ${orgId}
         limit 1
       `;
-      const evt = (evtRows as any[])[0];
+      const evt = (evtRows as unknown as EventScopeRow[])[0];
       if (!evt || !rowMatchesScope(scopedAccess, evt, actorId)) {
         throw new Error("You do not have access to this event scope.");
       }
@@ -806,7 +870,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         where id = ${input.payload.id} and org_id = ${orgId}
         limit 1
       `;
-      const art = (artRows as any[])[0];
+      const art = (artRows as unknown as ArticleScopeRow[])[0];
       if (!art || !rowMatchesScope(scopedAccess, art, actorId)) {
         throw new Error("You do not have access to this article scope.");
       }
