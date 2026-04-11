@@ -621,7 +621,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
 
   async function assertEventScope(eventId: string) {
     const rows = await sql`
-      select id, unit_id, department_id, created_by, submitted_by_user_id
+      select id, unit_id, department_id, created_by
       from public.events
       where id = ${eventId} and org_id = ${orgId}
       limit 1
@@ -661,12 +661,12 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
 
       const result = await sql`
         insert into public.events (
-          org_id, unit_id, title, description, status, starts_at, submitted_by_user_id, submitted_by_name_snapshot,
+          org_id, unit_id, title, description, status, starts_at, submitted_by_name_snapshot,
           checklist, created_by, updated_by
         )
         values (
           ${orgId}, ${unitId}, ${input.payload.title}, ${input.payload.description ?? ""}, 'draft', ${startsAt},
-          ${actorId}, ${ctx.profile?.display_name ?? input.payload.submittedBy ?? "Current User"},
+          ${ctx.profile?.display_name ?? input.payload.submittedBy ?? "Current User"},
           ${JSON.stringify(input.payload.checklist ?? {})}::jsonb, ${actorId}, ${actorId}
         )
         returning id
@@ -683,7 +683,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     case "updateEventStatus": {
       // ── Fetch current event (scope check + current status) ──────────────
       const evtRows = await sql`
-        select id, status, title, unit_id, department_id, created_by, submitted_by_user_id
+        select id, status, title, unit_id, department_id, created_by
         from public.events
         where id = ${input.payload.id} and org_id = ${orgId}
         limit 1
