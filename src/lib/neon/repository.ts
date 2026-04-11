@@ -779,10 +779,10 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       const poll = input.payload.poll;
       const pollRes = await sql`
         insert into public.event_polls (
-          event_id, question, question_hi, poll_type, is_public_voting, created_by, updated_by
+          event_id, question, question_hi, poll_type, created_by, updated_at
         )
         values (
-          ${input.payload.eventId}, ${poll.question}, ${poll.questionHi}, ${poll.type}, true, ${actorId}, ${actorId}
+          ${input.payload.eventId}, ${poll.question}, ${poll.questionHi}, ${poll.type}, ${actorId}, now()
         )
         returning id
       `;
@@ -792,14 +792,12 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       for (let i = 0; i < poll.options.length; i += 1) {
         const opt = poll.options[i];
         await sql`
-          insert into public.event_poll_options (poll_id, label, sort_order, scheduled_at, created_by, updated_by)
+          insert into public.event_poll_options (poll_id, label, scheduled_at, display_order)
           values (
             ${pollId},
             ${opt.label},
-            ${i},
             ${poll.type === "date" ? (opt.scheduledAtIso ?? null) : null},
-            ${actorId},
-            ${actorId}
+            ${i}
           )
         `;
       }
@@ -814,7 +812,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
 
     case "castVote": {
       await sql`
-        insert into public.event_poll_votes (poll_id, option_id, actor_user_id)
+        insert into public.event_poll_votes (poll_id, option_id, submitted_by)
         values (${input.payload.pollId}, ${input.payload.optionId}, ${actorId})
       `;
       await writeAuditLog({
@@ -829,7 +827,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       await assertEventScope(input.payload.eventId);
       await sql`
         update public.event_polls
-        set is_finalized = true, winner_option_id = ${input.payload.winnerOptionId}, finalized_by = ${actorId}, updated_by = ${actorId}, updated_at = now()
+        set is_finalized = true, winner_option_id = ${input.payload.winnerOptionId}, updated_at = now()
         where id = ${input.payload.pollId} and event_id = ${input.payload.eventId}
       `;
       await writeAuditLog({

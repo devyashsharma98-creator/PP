@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { createHash } from "node:crypto";
 
 const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
@@ -29,7 +28,7 @@ export async function POST(
     // Check poll is open
     const [pollRows, eventRows] = await Promise.all([
       sql`SELECT * FROM public.event_polls WHERE id = ${pollId} AND event_id = ${eventId} LIMIT 1`,
-      sql`SELECT status, voting_public_enabled FROM public.events WHERE id = ${eventId} LIMIT 1`,
+      sql`SELECT status FROM public.events WHERE id = ${eventId} LIMIT 1`,
     ]);
     const poll = pollRows[0];
     const event = eventRows[0];
@@ -42,11 +41,20 @@ export async function POST(
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip = forwardedFor?.split(",")[0]?.trim() ?? "unknown";
     const ua = req.headers.get("user-agent") ?? "unknown";
-    const fingerprint = createHash("sha256").update(`${eventId}:${pollId}:${ip}:${ua}`).digest("hex");
+    const existingVoteRows = await sql`
+      SELECT id FROM public.event_poll_votes
+      WHERE poll_id = ${pollId}
+        AND coalesce(submitted_from_ip, '') = ${ip}
+        AND coalesce(submitted_user_agent, '') = ${ua}
+      LIMIT 1
+    `;
+    if (existingVoteRows[0]) {
+      return NextResponse.json({ error: "Vote already recorded." }, { status: 409 });
+    }
 
     await sql`
-      INSERT INTO public.event_poll_votes (poll_id, option_id, voter_fingerprint_hash, submitted_from_ip, submitted_user_agent)
-      VALUES (${pollId}, ${body.optionId}, ${fingerprint}, ${ip}, ${ua})
+      INSERT INTO public.event_poll_votes (poll_id, option_id, submitted_from_ip, submitted_user_agent)
+      VALUES (${pollId}, ${body.optionId}, ${ip}, ${ua})
     `;
 
     return NextResponse.json({ ok: true });
