@@ -22,7 +22,7 @@ export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
 }
 
 export interface AayamDashboardViewProps extends DashboardRoleViewProps {
-  onForwardToVibhag: (eventId: string) => void | Promise<void>;
+  onForwardToVibhag: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
 }
 
 export interface UnitDashboardViewProps {

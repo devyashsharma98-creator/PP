@@ -100,8 +100,10 @@ export function AayamDashboardView({
                   </div>
                   <p className="text-sm text-muted-foreground">{event.description}</p>
                   <div className="space-y-1">
-                    <Button size="sm" onClick={() => void onForwardToVibhag(event.id)}>
-                      {t("Review & Forward to Vibhag", "समीक्षा करें और विभाग को भेजें")} <ArrowRight className="ml-1 h-4 w-4" />
+                    <Button size="sm" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                      {event.status === "Submitted by Unit"
+                        ? t("Accept & Begin Review", "स्वीकारें और समीक्षा प्रारंभ करें")
+                        : t("Review & Forward to Vibhag", "समीक्षा करें और विभाग को भेजें")} <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                     <p className="pl-0.5 font-devanagari text-xs text-muted-foreground">
                       {t(
