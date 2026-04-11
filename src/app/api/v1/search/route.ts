@@ -1,6 +1,8 @@
+import "server-only";
+
 import { executeSqlQuery } from '@/lib/neon/client';
-import { json, errorResponse, unauthorized } from '@/lib/server/api/response';
-import { requireAuth } from '@/lib/server/middleware/auth';
+import { json, errorResponse } from '@/lib/server/api/response';
+import { withAuth } from '@/lib/middleware/with-auth';
 import { NextRequest } from 'next/server';
 
 type SearchEventRow = {
@@ -25,9 +27,7 @@ type SearchUserRow = {
   email: string | null;
 };
 
-export async function GET(req: NextRequest) {
-  const auth = requireAuth(req);
-  if (!auth) return unauthorized();
+export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get('q');
   const type = searchParams.get('type');
@@ -96,4 +96,4 @@ export async function GET(req: NextRequest) {
     console.error('Search error:', error);
     return errorResponse(500, 'INTERNAL_ERROR', 'Search failed');
   }
-}
+});
