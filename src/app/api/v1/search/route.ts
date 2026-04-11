@@ -41,7 +41,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     if (!type || type === 'events') {
       const events = await executeSqlQuery<SearchEventRow>(
-        `SELECT id, title, description, status, starts_at FROM events WHERE title ILIKE $1 OR description ILIKE $1 ORDER BY starts_at DESC LIMIT 20`,
+        `SELECT id, title, description, status, starts_at FROM public.events WHERE title ILIKE $1 OR description ILIKE $1 ORDER BY starts_at DESC LIMIT 20`,
         [`%${q}%`]
       );
 
@@ -59,7 +59,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     if (!type || type === 'articles') {
       const articles = await executeSqlQuery<SearchArticleRow>(
-        `SELECT id, title, content, status, created_at FROM articles WHERE title ILIKE $1 OR content ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
+        `SELECT id, title, content, status, created_at FROM public.articles WHERE title ILIKE $1 OR content ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
         [`%${q}%`]
       );
 
@@ -77,7 +77,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     if (!type || type === 'users') {
       const users = await executeSqlQuery<SearchUserRow>(
-        `SELECT id, display_name, email FROM profiles WHERE display_name ILIKE $1 OR email ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
+        `SELECT id, display_name, email FROM public.profiles WHERE display_name ILIKE $1 OR email ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
         [`%${q}%`]
       );
 

@@ -59,14 +59,14 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     const joinSql = filters.unit_id ? `LEFT JOIN units u ON p.default_unit_id = u.id` : '';
     const v = [...values];
 
-    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM profiles p ${joinSql} ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM public.profiles p ${joinSql} ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await executeSqlQuery<User>(`SELECT p.* FROM profiles p ${joinSql} ${whereSql} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<User>(`SELECT p.* FROM public.profiles p ${joinSql} ${whereSql} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     const userIds = rows.map((r: User) => r.id);
     const roleRows = userIds.length > 0
-      ? await executeSqlQuery<{ user_id: string; code: string }>(`SELECT ur.user_id, r.code FROM user_role_assignments ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ANY($1) AND (ur.ends_at IS NULL OR ur.ends_at > now())`, [userIds])
+      ? await executeSqlQuery<{ user_id: string; code: string }>(`SELECT ur.user_id, r.code FROM public.user_role_assignments ur JOIN public.roles r ON ur.role_id = r.id WHERE ur.user_id = ANY($1) AND (ur.ends_at IS NULL OR ur.ends_at > now())`, [userIds])
       : [];
 
     const rolesByUser = new Map<string, string[]>();
@@ -92,12 +92,12 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
   }
 
   async getById(id: string): Promise<UserWithRoles | null> {
-    const rows = await sql`SELECT * FROM profiles WHERE id = ${id} LIMIT 1` as unknown as User[];
+    const rows = await sql`SELECT * FROM public.profiles WHERE id = ${id} LIMIT 1` as unknown as User[];
     if (!rows[0]) return null;
 
     const roleRows = await sql`
-      SELECT r.code FROM user_role_assignments ur
-      JOIN roles r ON ur.role_id = r.id
+      SELECT r.code FROM public.user_role_assignments ur
+      JOIN public.roles r ON ur.role_id = r.id
       WHERE ur.user_id = ${id} AND (ur.ends_at IS NULL OR ur.ends_at > now())
     ` as unknown as { code: string }[];
 
@@ -112,7 +112,7 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     default_department_id?: string;
   }): Promise<User> {
     const rows = await sql`
-      INSERT INTO profiles (email, display_name, phone, default_unit_id, default_department_id, preferred_language)
+      INSERT INTO public.profiles (email, display_name, phone, default_unit_id, default_department_id, preferred_language)
       VALUES (${input.email}, ${input.display_name}, ${input.phone ?? null}, ${input.default_unit_id ?? null}, ${input.default_department_id ?? null}, 'en')
       RETURNING *` as unknown as User[];
 
@@ -156,26 +156,26 @@ export class UserService implements IService<UserFilters, PaginatedResult<UserWi
     values.push(new Date().toISOString());
 
     const whereIdx = values.length + 1;
-    const rows = await executeSqlQuery<User>(`UPDATE profiles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
+    const rows = await executeSqlQuery<User>(`UPDATE public.profiles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
     return rows[0];
   }
 
   async assignRole(userId: string, roleId: string, scopeType: string = 'org'): Promise<void> {
-    const roleRows = await sql`SELECT id FROM roles WHERE id = ${roleId}` as unknown as { id: string }[];
+    const roleRows = await sql`SELECT id FROM public.roles WHERE id = ${roleId}` as unknown as { id: string }[];
     if (!roleRows[0]) {
       throw new NotFoundError('Role', roleId);
     }
 
     await sql`
-      INSERT INTO user_role_assignments (user_id, role_id, scope_type, is_primary)
+      INSERT INTO public.user_role_assignments (user_id, role_id, scope_type, is_primary)
       VALUES (${userId}, ${roleId}, ${scopeType}, true)
       ON CONFLICT DO NOTHING
     `;
   }
 
   async removeRole(userId: string, assignmentId: string): Promise<void> {
-    await sql`DELETE FROM user_role_assignments WHERE id = ${assignmentId} AND user_id = ${userId}`;
+    await sql`DELETE FROM public.user_role_assignments WHERE id = ${assignmentId} AND user_id = ${userId}`;
   }
 
   async deactivate(id: string): Promise<User> {

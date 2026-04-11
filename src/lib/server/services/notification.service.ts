@@ -55,10 +55,10 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     const whereSql = `WHERE ${whereParts.join(' AND ')}`;
     const v = [...values];
 
-    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM notifications ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM public.notifications ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await executeSqlQuery<Notification>(`SELECT * FROM notifications ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<Notification>(`SELECT * FROM public.notifications ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Notification[],
@@ -72,7 +72,7 @@ export class NotificationService implements IService<NotificationFilters, Pagina
   }
 
   async getById(id: string): Promise<Notification | null> {
-    const rows = await sql`SELECT * FROM notifications WHERE id = ${id} LIMIT 1` as unknown as Notification[];
+    const rows = await sql`SELECT * FROM public.notifications WHERE id = ${id} LIMIT 1` as unknown as Notification[];
     return rows[0] ?? null;
   }
 
@@ -90,7 +90,7 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     }
 
     const rows = await sql`
-      INSERT INTO notifications (recipient_user_id, kind, title, body, link_path, entity_type, entity_id)
+      INSERT INTO public.notifications (recipient_user_id, kind, title, body, link_path, entity_type, entity_id)
       VALUES (${input.recipient_user_id}, ${input.kind}, ${input.title}, ${input.body ?? null}, ${input.link_path ?? null}, ${input.entity_type ?? null}, ${input.entity_id ?? null})
       RETURNING *` as unknown as Notification[];
 
@@ -108,7 +108,7 @@ export class NotificationService implements IService<NotificationFilters, Pagina
     }
 
     const rows = await sql`
-      UPDATE notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
+      UPDATE public.notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
       RETURNING *` as unknown as Notification[];
 
@@ -117,7 +117,7 @@ export class NotificationService implements IService<NotificationFilters, Pagina
 
   async markAllAsRead(userId: string): Promise<void> {
     await sql`
-      UPDATE notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
+      UPDATE public.notifications SET is_read = true, read_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE recipient_user_id = ${userId} AND is_read = false
     `;
   }
@@ -128,12 +128,12 @@ export class NotificationService implements IService<NotificationFilters, Pagina
       throw new NotFoundError('Notification', id);
     }
 
-    await sql`DELETE FROM notifications WHERE id = ${id}`;
+    await sql`DELETE FROM public.notifications WHERE id = ${id}`;
   }
 
   async getUnreadCount(userId: string): Promise<number> {
     const result = await sql`
-      SELECT COUNT(*) as total FROM notifications 
+      SELECT COUNT(*) as total FROM public.notifications 
       WHERE recipient_user_id = ${userId} AND is_read = false
     ` as unknown as { total: number }[];
     return Number(result[0]?.total ?? 0);

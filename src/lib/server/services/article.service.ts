@@ -51,10 +51,10 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     const whereSql = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
     const v = [...values];
 
-    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM articles ${whereSql}`, v);
+    const countResult = await executeSqlQuery<{ count: string }>(`SELECT COUNT(*) as count FROM public.articles ${whereSql}`, v);
     const total = parseInt(countResult?.[0]?.count ?? '0', 10);
 
-    const rows = await executeSqlQuery<Article>(`SELECT * FROM articles ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
+    const rows = await executeSqlQuery<Article>(`SELECT * FROM public.articles ${whereSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, v);
 
     return {
       data: rows as Article[],
@@ -68,7 +68,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
   }
 
   async getById(id: string): Promise<Article | null> {
-    const rows = await sql`SELECT * FROM articles WHERE id = ${id} LIMIT 1` as unknown as Article[];
+    const rows = await sql`SELECT * FROM public.articles WHERE id = ${id} LIMIT 1` as unknown as Article[];
     return rows[0] ?? null;
   }
 
@@ -81,7 +81,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     const rows = await sql`
-      INSERT INTO articles (title, content, summary, category, unit_id, department_id, status, author_user_id, author_name_snapshot)
+      INSERT INTO public.articles (title, content, summary, category, unit_id, department_id, status, author_user_id, author_name_snapshot)
       VALUES (${input.title}, ${input.content}, ${input.summary ?? null}, ${input.category}, ${input.unit_id ?? null}, ${input.department_id ?? null}, 'draft', null, null)
       RETURNING *` as unknown as Article[];
 
@@ -121,7 +121,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     values.push(new Date().toISOString());
 
     const whereIdx = values.length + 1;
-    const rows = await executeSqlQuery<Article>(`UPDATE articles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
+    const rows = await executeSqlQuery<Article>(`UPDATE public.articles SET ${setParts.join(', ')} WHERE id = $${whereIdx} RETURNING *`, [...values, id]);
 
     return rows[0];
   }
@@ -136,7 +136,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     const rows = await sql`
-      UPDATE articles SET status = 'pending_unit_head_review', updated_at = ${new Date().toISOString()}
+      UPDATE public.articles SET status = 'pending_unit_head_review', updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
       RETURNING *` as unknown as Article[];
 
@@ -153,7 +153,7 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     }
 
     const rows = await sql`
-      UPDATE articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
+      UPDATE public.articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
       RETURNING *` as unknown as Article[];
 
@@ -166,6 +166,6 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
       throw new NotFoundError('Article', id);
     }
 
-    await sql`DELETE FROM articles WHERE id = ${id}`;
+    await sql`DELETE FROM public.articles WHERE id = ${id}`;
   }
 }
