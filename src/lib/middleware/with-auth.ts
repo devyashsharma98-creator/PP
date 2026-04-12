@@ -27,7 +27,7 @@ export interface AuthContext {
   permissions: ReturnType<typeof resolvePermissions>;
 }
 
-type RouteParams = { params: Promise<unknown> };
+type RouteContext = { params: Promise<unknown> };
 
 export type AuthedHandler = (
   req: NextRequest,
@@ -42,7 +42,7 @@ export type AuthedHandler = (
  * Injects `session` and `permissions` into the handler context.
  */
 export function withAuth(handler: AuthedHandler) {
-  return async (req: NextRequest, routeCtx?: RouteParams): Promise<Response> => {
+  return async (req: NextRequest, routeCtx: RouteContext): Promise<Response> => {
     const session = await getSession();
 
     if (!session) {
