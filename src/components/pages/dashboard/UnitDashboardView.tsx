@@ -181,7 +181,6 @@ export function UnitDashboardView({
           title: form.title,
           description: form.description,
           startsAt: selectedDate.toISOString(),
-          unitId: form.unit || undefined,
         });
         setForm({
           title: "",
