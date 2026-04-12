@@ -806,25 +806,25 @@ export default function UserManagement() {
 
           <Card className="institution-panel-muted">
             <CardHeader>
-              <CardTitle className="text-base">Governance notes</CardTitle>
+              <CardTitle className="text-base">{t("Governance notes", "??????? ??????????")}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">Role-first access</p>
+                <p className="text-sm font-semibold">{t("Role-first access", "??????-????? ??????")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   This surface uses the canonical role hierarchy already present in the platform, so access remains
                   explainable and consistent across modules.
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">Safe revocation</p>
+                <p className="text-sm font-semibold">{t("Safe revocation", "???????? ??????????")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   Individual roles can be removed, but the final active role is protected. Use account deactivation
                   when someone should no longer sign in at all.
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">Transparent authority</p>
+                <p className="text-sm font-semibold">{t("Transparent authority", "???????? ??????")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   The access matrix below every account makes it obvious what a role stack unlocks before anyone is
                   placed into a workflow lane.
@@ -1180,6 +1180,7 @@ export default function UserManagement() {
     </motion.div>
   );
 }
+
 
 
 
