@@ -1,4 +1,4 @@
-﻿import {
+import {
   BookOpen,
   Calendar,
   History,
@@ -31,35 +31,35 @@ export type NavGroup = {
 };
 
 const workflowNavItems: NavItem[] = [
-  { label: "Overview", sublabel: "शुरुआती अवलोकन", icon: Home, path: "/overview" },
-  { label: "Events", sublabel: "à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤µ à¤…à¤¨à¥à¤®à¥‹à¤¦à¤¨", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Aalekh", sublabel: "à¤²à¥‡à¤–à¤¨ à¤µ à¤¸à¤®à¥€à¤•à¥à¤·à¤¾", icon: PenLine, path: "/aalekh" },
-  { label: "Prachar", sublabel: "à¤ªà¥à¤°à¤šà¤¾à¤° à¤«à¥‰à¤²à¥‹-à¤¥à¥à¤°à¥‚", icon: Megaphone, path: "/prachar" },
+  { label: "Overview", sublabel: "\u0936\u0941\u0930\u0941\u0906\u0924\u0940 \u0905\u0935\u0932\u094b\u0915\u0928", icon: Home, path: "/overview" },
+  { label: "Events", sublabel: "\u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0935 \u0905\u0928\u0941\u092e\u094b\u0926\u0928", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Aalekh", sublabel: "\u0932\u0947\u0916\u0928 \u0935 \u0938\u092e\u0940\u0915\u094d\u0937\u093e", icon: PenLine, path: "/aalekh" },
+  { label: "Prachar", sublabel: "\u092a\u094d\u0930\u091a\u093e\u0930 \u092b\u0949\u0932\u094b-\u0925\u094d\u0930\u0942", icon: Megaphone, path: "/prachar" },
 ];
 
 const mobilePrimaryNavItems: NavItem[] = [
-  { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Aalekh", sublabel: "आलेख", icon: PenLine, path: "/aalekh" },
-  { label: "Prachar", sublabel: "प्रचार", icon: Megaphone, path: "/prachar" },
-  { label: "Calendar", sublabel: "कैलेंडर", icon: Calendar, path: "/calendar" },
+  { label: "Dashboard", sublabel: "\u0921\u0948\u0936\u092c\u094b\u0930\u094d\u0921", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Aalekh", sublabel: "\u0906\u0932\u0947\u0916", icon: PenLine, path: "/aalekh" },
+  { label: "Prachar", sublabel: "\u092a\u094d\u0930\u091a\u093e\u0930", icon: Megaphone, path: "/prachar" },
+  { label: "Calendar", sublabel: "\u0915\u0948\u0932\u0947\u0902\u0921\u0930", icon: Calendar, path: "/calendar" },
 ];
 
 const coordinationNavItems: NavItem[] = [
-  { label: "Calendar", sublabel: "à¤¯à¥‹à¤œà¤¨à¤¾ à¤µ à¤¤à¤¿à¤¥à¤¿à¤¯à¤¾à¤", icon: Calendar, path: "/calendar" },
-  { label: "People", sublabel: "à¤¸à¤®à¥à¤ªà¤°à¥à¤• à¤µ à¤¸à¤®à¤¨à¥à¤µà¤¯", icon: Users, path: "/directory" },
+  { label: "Calendar", sublabel: "\u092f\u094b\u091c\u0928\u093e \u0935 \u0924\u093f\u0925\u093f\u092f\u093e\u0901", icon: Calendar, path: "/calendar" },
+  { label: "People", sublabel: "\u0938\u092e\u094d\u092a\u0930\u094d\u0915 \u0935 \u0938\u092e\u0928\u094d\u0935\u092f", icon: Users, path: "/directory" },
 ];
 
 const referenceNavItems: NavItem[] = [
-  { label: "Vimarsh", sublabel: "à¤µà¤¿à¤·à¤¯ à¤µ à¤µà¤¿à¤®à¤°à¥à¤¶", icon: MessagesSquare, path: "/vimarsh" },
-  { label: "Library", sublabel: "à¤ˆ-à¤ªà¥à¤¸à¥à¤¤à¤•à¤¾à¤²à¤¯", icon: BookOpen, path: "/library" },
-  { label: "Published", sublabel: "à¤ªà¥à¤°à¤•à¤¾à¤¶à¤¿à¤¤ à¤•à¤¾à¤°à¥à¤¯", icon: Newspaper, path: "/feed" },
-  { label: "Structure", sublabel: "à¤­à¥‚à¤®à¤¿à¤•à¤¾ à¤°à¤šà¤¨à¤¾", icon: Network, path: "/dayitv" },
-  { label: "Parichay", sublabel: "à¤ªà¤°à¤¿à¤šà¤¯", icon: UserCircle, path: "/parichay" },
-  { label: "History", sublabel: "à¤¸à¤‚à¤¦à¤°à¥à¤­ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸", icon: History, path: "/history" },
+  { label: "Vimarsh", sublabel: "\u0935\u093f\u0937\u092f \u0935 \u0935\u093f\u092e\u0930\u094d\u0936", icon: MessagesSquare, path: "/vimarsh" },
+  { label: "Library", sublabel: "\u0908-\u092a\u0941\u0938\u094d\u0924\u0915\u093e\u0932\u092f", icon: BookOpen, path: "/library" },
+  { label: "Published", sublabel: "\u092a\u094d\u0930\u0915\u093e\u0936\u093f\u0924 \u0915\u093e\u0930\u094d\u092f", icon: Newspaper, path: "/feed" },
+  { label: "Structure", sublabel: "\u092d\u0942\u092e\u093f\u0915\u093e \u0930\u091a\u0928\u093e", icon: Network, path: "/dayitv" },
+  { label: "Parichay", sublabel: "\u092a\u0930\u093f\u091a\u092f", icon: UserCircle, path: "/parichay" },
+  { label: "History", sublabel: "\u0938\u0902\u0926\u0930\u094d\u092d \u0907\u0924\u093f\u0939\u093e\u0938", icon: History, path: "/history" },
 ];
 
 const adminNavItems: NavItem[] = [
-  { label: "System Access", sublabel: "à¤ªà¥à¤°à¤µà¥‡à¤¶ à¤¨à¤¿à¤¯à¤‚à¤¤à¥à¤°à¤£", icon: ShieldCheck, path: "/super-admin" },
+  { label: "System Access", sublabel: "\u092a\u094d\u0930\u0935\u0947\u0936 \u0928\u093f\u092f\u0902\u0924\u094d\u0930\u0923", icon: ShieldCheck, path: "/super-admin" },
 ];
 
 function filterItemsByRole(items: NavItem[], roleCodes?: readonly RoleCode[] | null) {
@@ -69,13 +69,13 @@ function filterItemsByRole(items: NavItem[], roleCodes?: readonly RoleCode[] | n
 
 export function getNavGroups(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null): NavGroup[] {
   const groups: NavGroup[] = [
-    { title: "Workflow", titleHi: "à¤®à¥à¤–à¥à¤¯ à¤•à¤¾à¤°à¥à¤¯", items: workflowNavItems },
-    { title: "Coordination", titleHi: "à¤¸à¤®à¤¨à¥à¤µà¤¯", items: coordinationNavItems },
-    { title: "Reference", titleHi: "à¤¸à¤‚à¤¦à¤°à¥à¤­", items: referenceNavItems },
+    { title: "Workflow", titleHi: "\u092e\u0941\u0916\u094d\u092f \u0915\u093e\u0930\u094d\u092f", items: workflowNavItems },
+    { title: "Coordination", titleHi: "\u0938\u092e\u0928\u094d\u0935\u092f", items: coordinationNavItems },
+    { title: "Reference", titleHi: "\u0938\u0902\u0926\u0930\u094d\u092d", items: referenceNavItems },
   ];
 
   if (showAdminControls) {
-    groups.push({ title: "Admin", titleHi: "à¤ªà¥à¤°à¤¶à¤¾à¤¸à¤¨", items: adminNavItems });
+    groups.push({ title: "Admin", titleHi: "\u092a\u094d\u0930\u0936\u093e\u0938\u0928", items: adminNavItems });
   }
 
   return groups

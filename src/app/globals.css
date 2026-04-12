@@ -56,10 +56,10 @@
 
     --radius: 0.625rem;
 
-    --font-display: var(--font-ui-fraunces);
+    --font-display: var(--font-ui-inter);
     --font-body: var(--font-ui-inter);
     --font-devanagari: var(--font-ui-noto-devanagari);
-    --font-devanagari-display: var(--font-ui-anek-devanagari);
+    --font-devanagari-display: var(--font-ui-noto-devanagari);
     }
 
     .dark {
@@ -313,7 +313,7 @@
     background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy-light)) 100%);
   }
 
-  /* Hindi text — Baloo 2 for warmth and cultural feel */
+  /* Hindi text */
   .devanagari, .font-devanagari {
     font-family: var(--font-devanagari), var(--font-body), sans-serif;
     line-height: 1.72;

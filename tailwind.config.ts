@@ -15,12 +15,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['var(--font-ui-fraunces)', 'serif'],
+        serif: ['var(--font-ui-inter)', 'sans-serif'],
         sans: ['var(--font-ui-inter)', 'sans-serif'],
-        display: ['var(--font-ui-fraunces)', 'serif'],
+        display: ['var(--font-ui-inter)', 'sans-serif'],
         body: ['var(--font-ui-inter)', 'sans-serif'],
         devanagari: ['var(--font-ui-noto-devanagari)', 'sans-serif'],
-        devanagariDisplay: ['var(--font-ui-anek-devanagari)', 'var(--font-ui-noto-devanagari)', 'sans-serif'],
+        devanagariDisplay: ['var(--font-ui-noto-devanagari)', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

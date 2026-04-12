@@ -50,7 +50,7 @@ export function AppSidebar() {
                 exit={{ opacity: 0, maxWidth: 0 }}
                 className="overflow-hidden whitespace-nowrap"
               >
-                <h1 className="font-devanagari text-sm font-bold tracking-tight text-sidebar-accent-foreground">
+                <h1 className={cn("text-sm font-bold tracking-tight text-sidebar-accent-foreground", lang === "hi" && "font-devanagari")}>
                   {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
                 </h1>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/58">
@@ -129,3 +129,4 @@ export function AppSidebar() {
     </aside>
   );
 }
+

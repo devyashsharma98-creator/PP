@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Anek_Devanagari,
-  Fraunces,
   Inter,
   Noto_Sans_Devanagari,
 } from "next/font/google";
@@ -14,25 +12,13 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-ui-inter",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-ui-fraunces",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 const notoSansDevanagari = Noto_Sans_Devanagari({
   subsets: ["latin", "devanagari"],
   variable: "--font-ui-noto-devanagari",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const anekDevanagari = Anek_Devanagari({
-  subsets: ["latin", "devanagari"],
-  variable: "--font-ui-anek-devanagari",
   display: "swap",
   weight: ["400", "500", "600", "700"],
 });
@@ -58,7 +44,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`scroll-smooth ${inter.variable} ${fraunces.variable} ${notoSansDevanagari.variable} ${anekDevanagari.variable}`}
+      className={`scroll-smooth ${inter.variable} ${notoSansDevanagari.variable}`}
     >
       <body className="font-body antialiased selection:bg-primary/20 selection:text-primary">
         <ClientProviders>

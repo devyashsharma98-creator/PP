@@ -388,7 +388,7 @@ export function Navbar() {
                 className="absolute right-0 top-full mt-2 w-80 max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
               >
                 <div className="sticky top-0 bg-popover border-b border-border/60 px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold font-devanagari">{t('Notifications', 'सूचनाएं')}</h3>
+                  <h3 className={cn("text-sm font-semibold", lang === 'hi' && 'font-devanagari')}>{t('Notifications', 'सूचनाएं')}</h3>
                   <Badge variant="outline" className="text-[10px]">{totalPending}</Badge>
                 </div>
                 <div className="p-2 space-y-1">
@@ -424,7 +424,7 @@ export function Navbar() {
                   ))}
                 </div>
                 <div className="border-t border-border/60 px-4 py-2.5">
-                  <Link href="/dashboard" prefetch={false} onClick={() => setNotifOpen(false)} className="text-xs text-primary hover:underline font-devanagari">
+                  <Link href="/dashboard" prefetch={false} onClick={() => setNotifOpen(false)} className={cn("text-xs text-primary hover:underline", lang === 'hi' && 'font-devanagari')}>
                     {t('View all in Dashboard →', 'डैशबोर्ड में सब देखें →')}
                   </Link>
                 </div>
@@ -494,3 +494,4 @@ export function Navbar() {
     </header>
   );
 }
+
