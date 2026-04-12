@@ -180,8 +180,8 @@ export function UnitDashboardView({
         await createEventMutation.mutateAsync({
           title: form.title,
           description: form.description,
-          starts_at: selectedDate.toISOString(),
-          unit_id: form.unit || undefined,
+          startsAt: selectedDate.toISOString(),
+          unitId: form.unit || undefined,
         });
         setForm({
           title: "",

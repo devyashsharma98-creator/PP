@@ -79,7 +79,7 @@ export function useDashboardEvents() {
 export function useCreateDashboardEvent() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { title: string; description: string; starts_at: string; unit_id?: string; department_id?: string }) => {
+    mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string }) => {
       return fetchApi<Record<string, unknown>>('/events', {
         method: 'POST',
         body: JSON.stringify(input),
