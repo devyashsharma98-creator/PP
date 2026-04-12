@@ -294,7 +294,18 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   // Load all data in parallel
   const [events, units, articles, formConfigs, formQuestions, polls, pollOptions, pollVotes, pracharStatuses, registrations, regAnswers, articleReviews, vimarshTopics, vimarshResources] =
     await Promise.all([
-      sql`SELECT * FROM public.events ORDER BY starts_at ASC`,
+      sql`
+        SELECT
+          e.*,
+          ev.attendance_count AS vritt_attendance_count,
+          ev.checked_in_count AS vritt_checked_in_count,
+          ev.media_urls AS vritt_media_urls,
+          ev.content AS vritt_content,
+          ev.status AS vritt_status
+        FROM public.events e
+        LEFT JOIN public.event_vritt ev ON ev.event_id = e.id
+        ORDER BY e.starts_at ASC
+      `,
       sql`SELECT id, name FROM public.units`,
       sql`SELECT * FROM public.articles ORDER BY created_at DESC`,
       sql`SELECT * FROM public.event_form_configs`,
@@ -986,16 +997,32 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     case "updateVritt": {
       await assertEventScope(input.payload.eventId);
       await sql`
-        update public.events
-        set
-          vritt_content = coalesce(${input.payload.vrittContent ?? null}, vritt_content),
-          vritt_attendance_count = coalesce(${input.payload.vrittAttendanceCount ?? null}, vritt_attendance_count),
-          vritt_status = coalesce(${input.payload.vrittStatus ?? null}, vritt_status),
-          vritt_media_urls = coalesce(${input.payload.vrittMediaUrls ?? null}::text[], vritt_media_urls),
-          vritt_updated_at = now(),
-          updated_by = ${actorId},
+        insert into public.event_vritt (
+          event_id,
+          attendance_count,
+          media_urls,
+          content,
+          status,
+          submitted_by,
+          updated_at
+        )
+        values (
+          ${input.payload.eventId},
+          ${input.payload.vrittAttendanceCount ?? null},
+          ${input.payload.vrittMediaUrls ?? null}::jsonb,
+          ${input.payload.vrittContent ?? null},
+          ${input.payload.vrittStatus ?? "draft"},
+          ${actorId},
+          now()
+        )
+        on conflict (event_id)
+        do update set
+          attendance_count = coalesce(excluded.attendance_count, public.event_vritt.attendance_count),
+          media_urls = coalesce(excluded.media_urls, public.event_vritt.media_urls),
+          content = coalesce(excluded.content, public.event_vritt.content),
+          status = coalesce(excluded.status, public.event_vritt.status),
+          submitted_by = excluded.submitted_by,
           updated_at = now()
-        where id = ${input.payload.eventId}
       `;
       await writeAuditLog({
         orgId, actorUserId: actorId, action: "event.vritt_updated",
@@ -1007,11 +1034,12 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
     case "markAttendance": {
       await assertEventScope(input.payload.eventId);
       await sql`
-        update public.events
-        set vritt_checked_in_count = coalesce(vritt_checked_in_count, 0) + 1,
-            updated_by = ${actorId},
-            updated_at = now()
-        where id = ${input.payload.eventId}
+        insert into public.event_vritt (event_id, checked_in_count, updated_at)
+        values (${input.payload.eventId}, 1, now())
+        on conflict (event_id)
+        do update set
+          checked_in_count = coalesce(public.event_vritt.checked_in_count, 0) + 1,
+          updated_at = now()
       `;
       await writeAuditLog({
         orgId, actorUserId: actorId, action: "event.attendance_marked",
