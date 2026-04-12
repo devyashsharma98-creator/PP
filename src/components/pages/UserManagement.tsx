@@ -1144,7 +1144,7 @@ export default function UserManagement() {
                         className="gap-2 lg:col-span-2"
                       >
                         {assignRoleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                        {t("Assign scoped access", "????? ?????? ????????? ????")}
+                        {t("Assign scoped access", "सीमित प्रवेश निर्धारित करें")}
                       </Button>
                     </div>
                   </div>
@@ -1153,16 +1153,16 @@ export default function UserManagement() {
 
               <Card className="institution-panel">
                 <CardHeader className="border-b border-border/60">
-                  <CardTitle className="text-base">{t("Effective access matrix", "??????? ?????? ?????????")}</CardTitle>
+                  <CardTitle className="text-base">{t("Effective access matrix", "प्रभावी प्रवेश मैट्रिक्स")}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>{t("Capability", "??????")}</TableHead>
-                        <TableHead>{t("Area", "???????")}</TableHead>
-                        <TableHead>{t("Access", "??????")}</TableHead>
-                        <TableHead>{t("Detail", "?????")}</TableHead>
+                        <TableHead>{t("Capability", "क्षमता")}</TableHead>
+                        <TableHead>{t("Area", "क्षेत्र")}</TableHead>
+                        <TableHead>{t("Access", "प्रवेश")}</TableHead>
+                        <TableHead>{t("Detail", "विवरण")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1172,7 +1172,7 @@ export default function UserManagement() {
                           <TableCell>{lang === "hi" ? row.areaHi : row.area}</TableCell>
                           <TableCell>
                             <Badge variant={row.allowed ? "default" : "secondary"}>
-                              {row.allowed ? t("Allowed", "?????") : t("Restricted", "?????")}
+                              {row.allowed ? t("Allowed", "अनुमत") : t("Restricted", "सीमित")}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{lang === "hi" ? row.detailHi : row.detail}</TableCell>
@@ -1182,7 +1182,15 @@ export default function UserManagement() {
                   </Table>
 
                   <div className="mt-4 rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-sm text-muted-foreground">
-                    {lang === "hi" ? (<>??????? ??????? ?????? <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> ?? ??????? ?? ??? ??, ??? ??? {Math.max(activeAssignments.length - 1, 0)} ???????? ?????? {Math.max(activeAssignments.length - 1, 0) === 1 ? "??????" : "????????"}?</>) : (<>Effective authority is currently derived from <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> plus {Math.max(activeAssignments.length - 1, 0)} additional active {Math.max(activeAssignments.length - 1, 0) === 1 ? "role" : "roles"}.</>)}
+                    {lang === "hi" ? (
+                      <>
+                        वर्तमान प्रभावी अधिकार <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> से प्राप्त हो रहा है, साथ में {Math.max(activeAssignments.length - 1, 0)} अतिरिक्त सक्रिय {Math.max(activeAssignments.length - 1, 0) === 1 ? "भूमिका" : "भूमिकाएँ"}।
+                      </>
+                    ) : (
+                      <>
+                        Effective authority is currently derived from <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> plus {Math.max(activeAssignments.length - 1, 0)} additional active {Math.max(activeAssignments.length - 1, 0) === 1 ? "role" : "roles"}.
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
