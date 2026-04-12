@@ -145,13 +145,13 @@ const ACCESS_ROWS = [
   },
 ] as const;
 
-function formatDateTime(value: string | null | undefined) {
-  if (!value) return "Not recorded";
+function formatDateTime(value: string | null | undefined, lang: "en" | "hi") {
+  if (!value) return lang === "hi" ? "रिकॉर्ड उपलब्ध नहीं" : "Not recorded";
 
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "Not recorded";
+  if (Number.isNaN(parsed.getTime())) return lang === "hi" ? "रिकॉर्ड उपलब्ध नहीं" : "Not recorded";
 
-  return new Intl.DateTimeFormat("en-IN", {
+  return new Intl.DateTimeFormat(lang === "hi" ? "hi-IN" : "en-IN", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(parsed);
@@ -179,15 +179,15 @@ function isActiveRole(assignment: UserDetail["roleAssignments"][number]) {
   return true;
 }
 
-function getScopeTypeLabel(scopeType: AssignmentScopeType) {
-  const labels: Record<AssignmentScopeType, string> = {
-    org: "Whole organisation",
-    unit: "Specific unit",
-    department: "Specific aayam",
-    event: "Specific event",
-    article: "Specific article",
+function getScopeTypeLabel(scopeType: AssignmentScopeType, lang: "en" | "hi") {
+  const labels: Record<AssignmentScopeType, { en: string; hi: string }> = {
+    org: { en: "Whole organisation", hi: "पूरी संस्था" },
+    unit: { en: "Specific unit", hi: "विशिष्ट इकाई" },
+    department: { en: "Specific aayam", hi: "विशिष्ट आयाम" },
+    event: { en: "Specific event", hi: "विशिष्ट कार्यक्रम" },
+    article: { en: "Specific article", hi: "विशिष्ट आलेख" },
   };
-  return labels[scopeType];
+  return labels[scopeType][lang];
 }
 
 export default function UserManagement() {
@@ -300,10 +300,10 @@ export default function UserManagement() {
         phone: "",
         roleCode: "karyakarta",
       });
-      addToast("Account created", "success");
+      addToast(t("Account created", "खाता बनाया गया"), "success");
     },
     onError: (error) => {
-      addToast(error instanceof Error ? error.message : "Failed to create account", "error");
+      addToast(error instanceof Error ? error.message : t("Failed to create account", "खाता बनाया नहीं जा सका"), "error");
     },
   });
 
@@ -314,10 +314,10 @@ export default function UserManagement() {
         queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
         queryClient.invalidateQueries({ queryKey: ["admin-user", vars.id] }),
       ]);
-      addToast("Account updated", "success");
+      addToast(t("Account updated", "खाता अद्यतन किया गया"), "success");
     },
     onError: (error) => {
-      addToast(error instanceof Error ? error.message : "Failed to update account", "error");
+      addToast(error instanceof Error ? error.message : t("Failed to update account", "खाता अद्यतन नहीं हो सका"), "error");
     },
   });
 
@@ -334,10 +334,10 @@ export default function UserManagement() {
       setAssignUnitId("");
       setAssignDepartmentId("");
       setAssignPrimary(false);
-      addToast("Access role assigned", "success");
+      addToast(t("Access role assigned", "प्रवेश भूमिका निर्धारित की गई"), "success");
     },
     onError: (error) => {
-      addToast(error instanceof Error ? error.message : "Failed to assign access", "error");
+      addToast(error instanceof Error ? error.message : t("Failed to assign access", "प्रवेश निर्धारित नहीं हो सका"), "error");
     },
   });
 
@@ -349,10 +349,10 @@ export default function UserManagement() {
         queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
         queryClient.invalidateQueries({ queryKey: ["admin-user", vars.userId] }),
       ]);
-      addToast("Role removed", "success");
+      addToast(t("Role removed", "भूमिका हटाई गई"), "success");
     },
     onError: (error) => {
-      addToast(error instanceof Error ? error.message : "Failed to remove role", "error");
+      addToast(error instanceof Error ? error.message : t("Failed to remove role", "भूमिका हटाई नहीं जा सकी"), "error");
     },
   });
 
@@ -386,14 +386,16 @@ export default function UserManagement() {
   );
 
   function formatAssignmentScope(assignment: UserDetail["roleAssignments"][number]) {
-    if (assignment.scopeType === "org") return scopeOptions?.org?.name ?? "Whole organisation";
+    if (assignment.scopeType === "org") return scopeOptions?.org?.name ?? t("Whole organisation", "???? ??????");
     if (assignment.scopeType === "unit") {
-      return assignment.unitId ? unitNameById.get(assignment.unitId) ?? "Selected unit" : "Unit scope";
+      return assignment.unitId ? unitNameById.get(assignment.unitId) ?? t("Selected unit", "????? ????") : t("Unit scope", "???? ???????");
     }
     if (assignment.scopeType === "department") {
-      return assignment.departmentId ? departmentNameById.get(assignment.departmentId) ?? "Selected aayam" : "Aayam scope";
+      return assignment.departmentId
+        ? departmentNameById.get(assignment.departmentId) ?? t("Selected aayam", "????? ????")
+        : t("Aayam scope", "आयाम क्षेत्र");
     }
-    return assignment.scopeType;
+    return getScopeTypeLabel(assignment.scopeType, lang);
   }
 
   function buildAssignmentInput(): AssignRoleInput | null {
@@ -762,7 +764,7 @@ export default function UserManagement() {
                         <div className="min-w-0 space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate text-base font-semibold">
-                              {user.displayName || user.email || "Unnamed account"}
+                              {user.displayName || user.email || t("Unnamed account", "???? ??? ?? ????")}
                             </p>
                             <Badge variant={user.isActive ? "default" : "secondary"}>
                               {user.isActive ? t("Active", "सक्रिय") : t("Inactive", "निष्क्रिय")}
@@ -772,7 +774,7 @@ export default function UserManagement() {
                           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-1.5">
                               <Mail className="h-3.5 w-3.5" />
-                              {user.email || "No email"}
+                              {user.email || t("No email", "??? ???? ????")}
                             </span>
                             {user.phone ? (
                               <span className="inline-flex items-center gap-1.5">
@@ -784,7 +786,7 @@ export default function UserManagement() {
                         </div>
 
                         <div className="space-y-2 text-sm text-muted-foreground sm:text-right">
-                          <p>{t("Last login", "अंतिम लॉगिन")}: {formatDateTime(user.lastLoginAt)}</p>
+                          <p>{t("Last login", "अंतिम लॉगिन")}: {formatDateTime(user.lastLoginAt, lang)}</p>
                           <div className="flex flex-wrap gap-2 sm:justify-end">
                             {user.roles.slice(0, 3).map((role) => (
                               <Badge key={`${user.id}-${role.code}`} variant="secondary" className="gap-1.5">
@@ -806,28 +808,34 @@ export default function UserManagement() {
 
           <Card className="institution-panel-muted">
             <CardHeader>
-              <CardTitle className="text-base">{t("Governance notes", "??????? ??????????")}</CardTitle>
+              <CardTitle className="text-base">{t("Governance notes", "प्रशासन टिप्पणियाँ")}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">{t("Role-first access", "??????-????? ??????")}</p>
+                <p className="text-sm font-semibold">{t("Role-first access", "भूमिका-प्रथम प्रवेश")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  This surface uses the canonical role hierarchy already present in the platform, so access remains
-                  explainable and consistent across modules.
+                  {t(
+                    "This surface uses the canonical role hierarchy already present in the platform, so access remains explainable and consistent across modules.",
+                    "यह सतह प्लेटफ़ॉर्म में पहले से मौजूद मानक भूमिका-क्रम का उपयोग करती है, इसलिए प्रवेश सभी मॉड्यूलों में स्पष्ट और समान रहता है।",
+                  )}
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">{t("Safe revocation", "???????? ??????????")}</p>
+                <p className="text-sm font-semibold">{t("Safe revocation", "सुरक्षित निरस्तीकरण")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Individual roles can be removed, but the final active role is protected. Use account deactivation
-                  when someone should no longer sign in at all.
+                  {t(
+                    "Individual roles can be removed, but the final active role is protected. Use account deactivation when someone should no longer sign in at all.",
+                    "व्यक्तिगत भूमिकाएँ हटाई जा सकती हैं, लेकिन अंतिम सक्रिय भूमिका सुरक्षित रहती है। जब किसी को बिल्कुल भी लॉगिन नहीं करना हो, तब खाता निष्क्रिय करें।",
+                  )}
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
-                <p className="text-sm font-semibold">{t("Transparent authority", "???????? ??????")}</p>
+                <p className="text-sm font-semibold">{t("Transparent authority", "पारदर्शी अधिकार")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  The access matrix below every account makes it obvious what a role stack unlocks before anyone is
-                  placed into a workflow lane.
+                  {t(
+                    "The access matrix below every account makes it obvious what a role stack unlocks before anyone is placed into a workflow lane.",
+                    "हर खाते के नीचे दिया गया प्रवेश-मैट्रिक्स स्पष्ट करता है कि किसी भूमिका-संयोजन से क्या-क्या अधिकार खुलते हैं।",
+                  )}
                 </p>
               </div>
             </CardContent>
@@ -839,9 +847,12 @@ export default function UserManagement() {
             <Card className="institution-panel">
               <CardContent className="py-16 text-center">
                 <UserCog className="mx-auto mb-4 h-10 w-10 text-muted-foreground/55" />
-                <p className="text-base font-semibold">Select an account</p>
+                <p className="text-base font-semibold">{t("Select an account", "एक खाता चुनें")}</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Pick someone from the roster to review their profile, assigned roles, and effective access.
+                  {t(
+                    "Pick someone from the roster to review their profile, assigned roles, and effective access.",
+                    "सूची से किसी व्यक्ति को चुनकर उसका प्रोफ़ाइल, दी गई भूमिकाएँ और प्रभावी प्रवेश देखें।",
+                  )}
                 </p>
               </CardContent>
             </Card>
@@ -852,7 +863,7 @@ export default function UserManagement() {
               <CardContent className="flex min-h-[24rem] items-center justify-center">
                 <div className="space-y-3 text-center">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Loading account details...</p>
+                  <p className="text-sm text-muted-foreground">{t("Loading account details...", "खाते का विवरण लोड हो रहा है...")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -861,11 +872,11 @@ export default function UserManagement() {
           {selectedUserId && selectedUserQuery.isError ? (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Unable to load account detail</AlertTitle>
+              <AlertTitle>{t("Unable to load account detail", "खाते का विवरण लोड नहीं हो सका")}</AlertTitle>
               <AlertDescription>
                 {selectedUserQuery.error instanceof Error
                   ? selectedUserQuery.error.message
-                  : "Refresh the page and try again."}
+                  : t("Refresh the page and try again.", "पृष्ठ रीफ़्रेश करके फिर प्रयास करें।")}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -878,17 +889,17 @@ export default function UserManagement() {
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <CardTitle className="text-xl">
-                          {selectedUser.displayName || selectedUser.email || "Unnamed account"}
+                          {selectedUser.displayName || selectedUser.email || t("Unnamed account", "बिना नाम का खाता")}
                         </CardTitle>
                         <Badge variant={selectedUser.isActive ? "default" : "secondary"}>
-                          {selectedUser.isActive ? "Active" : "Inactive"}
+                          {selectedUser.isActive ? t("Active", "सक्रिय") : t("Inactive", "निष्क्रिय")}
                         </Badge>
                         <Badge variant="outline">{getRoleLabel(effectivePrimaryRole, lang)}</Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                         <span className="inline-flex items-center gap-1.5">
                           <Mail className="h-3.5 w-3.5" />
-                          {selectedUser.email || "No email"}
+                          {selectedUser.email || t("No email", "कोई ईमेल नहीं")}
                         </span>
                         {selectedUser.phone ? (
                           <span className="inline-flex items-center gap-1.5">
@@ -911,7 +922,9 @@ export default function UserManagement() {
                       disabled={updateUserMutation.isPending}
                     >
                       {selectedUser.isActive ? <EyeOff className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                      {selectedUser.isActive ? "Deactivate account" : "Reactivate account"}
+                      {selectedUser.isActive
+                        ? t("Deactivate account", "खाता निष्क्रिय करें")
+                        : t("Reactivate account", "खाता पुनः सक्रिय करें")}
                     </Button>
                   </div>
                 </CardHeader>
@@ -919,7 +932,7 @@ export default function UserManagement() {
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="edit-display-name">Display name</Label>
+                      <Label htmlFor="edit-display-name">{t("Display name", "प्रदर्शित नाम")}</Label>
                       <Input
                         id="edit-display-name"
                         value={profileForm.displayName ?? ""}
@@ -929,7 +942,7 @@ export default function UserManagement() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="edit-display-name-hi">Display name (Hindi)</Label>
+                      <Label htmlFor="edit-display-name-hi">{t("Display name (Hindi)", "प्रदर्शित नाम (हिंदी)")}</Label>
                       <Input
                         id="edit-display-name-hi"
                         value={profileForm.displayNameHi ?? ""}
@@ -939,21 +952,21 @@ export default function UserManagement() {
                       />
                     </div>
                     <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="edit-phone">Phone</Label>
+                      <Label htmlFor="edit-phone">{t("Phone", "फोन")}</Label>
                       <Input
                         id="edit-phone"
                         value={profileForm.phone ?? ""}
                         onChange={(event) =>
                           setProfileForm((current) => ({ ...current, phone: event.target.value }))
                         }
-                        placeholder="Optional phone number"
+                        placeholder={t("Optional phone number", "वैकल्पिक फोन नंबर")}
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                    <span>Created: {formatDateTime(selectedUser.createdAt)}</span>
-                    <span>Last login: {formatDateTime(selectedUser.lastLoginAt)}</span>
+                    <span>{t("Created", "निर्मित")}: {formatDateTime(selectedUser.createdAt, lang)}</span>
+                    <span>{t("Last login", "अंतिम लॉगिन")}: {formatDateTime(selectedUser.lastLoginAt, lang)}</span>
                   </div>
 
                   <div className="flex justify-end">
@@ -963,7 +976,7 @@ export default function UserManagement() {
                       className="gap-2"
                     >
                       {updateUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCog className="h-4 w-4" />}
-                      Save profile
+                      {t("Save profile", "प्रोफ़ाइल सहेजें")}
                     </Button>
                   </div>
                 </CardContent>
@@ -971,7 +984,7 @@ export default function UserManagement() {
 
               <Card className="institution-panel">
                 <CardHeader className="border-b border-border/60">
-                  <CardTitle className="text-base">Assigned roles</CardTitle>
+                  <CardTitle className="text-base">{t("Assigned roles", "निर्धारित भूमिकाएँ")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-6">
                   {activeAssignments.length ? (
@@ -987,10 +1000,10 @@ export default function UserManagement() {
                                 <Shield className="h-3 w-3" />
                                 {getRoleLabel(assignment.roleCode, lang)}
                               </Badge>
-                              {assignment.isPrimary ? <Badge>Primary</Badge> : null}
+                              {assignment.isPrimary ? <Badge>{t("Primary", "प्राथमिक")}</Badge> : null}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Scope: {getScopeTypeLabel(assignment.scopeType)} · {formatAssignmentScope(assignment)} · Active from {formatDateTime(assignment.startsAt)}
+                              {t("Scope", "क्षेत्र")}: {getScopeTypeLabel(assignment.scopeType, lang)} · {formatAssignmentScope(assignment)} · {t("Active from", "प्रभावी तिथि")} {formatDateTime(assignment.startsAt, lang)}
                             </p>
                           </div>
 
@@ -1007,16 +1020,19 @@ export default function UserManagement() {
                             disabled={removeRoleMutation.isPending}
                           >
                             {removeRoleMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            Remove
+                            {t("Remove", "हटाएँ")}
                           </Button>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-dashed border-border/80 bg-background/60 px-4 py-8 text-center">
-                      <p className="text-sm font-medium">No active roles found</p>
+                      <p className="text-sm font-medium">{t("No active roles found", "कोई सक्रिय भूमिका नहीं मिली")}</p>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        Add an organisation-level role below to place this member into an operational lane.
+                        {t(
+                          "Add an organisation-level role below to place this member into an operational lane.",
+                          "इस सदस्य को किसी कार्यधारा में रखने के लिए नीचे संस्था-स्तरीय भूमिका जोड़ें।",
+                        )}
                       </p>
                     </div>
                   )}
@@ -1024,10 +1040,10 @@ export default function UserManagement() {
                   <div className="rounded-3xl border border-border/70 bg-muted/20 p-4">
                     <div className="grid gap-4 lg:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="assign-role">Add role</Label>
+                        <Label htmlFor="assign-role">{t("Add role", "भूमिका जोड़ें")}</Label>
                         <Select value={assignRoleCode} onValueChange={(value: CanonicalRoleCode) => setAssignRoleCode(value)}>
                           <SelectTrigger id="assign-role">
-                            <SelectValue placeholder="Choose a role to add" />
+                            <SelectValue placeholder={t("Choose a role to add", "जोड़ने हेतु भूमिका चुनें")} />
                           </SelectTrigger>
                           <SelectContent>
                             {roleOptions.map((role) => (
@@ -1040,7 +1056,7 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="assign-scope">Scope</Label>
+                        <Label htmlFor="assign-scope">{t("Scope", "क्षेत्र")}</Label>
                         <Select
                           value={assignScopeType}
                           onValueChange={(value: AssignmentScopeType) => {
@@ -1053,19 +1069,19 @@ export default function UserManagement() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="org">Whole organisation</SelectItem>
-                            <SelectItem value="unit">Specific unit / vibhag</SelectItem>
-                            <SelectItem value="department">Specific aayam</SelectItem>
+                            <SelectItem value="org">{t("Whole organisation", "पूरी संस्था")}</SelectItem>
+                            <SelectItem value="unit">{t("Specific unit / vibhag", "विशिष्ट इकाई / विभाग")}</SelectItem>
+                            <SelectItem value="department">{t("Specific aayam", "विशिष्ट आयाम")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       {assignScopeType === "unit" ? (
                         <div className="space-y-2 lg:col-span-2">
-                          <Label htmlFor="assign-unit">Unit / Vibhag</Label>
+                          <Label htmlFor="assign-unit">{t("Unit / Vibhag", "इकाई / विभाग")}</Label>
                           <Select value={assignUnitId} onValueChange={setAssignUnitId}>
                             <SelectTrigger id="assign-unit">
-                              <SelectValue placeholder="Choose unit" />
+                              <SelectValue placeholder={t("Choose unit", "इकाई चुनें")} />
                             </SelectTrigger>
                             <SelectContent>
                               {units.map((unit) => (
@@ -1080,16 +1096,16 @@ export default function UserManagement() {
 
                       {assignScopeType === "department" ? (
                         <div className="space-y-2 lg:col-span-2">
-                          <Label htmlFor="assign-aayam">Aayam / Department</Label>
+                          <Label htmlFor="assign-aayam">{t("Aayam / Department", "आयाम / विभाग")}</Label>
                           <Select value={assignDepartmentId} onValueChange={setAssignDepartmentId}>
                             <SelectTrigger id="assign-aayam">
-                              <SelectValue placeholder="Choose aayam" />
+                              <SelectValue placeholder={t("Choose aayam", "आयाम चुनें")} />
                             </SelectTrigger>
                             <SelectContent>
                               {departments.map((department) => (
                                 <SelectItem key={department.id} value={department.id}>
                                   {lang === "hi" ? department.nameHi ?? department.name : department.name}
-                                  {department.unitId ? ` · ${unitNameById.get(department.unitId) ?? ""}` : ""}
+                                  {department.unitId ? ` - ${unitNameById.get(department.unitId) ?? ""}` : ""}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1099,22 +1115,22 @@ export default function UserManagement() {
 
                       <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 lg:col-span-2">
                         <div>
-                          <p className="text-sm font-medium">Make primary role</p>
-                          <p className="text-xs text-muted-foreground">Used for the default lane after next login.</p>
+                          <p className="text-sm font-medium">{t("Make primary role", "प्राथमिक भूमिका बनाएँ")}</p>
+                          <p className="text-xs text-muted-foreground">{t("Used for the default lane after next login.", "अगले लॉगिन के बाद डिफ़ॉल्ट कार्यधारा के लिए उपयोग होगा।")}</p>
                         </div>
                         <Switch checked={assignPrimary} onCheckedChange={setAssignPrimary} />
                       </div>
 
                       {selectedAssignRolePreview ? (
                         <div className="rounded-2xl border border-border/60 bg-background/70 px-3 py-3 text-xs text-muted-foreground lg:col-span-2">
-                          <p className="font-medium text-foreground">Preview: {getRoleLabel(assignRoleCode as CanonicalRoleCode, lang)}</p>
+                          <p className="font-medium text-foreground">{t("Preview", "???????????")}: {getRoleLabel(assignRoleCode as CanonicalRoleCode, lang)}</p>
                           <p className="mt-1">
-                            Scope: {getScopeTypeLabel(assignScopeType)}
-                            {assignScopeType === "unit" && assignUnitId ? ` · ${unitNameById.get(assignUnitId) ?? "Selected unit"}` : ""}
-                            {assignScopeType === "department" && assignDepartmentId ? ` · ${departmentNameById.get(assignDepartmentId) ?? "Selected aayam"}` : ""}
+                            {t("Scope", "???????")}: {getScopeTypeLabel(assignScopeType, lang)}
+                            {assignScopeType === "unit" && assignUnitId ? ` - ${unitNameById.get(assignUnitId) ?? t("Selected unit", "????? ????")}` : ""}
+                            {assignScopeType === "department" && assignDepartmentId ? ` - ${departmentNameById.get(assignDepartmentId) ?? t("Selected aayam", "????? ????")}` : ""}
                           </p>
                           <p className="mt-1">
-                            Capabilities: {ACCESS_ROWS.filter((row) => selectedAssignRolePreview[row.key]).map((row) => row.area).join(", ") || "restricted"}
+                            {t("Capabilities", "????????")}: {ACCESS_ROWS.filter((row) => selectedAssignRolePreview[row.key]).map((row) => (lang === "hi" ? row.areaHi : row.area)).join(", ") || t("Restricted", "?????")}
                           </p>
                         </div>
                       ) : null}
@@ -1128,7 +1144,7 @@ export default function UserManagement() {
                         className="gap-2 lg:col-span-2"
                       >
                         {assignRoleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                        Assign scoped access
+                        {t("Assign scoped access", "????? ?????? ????????? ????")}
                       </Button>
                     </div>
                   </div>
@@ -1137,39 +1153,36 @@ export default function UserManagement() {
 
               <Card className="institution-panel">
                 <CardHeader className="border-b border-border/60">
-                  <CardTitle className="text-base">Effective access matrix</CardTitle>
+                  <CardTitle className="text-base">{t("Effective access matrix", "??????? ?????? ?????????")}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Capability</TableHead>
-                        <TableHead>Area</TableHead>
-                        <TableHead>Access</TableHead>
-                        <TableHead>Detail</TableHead>
+                        <TableHead>{t("Capability", "??????")}</TableHead>
+                        <TableHead>{t("Area", "???????")}</TableHead>
+                        <TableHead>{t("Access", "??????")}</TableHead>
+                        <TableHead>{t("Detail", "?????")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {accessPreviewRows.map((row) => (
                         <TableRow key={row.key}>
-                          <TableCell className="font-medium">{row.label}</TableCell>
-                          <TableCell>{row.area}</TableCell>
+                          <TableCell className="font-medium">{lang === "hi" ? row.labelHi : row.label}</TableCell>
+                          <TableCell>{lang === "hi" ? row.areaHi : row.area}</TableCell>
                           <TableCell>
                             <Badge variant={row.allowed ? "default" : "secondary"}>
-                              {row.allowed ? "Allowed" : "Restricted"}
+                              {row.allowed ? t("Allowed", "?????") : t("Restricted", "?????")}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{row.detail}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{lang === "hi" ? row.detailHi : row.detail}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
 
                   <div className="mt-4 rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-sm text-muted-foreground">
-                    Effective authority is currently derived from{" "}
-                    <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span>
-                    {" "}plus {Math.max(activeAssignments.length - 1, 0)} additional active role
-                    {activeAssignments.length === 1 ? "" : "s"}.
+                    {lang === "hi" ? (<>??????? ??????? ?????? <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> ?? ??????? ?? ??? ??, ??? ??? {Math.max(activeAssignments.length - 1, 0)} ???????? ?????? {Math.max(activeAssignments.length - 1, 0) === 1 ? "??????" : "????????"}?</>) : (<>Effective authority is currently derived from <span className="font-medium text-foreground">{getRoleLabel(effectivePrimaryRole, lang)}</span> plus {Math.max(activeAssignments.length - 1, 0)} additional active {Math.max(activeAssignments.length - 1, 0) === 1 ? "role" : "roles"}.</>)}
                   </div>
                 </CardContent>
               </Card>
