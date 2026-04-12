@@ -39,8 +39,8 @@ export function AppSidebar() {
       <div className="shrink-0 border-b border-sidebar-border px-4 py-4">
         {!collapsed ? <p className="shell-copy mb-3 text-sidebar-foreground/55">Bhopal Vibhag</p> : null}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl saffron-gradient shadow-lg shadow-primary/20">
-            <PragyaLogo className="h-7 w-7" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_18px_30px_-22px_hsl(27_100%_50%/0.8)]">
+            <PragyaLogo className="h-8 w-8" />
           </div>
           <AnimatePresence>
             {!collapsed ? (

@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LogIn, Loader2, AlertCircle } from "lucide-react";
+import { LogIn, Loader2, AlertCircle, BookOpenText } from "lucide-react";
 import { PragyaLogo } from "@/components/PragyaLogo";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -141,8 +142,8 @@ function LoginForm() {
             </div>
             <div className="mt-5 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl saffron-gradient shadow-lg shadow-primary/20">
-                  <PragyaLogo className="h-10 w-10" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_24px_42px_-26px_hsl(27_100%_50%/0.85)]">
+                  <PragyaLogo className="h-11 w-11" />
                 </div>
                 <div>
                   <p className="shell-copy">{isHi ? "आंतरिक संस्थागत प्रणाली" : "Internal institutional console"}</p>
@@ -273,6 +274,24 @@ function LoginForm() {
                     <span className="text-xs text-muted-foreground">Load</span>
                   </button>
                 ))}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    {isHi ? "मोबाइल पर चलाने के लिए आसान मार्गदर्शिका" : "Simple guide for mobile users"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isHi
+                      ? "Client के साथ direct share करने के लिए bilingual help page खोलें।"
+                      : "Open the bilingual help page you can share directly with the client."}
+                  </p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Link href="/guide" prefetch={false}>
+                    <BookOpenText className="h-4 w-4" />
+                    {isHi ? "गाइड खोलें" : "Open guide"}
+                  </Link>
+                </Button>
               </div>
             </div>
           </CardContent>

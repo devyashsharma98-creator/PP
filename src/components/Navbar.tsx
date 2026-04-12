@@ -262,8 +262,8 @@ export function Navbar() {
                 {t('Bhopal Vibhag', 'भोपाल विभाग')}
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
-                  <PragyaLogo className="w-6 h-6" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]">
+                  <PragyaLogo className="h-7 w-7" />
                 </div>
                 <div className="min-w-0 space-y-1">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/60">
@@ -313,8 +313,8 @@ export function Navbar() {
         </Sheet>
 
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden shrink-0">
-            <PragyaLogo className="w-5 h-5" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden">
+            <PragyaLogo className="h-6 w-6" />
           </div>
           <div className="space-y-0.5 min-w-0">
             <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>

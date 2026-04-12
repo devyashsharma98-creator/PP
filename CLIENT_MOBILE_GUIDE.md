@@ -1,6 +1,7 @@
 # Pragya Pravah ERP — Client Mobile Guide
 
 Live site: [https://mediumturquoise-dove-917779.hostingersite.com/](https://mediumturquoise-dove-917779.hostingersite.com/)
+Public guide page: [https://mediumturquoise-dove-917779.hostingersite.com/guide](https://mediumturquoise-dove-917779.hostingersite.com/guide)
 
 This guide is written in simple Hindi + English so it can be shared directly with client users.
 
@@ -145,4 +146,3 @@ Open it in Chrome/Safari, log in with the credentials shared with you, and the s
 [https://mediumturquoise-dove-917779.hostingersite.com/](https://mediumturquoise-dove-917779.hostingersite.com/)
 
 इसे Chrome/Safari में खोलें, आपको दिए गए login credentials से sign in करें, और सिस्टम सीधे आपके role-based काम वाले page पर खुल जाएगा।
-

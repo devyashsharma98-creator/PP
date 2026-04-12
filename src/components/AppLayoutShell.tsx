@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/Skeletons";
 import { useAppContext } from "@/context/AppContext";
 
 const FULL_BLEED_PUBLIC_PATHS = new Set(["/login"]);
-const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh", "/library", "/feed", "/history"]);
+const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh", "/library", "/feed", "/history", "/guide"]);
 const PADDED_PUBLIC_PREFIXES = ["/form/", "/vote/"];
 
 function isPaddedPublicPath(pathname: string) {
