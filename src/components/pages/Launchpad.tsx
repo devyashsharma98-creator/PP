@@ -57,6 +57,34 @@ function formatDateTime(value: string | null) {
   }).format(parsed);
 }
 
+function translateLaneLabel(lane: string, t: (en: string, hi: string) => string) {
+  const hiMap: Record<string, string> = {
+    "Unit review": "इकाई समीक्षा",
+    "Aayam review": "आयाम समीक्षा",
+    "Vibhag review": "विभाग समीक्षा",
+    "Prant review": "प्रान्त समीक्षा",
+    "Prachar follow-through": "प्रचार अनुवर्ती",
+  };
+  return t(lane, hiMap[lane] ?? lane);
+}
+
+function translateOverviewWarning(message: string, t: (en: string, hi: string) => string) {
+  const hi = message
+    .replace("Prant Sanyojak", "प्रान्त संयोजक")
+    .replace("Vibhag Pramukh", "विभाग प्रमुख")
+    .replace("Unit Head", "इकाई प्रमुख")
+    .replace("Aayam Pramukh", "आयाम प्रमुख")
+    .replace("role is not assigned.", " की भूमिका निर्धारित नहीं है।")
+    .replace(" units have no active Unit Head.", " इकाइयों में सक्रिय इकाई प्रमुख नहीं है।")
+    .replace(" aayams have no active Aayam Pramukh.", " आयामों में सक्रिय आयाम प्रमुख नहीं है।")
+    .replace(" inactive users still hold active assignments.", " निष्क्रिय उपयोगकर्ताओं के पास अभी भी सक्रिय दायित्व हैं।")
+    .replace(" items are blocked in unit review.", " प्रविष्टियाँ इकाई समीक्षा में अटकी हुई हैं।")
+    .replace(" items are blocked in aayam review.", " प्रविष्टियाँ आयाम समीक्षा में अटकी हुई हैं।")
+    .replace(" items are blocked in vibhag review.", " प्रविष्टियाँ विभाग समीक्षा में अटकी हुई हैं।")
+    .replace(" items are blocked in prant authorization.", " प्रविष्टियाँ प्रान्त अनुमोदन में अटकी हुई हैं।");
+  return t(message, hi);
+}
+
 function roleEventActionStatuses(role: Role) {
   if (role === "unit_head") return new Set<GatividhiEvent["status"]>(["Draft", "Returned for Revision"]);
   if (role === "aayam_pramukh") return new Set<GatividhiEvent["status"]>(["Pending Aayam Review"]);
@@ -461,7 +489,7 @@ export default function Launchpad() {
               {laneCounts.length ? (
                 laneCounts.map((lane) => (
                   <div key={lane.lane} className="rounded-2xl border border-border/60 bg-muted/20 px-4 py-4">
-                    <p className="shell-copy">{lane.lane}</p>
+                    <p className="shell-copy">{translateLaneLabel(lane.lane, t)}</p>
                     <p className="mt-2 text-2xl font-semibold">{lane.count}</p>
                   </div>
                 ))
@@ -501,7 +529,7 @@ export default function Launchpad() {
                 <div key={message} className="rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-sm text-foreground/85">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                    <p className="leading-6">{message}</p>
+                    <p className="leading-6">{translateOverviewWarning(message, t)}</p>
                   </div>
                 </div>
               ))

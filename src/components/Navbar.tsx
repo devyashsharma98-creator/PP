@@ -145,6 +145,7 @@ export function Navbar() {
   const prevCountRef = useRef(0);
   const notifRef = useRef<HTMLDivElement>(null);
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
+  const canUseDemoRoleSwitch = demoRoleSwitchEnabled && !isAuthenticated;
   const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
@@ -457,7 +458,7 @@ export function Navbar() {
             <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
               {t('Dayitva', 'दायित्व')}
             </p>
-            {demoRoleSwitchEnabled ? (
+            {canUseDemoRoleSwitch ? (
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                 <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
                   <SelectValue />
@@ -494,4 +495,5 @@ export function Navbar() {
     </header>
   );
 }
+
 
