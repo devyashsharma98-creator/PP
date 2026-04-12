@@ -40,6 +40,7 @@ Detailed architectural plans and design documents are available in the `docs/pla
 - [Prachar Campaign Control Room](./docs/plans/2026-03-09-prachar-campaign-control-room.md)
 - [Institutional Planning Calendar](./docs/plans/2026-03-12-calendar-institutional-planning-panchang.md)
 - [Phase 2 Expansion Plan](./docs/plans/2026-03-16-access-workflow-phase2-status-expansion.md)
+- [Client Mobile Guide](./CLIENT_MOBILE_GUIDE.md)
 
 ## Environment
 
