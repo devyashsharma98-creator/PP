@@ -259,7 +259,7 @@ export default function Launchpad() {
     {
       key: "events",
       title: "Event Workflow",
-      body: "Pre-event planning, vritt, attendance, approvals.",
+      body: isHi ? "पूर्व-कार्यक्रम योजना, वृत्त, उपस्थिति और अनुमोदन।" : "Pre-event planning, vritt, attendance, approvals.",
       href: "/dashboard",
       icon: LayoutDashboard,
       accent: "from-primary/12 to-primary/4 border-primary/20",
@@ -268,7 +268,7 @@ export default function Launchpad() {
     {
       key: "prachar",
       title: "Prachar Follow-through",
-      body: "Complete channel coverage and document skipped platforms.",
+      body: isHi ? "चैनल कवरेज पूर्ण करें और छोड़े गए प्लेटफ़ॉर्म का कारण दर्ज करें।" : "Complete channel coverage and document skipped platforms.",
       href: "/prachar",
       icon: Megaphone,
       accent: "from-emerald-500/12 to-emerald-500/4 border-emerald-500/20",
@@ -277,7 +277,7 @@ export default function Launchpad() {
     {
       key: "aalekh",
       title: "Aalekh Desk",
-      body: "Write, review, and publish through the governed workflow.",
+      body: isHi ? "नियंत्रित कार्यप्रवाह के माध्यम से लिखें, समीक्षा करें और प्रकाशित करें।" : "Write, review, and publish through the governed workflow.",
       href: "/aalekh",
       icon: PenLine,
       accent: "from-blue-500/12 to-blue-500/4 border-blue-500/20",
@@ -286,7 +286,7 @@ export default function Launchpad() {
     {
       key: "calendar",
       title: "Annual Calendar",
-      body: "See upcoming programmes and reminder rhythms.",
+      body: isHi ? "आगामी कार्यक्रम और स्मरण लय देखें।" : "See upcoming programmes and reminder rhythms.",
       href: "/calendar",
       icon: CalendarDays,
       accent: "from-amber-500/12 to-amber-500/4 border-amber-500/20",
@@ -295,7 +295,7 @@ export default function Launchpad() {
     {
       key: "vimarsh",
       title: "Vimarsh Topics",
-      body: "Open curated discourse material and subject resources.",
+      body: isHi ? "चयनित विमर्श सामग्री और विषय संसाधन खोलें।" : "Open curated discourse material and subject resources.",
       href: "/vimarsh",
       icon: MessagesSquare,
       accent: "from-violet-500/12 to-violet-500/4 border-violet-500/20",
@@ -304,7 +304,7 @@ export default function Launchpad() {
     {
       key: "library",
       title: "E-Library",
-      body: "Access PDFs and study material for circles and sessions.",
+      body: isHi ? "मंडलियों और सत्रों के लिए PDF और अध्ययन सामग्री देखें।" : "Access PDFs and study material for circles and sessions.",
       href: "/library",
       icon: BookOpen,
       accent: "from-orange-500/12 to-orange-500/4 border-orange-500/20",
@@ -313,7 +313,7 @@ export default function Launchpad() {
     {
       key: "sampark",
       title: "Sampark Directory",
-      body: "Find the right contact across units and aayams.",
+      body: isHi ? "इकाइयों और आयामों में सही सम्पर्क खोजें।" : "Find the right contact across units and aayams.",
       href: "/directory",
       icon: Users,
       accent: "from-slate-500/12 to-slate-500/4 border-slate-500/20",
@@ -324,27 +324,27 @@ export default function Launchpad() {
   const contexts = [
     {
       labelEn: "Pilot scope",
-      labelHi: "Pilot scope",
+      labelHi: "पायलट क्षेत्र",
       valueEn: "Bhopal Vibhag",
-      valueHi: "Bhopal Vibhag",
+      valueHi: "भोपाल विभाग",
       detailEn: "Workflow, access, and oversight are being verified here first.",
-      detailHi: "Workflow, access, and oversight are being verified here first.",
+      detailHi: "कार्यप्रवाह, प्रवेश और निगरानी का सत्यापन पहले यहीं किया जा रहा है।",
     },
     {
       labelEn: "Action queue",
-      labelHi: "Action queue",
+      labelHi: "कार्य कतार",
       valueEn: `${queue.length} items`,
-      valueHi: `${queue.length} items`,
+      valueHi: `${queue.length} कार्य`,
       detailEn: "Items that still need action in the current workflow lanes.",
-      detailHi: "Items that still need action in the current workflow lanes.",
+      detailHi: "वर्तमान कार्यप्रवाह धारा में जिन कार्यों पर अभी कार्रवाई बाकी है।",
     },
     {
       labelEn: "Notifications",
-      labelHi: "Notifications",
+      labelHi: "सूचनाएँ",
       valueEn: unreadSafe === null ? "--" : `${unreadSafe} unread`,
-      valueHi: unreadSafe === null ? "--" : `${unreadSafe} unread`,
+      valueHi: unreadSafe === null ? "--" : `${unreadSafe} अपठित`,
       detailEn: unreadSafe === null && unreadError ? "Notification count is not available." : "Role-relevant updates from the system.",
-      detailHi: unreadSafe === null && unreadError ? "Notification count is not available." : "Role-relevant updates from the system.",
+      detailHi: unreadSafe === null && unreadError ? "सूचना गणना अभी उपलब्ध नहीं है।" : "प्रणाली से भूमिका-सम्बन्धित अद्यतन।",
     },
   ];
 
@@ -356,20 +356,20 @@ export default function Launchpad() {
     tone: "default" | "warn" | "good";
   }> = [
     {
-      title: "Login health",
+      title: t("Login health", "लॉगिन स्वास्थ्य"),
       value:
         overview && !overviewQuery.isError
           ? `${overview.login.loggedInLast7Days}/${overview.login.activeAccounts}`
           : "--",
       detail:
         overview && !overviewQuery.isError
-          ? `${overview.login.successLast30Days} successful logins in 30 days`
-          : "Recent login activity will load here.",
+          ? `${overview.login.successLast30Days} ${t("successful logins in 30 days", "पिछले 30 दिनों में सफल लॉगिन")}`
+          : t("Recent login activity will load here.", "हाल की लॉगिन गतिविधि यहाँ दिखाई देगी।"),
       icon: LogIn,
       tone: "default" as const,
     },
     {
-      title: "Approval load",
+      title: t("Approval load", "अनुमोदन भार"),
       value:
         overview && !overviewQuery.isError
           ? `${overview.workflow.pendingEvents + overview.workflow.pendingArticles}`
@@ -377,33 +377,33 @@ export default function Launchpad() {
       detail:
         overview && !overviewQuery.isError
           ? `${overview.workflow.pendingEvents} events · ${overview.workflow.pendingArticles} articles`
-          : "Pending items across approval lanes.",
+          : t("Pending items across approval lanes.", "अनुमोदन धाराओं में लंबित प्रविष्टियाँ।"),
       icon: Clock,
       tone: "warn" as const,
     },
     {
-      title: "Prachar closure",
+      title: t("Prachar closure", "प्रचार समापन"),
       value:
         overview && !overviewQuery.isError
           ? `${overview.workflow.openPracharCampaigns}`
           : `${pracharCampaigns.open.length}`,
       detail:
         overview && !overviewQuery.isError
-          ? "Published campaigns still needing channel completion"
-          : "Open dissemination follow-through",
+          ? t("Published campaigns still needing channel completion", "प्रकाशित अभियानों में अभी चैनल समापन बाकी है।")
+          : t("Open dissemination follow-through", "प्रसार अनुवर्ती खुला है"),
       icon: Megaphone,
       tone: overview?.workflow.openPracharCampaigns ? "warn" : "good",
     },
     {
-      title: "Hierarchy health",
+      title: t("Hierarchy health", "संरचना स्वास्थ्य"),
       value:
         overview && !overviewQuery.isError
           ? `${overview.hierarchy.totalWarnings}`
           : "--",
       detail:
         overview && !overviewQuery.isError
-          ? "Warnings across roles, assignment gaps, and workflow chains"
-          : "Role coverage and hierarchy checks",
+          ? t("Warnings across roles, assignment gaps, and workflow chains", "भूमिकाओं, दायित्व अंतराल और कार्यप्रवाह शृंखला में चेतावनियाँ")
+          : t("Role coverage and hierarchy checks", "भूमिका कवरेज और संरचना जाँच"),
       icon: ShieldAlert,
       tone: overview?.hierarchy.totalWarnings ? "warn" : "good",
     },
@@ -416,18 +416,15 @@ export default function Launchpad() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
       <Masthead
-        seal={t("ERP Operations Center", "ERP Operations Center")}
-        sealHi={t("ERP Operations Center", "ERP Operations Center")}
-        title={t("Operational Overview", "Operational Overview")}
-        titleHi={t("Operational Overview", "Operational Overview")}
+        seal="ERP Operations Center"
+        sealHi="ईआरपी संचालन केंद्र"
+        title="Operational Overview"
+        titleHi="परिचालन अवलोकन"
         subtitle={t(
           "Track workflow health, login activity, hierarchy gaps, and role-wise pending work from one ERP home.",
-          "Track workflow health, login activity, hierarchy gaps, and role-wise pending work from one ERP home.",
+          "एक ही ईआरपी गृह-पटल से कार्यप्रवाह स्वास्थ्य, लॉगिन गतिविधि, संरचनात्मक अंतर और भूमिका-आधारित लंबित कार्य देखें।",
         )}
-        subtitleHi={t(
-          "Track workflow health, login activity, hierarchy gaps, and role-wise pending work from one ERP home.",
-          "Track workflow health, login activity, hierarchy gaps, and role-wise pending work from one ERP home.",
-        )}
+        subtitleHi="एक ही ईआरपी गृह-पटल से कार्यप्रवाह स्वास्थ्य, लॉगिन गतिविधि, संरचनात्मक अंतर और भूमिका-आधारित लंबित कार्य देखें।"
         contexts={contexts}
         lang={isHi ? "hi" : "en"}
         actions={
@@ -435,13 +432,13 @@ export default function Launchpad() {
             <Link href="/dashboard">
               <Button className="h-11 rounded-2xl gap-2">
                 <LayoutDashboard className="w-4 h-4" />
-                Open Events Queue
+                {t("Open Events Queue", "कार्यक्रम कतार खोलें")}
               </Button>
             </Link>
             <Link href="/prachar">
               <Button variant="outline" className="h-11 rounded-2xl gap-2">
                 <Megaphone className="w-4 h-4" />
-                Open Prachar Flow
+                {t("Open Prachar Flow", "प्रचार प्रवाह खोलें")}
               </Button>
             </Link>
           </div>
@@ -457,7 +454,7 @@ export default function Launchpad() {
       <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <Card className="institution-panel">
           <CardHeader className="border-b border-border/60 pb-4">
-            <CardTitle className="text-base">Approval visibility</CardTitle>
+            <CardTitle className="text-base">{t("Approval visibility", "अनुमोदन दृश्यता")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-5 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -470,22 +467,22 @@ export default function Launchpad() {
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed border-border/70 px-4 py-6 text-sm text-muted-foreground sm:col-span-2 xl:col-span-3">
-                  {overviewQuery.isLoading ? "Loading approval overview..." : "Approval overview is not available yet."}
+                  {overviewQuery.isLoading ? t("Loading approval overview...", "अनुमोदन अवलोकन लोड हो रहा है...") : t("Approval overview is not available yet.", "अनुमोदन अवलोकन अभी उपलब्ध नहीं है।")}
                 </div>
               )}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                <p className="shell-copy">Published events</p>
+                <p className="shell-copy">{t("Published events", "प्रकाशित कार्यक्रम")}</p>
                 <p className="mt-2 text-xl font-semibold">{overview?.workflow.publishedEvents ?? "--"}</p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                <p className="shell-copy">Published articles</p>
+                <p className="shell-copy">{t("Published articles", "प्रकाशित आलेख")}</p>
                 <p className="mt-2 text-xl font-semibold">{overview?.workflow.publishedArticles ?? "--"}</p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                <p className="shell-copy">Stalled items</p>
+                <p className="shell-copy">{t("Stalled items", "अटकी हुई प्रविष्टियाँ")}</p>
                 <p className="mt-2 text-xl font-semibold">
                   {overview ? overview.workflow.stalledEvents + overview.workflow.stalledArticles : "--"}
                 </p>
@@ -496,7 +493,7 @@ export default function Launchpad() {
 
         <Card className="institution-panel">
           <CardHeader className="border-b border-border/60 pb-4">
-            <CardTitle className="text-base">Hierarchy health</CardTitle>
+            <CardTitle className="text-base">{t("Hierarchy health", "संरचना स्वास्थ्य")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-5 space-y-4">
             {hierarchyMessages.length ? (
@@ -514,8 +511,8 @@ export default function Launchpad() {
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                   <p className="leading-6">
                     {overviewQuery.isLoading
-                      ? "Checking hierarchy and role coverage..."
-                      : "No hierarchy warnings found in the current overview."}
+                      ? t("Checking hierarchy and role coverage...", "संरचना और भूमिका कवरेज जाँची जा रही है...")
+                      : t("No hierarchy warnings found in the current overview.", "वर्तमान अवलोकन में कोई संरचनात्मक चेतावनी नहीं मिली।")}
                   </p>
                 </div>
               </div>
@@ -523,11 +520,11 @@ export default function Launchpad() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                <p className="shell-copy">Missing Unit Heads</p>
+                <p className="shell-copy">{t("Missing Unit Heads", "अनुपस्थित इकाई प्रमुख")}</p>
                 <p className="mt-2 text-xl font-semibold">{overview?.hierarchy.missingUnitHeads ?? "--"}</p>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                <p className="shell-copy">Missing Aayam Heads</p>
+                <p className="shell-copy">{t("Missing Aayam Heads", "अनुपस्थित आयाम प्रमुख")}</p>
                 <p className="mt-2 text-xl font-semibold">{overview?.hierarchy.missingAayamHeads ?? "--"}</p>
               </div>
             </div>
@@ -538,7 +535,7 @@ export default function Launchpad() {
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className="institution-panel">
           <CardHeader className="border-b border-border/60 pb-4">
-            <CardTitle className="text-base">Work lanes</CardTitle>
+            <CardTitle className="text-base">{t("Work lanes", "कार्य धाराएँ")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-5">
             <div className="grid gap-3 sm:grid-cols-2">
@@ -577,12 +574,12 @@ export default function Launchpad() {
 
         <Card className="institution-panel">
           <CardHeader className="border-b border-border/60 pb-4">
-            <CardTitle className="text-base">My action queue</CardTitle>
+            <CardTitle className="text-base">{t("My action queue", "मेरी कार्य कतार")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-5">
             {queue.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border/70 px-4 py-8 text-center text-sm text-muted-foreground">
-                No pending items are assigned to your current workflow lane.
+                {t("No pending items are assigned to your current workflow lane.", "आपकी वर्तमान कार्यधारा में कोई लंबित कार्य नहीं है।")}
               </div>
             ) : (
               <div className="space-y-3">
@@ -620,15 +617,15 @@ export default function Launchpad() {
             <div className="mt-5 border-t border-border/60 pt-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="shell-copy">Upcoming programmes</p>
+                  <p className="shell-copy">{t("Upcoming programmes", "आगामी कार्यक्रम")}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Keep the next programmes visible while you clear the queue.
+                    {t("Keep the next programmes visible while you clear the queue.", "कतार साफ़ करते समय आगामी कार्यक्रम भी दृष्टि में रखें।")}
                   </p>
                 </div>
                 <Link href="/calendar">
                   <Button variant="outline" className="h-10 rounded-2xl gap-2">
                     <CalendarDays className="h-4 w-4" />
-                    Open Calendar
+                    {t("Open Calendar", "कैलेंडर खोलें")}
                   </Button>
                 </Link>
               </div>
@@ -645,7 +642,7 @@ export default function Launchpad() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">No upcoming events recorded yet.</p>
+                <p className="mt-4 text-sm text-muted-foreground">{t("No upcoming events recorded yet.", "अभी कोई आगामी कार्यक्रम दर्ज नहीं है।")}</p>
               )}
             </div>
           </CardContent>
@@ -655,17 +652,17 @@ export default function Launchpad() {
       {canManageUsers ? (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="dashboard-section-heading">Admin detail</h2>
+            <h2 className="dashboard-section-heading">{t("Admin detail", "प्रशासन विवरण")}</h2>
             <Link href="/super-admin">
               <Button variant="outline" className="h-10 rounded-2xl gap-2">
                 <ShieldCheck className="h-4 w-4" />
-                Open System Access
+                {t("Open System Access", "प्रवेश नियंत्रण खोलें")}
               </Button>
             </Link>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            <AdminListCard title="Recent logins" emptyText="No recent logins recorded.">
+            <AdminListCard title={t("Recent logins", "हाल के लॉगिन")} emptyText={t("No recent logins recorded.", "हाल का कोई लॉगिन दर्ज नहीं है।")}>
               {adminDetails?.recentLogins?.length ? (
                 <div className="space-y-3">
                   {adminDetails.recentLogins.map((record) => (
@@ -688,7 +685,7 @@ export default function Launchpad() {
               ) : null}
             </AdminListCard>
 
-            <AdminListCard title="Recent workflow actors" emptyText="No workflow actors recorded.">
+            <AdminListCard title={t("Recent workflow actors", "हाल के कार्यकर्ता")} emptyText={t("No workflow actors recorded.", "हाल की कोई कार्य प्रविष्टि दर्ज नहीं है।")}>
               {adminDetails?.recentActors?.length ? (
                 <div className="space-y-3">
                   {adminDetails.recentActors.map((actor) => (
@@ -725,3 +722,5 @@ export default function Launchpad() {
     </motion.div>
   );
 }
+
+

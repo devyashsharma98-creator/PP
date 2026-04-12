@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
-import { useT } from '@/lib/useT';
+import { repairBrokenHindi, useT } from '@/lib/useT';
 import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -78,7 +78,7 @@ export function ArticleCard({
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className={cn("text-[9px] font-bold uppercase tracking-wider", statusColors[article.status])}>
-                {lang === 'hi' ? statusHi[article.status] : article.status}
+                {lang === 'hi' ? repairBrokenHindi(statusHi[article.status]) : article.status}
               </Badge>
               <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest bg-muted/30">{article.category}</Badge>
             </div>
@@ -276,8 +276,8 @@ export function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof empty
                   className="mt-0.5"
                 />
                 <Label htmlFor={v.key} className="text-sm cursor-pointer leading-snug">
-                  <span className="font-medium font-devanagari">{v.label}</span>
-                  <span className="block text-[10px] text-muted-foreground">{lang === 'hi' ? v.sublabelHi : v.sublabel}</span>
+                  <span className="font-medium font-devanagari">{lang === 'hi' ? repairBrokenHindi(v.label) : v.sublabel}</span>
+                  <span className="block text-[10px] text-muted-foreground">{t(v.sublabel, v.sublabelHi)}</span>
                 </Label>
               </div>
             ))}

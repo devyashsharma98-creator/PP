@@ -37,7 +37,6 @@ export function Masthead({
   stats,
   contexts,
   actions,
-  lang = "en",
   className,
 }: MastheadProps) {
   const t = useT();
@@ -53,12 +52,12 @@ export function Masthead({
             <div className="flex items-center gap-3">
               {icon && <div className="shrink-0">{icon}</div>}
               <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-                {lang === "hi" && titleHi ? titleHi : title}
+                {t(title, titleHi ?? title)}
               </h1>
             </div>
             {(subtitle || subtitleHi) && (
               <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-                {lang === "hi" && subtitleHi ? subtitleHi : subtitle}
+                {t(subtitle ?? "", subtitleHi ?? subtitle ?? "")}
               </p>
             )}
           </div>

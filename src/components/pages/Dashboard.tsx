@@ -136,7 +136,7 @@ export default function Dashboard() {
     addToast(t('Smart Draft generated!', 'à¤¸à¥à¤®à¤¾à¤°à¥à¤Ÿ à¤¡à¥à¤°à¤¾à¤«à¥à¤Ÿ à¤¤à¥ˆà¤¯à¤¾à¤°!'), 'info');
   };
 
-  const statusLabel = (status: string) => lang === 'hi' ? (eventStatusHi[status] ?? status) : status;
+  const statusLabel = (status: string) => t(status, eventStatusHi[status] ?? status);
   const handleForwardToPrant = async (eventId: string) => {
     if (isApiConnected) {
       try {

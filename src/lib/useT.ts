@@ -6,7 +6,7 @@ function looksLikeBrokenHindi(value: string) {
   return /[ÃÂà]/.test(value) && /[¤¥]/.test(value);
 }
 
-function repairBrokenHindi(value: string) {
+export function repairBrokenHindi(value: string) {
   if (!looksLikeBrokenHindi(value)) return value;
 
   try {
@@ -16,6 +16,11 @@ function repairBrokenHindi(value: string) {
   } catch {
     return value;
   }
+}
+
+export function pickLang(en: string, hi: string | undefined | null, lang: "en" | "hi") {
+  if (lang !== "hi") return en;
+  return repairBrokenHindi(hi ?? en);
 }
 
 export function useT() {
