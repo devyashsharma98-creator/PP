@@ -1,0 +1,23 @@
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="#1e293b"/>
+  <!-- Back petals -->
+  <ellipse cx="16" cy="8" rx="3.5" ry="9" fill="#f97316" opacity="0.2" transform="rotate(-35 16 16)"/>
+  <ellipse cx="16" cy="8" rx="3.5" ry="9" fill="#f97316" opacity="0.2" transform="rotate(35 16 16)"/>
+  <ellipse cx="16" cy="8" rx="3.5" ry="9" fill="#f97316" opacity="0.2" transform="rotate(-65 16 16)"/>
+  <ellipse cx="16" cy="8" rx="3.5" ry="9" fill="#f97316" opacity="0.2" transform="rotate(65 16 16)"/>
+  <!-- Mid petals -->
+  <ellipse cx="16" cy="9" rx="3" ry="7.5" fill="#f97316" opacity="0.35" transform="rotate(-22 16 16)"/>
+  <ellipse cx="16" cy="9" rx="3" ry="7.5" fill="#f97316" opacity="0.35" transform="rotate(22 16 16)"/>
+  <!-- Front petal -->
+  <ellipse cx="16" cy="10" rx="2.5" ry="6" fill="#f97316" opacity="0.5"/>
+  <!-- Left figure -->
+  <g transform="translate(12, 15)" fill="white" opacity="0.9">
+    <circle cx="1.5" cy="0" r="1.2"/>
+    <path d="M1.5 1.2 C1.5 1.2 0.5 2.4 0 3.4 C-0.3 4 0.5 4.2 1.5 4 C2.5 4.2 3.3 4 3 3.4 C2.5 2.4 1.5 1.2 1.5 1.2Z"/>
+  </g>
+  <!-- Right figure -->
+  <g transform="translate(16.5, 15)" fill="#f97316" opacity="0.9">
+    <circle cx="1.5" cy="0" r="1.2"/>
+    <path d="M1.5 1.2 C1.5 1.2 0.5 2.4 0 3.4 C-0.3 4 0.5 4.2 1.5 4 C2.5 4.2 3.3 4 3 3.4 C2.5 2.4 1.5 1.2 1.5 1.2Z"/>
+  </g>
+</svg>

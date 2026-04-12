@@ -7,7 +7,8 @@ import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle2, QrCode, Calendar, MapPin, Flame, ArrowRight } from 'lucide-react';
+import { CheckCircle2, QrCode, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { PragyaLogo } from '@/components/PragyaLogo';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -153,7 +154,7 @@ export default function CheckinPage() {
                 )}
 
                 <div className="pt-2 flex items-center justify-center gap-2 text-muted-foreground/40">
-                  <Flame className="w-3.5 h-3.5" />
+                  <PragyaLogo className="w-4 h-4" mono />
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{t('Pragya Pravah Registry', 'प्रज्ञा प्रवाह पंजिका')}</span>
                 </div>
               </CardContent>

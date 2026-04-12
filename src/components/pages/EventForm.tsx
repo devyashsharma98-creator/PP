@@ -14,10 +14,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import { PragyaLogo } from '@/components/PragyaLogo';
 import type { LucideIcon } from 'lucide-react';
 import {
   CheckCircle2, ChevronRight, ChevronLeft,
-  Calendar, MapPin, Users, Flame, Phone,
+  Calendar, MapPin, Users, Phone,
   User as UserIcon, Building2, AlertTriangle, ArrowRight,
   FileText, Shield, Compass
 } from 'lucide-react';
@@ -227,7 +228,7 @@ export default function EventForm({ eventId }: Props) {
           animate={{ y: 0, opacity: 1 }}
           className="w-16 h-16 rounded-[1.25rem] saffron-gradient flex items-center justify-center shadow-xl shadow-primary/20"
         >
-          <Flame className="w-8 h-8 text-white" />
+          <PragyaLogo className="w-10 h-10" />
         </motion.div>
         
         <div className="space-y-2">

@@ -2,7 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Flame, LogIn, Loader2, AlertCircle } from "lucide-react";
+import { LogIn, Loader2, AlertCircle } from "lucide-react";
+import { PragyaLogo } from "@/components/PragyaLogo";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,7 +142,7 @@ function LoginForm() {
             <div className="mt-5 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl saffron-gradient shadow-lg shadow-primary/20">
-                  <Flame className="h-7 w-7 text-white" />
+                  <PragyaLogo className="h-10 w-10" />
                 </div>
                 <div>
                   <p className="shell-copy">{isHi ? "आंतरिक संस्थागत प्रणाली" : "Internal institutional console"}</p>

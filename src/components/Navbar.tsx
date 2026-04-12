@@ -5,7 +5,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext, type Role } from '@/context/AppContext';
 import { canonicalRoleLabels, canonicalRoleLabelsHi, roleLabels, roleLabelsHi } from '@/lib/app/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Bell, Menu, Flame, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
+import { Shield, Bell, Menu, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
+import { PragyaLogo } from '@/components/PragyaLogo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -262,7 +263,7 @@ export function Navbar() {
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg saffron-gradient flex items-center justify-center shrink-0">
-                  <Flame className="w-4 h-4 text-primary-foreground" />
+                  <PragyaLogo className="w-6 h-6" />
                 </div>
                 <div className="min-w-0 space-y-1">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/60">
@@ -313,7 +314,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-7 h-7 rounded-md saffron-gradient flex items-center justify-center md:hidden shrink-0">
-            <Flame className="w-3.5 h-3.5 text-white" />
+            <PragyaLogo className="w-5 h-5" />
           </div>
           <div className="space-y-0.5 min-w-0">
             <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>

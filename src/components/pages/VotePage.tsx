@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
-  CheckCircle2, Vote, Calendar, Clock, MapPin, Flame,
+  CheckCircle2, Vote, Calendar, Clock, MapPin,
   TrendingUp, Sparkles, Award, Shield, AlertTriangle, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';

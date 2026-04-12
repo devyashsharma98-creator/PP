@@ -7,8 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
-  Flame,
 } from "lucide-react";
+import { PragyaLogo } from "@/components/PragyaLogo";
 
 import { useAppContext } from "@/context/AppContext";
 import { getNavGroups } from "@/lib/app/navigation";
@@ -40,7 +40,7 @@ export function AppSidebar() {
         {!collapsed ? <p className="shell-copy mb-3 text-sidebar-foreground/55">Bhopal Vibhag</p> : null}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl saffron-gradient shadow-lg shadow-primary/20">
-            <Flame className="h-5 w-5 text-primary-foreground" />
+            <PragyaLogo className="h-7 w-7" />
           </div>
           <AnimatePresence>
             {!collapsed ? (

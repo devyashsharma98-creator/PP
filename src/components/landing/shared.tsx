@@ -1,29 +1,36 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 
 export function DeepMandala({ className }: { className?: string }) {
-  const petals = [0, 45, 90, 135, 180, 225, 270, 315];
-
   return (
     <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="120" cy="120" r="112" stroke="currentColor" strokeWidth="0.8" opacity="0.12" />
-      <circle cx="120" cy="120" r="78" stroke="currentColor" strokeWidth="1" opacity="0.18" />
-      <circle cx="120" cy="120" r="42" stroke="currentColor" strokeWidth="1.2" opacity="0.25" />
-      {petals.map((angle) => (
-        <ellipse
-          key={angle}
-          cx="120"
-          cy="62"
-          rx="12"
-          ry="48"
-          fill="currentColor"
-          fillOpacity="0.04"
-          stroke="currentColor"
-          strokeOpacity="0.2"
-          strokeWidth="0.5"
-          transform={`rotate(${angle} 120 120)`}
-        />
-      ))}
-      <circle cx="120" cy="120" r="16" fill="currentColor" fillOpacity="0.15" />
+      {/* Outer petals (back layer) */}
+      <ellipse cx="120" cy="58" rx="22" ry="56" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.6" transform="rotate(-30 120 120)" />
+      <ellipse cx="120" cy="58" rx="22" ry="56" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.6" transform="rotate(30 120 120)" />
+      <ellipse cx="120" cy="58" rx="22" ry="56" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.6" transform="rotate(-60 120 120)" />
+      <ellipse cx="120" cy="58" rx="22" ry="56" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.6" transform="rotate(60 120 120)" />
+      {/* Middle petals */}
+      <ellipse cx="120" cy="66" rx="18" ry="46" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.7" transform="rotate(-20 120 120)" />
+      <ellipse cx="120" cy="66" rx="18" ry="46" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.7" transform="rotate(20 120 120)" />
+      <ellipse cx="120" cy="66" rx="18" ry="46" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.7" transform="rotate(-45 120 120)" />
+      <ellipse cx="120" cy="66" rx="18" ry="46" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.7" transform="rotate(45 120 120)" />
+      {/* Front petals */}
+      <ellipse cx="120" cy="74" rx="14" ry="38" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeOpacity="0.25" strokeWidth="0.8" transform="rotate(-10 120 120)" />
+      <ellipse cx="120" cy="74" rx="14" ry="38" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeOpacity="0.25" strokeWidth="0.8" transform="rotate(10 120 120)" />
+      <ellipse cx="120" cy="74" rx="14" ry="38" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeOpacity="0.25" strokeWidth="0.8" />
+      {/* Left meditating figure */}
+      <g transform="translate(100, 105)" opacity="0.35">
+        <circle cx="6" cy="0" r="4" fill="currentColor" />
+        <path d="M6 4 C6 4 2 8 0 12 C-1 14 2 15 6 14 C10 15 13 14 12 12 C10 8 6 4 6 4Z" fill="currentColor" />
+        <path d="M0 10 C-3 9 -4 11 -2 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        <path d="M12 10 C15 9 16 11 14 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      </g>
+      {/* Right meditating figure */}
+      <g transform="translate(122, 105)" opacity="0.35">
+        <circle cx="6" cy="0" r="4" fill="currentColor" />
+        <path d="M6 4 C6 4 2 8 0 12 C-1 14 2 15 6 14 C10 15 13 14 12 12 C10 8 6 4 6 4Z" fill="currentColor" />
+        <path d="M0 10 C-3 9 -4 11 -2 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        <path d="M12 10 C15 9 16 11 14 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      </g>
     </svg>
   );
 }
