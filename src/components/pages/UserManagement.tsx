@@ -71,6 +71,7 @@ import type { CanonicalRoleCode } from "@/lib/app/contracts";
 import { canonicalRoleLabels, canonicalRoleLabelsHi } from "@/lib/app/constants";
 import { getPrimaryRole, resolvePermissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/useT";
 
 type StatusFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | CanonicalRoleCode;
@@ -82,44 +83,65 @@ const ACCESS_ROWS = [
   {
     key: "canCreateEvent",
     label: "Create and update events",
+    labelHi: "कार्यक्रम बनाना और अद्यतन करना",
     area: "Gatividhi",
+    areaHi: "गतिविधि",
     detail: "Programme planning, checklists, and local event control.",
+    detailHi: "कार्यक्रम योजना, चेकलिस्ट और स्थानीय कार्यक्रम नियंत्रण।",
   },
   {
     key: "canFinalizePoll",
     label: "Finalize polls and decisions",
+    labelHi: "मतदान और निर्णय अंतिम करना",
     area: "Gatividhi",
+    areaHi: "गतिविधि",
     detail: "Locks public voting outcomes and operational choices.",
+    detailHi: "सार्वजनिक मतदान परिणाम और परिचालन विकल्पों को अंतिम करता है।",
   },
   {
     key: "canPublishEvent",
     label: "Publish event workflows",
+    labelHi: "कार्यक्रम प्रवाह प्रकाशित करना",
     area: "Governance",
+    areaHi: "शासन",
     detail: "Moves programmes into the public or approved lane.",
+    detailHi: "कार्यक्रमों को सार्वजनिक या अनुमोदित धारा में ले जाता है।",
   },
   {
     key: "canCreateArticle",
     label: "Create and edit aalekh",
+    labelHi: "आलेख बनाना और संपादित करना",
     area: "Aalekh",
+    areaHi: "आलेख",
     detail: "Drafts, revisions, and editorial preparation.",
+    detailHi: "प्रारूप, संशोधन और संपादकीय तैयारी।",
   },
   {
     key: "canPublishArticle",
     label: "Approve publication",
+    labelHi: "प्रकाशन अनुमोदित करना",
     area: "Aalekh",
+    areaHi: "आलेख",
     detail: "Final editorial authority for institutional writing.",
+    detailHi: "संस्थागत लेखन के लिए अंतिम संपादकीय अधिकार।",
   },
   {
     key: "canUpdatePrachar",
     label: "Control prachar follow-through",
+    labelHi: "प्रचार अनुवर्ती नियंत्रित करना",
     area: "Prachar",
+    areaHi: "प्रचार",
     detail: "Tracks publication, distribution, and outreach completion.",
+    detailHi: "प्रकाशन, प्रसार और पहुँच-समापन को ट्रैक करता है।",
   },
   {
     key: "canManageUsers",
     label: "Manage accounts and access",
+    labelHi: "खाते और प्रवेश प्रबंधन",
     area: "Administration",
+    areaHi: "प्रशासन",
     detail: "Creates users, assigns roles, and governs account access.",
+    detailHi: "उपयोगकर्ता बनाता है, भूमिकाएँ निर्धारित करता है और खाते का प्रवेश नियंत्रित करता है।",
   },
 ] as const;
 
@@ -172,6 +194,7 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
   const { authReady, lang, permissions, viewer } = useAppContext();
+  const t = useT();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -398,24 +421,27 @@ export default function UserManagement() {
   const createContexts = [
     {
       labelEn: "Accounts",
-      labelHi: "Accounts",
+      labelHi: "खाते",
       valueEn: String(totalUsers),
+      valueHi: String(totalUsers),
       detailEn: "Total identities available inside the organisation.",
-      detailHi: "Total identities available inside the organisation.",
+      detailHi: "संस्था के भीतर उपलब्ध कुल पहचानें।",
     },
     {
       labelEn: "Active",
-      labelHi: "Active",
+      labelHi: "सक्रिय",
       valueEn: String(activeUsers),
+      valueHi: String(activeUsers),
       detailEn: "Members who can currently sign in and operate.",
-      detailHi: "Members who can currently sign in and operate.",
+      detailHi: "वे सदस्य जो अभी लॉगिन कर कार्य कर सकते हैं।",
     },
     {
       labelEn: "Admin seats",
-      labelHi: "Admin seats",
+      labelHi: "प्रशासन सीटें",
       valueEn: String(adminUsers),
+      valueHi: String(adminUsers),
       detailEn: "Accounts carrying organisation or super-admin authority.",
-      detailHi: "Accounts carrying organisation or super-admin authority.",
+      detailHi: "वे खाते जिनके पास संस्था या सुपर-एडमिन अधिकार हैं।",
     },
   ];
 
@@ -433,20 +459,22 @@ export default function UserManagement() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <Masthead
           seal="Access Governance"
-          sealHi="Access Governance"
+          sealHi="प्रवेश संचालन"
           title="Super Admin Console"
-          titleHi="Super Admin Console"
+          titleHi="सुपर एडमिन कंसोल"
           subtitle="This page is reserved for super-admin and organisation-admin accounts."
-          subtitleHi="This page is reserved for super-admin and organisation-admin accounts."
+          subtitleHi="यह पृष्ठ केवल सुपर-एडमिन और संस्था-एडमिन खातों के लिए सुरक्षित है।"
           icon={<ShieldCheck className="h-6 w-6 text-primary" />}
         />
 
         <Alert className="institution-panel border-primary/20 bg-primary/5">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Restricted surface</AlertTitle>
+          <AlertTitle>{t("Restricted surface", "सीमित सतह")}</AlertTitle>
           <AlertDescription>
-            Your current account can work inside the institutional workflows, but it cannot govern other accounts.
-            Sign in with a super-admin or org-admin profile to create users and control access.
+            {t(
+              "Your current account can work inside the institutional workflows, but it cannot govern other accounts. Sign in with a super-admin or org-admin profile to create users and control access.",
+              "आपका वर्तमान खाता संस्थागत कार्यप्रवाह में काम कर सकता है, लेकिन अन्य खातों का संचालन नहीं कर सकता। उपयोगकर्ता बनाने और प्रवेश नियंत्रित करने के लिए सुपर-एडमिन या संस्था-एडमिन प्रोफ़ाइल से लॉगिन करें।",
+            )}
           </AlertDescription>
         </Alert>
       </motion.div>
@@ -457,11 +485,11 @@ export default function UserManagement() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
         seal="Access Governance"
-        sealHi="Access Governance"
+        sealHi="प्रवेश संचालन"
         title="Super Admin Console"
-        titleHi="Super Admin Console"
+        titleHi="सुपर एडमिन कंसोल"
         subtitle="Create institutional accounts, define role-based access, and keep authority boundaries explicit."
-        subtitleHi="Create institutional accounts, define role-based access, and keep authority boundaries explicit."
+        subtitleHi="संस्थागत खाते बनाइए, भूमिका-आधारित प्रवेश निर्धारित कीजिए और अधिकार सीमाएँ स्पष्ट रखिए।"
         icon={<ShieldCheck className="h-6 w-6 text-primary" />}
         contexts={createContexts}
         actions={
@@ -469,15 +497,17 @@ export default function UserManagement() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <UserPlus className="h-4 w-4" />
-                Create account
+                {t("Create account", "खाता बनाएं")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl bg-popover">
               <DialogHeader>
-                <DialogTitle>Create a new institutional account</DialogTitle>
+                <DialogTitle>{t("Create a new institutional account", "नया संस्थागत खाता बनाएं")}</DialogTitle>
                 <DialogDescription>
-                  Set a temporary password, assign the first role, and let the access preview confirm what this
-                  account can actually do.
+                  {t(
+                    "Set a temporary password, assign the first role, and let the access preview confirm what this account can actually do.",
+                    "अस्थायी पासवर्ड निर्धारित करें, पहली भूमिका दें, और प्रवेश पूर्वावलोकन से पुष्टि करें कि यह खाता वास्तव में क्या कर सकता है।",
+                  )}
                 </DialogDescription>
               </DialogHeader>
 
@@ -485,32 +515,32 @@ export default function UserManagement() {
                 <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="new-display-name">Display name</Label>
+                      <Label htmlFor="new-display-name">{t("Display name", "प्रदर्शित नाम")}</Label>
                       <Input
                         id="new-display-name"
                         value={createForm.displayName ?? ""}
                         onChange={(event) =>
                           setCreateForm((current) => ({ ...current, displayName: event.target.value }))
                         }
-                        placeholder="Name used across the workspace"
+                        placeholder={t("Name used across the workspace", "पूरे कार्यक्षेत्र में प्रयुक्त नाम")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="new-display-name-hi">Display name (Hindi)</Label>
+                      <Label htmlFor="new-display-name-hi">{t("Display name (Hindi)", "प्रदर्शित नाम (हिंदी)")}</Label>
                       <Input
                         id="new-display-name-hi"
                         value={createForm.displayNameHi ?? ""}
                         onChange={(event) =>
                           setCreateForm((current) => ({ ...current, displayNameHi: event.target.value }))
                         }
-                        placeholder="Optional Hindi label"
+                        placeholder={t("Optional Hindi label", "वैकल्पिक हिंदी नाम")}
                       />
                     </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="new-email">Email</Label>
+                      <Label htmlFor="new-email">{t("Email", "ईमेल")}</Label>
                       <Input
                         id="new-email"
                         type="email"
@@ -522,21 +552,21 @@ export default function UserManagement() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="new-phone">Phone</Label>
+                      <Label htmlFor="new-phone">{t("Phone", "फोन")}</Label>
                       <Input
                         id="new-phone"
                         value={createForm.phone ?? ""}
                         onChange={(event) =>
                           setCreateForm((current) => ({ ...current, phone: event.target.value }))
                         }
-                        placeholder="Optional phone number"
+                        placeholder={t("Optional phone number", "वैकल्पिक फोन नंबर")}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
-                      <Label htmlFor="new-password">Temporary password</Label>
+                      <Label htmlFor="new-password">{t("Temporary password", "अस्थायी पासवर्ड")}</Label>
                       <Button
                         type="button"
                         size="sm"
@@ -547,7 +577,7 @@ export default function UserManagement() {
                         }
                       >
                         <Sparkles className="h-3.5 w-3.5" />
-                        Generate
+                        {t("Generate", "बनाएँ")}
                       </Button>
                     </div>
                     <Input
@@ -556,12 +586,12 @@ export default function UserManagement() {
                       onChange={(event) =>
                         setCreateForm((current) => ({ ...current, password: event.target.value }))
                       }
-                      placeholder="Set a strong temporary password"
+                      placeholder={t("Set a strong temporary password", "मज़बूत अस्थायी पासवर्ड रखें")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="new-role">Initial access role</Label>
+                    <Label htmlFor="new-role">{t("Initial access role", "प्रारम्भिक प्रवेश भूमिका")}</Label>
                     <Select
                       value={createForm.roleCode}
                       onValueChange={(value: CanonicalRoleCode) =>
@@ -569,7 +599,7 @@ export default function UserManagement() {
                       }
                     >
                       <SelectTrigger id="new-role">
-                        <SelectValue placeholder="Choose an access role" />
+                        <SelectValue placeholder={t("Choose an access role", "प्रवेश भूमिका चुनें")} />
                       </SelectTrigger>
                       <SelectContent>
                         {roleOptions.map((role) => (
@@ -584,11 +614,13 @@ export default function UserManagement() {
 
                 <div className="institution-panel-muted space-y-4 p-4">
                   <div className="space-y-1">
-                    <p className="shell-copy">Access preview</p>
+                    <p className="shell-copy">{t("Access preview", "प्रवेश पूर्वावलोकन")}</p>
                     <h3 className="text-sm font-semibold">{getRoleLabel(createForm.roleCode, lang)}</h3>
                     <p className="text-xs leading-5 text-muted-foreground">
-                      This preview is calculated from the current role matrix so the account scope is explicit before
-                      creation.
+                      {t(
+                        "This preview is calculated from the current role matrix so the account scope is explicit before creation.",
+                        "यह पूर्वावलोकन वर्तमान भूमिका-मैट्रिक्स से निकाला जाता है ताकि खाता बनने से पहले इसका प्रवेश-क्षेत्र स्पष्ट हो।",
+                      )}
                     </p>
                   </div>
 
@@ -599,11 +631,11 @@ export default function UserManagement() {
                         className="flex items-start justify-between gap-3 rounded-2xl border border-border/60 bg-background/70 px-3 py-2.5"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm font-medium">{row.label}</p>
-                          <p className="text-xs leading-5 text-muted-foreground">{row.area}</p>
+                          <p className="text-sm font-medium">{lang === "hi" ? row.labelHi : row.label}</p>
+                          <p className="text-xs leading-5 text-muted-foreground">{lang === "hi" ? row.areaHi : row.area}</p>
                         </div>
                         <Badge variant={createRolePreview[row.key] ? "default" : "secondary"}>
-                          {createRolePreview[row.key] ? "Allowed" : "Locked"}
+                          {createRolePreview[row.key] ? t("Allowed", "अनुमत") : t("Locked", "सीमित")}
                         </Badge>
                       </div>
                     ))}
@@ -622,7 +654,7 @@ export default function UserManagement() {
                   ) : (
                     <UserPlus className="h-4 w-4" />
                   )}
-                  Create account
+                  {t("Create account", "खाता बनाएं")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -636,9 +668,9 @@ export default function UserManagement() {
             <CardHeader className="space-y-4 border-b border-border/60">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <CardTitle className="text-lg">Account roster</CardTitle>
+                  <CardTitle className="text-lg">{t("Account roster", "खाता सूची")}</CardTitle>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Search people, inspect authority, and keep access decisions legible.
+                    {t("Search people, inspect authority, and keep access decisions legible.", "लोगों को खोजें, अधिकार देखें और प्रवेश-निर्णयों को स्पष्ट रखें।")}
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
@@ -647,7 +679,7 @@ export default function UserManagement() {
                     <Input
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Search by name or email"
+                      placeholder={t("Search by name or email", "नाम या ईमेल से खोजें")}
                       className="pl-9"
                     />
                   </div>
@@ -656,9 +688,9 @@ export default function UserManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All statuses</SelectItem>
-                      <SelectItem value="active">Active only</SelectItem>
-                      <SelectItem value="inactive">Inactive only</SelectItem>
+                      <SelectItem value="all">{t("All statuses", "सभी स्थितियाँ")}</SelectItem>
+                      <SelectItem value="active">{t("Active only", "केवल सक्रिय")}</SelectItem>
+                      <SelectItem value="inactive">{t("Inactive only", "केवल निष्क्रिय")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={roleFilter} onValueChange={(value: RoleFilter) => setRoleFilter(value)}>
@@ -666,7 +698,7 @@ export default function UserManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All roles</SelectItem>
+                      <SelectItem value="all">{t("All roles", "सभी भूमिकाएँ")}</SelectItem>
                       {roleOptions.map((role) => (
                         <SelectItem key={role.id} value={role.code}>
                           {getRoleLabel(role.code, lang)}
@@ -683,7 +715,7 @@ export default function UserManagement() {
                 <div className="flex min-h-[18rem] items-center justify-center">
                   <div className="space-y-3 text-center">
                     <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Loading institutional accounts...</p>
+                    <p className="text-sm text-muted-foreground">{t("Loading institutional accounts...", "संस्थागत खाते लोड हो रहे हैं...")}</p>
                   </div>
                 </div>
               ) : null}
@@ -691,9 +723,9 @@ export default function UserManagement() {
               {!usersQuery.isLoading && usersQuery.isError ? (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Unable to load accounts</AlertTitle>
+                  <AlertTitle>{t("Unable to load accounts", "खाते लोड नहीं हो सके")}</AlertTitle>
                   <AlertDescription>
-                    {usersQuery.error instanceof Error ? usersQuery.error.message : "Try refreshing the page."}
+                    {usersQuery.error instanceof Error ? usersQuery.error.message : t("Try refreshing the page.", "कृपया पृष्ठ रीफ़्रेश करें।")}
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -701,9 +733,9 @@ export default function UserManagement() {
               {!usersQuery.isLoading && !usersQuery.isError && !visibleUsers.length ? (
                 <div className="rounded-3xl border border-dashed border-border/80 bg-background/60 px-6 py-12 text-center">
                   <UserCog className="mx-auto mb-4 h-10 w-10 text-muted-foreground/60" />
-                  <p className="text-base font-semibold">No accounts match this filter</p>
+                  <p className="text-base font-semibold">{t("No accounts match this filter", "इस फ़िल्टर से कोई खाता नहीं मिला")}</p>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Broaden the search or create a new institutional account from the masthead action.
+                    {t("Broaden the search or create a new institutional account from the masthead action.", "खोज को विस्तृत करें या ऊपर दिए गए बटन से नया संस्थागत खाता बनाएं।")}
                   </p>
                 </div>
               ) : null}
@@ -733,7 +765,7 @@ export default function UserManagement() {
                               {user.displayName || user.email || "Unnamed account"}
                             </p>
                             <Badge variant={user.isActive ? "default" : "secondary"}>
-                              {user.isActive ? "Active" : "Inactive"}
+                              {user.isActive ? t("Active", "सक्रिय") : t("Inactive", "निष्क्रिय")}
                             </Badge>
                             <Badge variant="outline">{getRoleLabel(primaryRole, lang)}</Badge>
                           </div>
@@ -752,7 +784,7 @@ export default function UserManagement() {
                         </div>
 
                         <div className="space-y-2 text-sm text-muted-foreground sm:text-right">
-                          <p>Last login: {formatDateTime(user.lastLoginAt)}</p>
+                          <p>{t("Last login", "अंतिम लॉगिन")}: {formatDateTime(user.lastLoginAt)}</p>
                           <div className="flex flex-wrap gap-2 sm:justify-end">
                             {user.roles.slice(0, 3).map((role) => (
                               <Badge key={`${user.id}-${role.code}`} variant="secondary" className="gap-1.5">
@@ -761,7 +793,7 @@ export default function UserManagement() {
                               </Badge>
                             ))}
                             {user.roles.length > 3 ? (
-                              <Badge variant="outline">+{user.roles.length - 3} more</Badge>
+                              <Badge variant="outline">+{user.roles.length - 3} {t("more", "और")}</Badge>
                             ) : null}
                           </div>
                         </div>
