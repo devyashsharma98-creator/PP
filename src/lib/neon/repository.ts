@@ -996,6 +996,9 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
 
     case "updateVritt": {
       await assertEventScope(input.payload.eventId);
+      const serializedMediaUrls = input.payload.vrittMediaUrls
+        ? JSON.stringify(input.payload.vrittMediaUrls)
+        : null;
       await sql`
         insert into public.event_vritt (
           event_id,
@@ -1009,7 +1012,7 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
         values (
           ${input.payload.eventId},
           ${input.payload.vrittAttendanceCount ?? null},
-          ${input.payload.vrittMediaUrls ?? null}::jsonb,
+          ${serializedMediaUrls}::jsonb,
           ${input.payload.vrittContent ?? null},
           ${input.payload.vrittStatus ?? "draft"},
           ${actorId},
