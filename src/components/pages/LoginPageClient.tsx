@@ -16,11 +16,13 @@ import type { RoleCode } from "@/lib/permissions/types";
 import { cn } from "@/lib/utils";
 
 const DEMO_ACCOUNTS = [
-  { labelEn: "Super Admin", labelHi: "सुपर एडमिन", email: "demo.superadmin@example.com" },
-  { labelEn: "Vibhag Pramukh", labelHi: "विभाग प्रमुख", email: "demo.vibhag@example.com" },
-  { labelEn: "Aayam Pramukh", labelHi: "आयाम प्रमुख", email: "demo.aayam@example.com" },
-  { labelEn: "Unit Head", labelHi: "यूनिट प्रमुख", email: "demo.unithead@example.com" },
-  { labelEn: "Karyakarta", labelHi: "कार्यकर्ता", email: "demo.karyakarta@example.com" },
+  { labelEn: "Super Admin", labelHi: "???? ?????", email: "demo.superadmin@example.com" },
+  { labelEn: "Kshetra Reviewer", labelHi: "??????? ???????", email: "demo.kshetra@example.com" },
+  { labelEn: "Prant Sanyojak", labelHi: "??????? ??????", email: "demo.prant@example.com" },
+  { labelEn: "Vibhag Pramukh", labelHi: "????? ??????", email: "demo.vibhag@example.com" },
+  { labelEn: "Aayam Pramukh", labelHi: "???? ??????", email: "demo.aayam@example.com" },
+  { labelEn: "Unit Head", labelHi: "????? ??????", email: "demo.unithead@example.com" },
+  { labelEn: "Karyakarta", labelHi: "??????????", email: "demo.karyakarta@example.com" },
 ] as const;
 
 function LoginForm() {

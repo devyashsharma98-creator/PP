@@ -110,6 +110,18 @@ async function seed() {
       roleCode: "super_admin" as const,
     },
     {
+      email: "demo.kshetra@example.com",
+      displayName: "Demo Kshetra Reviewer",
+      displayNameHi: "डेमो क्षेत्र समीक्षक",
+      roleCode: "kshetra_reviewer" as const,
+    },
+    {
+      email: "demo.prant@example.com",
+      displayName: "Demo Prant Sanyojak",
+      displayNameHi: "डेमो प्रान्त संयोजक",
+      roleCode: "prant_sanyojak" as const,
+    },
+    {
       email: "demo.vibhag@example.com",
       displayName: "Demo Vibhag Pramukh",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–",
