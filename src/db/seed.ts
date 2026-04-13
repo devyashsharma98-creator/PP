@@ -122,6 +122,12 @@ async function seed() {
       roleCode: "prant_sanyojak" as const,
     },
     {
+      email: "demo.prant.aayam@example.com",
+      displayName: "Demo Prant Aayam Pramukh",
+      displayNameHi: "डेमो प्रान्त आयाम प्रमुख",
+      roleCode: "prant_aayam_pramukh" as const,
+    },
+    {
       email: "demo.vibhag@example.com",
       displayName: "Demo Vibhag Pramukh",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–",
