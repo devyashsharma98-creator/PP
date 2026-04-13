@@ -8,7 +8,7 @@ import { NextRequest } from "next/server";
 import { and, eq, gte, lte, ilike, count, desc, inArray, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
-import { events, eventStatusHistory } from "@/db/schema/index";
+import { events, eventStatusHistory, units } from "@/db/schema/index";
 import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-auth";
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { createEventSchema, listEventsQuerySchema } from "@/lib/validators/events";
@@ -65,6 +65,7 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
         endsAt: events.endsAt,
         status: events.status,
         unitId: events.unitId,
+        unitName: units.name,
         departmentId: events.departmentId,
         submittedByNameSnapshot: events.submittedByNameSnapshot,
         checklist: events.checklist,
@@ -72,6 +73,7 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
         updatedAt: events.updatedAt,
       })
       .from(events)
+      .leftJoin(units, eq(events.unitId, units.id))
       .where(whereClause)
       .orderBy(desc(events.createdAt))
       .limit(limit)

@@ -39,7 +39,7 @@ function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
     description: (row.description as string) || '',
     date: dateFormatted,
     dateIso,
-    unit: ((row.unitId ?? row.unit_id) as string) || 'Unknown',
+    unit: ((row.unitName ?? row.unit_name ?? row.unitId ?? row.unit_id) as string) || 'Unknown',
     submittedBy: (row.submittedByNameSnapshot as string) || 'API',
     status: (dbToUiEventStatus[String(row.status ?? '')] ?? 'Draft') as GatividhiEvent['status'],
     checklist: {
