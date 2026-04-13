@@ -3,23 +3,25 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LogIn, Loader2, AlertCircle, BookOpenText } from "lucide-react";
+import { AlertCircle, ArrowRight, BookOpenText, Loader2, LogIn, ShieldCheck } from "lucide-react";
+
 import { PragyaLogo } from "@/components/PragyaLogo";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
 import { canAccessPathForPrimaryRole, getRoleLandingPath } from "@/lib/app/role-routing";
 import type { RoleCode } from "@/lib/permissions/types";
+import { cn } from "@/lib/utils";
 
 const DEMO_ACCOUNTS = [
-  { label: "Super Admin", email: "demo.superadmin@example.com" },
-  { label: "Vibhag Pramukh", email: "demo.vibhag@example.com" },
-  { label: "Aayam Pramukh", email: "demo.aayam@example.com" },
-  { label: "Unit Head", email: "demo.unithead@example.com" },
-  { label: "Karyakarta", email: "demo.karyakarta@example.com" },
-];
+  { labelEn: "Super Admin", labelHi: "सुपर एडमिन", email: "demo.superadmin@example.com" },
+  { labelEn: "Vibhag Pramukh", labelHi: "विभाग प्रमुख", email: "demo.vibhag@example.com" },
+  { labelEn: "Aayam Pramukh", labelHi: "आयाम प्रमुख", email: "demo.aayam@example.com" },
+  { labelEn: "Unit Head", labelHi: "यूनिट प्रमुख", email: "demo.unithead@example.com" },
+  { labelEn: "Karyakarta", labelHi: "कार्यकर्ता", email: "demo.karyakarta@example.com" },
+] as const;
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -32,15 +34,71 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const copy = isHi
+    ? {
+        language: "भाषा",
+        scope: "भोपाल विभाग",
+        heroSeal: "आंतरिक संस्थागत प्रणाली",
+        title: "प्रज्ञा प्रवाह",
+        tagline: "सभ्यतागत चिंतन, संगठित कार्य।",
+        description: "आंतरिक समीक्षा, समन्वय और प्रकाशन के लिए शांत, भूमिका-आधारित ERP प्रवेशद्वार।",
+        highlights: ["भोपाल पायलट", "आंतरिक ERP", "भूमिका-अनुसार प्रवेश"],
+        panelSeal: "सुरक्षित प्रवेश",
+        panelTitle: "आंतरिक प्रवेश पैनल",
+        panelDescription: "अपने निर्धारित खाते से लॉगिन करें और सीधे अपने कार्यक्षेत्र में जाएँ।",
+        emailLabel: "ईमेल",
+        emailPlaceholder: "aap@example.com",
+        passwordLabel: "पासवर्ड",
+        passwordPlaceholder: "पासवर्ड दर्ज करें",
+        invalidCredentials: "अमान्य लॉगिन विवरण",
+        genericError: "कुछ गड़बड़ हुई। कृपया फिर प्रयास करें।",
+        signIn: "लॉगिन करें",
+        signingIn: "लॉगिन हो रहा है...",
+        demoSeal: "आंतरिक परीक्षण हेतु डेमो खाते",
+        demoDescription: "आंतरिक परीक्षण हेतु त्वरित भराव।",
+        demoAction: "भरें",
+        internalOnly: "परीक्षण",
+        guideTitle: "मोबाइल उपयोग मार्गदर्शिका",
+        guideDescription: "क्लाइंट हेतु द्विभाषी गाइड।",
+        guideCta: "गाइड खोलें",
+      }
+    : {
+        language: "Language",
+        scope: "Bhopal Vibhag",
+        heroSeal: "Internal institutional console",
+        title: "Pragya Pravah",
+        tagline: "Civilisational thought, organised action.",
+        description: "A calm, role-aware ERP entry for internal review, coordination, and publication.",
+        highlights: ["Bhopal pilot", "Internal ERP", "Role-aware access"],
+        panelSeal: "Secure access",
+        panelTitle: "Internal access panel",
+        panelDescription: "Sign in with your assigned account and open the correct ERP workspace for your role.",
+        emailLabel: "Email",
+        emailPlaceholder: "you@example.com",
+        passwordLabel: "Password",
+        passwordPlaceholder: "Enter password",
+        invalidCredentials: "Invalid credentials",
+        genericError: "Something went wrong. Please try again.",
+        signIn: "Sign In",
+        signingIn: "Signing in...",
+        demoSeal: "Demo accounts for internal testing",
+        demoDescription: "Quick-fill for internal testing.",
+        demoAction: "Load",
+        internalOnly: "Testing",
+        guideTitle: "Mobile user guide",
+        guideDescription: "Share the bilingual guide with the client.",
+        guideCta: "Open guide",
+      };
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
@@ -50,13 +108,12 @@ function LoginForm() {
         const message =
           (typeof data?.error === "string" ? data.error : data?.error?.message) ||
           data?.message ||
-          "Invalid credentials";
+          copy.invalidCredentials;
         setError(message);
         setLoading(false);
         return;
       }
 
-      // Force a fresh page load so Hostinger cannot serve stale protected-page HTML/chunk references after deploys.
       const authPayload = data?.data ?? data;
       const roleCodes = (
         Array.isArray(authPayload?.effectiveRoleCodes)
@@ -67,20 +124,23 @@ function LoginForm() {
       const primaryRoleCode = authPayload?.primaryRoleCode as RoleCode | undefined;
       const roleLandingPath = getRoleLandingPath(roleCodes, primaryRoleCode);
       const destination = new URL(requestedReturnTo || roleLandingPath, window.location.origin);
+
       if (destination.origin !== window.location.origin) {
         destination.pathname = roleLandingPath;
         destination.search = "";
         destination.hash = "";
       }
+
       if (!canAccessPathForPrimaryRole(destination.pathname, primaryRoleCode)) {
         destination.pathname = roleLandingPath;
         destination.search = "";
         destination.hash = "";
       }
+
       destination.searchParams.set("loginAt", String(Date.now()));
       window.location.replace(`${destination.pathname}${destination.search}${destination.hash}`);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(copy.genericError);
       setLoading(false);
     }
   }
@@ -92,210 +152,186 @@ function LoginForm() {
   }
 
   return (
-    <div className="demo-bridge-bg min-h-screen px-4 py-8 sm:px-6 md:py-10">
-      <div className="mx-auto mb-4 flex max-w-6xl justify-end">
-        <div className="flex items-center gap-2 rounded-2xl border border-border/70 bg-background/90 px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur">
-          <span className="text-muted-foreground">{isHi ? "भाषा" : "Language"}</span>
-          <div className="flex rounded-full bg-muted p-1">
-            <button
-              type="button"
-              onClick={() => setLang("en")}
-              className={`rounded-full px-3 py-1.5 transition-colors ${!isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={!isHi}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang("hi")}
-              className={`rounded-full px-3 py-1.5 font-devanagari transition-colors ${isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={isHi}
-            >
-              Hindi
-            </button>
+    <div className="login-editorial-bg min-h-screen px-4 py-5 sm:px-6 md:py-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="login-editorial-rail">
+          <p className="section-seal">{copy.scope}</p>
+
+          <div className="login-editorial-lang" role="group" aria-label={copy.language}>
+            <span className="text-muted-foreground">{copy.language}</span>
+            <div className="flex rounded-full bg-muted p-1">
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className={cn(
+                  "rounded-full px-3 py-1.5 transition-colors",
+                  !isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+                aria-pressed={!isHi}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang("hi")}
+                className={cn(
+                  "rounded-full px-3 py-1.5 font-devanagari transition-colors",
+                  isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+                aria-pressed={isHi}
+              >
+                हिंदी
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-        <section className="space-y-6">
-          <div className="demo-bridge-copy">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="section-seal">Bhopal Vibhag</p>
-              <div className="flex rounded-full border border-border/70 bg-background/70 p-1 text-xs font-semibold shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => setLang("en")}
-                  className={`rounded-full px-3 py-1.5 transition-colors ${!isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                  aria-pressed={!isHi}
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLang("hi")}
-                  className={`rounded-full px-3 py-1.5 font-devanagari transition-colors ${isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                  aria-pressed={isHi}
-                >
-                  हिंदी
-                </button>
-              </div>
-            </div>
-            <div className="mt-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_24px_42px_-26px_hsl(27_100%_50%/0.85)]">
-                  <PragyaLogo className="h-11 w-11" />
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(21rem,29rem)] lg:items-start xl:gap-10">
+          <section className="space-y-5">
+            <div className="login-editorial-hero">
+              <div className="flex items-start gap-4">
+                <div className="login-editorial-mark">
+                  <PragyaLogo className="h-12 w-12 md:h-14 md:w-14" />
                 </div>
-                <div>
-                  <p className="shell-copy">{isHi ? "आंतरिक संस्थागत प्रणाली" : "Internal institutional console"}</p>
-                  <h1 className="text-3xl font-bold tracking-tight font-devanagari md:text-5xl">
-                    {isHi ? "प्रज्ञा प्रवाह" : "Pragya Pravah"}
+
+                <div className="min-w-0 space-y-2">
+                  <p className="shell-copy">{copy.heroSeal}</p>
+                  <h1 className={cn("text-4xl font-bold tracking-tight md:text-6xl", isHi && "font-devanagari")}>
+                    {copy.title}
                   </h1>
                 </div>
               </div>
 
-              <p className="max-w-2xl text-lg font-medium text-foreground/85 md:text-xl">
-                {isHi ? "सभ्यतागत चिंतन, संगठित कार्य।" : "Civilisational thought, organised action."}
-              </p>
-
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                {isHi
-                  ? "समीक्षा कतार, इकाई गतिविधि, आलेख प्रवाह और प्रचार समन्वय — सब एक आंतरिक प्रणाली में।"
-                  : "Review queues, unit activity, aalekh workflow, and prachar coordination in one console designed for internal organisational use."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="institution-panel-muted px-4 py-4">
-              <p className="shell-copy">{isHi ? "संदर्भ" : "Context"}</p>
-              <p className="mt-2 text-sm font-semibold">{isHi ? "भोपाल विभाग" : "Bhopal Vibhag"}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isHi ? "क्षेत्रीय नेतृत्व और इकाई समन्वय।" : "Regional leadership and unit coordination."}
-              </p>
-            </div>
-            <div className="institution-panel-muted px-4 py-4">
-              <p className="shell-copy">{isHi ? "कार्यप्रवाह" : "Workflow"}</p>
-              <p className="mt-2 text-sm font-semibold">{isHi ? "आंतरिक समीक्षा और प्रकाशन" : "Internal review and publication"}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isHi ? "कार्यक्रम योजना से आलेख और प्रचार अनुवर्ती तक।" : "From event planning to aalekh and prachar follow-through."}
-              </p>
-            </div>
-            <div className="institution-panel-muted px-4 py-4">
-              <p className="shell-copy">{isHi ? "उपयोगकर्ता" : "Audience"}</p>
-              <p className="mt-2 text-sm font-semibold">{isHi ? "आंतरिक परीक्षण हेतु डेमो खाते" : "Demo accounts for internal testing"}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isHi ? "हर भूमिका और स्तर को जल्दी देखने के लिए seeded roles उपयोग करें।" : "Use seeded roles to inspect each operational layer quickly."}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <Card className="institution-panel mx-auto w-full max-w-xl border-none">
-          <CardHeader className="space-y-4 border-b border-border/60 pb-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="shell-copy">{isHi ? "सुरक्षित प्रवेश" : "Secure access"}</p>
-                <h2 className="text-2xl font-semibold tracking-tight">{isHi ? "आंतरिक प्रवेश पैनल" : "Internal access panel"}</h2>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <LogIn className="h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {isHi
-                ? "अपने खाते से लॉगिन करें या डेमो प्रवाह देखने के लिए seeded role profile उपयोग करें।"
-                : "Sign in with your assigned account or use a seeded role profile to review the demo flow."}
-            </p>
-          </CardHeader>
-
-          <CardContent className="space-y-6 pt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{isHi ? "ईमेल" : "Email"}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={isHi ? "aap@example.com" : "you@example.com"}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">{isHi ? "पासवर्ड" : "Password"}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={isHi ? "पासवर्ड दर्ज करें" : "Enter password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  disabled={loading}
-                />
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <LogIn className="h-4 w-4" />
-                )}
-                {loading ? (isHi ? "लॉगिन हो रहा है..." : "Signing in...") : isHi ? "लॉगिन करें" : "Sign In"}
-              </Button>
-            </form>
-
-            <div className="space-y-3 border-t border-border/60 pt-5">
-              <div>
-                <p className="shell-copy">{isHi ? "आंतरिक परीक्षण हेतु डेमो खाते" : "Demo accounts for internal testing"}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {isHi ? "लाइव auth flow बदले बिना seeded roles तुरंत भरें।" : "Quick-fill seeded roles without changing the live auth flow."}
+              <div className="space-y-3 pt-1">
+                <p className={cn("max-w-2xl text-lg font-medium text-foreground/88 md:text-2xl", isHi && "font-devanagari")}>
+                  {copy.tagline}
                 </p>
+                <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">{copy.description}</p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {DEMO_ACCOUNTS.map((acct) => (
-                  <button
-                    key={acct.email}
-                    type="button"
-                    onClick={() => fillDemoAccount(acct.email)}
-                    className="demo-account-chip"
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                {copy.highlights.map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex items-center rounded-full border border-border/70 bg-background/72 px-3 py-1.5 text-xs font-medium text-foreground/80"
                   >
-                    <span className="font-medium text-foreground">{acct.label}</span>
-                    <span className="text-xs text-muted-foreground">Load</span>
-                  </button>
+                    {item}
+                  </span>
                 ))}
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">
-                    {isHi ? "मोबाइल पर चलाने के लिए आसान मार्गदर्शिका" : "Simple guide for mobile users"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {isHi
-                      ? "Client के साथ direct share करने के लिए bilingual help page खोलें।"
-                      : "Open the bilingual help page you can share directly with the client."}
-                  </p>
-                </div>
-                <Button asChild variant="outline" size="sm" className="rounded-full">
-                  <Link href="/guide" prefetch={false}>
-                    <BookOpenText className="h-4 w-4" />
-                    {isHi ? "गाइड खोलें" : "Open guide"}
-                  </Link>
-                </Button>
-              </div>
             </div>
-          </CardContent>
-        </Card>
+          </section>
+
+          <Card className="login-editorial-card mx-auto w-full max-w-xl border-none">
+            <CardHeader className="space-y-4 border-b border-border/60 pb-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <p className="shell-copy">{copy.panelSeal}</p>
+                  <h2 className={cn("text-2xl font-semibold tracking-tight md:text-[2rem]", isHi && "font-devanagari")}>
+                    {copy.panelTitle}
+                  </h2>
+                </div>
+
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+              </div>
+
+              <p className="text-sm leading-6 text-muted-foreground">{copy.panelDescription}</p>
+            </CardHeader>
+
+            <CardContent className="space-y-6 pt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">{copy.emailLabel}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder={copy.emailPlaceholder}
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
+                    autoComplete="email"
+                    disabled={loading}
+                    className="h-11 rounded-xl border-border/70 bg-background/88"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">{copy.passwordLabel}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={copy.passwordPlaceholder}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                    autoComplete="current-password"
+                    disabled={loading}
+                    className="h-11 rounded-xl border-border/70 bg-background/88"
+                  />
+                </div>
+
+                {error ? (
+                  <div className="flex items-start gap-2 rounded-2xl border border-destructive/20 bg-destructive/8 px-3 py-3 text-sm text-destructive">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                ) : null}
+
+                <Button type="submit" className="h-11 w-full rounded-xl" disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
+                  {loading ? copy.signingIn : copy.signIn}
+                </Button>
+              </form>
+
+              <div className="space-y-4 border-t border-border/60 pt-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="shell-copy">{copy.demoSeal}</p>
+                    <p className="text-sm leading-6 text-muted-foreground">{copy.demoDescription}</p>
+                  </div>
+                  <span className="login-editorial-demo-tag">{copy.internalOnly}</span>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {DEMO_ACCOUNTS.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      onClick={() => fillDemoAccount(account.email)}
+                      className="demo-account-chip"
+                      aria-label={`${isHi ? account.labelHi : account.labelEn} ${copy.demoAction}`}
+                    >
+                      <span className="text-sm font-medium text-foreground">
+                        {isHi ? account.labelHi : account.labelEn}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                        {copy.demoAction}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">{copy.guideTitle}</p>
+                      <p className="text-xs leading-5 text-muted-foreground">{copy.guideDescription}</p>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="rounded-full">
+                      <Link href="/guide" prefetch={false}>
+                        <BookOpenText className="h-4 w-4" />
+                        {copy.guideCta}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

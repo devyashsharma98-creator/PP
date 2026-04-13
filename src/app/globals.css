@@ -588,6 +588,54 @@
     @apply flex w-full items-center justify-between rounded-xl border border-border/70 bg-background/70 px-3 py-2.5 text-left text-xs transition-colors hover:border-primary/35 hover:bg-primary/5 md:rounded-2xl md:py-3 md:text-sm;
   }
 
+  .login-editorial-bg {
+    background:
+      radial-gradient(circle at 14% 14%, hsl(var(--primary) / 0.12), transparent 28%),
+      radial-gradient(circle at 85% 16%, hsl(var(--navy) / 0.08), transparent 30%),
+      linear-gradient(180deg, hsl(38 42% 98%), hsl(35 34% 94%));
+  }
+
+  .login-editorial-rail {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .login-editorial-lang {
+    @apply flex items-center gap-2 self-end rounded-2xl border border-border/70 bg-background/90 px-3 py-2 text-xs font-semibold shadow-[0_16px_32px_-28px_hsl(var(--navy)/0.25)] backdrop-blur;
+  }
+
+  .login-editorial-hero {
+    @apply institution-panel p-6 md:p-8;
+    background:
+      linear-gradient(180deg, hsl(0 0% 100% / 0.78), hsl(38 45% 97% / 0.94)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 34%);
+  }
+
+  .login-editorial-mark {
+    @apply flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] ring-1 ring-primary/10 shadow-[0_26px_46px_-30px_hsl(var(--primary)/0.6)] md:h-[4.5rem] md:w-[4.5rem];
+    background:
+      linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(35 56% 95% / 0.92)),
+      radial-gradient(circle at top, hsl(var(--primary) / 0.12), transparent 55%);
+  }
+
+  .login-note-row {
+    @apply grid gap-1 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 md:grid-cols-[9rem_minmax(0,1fr)] md:items-start;
+  }
+
+  .login-editorial-card {
+    @apply institution-panel;
+    background:
+      linear-gradient(180deg, hsl(0 0% 100% / 0.92), hsl(36 48% 97% / 0.98)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.08), transparent 34%);
+  }
+
+  .login-editorial-form-note {
+    @apply rounded-2xl border border-border/60 bg-background/70 px-4 py-4;
+  }
+
+  .login-editorial-demo-tag {
+    @apply inline-flex shrink-0 items-center rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary;
+  }
+
   .dashboard-masthead {
     @apply institution-panel p-5 md:p-7;
     background:
@@ -1040,6 +1088,33 @@
     background:
       linear-gradient(180deg, hsl(var(--card) / 0.9), hsl(222 30% 10% / 0.96)),
       radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .dark .login-editorial-bg {
+    background:
+      radial-gradient(circle at 15% 15%, hsl(var(--primary) / 0.14), transparent 28%),
+      radial-gradient(circle at 86% 16%, hsl(220 82% 24% / 0.22), transparent 32%),
+      linear-gradient(180deg, hsl(222 36% 8%), hsl(222 30% 10%));
+  }
+
+  .dark .login-editorial-lang,
+  .dark .login-editorial-form-note,
+  .dark .login-note-row,
+  .dark .login-editorial-demo-tag {
+    border-color: hsl(var(--border) / 0.78);
+  }
+
+  .dark .login-editorial-hero,
+  .dark .login-editorial-card {
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(222 30% 10% / 0.98)),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 36%);
+  }
+
+  .dark .login-editorial-mark {
+    background:
+      linear-gradient(145deg, hsl(var(--card) / 0.9), hsl(222 26% 13% / 0.96)),
+      radial-gradient(circle at top, hsl(var(--primary) / 0.1), transparent 55%);
   }
 
   .dark .calendar-summary-card,
