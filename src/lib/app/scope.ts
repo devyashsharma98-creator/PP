@@ -112,10 +112,18 @@ export function resolveScopedAccess(assignments: ScopedAssignmentLike[], units: 
       continue;
     }
 
-    if (unitId) addUnitWithChildren(access.unitIds, unitId, unitChildren);
-    if (departmentId) access.departmentIds.add(departmentId);
-    if (scopeType === "unit" && scopeEntityId) addUnitWithChildren(access.unitIds, scopeEntityId, unitChildren);
-    if (scopeType === "department" && scopeEntityId) access.departmentIds.add(scopeEntityId);
+    if (scopeType === "org") {
+      if (departmentId) access.departmentIds.add(departmentId);
+      else if (unitId) addUnitWithChildren(access.unitIds, unitId, unitChildren);
+    }
+    if (scopeType === "unit") {
+      if (unitId) addUnitWithChildren(access.unitIds, unitId, unitChildren);
+      if (scopeEntityId) addUnitWithChildren(access.unitIds, scopeEntityId, unitChildren);
+    }
+    if (scopeType === "department") {
+      if (departmentId) access.departmentIds.add(departmentId);
+      if (scopeEntityId) access.departmentIds.add(scopeEntityId);
+    }
     if (scopeType === "event" && scopeEntityId) access.eventIds.add(scopeEntityId);
     if (scopeType === "article" && scopeEntityId) access.articleIds.add(scopeEntityId);
   }

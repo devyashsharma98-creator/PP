@@ -129,32 +129,33 @@ async function seed() {
   const duplicateRootUnitIds = (duplicateRootUnits as Array<{ id: string }>).map((row) => row.id);
 
   if (duplicateRootUnitIds.length > 1) {
-    await Promise.all([
-      sql`
+    for (const duplicateUnitId of duplicateRootUnitIds) {
+      if (duplicateUnitId === canonicalUnitId) continue;
+      await sql`
         update public.departments_or_aayams
         set unit_id = ${canonicalUnitId}
         where org_id = ${orgId}
-          and unit_id = any(${duplicateRootUnitIds}::uuid[])
-      `,
-      sql`
+          and unit_id = ${duplicateUnitId}
+      `;
+      await sql`
         update public.events
         set unit_id = ${canonicalUnitId}
         where org_id = ${orgId}
-          and unit_id = any(${duplicateRootUnitIds}::uuid[])
-      `,
-      sql`
+          and unit_id = ${duplicateUnitId}
+      `;
+      await sql`
         update public.articles
         set unit_id = ${canonicalUnitId}
         where org_id = ${orgId}
-          and unit_id = any(${duplicateRootUnitIds}::uuid[])
-      `,
-      sql`
+          and unit_id = ${duplicateUnitId}
+      `;
+      await sql`
         update public.user_role_assignments
         set unit_id = ${canonicalUnitId}
         where org_id = ${orgId}
-          and unit_id = any(${duplicateRootUnitIds}::uuid[])
-      `,
-    ]);
+          and unit_id = ${duplicateUnitId}
+      `;
+    }
   }
 
   const existingAayams = await db.query.departmentsOrAayams.findMany({
@@ -202,14 +203,14 @@ async function seed() {
     select id
     from public.events
     where org_id = ${orgId}
-      and status = ${"pending_aayam_review"}
+      and status::text = 'pending_aayam_review'
     order by created_at asc
   `;
   const pendingAayamArticles = await sql`
     select id
     from public.articles
     where org_id = ${orgId}
-      and status = ${"pending_aayam_review"}
+      and status::text = 'pending_aayam_review'
     order by created_at asc
   `;
 
