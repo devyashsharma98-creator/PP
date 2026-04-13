@@ -104,6 +104,9 @@ export interface GatividhiEvent {
   description: string;
   date: string;
   dateIso?: string;
+  unitId?: string | null;
+  departmentId?: string | null;
+  createdByUserId?: string | null;
   unit: string;
   submittedBy: string;
   status: EventStatus;
@@ -138,6 +141,10 @@ export interface AalekhArticle {
   title: string;
   content: string;
   summary: string;
+  unitId?: string | null;
+  departmentId?: string | null;
+  authorUserId?: string | null;
+  createdByUserId?: string | null;
   author: string;
   date: string;
   category: string;

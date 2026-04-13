@@ -7,6 +7,7 @@ import type {
   AppOverviewPayload,
   CanonicalRoleCode,
 } from "@/lib/app/contracts";
+import { filterRowsByScope, resolveScopedAccess, rowMatchesScope, type UnitTreeLike } from "@/lib/app/scope";
 import { sql } from "@/lib/neon/repository";
 
 type AccountRow = {
@@ -29,8 +30,8 @@ type AssignmentRow = {
   is_active: boolean;
 };
 
-type UnitRow = { id: string; name: string; unit_kind: string };
-type AayamRow = { id: string; name: string; department_kind: string };
+type UnitRow = { id: string; name: string; unit_kind: string; parent_unit_id: string | null };
+type AayamRow = { id: string; name: string; department_kind: string; unit_id: string | null };
 type EventRow = {
   id: string;
   title: string;
@@ -53,16 +54,19 @@ type ArticleRow = {
   updated_at: string;
 };
 type EventHistoryRow = {
+  event_id: string;
   actor_user_id: string | null;
   to_status: string;
   created_at: string;
 };
 type ArticleReviewRow = {
+  article_id: string;
   reviewer_user_id: string | null;
   decision: string;
   created_at: string;
 };
 type ArticlePublicationRow = {
+  article_id: string;
   published_by: string | null;
   published_at: string;
 };
@@ -217,13 +221,13 @@ export async function getAppOverview(
         and (ura.ends_at is null or ura.ends_at > now())
     `),
     typedResult<UnitRow[]>(sql`
-      select id, name, unit_kind
+      select id, name, unit_kind, parent_unit_id
       from public.units
       where org_id = ${orgId} and is_active = true
       order by name asc
     `),
     typedResult<AayamRow[]>(sql`
-      select id, name, department_kind
+      select id, name, department_kind, unit_id
       from public.departments_or_aayams
       where org_id = ${orgId} and is_active = true
       order by name asc
@@ -241,19 +245,19 @@ export async function getAppOverview(
       order by created_at desc
     `),
     typedResult<EventHistoryRow[]>(sql`
-      select esh.actor_user_id, esh.to_status, esh.created_at
+      select esh.event_id, esh.actor_user_id, esh.to_status, esh.created_at
       from public.event_status_history esh
       inner join public.events e on e.id = esh.event_id
       where e.org_id = ${orgId}
     `),
     typedResult<ArticleReviewRow[]>(sql`
-      select ar.reviewer_user_id, ar.decision, ar.created_at
+      select ar.article_id, ar.reviewer_user_id, ar.decision, ar.created_at
       from public.article_reviews ar
       inner join public.articles a on a.id = ar.article_id
       where a.org_id = ${orgId}
     `),
     typedResult<ArticlePublicationRow[]>(sql`
-      select ap.published_by, ap.published_at
+      select ap.article_id, ap.published_by, ap.published_at
       from public.article_publications ap
       inner join public.articles a on a.id = ap.article_id
       where a.org_id = ${orgId}
@@ -280,13 +284,45 @@ export async function getAppOverview(
     `),
   ]);
 
+  const scopedAccess = resolveScopedAccess(session.assignments, unitRows as UnitTreeLike[]);
+  const scopedEventRows = filterRowsByScope(eventRows, scopedAccess, session.userId);
+  const scopedArticleRows = filterRowsByScope(articleRows, scopedAccess, session.userId);
+  const scopedEventIds = new Set(scopedEventRows.map((row) => row.id));
+  const scopedArticleIds = new Set(scopedArticleRows.map((row) => row.id));
+  const scopedAssignmentRows = scopedAccess.orgWide
+    ? assignmentRows
+    : assignmentRows.filter((assignment) =>
+        rowMatchesScope(
+          scopedAccess,
+          { unit_id: assignment.unit_id, department_id: assignment.department_id },
+          session.userId,
+        ),
+      );
+
+  const unitIdsFromDepartments = new Set(
+    aayamRows
+      .filter((aayam) => scopedAccess.departmentIds.has(aayam.id))
+      .map((aayam) => aayam.unit_id)
+      .filter((unitId): unitId is string => Boolean(unitId)),
+  );
+  const scopedUnitRows = scopedAccess.orgWide
+    ? unitRows
+    : unitRows.filter((unit) => scopedAccess.unitIds.has(unit.id) || unitIdsFromDepartments.has(unit.id));
+  const scopedAayamRows = scopedAccess.orgWide
+    ? aayamRows
+    : aayamRows.filter(
+        (aayam) =>
+          scopedAccess.departmentIds.has(aayam.id) ||
+          (aayam.unit_id ? scopedAccess.unitIds.has(aayam.unit_id) : false),
+      );
+
   const roleCodesByUser = new Map<string, CanonicalRoleCode[]>();
   const unitHeads = new Set<string>();
   const aayamHeads = new Set<string>();
   const orgRolePresence = new Set<CanonicalRoleCode>();
   const inactiveAssignmentHolders: InactiveAssignmentHolder[] = [];
 
-  for (const assignment of assignmentRows) {
+  for (const assignment of scopedAssignmentRows) {
     const currentRoles = roleCodesByUser.get(assignment.user_id) ?? [];
     currentRoles.push(assignment.role_code);
     roleCodesByUser.set(assignment.user_id, currentRoles);
@@ -315,27 +351,31 @@ export async function getAppOverview(
     }
   }
 
-  const missingOrgRoles = [
-    ["vibhag_pramukh", "Vibhag Pramukh"],
-    ["prant_sanyojak", "Prant Sanyojak"],
-  ].filter(([roleCode]) => !orgRolePresence.has(roleCode as CanonicalRoleCode)).map(([, label]) => label);
+  const missingOrgRoles = scopedAccess.orgWide
+    ? [
+        ["vibhag_pramukh", "Vibhag Pramukh"],
+        ["prant_sanyojak", "Prant Sanyojak"],
+      ]
+        .filter(([roleCode]) => !orgRolePresence.has(roleCode as CanonicalRoleCode))
+        .map(([, label]) => label)
+    : [];
 
-  const missingUnits = unitRows
+  const missingUnits = scopedUnitRows
     .filter((unit) => unit.unit_kind !== "prant")
     .filter((unit) => !unitHeads.has(unit.id))
     .map((unit) => unit.name);
 
-  const missingAayams = aayamRows
+  const missingAayams = scopedAayamRows
     .filter((aayam) => aayam.department_kind !== "other")
     .filter((aayam) => !aayamHeads.has(aayam.id))
     .map((aayam) => aayam.name);
 
-  const pendingEvents = eventRows.filter((row) => PENDING_EVENT_STATUSES.has(row.status)).length;
-  const pendingArticles = articleRows.filter((row) => PENDING_ARTICLE_STATUSES.has(row.status)).length;
-  const publishedEvents = eventRows.filter((row) => row.status === "authorized_public" || row.status === "published").length;
-  const publishedArticles = articleRows.filter((row) => row.status === "authorized_public" || row.status === "published").length;
-  const stalledEvents = getStaleCount(eventRows, PENDING_EVENT_STATUSES);
-  const stalledArticles = getStaleCount(articleRows, PENDING_ARTICLE_STATUSES);
+  const pendingEvents = scopedEventRows.filter((row) => PENDING_EVENT_STATUSES.has(row.status)).length;
+  const pendingArticles = scopedArticleRows.filter((row) => PENDING_ARTICLE_STATUSES.has(row.status)).length;
+  const publishedEvents = scopedEventRows.filter((row) => row.status === "authorized_public" || row.status === "published").length;
+  const publishedArticles = scopedArticleRows.filter((row) => row.status === "authorized_public" || row.status === "published").length;
+  const stalledEvents = getStaleCount(scopedEventRows, PENDING_EVENT_STATUSES);
+  const stalledArticles = getStaleCount(scopedArticleRows, PENDING_ARTICLE_STATUSES);
 
   const pracharByEventId = new Map<string, PracharRow[]>();
   for (const row of pracharRows) {
@@ -343,7 +383,7 @@ export async function getAppOverview(
     current.push(row);
     pracharByEventId.set(row.entity_id, current);
   }
-  const openPracharCampaigns = eventRows
+  const openPracharCampaigns = scopedEventRows
     .filter((row) => row.status === "authorized_public" || row.status === "published")
     .filter((row) => {
       const prachar = pracharByEventId.get(row.id) ?? [];
@@ -360,8 +400,8 @@ export async function getAppOverview(
   const workflowGapDetails: Array<{ lane: string; count: number; reason: string }> = [];
 
   const pendingUnitLaneCount =
-    eventRows.filter((row) => row.status === "submitted_by_unit" && (!row.unit_id || !unitHeads.has(row.unit_id))).length +
-    articleRows.filter((row) => row.status === "pending_unit_head_review" && (!row.unit_id || !unitHeads.has(row.unit_id))).length;
+    scopedEventRows.filter((row) => row.status === "submitted_by_unit" && (!row.unit_id || !unitHeads.has(row.unit_id))).length +
+    scopedArticleRows.filter((row) => row.status === "pending_unit_head_review" && (!row.unit_id || !unitHeads.has(row.unit_id))).length;
   if (pendingUnitLaneCount > 0) {
     workflowGapDetails.push({
       lane: "Unit review",
@@ -371,8 +411,8 @@ export async function getAppOverview(
   }
 
   const pendingAayamLaneCount =
-    eventRows.filter((row) => row.status === "pending_aayam_review" && (!row.department_id || !aayamHeads.has(row.department_id))).length +
-    articleRows.filter((row) => row.status === "pending_aayam_review" && (!row.department_id || !aayamHeads.has(row.department_id))).length;
+    scopedEventRows.filter((row) => row.status === "pending_aayam_review" && (!row.department_id || !aayamHeads.has(row.department_id))).length +
+    scopedArticleRows.filter((row) => row.status === "pending_aayam_review" && (!row.department_id || !aayamHeads.has(row.department_id))).length;
   if (pendingAayamLaneCount > 0) {
     workflowGapDetails.push({
       lane: "Aayam review",
@@ -383,8 +423,8 @@ export async function getAppOverview(
 
   const hasVibhagApprover = orgRolePresence.has("vibhag_pramukh");
   const pendingVibhagLaneCount =
-    eventRows.filter((row) => row.status === "pending_vibhag_review").length +
-    articleRows.filter((row) => row.status === "pending_vibhag_review").length;
+    scopedEventRows.filter((row) => row.status === "pending_vibhag_review").length +
+    scopedArticleRows.filter((row) => row.status === "pending_vibhag_review").length;
   if (pendingVibhagLaneCount > 0 && !hasVibhagApprover) {
     workflowGapDetails.push({
       lane: "Vibhag review",
@@ -395,8 +435,8 @@ export async function getAppOverview(
 
   const hasPrantApprover = orgRolePresence.has("prant_sanyojak");
   const pendingPrantLaneCount =
-    eventRows.filter((row) => row.status === "pending_prant_authorization" || row.status === "pending_prant_dual_authorization").length +
-    articleRows.filter((row) => row.status === "pending_prant_authorization").length;
+    scopedEventRows.filter((row) => row.status === "pending_prant_authorization" || row.status === "pending_prant_dual_authorization").length +
+    scopedArticleRows.filter((row) => row.status === "pending_prant_authorization").length;
   if (pendingPrantLaneCount > 0 && !hasPrantApprover) {
     workflowGapDetails.push({
       lane: "Prant authorization",
@@ -433,15 +473,16 @@ export async function getAppOverview(
     }
   };
 
-  for (const event of eventRows) {
+  for (const event of scopedEventRows) {
     noteActorAction(event.created_by, "createdCount", event.created_at);
   }
 
-  for (const article of articleRows) {
+  for (const article of scopedArticleRows) {
     noteActorAction(article.author_user_id ?? article.created_by, "createdCount", article.created_at);
   }
 
   for (const history of eventHistoryRows) {
+    if (!scopedEventIds.has(history.event_id)) continue;
     if (history.to_status === "authorized_public" || history.to_status === "published") {
       noteActorAction(history.actor_user_id, "publishedCount", history.created_at);
     } else {
@@ -450,10 +491,12 @@ export async function getAppOverview(
   }
 
   for (const review of articleReviewRows) {
+    if (!scopedArticleIds.has(review.article_id)) continue;
     noteActorAction(review.reviewer_user_id, "reviewCount", review.created_at);
   }
 
   for (const publication of articlePublicationRows) {
+    if (!scopedArticleIds.has(publication.article_id)) continue;
     noteActorAction(publication.published_by, "publishedCount", publication.published_at);
   }
 
@@ -466,7 +509,11 @@ export async function getAppOverview(
     })
     .slice(0, 8);
 
-  const recentLogins: AppOverviewLoginRecord[] = accountRows
+  const scopedUserIds = new Set(scopedAssignmentRows.map((assignment) => assignment.user_id));
+
+  const recentLogins: AppOverviewLoginRecord[] = (scopedAccess.orgWide
+    ? accountRows
+    : accountRows.filter((account) => scopedUserIds.has(account.id)))
     .filter((account) => account.last_login_at)
     .sort((a, b) => new Date(b.last_login_at ?? 0).getTime() - new Date(a.last_login_at ?? 0).getTime())
     .slice(0, 8)
@@ -487,26 +534,26 @@ export async function getAppOverview(
     ...workflowGapDetails.map((gap) => `${gap.count} items are blocked in ${gap.lane.toLowerCase()}.`),
   ].slice(0, 6);
 
-  const uniqueEventCreators = new Set(eventRows.map((row) => row.created_by).filter(Boolean)).size;
-  const uniqueArticleAuthors = new Set(articleRows.map((row) => row.author_user_id ?? row.created_by).filter(Boolean)).size;
+  const uniqueEventCreators = new Set(scopedEventRows.map((row) => row.created_by).filter(Boolean)).size;
+  const uniqueArticleAuthors = new Set(scopedArticleRows.map((row) => row.author_user_id ?? row.created_by).filter(Boolean)).size;
   const activeContributors = new Set(Array.from(actorMap.values()).map((actor) => actor.userId)).size;
   const loginSummaryMap = new Map(auditSummaryRows.map((row) => [row.action, toNumber(row.total)]));
 
   const roleLaneCounts = [
-    { lane: "Unit review", count: eventRows.filter((row) => row.status === "submitted_by_unit").length + articleRows.filter((row) => row.status === "pending_unit_head_review").length },
-    { lane: "Aayam review", count: eventRows.filter((row) => row.status === "pending_aayam_review").length + articleRows.filter((row) => row.status === "pending_aayam_review").length },
-    { lane: "Vibhag review", count: eventRows.filter((row) => row.status === "pending_vibhag_review").length + articleRows.filter((row) => row.status === "pending_vibhag_review").length },
-    { lane: "Prant review", count: eventRows.filter((row) => row.status === "pending_prant_authorization" || row.status === "pending_prant_dual_authorization").length + articleRows.filter((row) => row.status === "pending_prant_authorization").length },
+    { lane: "Unit review", count: scopedEventRows.filter((row) => row.status === "submitted_by_unit").length + scopedArticleRows.filter((row) => row.status === "pending_unit_head_review").length },
+    { lane: "Aayam review", count: scopedEventRows.filter((row) => row.status === "pending_aayam_review").length + scopedArticleRows.filter((row) => row.status === "pending_aayam_review").length },
+    { lane: "Vibhag review", count: scopedEventRows.filter((row) => row.status === "pending_vibhag_review").length + scopedArticleRows.filter((row) => row.status === "pending_vibhag_review").length },
+    { lane: "Prant review", count: scopedEventRows.filter((row) => row.status === "pending_prant_authorization" || row.status === "pending_prant_dual_authorization").length + scopedArticleRows.filter((row) => row.status === "pending_prant_authorization").length },
     { lane: "Prachar follow-through", count: openPracharCampaigns },
   ];
 
   return {
     generatedAt: new Date().toISOString(),
     login: {
-      totalAccounts: accountRows.length,
-      activeAccounts: accountRows.filter((account) => account.is_active).length,
-      loggedInToday: accountRows.filter((account) => isToday(account.last_login_at)).length,
-      loggedInLast7Days: accountRows.filter((account) => isRecent(account.last_login_at, 7)).length,
+      totalAccounts: scopedAccess.orgWide ? accountRows.length : scopedUserIds.size,
+      activeAccounts: (scopedAccess.orgWide ? accountRows : accountRows.filter((account) => scopedUserIds.has(account.id))).filter((account) => account.is_active).length,
+      loggedInToday: (scopedAccess.orgWide ? accountRows : accountRows.filter((account) => scopedUserIds.has(account.id))).filter((account) => isToday(account.last_login_at)).length,
+      loggedInLast7Days: (scopedAccess.orgWide ? accountRows : accountRows.filter((account) => scopedUserIds.has(account.id))).filter((account) => isRecent(account.last_login_at, 7)).length,
       successLast30Days: loginSummaryMap.get("auth.login_success") ?? 0,
       failedLast30Days: loginSummaryMap.get("auth.login_failed") ?? 0,
     },

@@ -195,6 +195,7 @@ export default function Launchpad() {
   const dashboardLane = getDashboardLane(primaryRoleCode);
   const isKshetraLane = primaryRoleCode === "kshetra_reviewer";
   const isPrantLane = primaryRoleCode === "prant_sanyojak";
+  const viewerUserId = viewer?.userId ?? null;
 
   const { data: unreadCount, error: unreadError } = useUnreadCount();
   const unreadSafe = typeof unreadCount === "number" && !Number.isNaN(unreadCount) ? unreadCount : null;
@@ -212,6 +213,21 @@ export default function Launchpad() {
   const actionableArticles = useMemo(
     () => articles.filter((article) => actionArticleStatuses.has(article.status)),
     [articles, actionArticleStatuses],
+  );
+
+  const personalEvents = useMemo(
+    () => (viewerUserId ? actionableEvents.filter((event) => event.createdByUserId === viewerUserId) : actionableEvents),
+    [actionableEvents, viewerUserId],
+  );
+
+  const personalArticles = useMemo(
+    () =>
+      viewerUserId
+        ? actionableArticles.filter(
+            (article) => article.authorUserId === viewerUserId || article.createdByUserId === viewerUserId,
+          )
+        : actionableArticles,
+    [actionableArticles, viewerUserId],
   );
 
   const upcomingEvents = useMemo(() => {
@@ -248,8 +264,12 @@ export default function Launchpad() {
 
   const queue = useMemo(() => {
     const items: QueueItem[] = [];
+    const eventQueueSource =
+      primaryRoleCode === "karyakarta" || primaryRoleCode === "unit_head" ? personalEvents : actionableEvents;
+    const articleQueueSource =
+      primaryRoleCode === "karyakarta" || primaryRoleCode === "unit_head" ? personalArticles : actionableArticles;
 
-    actionableEvents.slice(0, 6).forEach((event) => {
+    eventQueueSource.slice(0, 6).forEach((event) => {
       items.push({
         id: event.id,
         kind: "event",
@@ -260,7 +280,7 @@ export default function Launchpad() {
       });
     });
 
-    actionableArticles.slice(0, 6).forEach((article) => {
+    articleQueueSource.slice(0, 6).forEach((article) => {
       items.push({
         id: article.id,
         kind: "article",
@@ -289,7 +309,15 @@ export default function Launchpad() {
     }
 
     return items.slice(0, 12);
-  }, [actionableArticles, actionableEvents, permissions.canUpdatePrachar, pracharCampaigns.open]);
+  }, [
+    actionableArticles,
+    actionableEvents,
+    permissions.canUpdatePrachar,
+    personalArticles,
+    personalEvents,
+    pracharCampaigns.open,
+    primaryRoleCode,
+  ]);
 
   const quickActions = [
     {
