@@ -2,7 +2,6 @@ import {
   BookOpen,
   Calendar,
   History,
-  Home,
   LayoutDashboard,
   Megaphone,
   MessagesSquare,
@@ -31,8 +30,7 @@ export type NavGroup = {
 };
 
 const workflowNavItems: NavItem[] = [
-  { label: "Overview", sublabel: "\u0936\u0941\u0930\u0941\u0906\u0924\u0940 \u0905\u0935\u0932\u094b\u0915\u0928", icon: Home, path: "/overview" },
-  { label: "Events", sublabel: "\u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e \u0935 \u0905\u0928\u0941\u092e\u094b\u0926\u0928", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Dashboard", sublabel: "\u0921\u0948\u0936\u092c\u094b\u0930\u094d\u0921", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Aalekh", sublabel: "\u0932\u0947\u0916\u0928 \u0935 \u0938\u092e\u0940\u0915\u094d\u0937\u093e", icon: PenLine, path: "/aalekh" },
   { label: "Prachar", sublabel: "\u092a\u094d\u0930\u091a\u093e\u0930 \u092b\u0949\u0932\u094b-\u0925\u094d\u0930\u0942", icon: Megaphone, path: "/prachar" },
 ];

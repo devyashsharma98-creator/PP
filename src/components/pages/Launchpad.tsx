@@ -20,7 +20,7 @@ import {
   Users,
 } from "lucide-react";
 
-import type { AalekhArticle, GatividhiEvent, PracharStatus, Role } from "@/context/AppContext";
+import type { AalekhArticle, GatividhiEvent, PracharStatus } from "@/context/AppContext";
 import { useAppContext } from "@/context/AppContext";
 import { useOverview } from "@/hooks/api/use-overview";
 import { useUnreadCount } from "@/hooks/api/use-notifications";
@@ -28,6 +28,8 @@ import { Masthead } from "@/components/Masthead";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CanonicalRoleCode } from "@/lib/app/contracts";
+import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 
@@ -85,27 +87,29 @@ function translateOverviewWarning(message: string, t: (en: string, hi: string) =
   return t(message, hi);
 }
 
-function roleEventActionStatuses(role: Role) {
-  if (role === "unit_head") return new Set<GatividhiEvent["status"]>(["Draft", "Returned for Revision"]);
-  if (role === "aayam_pramukh") return new Set<GatividhiEvent["status"]>(["Pending Aayam Review"]);
-  if (role === "vibhag_pramukh") {
-    return new Set<GatividhiEvent["status"]>([
-      "Pending Vibhag Review",
-      "Pending Prant Authorization",
-      "Pending Prant Dual Authorization",
-    ]);
+function roleEventActionStatuses(roleCode: CanonicalRoleCode) {
+  if (roleCode === "unit_head") return new Set<GatividhiEvent["status"]>(["Draft", "Returned for Revision"]);
+  if (roleCode === "aayam_pramukh" || roleCode === "prant_aayam_pramukh") {
+    return new Set<GatividhiEvent["status"]>(["Pending Aayam Review"]);
   }
-  return new Set<GatividhiEvent["status"]>();
+  if (roleCode === "vibhag_pramukh") return new Set<GatividhiEvent["status"]>(["Pending Vibhag Review"]);
+  if (roleCode === "prant_sanyojak" || roleCode === "kshetra_reviewer" || roleCode === "super_admin" || roleCode === "org_admin") {
+    return new Set<GatividhiEvent["status"]>(["Pending Prant Authorization", "Pending Prant Dual Authorization"]);
+  }
+  return new Set<GatividhiEvent["status"]>([]);
 }
 
-function roleArticleActionStatuses(role: Role) {
-  if (role === "karyakarta") return new Set<AalekhArticle["status"]>(["Draft", "Returned for Revision"]);
-  if (role === "unit_head") return new Set<AalekhArticle["status"]>(["Pending Unit Head Review"]);
-  if (role === "aayam_pramukh") return new Set<AalekhArticle["status"]>(["Pending Aayam Review"]);
-  if (role === "vibhag_pramukh") {
-    return new Set<AalekhArticle["status"]>(["Pending Vibhag Review", "Pending Prant Authorization"]);
+function roleArticleActionStatuses(roleCode: CanonicalRoleCode) {
+  if (roleCode === "karyakarta") return new Set<AalekhArticle["status"]>(["Draft", "Returned for Revision"]);
+  if (roleCode === "unit_head") return new Set<AalekhArticle["status"]>(["Pending Unit Head Review"]);
+  if (roleCode === "aayam_pramukh" || roleCode === "prant_aayam_pramukh") {
+    return new Set<AalekhArticle["status"]>(["Pending Aayam Review"]);
   }
-  return new Set<AalekhArticle["status"]>();
+  if (roleCode === "vibhag_pramukh") return new Set<AalekhArticle["status"]>(["Pending Vibhag Review"]);
+  if (roleCode === "prant_sanyojak" || roleCode === "kshetra_reviewer" || roleCode === "super_admin" || roleCode === "org_admin") {
+    return new Set<AalekhArticle["status"]>(["Pending Prant Authorization"]);
+  }
+  return new Set<AalekhArticle["status"]>([]);
 }
 
 function isPracharPlatformResolved(
@@ -183,18 +187,20 @@ function AdminListCard({
 }
 
 export default function Launchpad() {
-  const { role, permissions, events, articles, pracharStatuses, lang } = useAppContext();
+  const { role, viewer, permissions, events, articles, pracharStatuses, lang } = useAppContext();
   const t = useT();
   const isHi = lang === "hi";
   const canManageUsers = permissions.canManageUsers;
+  const primaryRoleCode = viewer?.primaryRoleCode ?? getCanonicalRoleFromUiRole(role);
+  const dashboardLane = getDashboardLane(primaryRoleCode);
 
   const { data: unreadCount, error: unreadError } = useUnreadCount();
   const unreadSafe = typeof unreadCount === "number" && !Number.isNaN(unreadCount) ? unreadCount : null;
   const overviewQuery = useOverview();
   const overview = overviewQuery.data;
 
-  const actionEventStatuses = useMemo(() => roleEventActionStatuses(role), [role]);
-  const actionArticleStatuses = useMemo(() => roleArticleActionStatuses(role), [role]);
+  const actionEventStatuses = useMemo(() => roleEventActionStatuses(primaryRoleCode), [primaryRoleCode]);
+  const actionArticleStatuses = useMemo(() => roleArticleActionStatuses(primaryRoleCode), [primaryRoleCode]);
 
   const actionableEvents = useMemo(
     () => events.filter((event) => actionEventStatuses.has(event.status)),
@@ -440,19 +446,38 @@ export default function Launchpad() {
   const laneCounts = overview?.workflow.roleLaneCounts ?? [];
   const hierarchyMessages = overview?.hierarchy.warningMessages ?? [];
   const adminDetails = overview?.admin ?? null;
+  const dashboardFrame =
+    dashboardLane === "super_admin"
+      ? {
+          seal: "ERP Governance Center",
+          sealHi: "ईआरपी शासन केंद्र",
+          title: "System Oversight Dashboard",
+          titleHi: "सिस्टम अवलोकन डैशबोर्ड",
+          subtitle: t(
+            "Monitor account health, blocked workflows, hierarchy gaps, and organisation-wide operational pressure.",
+            "खाता स्वास्थ्य, अटके कार्यप्रवाह, संरचनात्मक अंतर और संस्था-व्यापी परिचालन दबाव को एक ही स्थान से देखें।",
+          ),
+        }
+      : {
+          seal: "Prant Operations Center",
+          sealHi: "प्रान्त संचालन केंद्र",
+          title: "Prant Oversight Dashboard",
+          titleHi: "प्रान्त अवलोकन डैशबोर्ड",
+          subtitle: t(
+            "Track final approvals, delayed vibhags, escalation pressure, and hierarchy health across the prant lane.",
+            "अंतिम अनुमोदन, विलंबित विभाग, escalation pressure और प्रान्त-स्तरीय संरचनात्मक स्वास्थ्य को एक ही स्थान से देखें।",
+          ),
+        };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-10">
       <Masthead
-        seal="ERP Operations Center"
-        sealHi="ईआरपी संचालन केंद्र"
-        title="Operational Overview"
-        titleHi="परिचालन अवलोकन"
-        subtitle={t(
-          "Track workflow health, login activity, hierarchy gaps, and role-wise pending work from one ERP home.",
-          "एक ही ईआरपी गृह-पटल से कार्यप्रवाह स्वास्थ्य, लॉगिन गतिविधि, संरचनात्मक अंतर और भूमिका-आधारित लंबित कार्य देखें।",
-        )}
-        subtitleHi="एक ही ईआरपी गृह-पटल से कार्यप्रवाह स्वास्थ्य, लॉगिन गतिविधि, संरचनात्मक अंतर और भूमिका-आधारित लंबित कार्य देखें।"
+        seal={dashboardFrame.seal}
+        sealHi={dashboardFrame.sealHi}
+        title={dashboardFrame.title}
+        titleHi={dashboardFrame.titleHi}
+        subtitle={dashboardFrame.subtitle}
+        subtitleHi={dashboardFrame.subtitle}
         contexts={contexts}
         lang={isHi ? "hi" : "en"}
         actions={

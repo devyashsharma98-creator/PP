@@ -22,10 +22,12 @@ export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
 }
 
 export interface AayamDashboardViewProps extends DashboardRoleViewProps {
+  dashboardKind?: "aayam_pramukh" | "prant_aayam_pramukh";
   onForwardToVibhag: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
 }
 
 export interface UnitDashboardViewProps {
+  dashboardKind?: "unit_head" | "karyakarta";
   events: GatividhiEvent[];
   isApiConnected: boolean;
   statusBadge: (status: string) => string;

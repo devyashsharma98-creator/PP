@@ -18,6 +18,7 @@ export const DASHBOARD_ROLES: RoleCode[] = [
   "vibhag_pramukh",
   "aayam_pramukh",
   "unit_head",
+  "karyakarta",
 ];
 export const PRACHAR_ROLES: RoleCode[] = [
   "super_admin",
@@ -58,20 +59,9 @@ export function getHighestRole(roleCodes: readonly RoleCode[] | null | undefined
 }
 
 export function getRoleLandingPath(roleCodes: readonly RoleCode[] | null | undefined, primaryRoleCode?: RoleCode | null) {
-  const primaryRole = primaryRoleCode ?? getHighestRole(roleCodes);
-
-  if (primaryRole === "super_admin" || primaryRole === "org_admin") return "/super-admin";
-  if (
-    primaryRole === "kshetra_reviewer" ||
-    primaryRole === "prant_sanyojak" ||
-    primaryRole === "vibhag_pramukh"
-  ) {
-    return "/overview";
-  }
-  if (primaryRole === "prant_aayam_pramukh" || primaryRole === "aayam_pramukh" || primaryRole === "unit_head") {
-    return "/dashboard";
-  }
-  return "/aalekh";
+  void roleCodes;
+  void primaryRoleCode;
+  return "/dashboard";
 }
 
 export function getAllowedRolesForPath(pathname: string) {

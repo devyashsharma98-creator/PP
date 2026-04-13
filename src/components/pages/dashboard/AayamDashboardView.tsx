@@ -12,12 +12,14 @@ import { cn } from "@/lib/utils";
 import type { AayamDashboardViewProps } from "./types";
 
 export function AayamDashboardView({
+  dashboardKind = "aayam_pramukh",
   events,
   t,
   eventStatusHi,
   statusBadge,
   onForwardToVibhag,
 }: AayamDashboardViewProps) {
+  const isPrantAayamLane = dashboardKind === "prant_aayam_pramukh";
   const pendingReview = events.filter((event) => event.status === "Pending Aayam Review" || event.status === "Submitted by Unit");
   const forwarded = events.filter(
     (event) =>
@@ -32,20 +34,32 @@ export function AayamDashboardView({
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
-        seal="Aayam Review Desk"
-        sealHi="आयाम समीक्षा डेस्क"
-        title="Aayam Review Board"
-        titleHi="आयाम समीक्षा मंडल"
-        subtitle="Review incoming programmes, forward for vibhag review, and keep the organisational lane clear."
-        subtitleHi="आगत कार्यक्रमों की समीक्षा करें, विभाग समीक्षा हेतु आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
+        seal={isPrantAayamLane ? "Prant Aayam Review Desk" : "Aayam Review Desk"}
+        sealHi={isPrantAayamLane ? "प्रान्त आयाम समीक्षा डेस्क" : "आयाम समीक्षा डेस्क"}
+        title={isPrantAayamLane ? "Prant Aayam Review Board" : "Aayam Review Board"}
+        titleHi={isPrantAayamLane ? "प्रान्त आयाम समीक्षा मंडल" : "आयाम समीक्षा मंडल"}
+        subtitle={
+          isPrantAayamLane
+            ? "Review aayam work at prant level, clear the thematic queue, and prepare items for higher oversight."
+            : "Review incoming programmes, forward for vibhag review, and keep the organisational lane clear."
+        }
+        subtitleHi={
+          isPrantAayamLane
+            ? "प्रान्त स्तर पर आयाम कार्य की समीक्षा करें, विषयगत कतार स्पष्ट रखें और उच्च स्तरीय अवलोकन हेतु प्रविष्टियाँ तैयार करें।"
+            : "आगत कार्यक्रमों की समीक्षा करें, विभाग समीक्षा हेतु आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।"
+        }
         contexts={[
           {
             labelEn: "Review queue",
             labelHi: "समीक्षा कतार",
             valueEn: `${pendingReview.length} programmes awaiting review`,
             valueHi: `${pendingReview.length} कार्यक्रम समीक्षा हेतु प्रतीक्षित`,
-            detailEn: "Programmes submitted by units arrive here for thematic review.",
-            detailHi: "इकाइयों द्वारा भेजे गए कार्यक्रम विषयगत समीक्षा के लिए यहाँ आते हैं।",
+            detailEn: isPrantAayamLane
+              ? "Aayam items that need prant-level thematic review are visible here."
+              : "Programmes submitted by units arrive here for thematic review.",
+            detailHi: isPrantAayamLane
+              ? "प्रान्त-स्तरीय विषयगत समीक्षा हेतु आयाम प्रविष्टियाँ यहाँ दिखाई देती हैं।"
+              : "इकाइयों द्वारा भेजे गए कार्यक्रम विषयगत समीक्षा के लिए यहाँ आते हैं।",
           },
           {
             labelEn: "Forwarded lane",
@@ -57,11 +71,15 @@ export function AayamDashboardView({
           },
           {
             labelEn: "Operational focus",
-            labelHi: "परिचालन केंद्र",
-            valueEn: "Thematic Review & Forwarding",
-            valueHi: "विषयगत समीक्षा और अग्रेषण",
-            detailEn: "Keep the review lane moving cleanly for vibhag-level action.",
-            detailHi: "विभाग स्तर की कार्रवाई के लिए समीक्षा धारा को स्पष्ट और गतिशील रखें।",
+            labelHi: "परिचालन केन्द्र",
+            valueEn: isPrantAayamLane ? "Prant thematic review" : "Thematic Review & Forwarding",
+            valueHi: isPrantAayamLane ? "प्रान्त विषयगत समीक्षा" : "विषयगत समीक्षा और अग्रेषण",
+            detailEn: isPrantAayamLane
+              ? "Keep the prant-level thematic queue ready for higher oversight."
+              : "Keep the review lane moving cleanly for vibhag-level action.",
+            detailHi: isPrantAayamLane
+              ? "उच्च स्तरीय अवलोकन हेतु प्रान्त-स्तरीय विषयगत कतार को स्पष्ट और तैयार रखें।"
+              : "विभाग स्तर की कार्रवाई के लिए समीक्षा धारा को स्पष्ट और गतिशील रखें।",
           },
         ]}
       />
@@ -70,7 +88,8 @@ export function AayamDashboardView({
         <Card className="institution-panel">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-primary" /> {t(`Pending Reviews (${pendingReview.length})`, `समीक्षा प्रतीक्षित (${pendingReview.length})`)}
+              <Clock className="h-4 w-4 text-primary" />{" "}
+              {t(`Pending Reviews (${pendingReview.length})`, `समीक्षा प्रतीक्षित (${pendingReview.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -102,8 +121,9 @@ export function AayamDashboardView({
                   <div className="space-y-1">
                     <Button size="sm" onClick={() => void onForwardToVibhag(event.id, event.status)}>
                       {event.status === "Submitted by Unit"
-                        ? t("Accept & Begin Review", "स्वीकारें और समीक्षा प्रारंभ करें")
-                        : t("Review & Forward to Vibhag", "समीक्षा करें और विभाग को भेजें")} <ArrowRight className="ml-1 h-4 w-4" />
+                        ? t("Accept & Begin Review", "स्वीकारें और समीक्षा प्रारम्भ करें")
+                        : t("Review & Forward to Vibhag", "समीक्षा करें और विभाग को भेजें")}{" "}
+                      <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                     <p className="pl-0.5 font-devanagari text-xs text-muted-foreground">
                       {t(

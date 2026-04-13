@@ -11,13 +11,17 @@ import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardV
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
+import Launchpad from "@/components/pages/Launchpad";
+import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
 
 
 export default function Dashboard() {
-  const { role, lang, permissions, events: demoEvents, updateEventStatus, updateVritt } = useAppContext();
+  const { role, lang, permissions, viewer, events: demoEvents, updateEventStatus, updateVritt } = useAppContext();
   const { addToast } = useToast();
   const t = useT();
+  const primaryRoleCode = viewer?.primaryRoleCode ?? getCanonicalRoleFromUiRole(role);
+  const dashboardLane = getDashboardLane(primaryRoleCode);
   
   // Real data from API with TanStack Query
   const { data: apiEvents = [], isLoading: eventsLoading, error: eventsError } = useDashboardEvents();
@@ -246,7 +250,11 @@ export default function Dashboard() {
     />
   );
 
-  if (role === "vibhag_pramukh") {
+  if (dashboardLane === "super_admin" || dashboardLane === "prant") {
+    return <Launchpad />;
+  }
+
+  if (dashboardLane === "vibhag") {
     return (
       <>
         <VibhagDashboardView
@@ -267,10 +275,11 @@ export default function Dashboard() {
     );
   }
 
-  if (role === "aayam_pramukh") {
+  if (dashboardLane === "aayam") {
     return (
       <>
         <AayamDashboardView
+          dashboardKind={primaryRoleCode === "prant_aayam_pramukh" ? "prant_aayam_pramukh" : "aayam_pramukh"}
           events={events}
           permissions={permissions}
           t={t}
@@ -285,11 +294,12 @@ export default function Dashboard() {
     );
   }
   return (
-    <>
-      <UnitDashboardView
-        events={events}
-        isApiConnected={isApiConnected}
-        statusBadge={dashboardStatusBadgeClass}
+      <>
+        <UnitDashboardView
+          dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
+          events={events}
+          isApiConnected={isApiConnected}
+          statusBadge={dashboardStatusBadgeClass}
         statusLabel={statusLabel}
         vrittStatusLabel={vrittStatusLabel}
         onOpenVrittEditor={openVrittEditor}
