@@ -98,6 +98,147 @@ async function seed() {
     })
   )!.id;
 
+  const canonicalUnitRow = await sql`
+    with referenced_units as (
+      select unit_id, count(*)::int as total
+      from (
+        select unit_id from public.events where org_id = ${orgId}
+        union all
+        select unit_id from public.articles where org_id = ${orgId}
+      ) scoped
+      where unit_id is not null
+      group by unit_id
+    )
+    select u.id
+    from public.units u
+    left join referenced_units ru on ru.unit_id = u.id
+    where u.org_id = ${orgId}
+      and u.code = ${"bhopal_vibhag_root"}
+    order by coalesce(ru.total, 0) desc, u.created_at asc
+    limit 1
+  `;
+
+  const canonicalUnitId = (canonicalUnitRow as Array<{ id: string }>)[0]?.id ?? unitId;
+
+  const duplicateRootUnits = await sql`
+    select id
+    from public.units
+    where org_id = ${orgId}
+      and code = ${"bhopal_vibhag_root"}
+  `;
+  const duplicateRootUnitIds = (duplicateRootUnits as Array<{ id: string }>).map((row) => row.id);
+
+  if (duplicateRootUnitIds.length > 1) {
+    await Promise.all([
+      sql`
+        update public.departments_or_aayams
+        set unit_id = ${canonicalUnitId}
+        where org_id = ${orgId}
+          and unit_id = any(${duplicateRootUnitIds}::uuid[])
+      `,
+      sql`
+        update public.events
+        set unit_id = ${canonicalUnitId}
+        where org_id = ${orgId}
+          and unit_id = any(${duplicateRootUnitIds}::uuid[])
+      `,
+      sql`
+        update public.articles
+        set unit_id = ${canonicalUnitId}
+        where org_id = ${orgId}
+          and unit_id = any(${duplicateRootUnitIds}::uuid[])
+      `,
+      sql`
+        update public.user_role_assignments
+        set unit_id = ${canonicalUnitId}
+        where org_id = ${orgId}
+          and unit_id = any(${duplicateRootUnitIds}::uuid[])
+      `,
+    ]);
+  }
+
+  const existingAayams = await db.query.departmentsOrAayams.findMany({
+    where: eq(schema.departmentsOrAayams.orgId, orgId),
+  });
+
+  if (existingAayams.length === 0) {
+    const aayamDefs = [
+      { code: "yuva", name: "Yuva Aayam", nameHi: "युवा आयाम", departmentKind: "yuva" as const },
+      { code: "mahila", name: "Mahila Aayam", nameHi: "महिला आयाम", departmentKind: "mahila" as const },
+      { code: "shodh", name: "Shodh Aayam", nameHi: "शोध आयाम", departmentKind: "shodh" as const },
+      { code: "prachar", name: "Prachar Aayam", nameHi: "प्रचार आयाम", departmentKind: "prachar" as const },
+      { code: "vimarsh", name: "Vimarsh Aayam", nameHi: "विमर्श आयाम", departmentKind: "vimarsh" as const },
+    ];
+
+    for (const aayam of aayamDefs) {
+      await db.insert(schema.departmentsOrAayams).values({
+        orgId,
+        unitId,
+        code: aayam.code,
+        name: aayam.name,
+        nameHi: aayam.nameHi,
+        departmentKind: aayam.departmentKind,
+        isActive: true,
+      });
+    }
+  }
+
+  const aayams = await db.query.departmentsOrAayams.findMany({
+    where: eq(schema.departmentsOrAayams.orgId, orgId),
+  });
+
+  const prantAayamId =
+    aayams.find((aayam) => aayam.code === "vimarsh")?.id ??
+    aayams.find((aayam) => aayam.code === "yuva")?.id ??
+    aayams[0]?.id ??
+    null;
+  const localAayamId =
+    aayams.find((aayam) => aayam.code === "yuva")?.id ??
+    aayams.find((aayam) => aayam.code === "prachar")?.id ??
+    aayams[0]?.id ??
+    null;
+
+  const pendingAayamEvents = await sql`
+    select id
+    from public.events
+    where org_id = ${orgId}
+      and status = ${"pending_aayam_review"}
+    order by created_at asc
+  `;
+  const pendingAayamArticles = await sql`
+    select id
+    from public.articles
+    where org_id = ${orgId}
+      and status = ${"pending_aayam_review"}
+    order by created_at asc
+  `;
+
+  const distributeDepartmentIds = (rows: Array<{ id: string }>) =>
+    rows.map((row, index) => ({
+      id: row.id,
+      departmentId: index % 2 === 0 ? localAayamId : prantAayamId ?? localAayamId,
+    }));
+
+  const eventDepartmentAssignments = distributeDepartmentIds(pendingAayamEvents as Array<{ id: string }>);
+  for (const row of eventDepartmentAssignments) {
+    if (!row.departmentId) continue;
+    await sql`
+      update public.events
+      set department_id = ${row.departmentId}
+      where id = ${row.id}
+    `;
+  }
+
+  const articleDepartmentAssignments = distributeDepartmentIds(pendingAayamArticles as Array<{ id: string }>);
+  for (const row of articleDepartmentAssignments) {
+    if (!row.departmentId) continue;
+    await sql`
+      update public.articles
+      set department_id = ${row.departmentId}
+      where id = ${row.id}
+    `;
+  }
+
   // â”€â”€ 4. Demo users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   console.log("  [4/5] Demo usersâ€¦");
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
@@ -108,48 +249,61 @@ async function seed() {
       displayName: "Demo Super Admin",
       displayNameHi: "डेमो सुपर एडमिन",
       roleCode: "super_admin" as const,
+      scopeType: "org" as const,
     },
     {
       email: "demo.kshetra@example.com",
       displayName: "Demo Kshetra Reviewer",
       displayNameHi: "डेमो क्षेत्र समीक्षक",
       roleCode: "kshetra_reviewer" as const,
+      scopeType: "org" as const,
     },
     {
       email: "demo.prant@example.com",
       displayName: "Demo Prant Sanyojak",
       displayNameHi: "डेमो प्रान्त संयोजक",
       roleCode: "prant_sanyojak" as const,
+      scopeType: "org" as const,
     },
     {
       email: "demo.prant.aayam@example.com",
       displayName: "Demo Prant Aayam Pramukh",
       displayNameHi: "डेमो प्रान्त आयाम प्रमुख",
       roleCode: "prant_aayam_pramukh" as const,
+      scopeType: "department" as const,
+      departmentId: prantAayamId,
     },
     {
       email: "demo.vibhag@example.com",
       displayName: "Demo Vibhag Pramukh",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–",
       roleCode: "vibhag_pramukh" as const,
+      scopeType: "unit" as const,
+      unitId: canonicalUnitId,
     },
     {
       email: "demo.aayam@example.com",
       displayName: "Demo Aayam Pramukh",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤†à¤¯à¤¾à¤® à¤ªà¥à¤°à¤®à¥à¤–",
       roleCode: "aayam_pramukh" as const,
+      scopeType: "department" as const,
+      departmentId: localAayamId,
     },
     {
       email: "demo.unithead@example.com",
       displayName: "Demo Unit Head",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤‡à¤•à¤¾à¤ˆ à¤ªà¥à¤°à¤®à¥à¤–",
       roleCode: "unit_head" as const,
+      scopeType: "unit" as const,
+      unitId: canonicalUnitId,
     },
     {
       email: "demo.karyakarta@example.com",
       displayName: "Demo Karyakarta",
       displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤•à¤¾à¤°à¥à¤¯à¤•à¤°à¥à¤¤à¤¾",
       roleCode: "karyakarta" as const,
+      scopeType: "unit" as const,
+      unitId: canonicalUnitId,
     },
   ];
 
@@ -187,15 +341,25 @@ async function seed() {
         and(eq2(t.userId, userId), eq2(t.roleId, roleId)),
     });
 
+    const assignmentValues = {
+      scopeType: u.scopeType,
+      orgId,
+      unitId: u.unitId ?? canonicalUnitId,
+      departmentId: u.departmentId ?? null,
+      isPrimary: true,
+    };
+
     if (!existingAssignment) {
       await db.insert(schema.userRoleAssignments).values({
         userId,
         roleId,
-        scopeType: "org",
-        orgId,
-        unitId,
-        isPrimary: true,
+        ...assignmentValues,
       });
+    } else {
+      await db
+        .update(schema.userRoleAssignments)
+        .set(assignmentValues)
+        .where(eq(schema.userRoleAssignments.id, existingAssignment.id));
     }
   }
 

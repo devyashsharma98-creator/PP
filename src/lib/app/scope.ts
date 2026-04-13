@@ -48,8 +48,6 @@ const ORG_WIDE_ROLES = new Set([
   "org_admin",
   "kshetra_reviewer",
   "prant_sanyojak",
-  "prant_aayam_pramukh",
-  "vibhag_pramukh",
 ]);
 
 function roleCodeOf(assignment: ScopedAssignmentLike) {
