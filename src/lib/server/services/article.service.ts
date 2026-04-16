@@ -148,12 +148,12 @@ export class ArticleService implements IService<ArticleFilters, PaginatedResult<
     if (!article) {
       throw new NotFoundError('Article', id);
     }
-    if (article.status !== 'published' && article.status !== 'pending_prant_authorization') {
+    if (article.status !== 'authorized_public' && article.status !== 'published' && article.status !== 'pending_prant_authorization') {
       throw new ForbiddenError('Article cannot be published in current status');
     }
 
     const rows = await sql`
-      UPDATE public.articles SET status = 'published', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
+      UPDATE public.articles SET status = 'authorized_public', published_at = ${new Date().toISOString()}, updated_at = ${new Date().toISOString()}
       WHERE id = ${id}
       RETURNING *` as unknown as Article[];
 

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { publicVoteSchema } from "@/lib/validators/events";
+import { withPublicRateLimit } from "@/lib/middleware/rate-limit";
 
 const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
@@ -12,6 +14,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ eventId: string; pollId: string }> },
 ) {
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rateRes = withPublicRateLimit(clientIp);
+  if (rateRes) return rateRes;
+
   if (!sql) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
 
   try {
@@ -21,9 +27,11 @@ export async function POST(
     }
 
     const body = await req.json();
-    if (!body?.optionId || !isValidUuid(body.optionId)) {
-      return NextResponse.json({ error: "Valid optionId required." }, { status: 400 });
+    const parsed = publicVoteSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors[0]?.message ?? "Valid optionId required." }, { status: 400 });
     }
+    const { optionId } = parsed.data;
 
     // Check poll is open
     const [pollRows, eventRows] = await Promise.all([
@@ -54,7 +62,7 @@ export async function POST(
 
     await sql`
       INSERT INTO public.event_poll_votes (poll_id, option_id, submitted_from_ip, submitted_user_agent)
-      VALUES (${pollId}, ${body.optionId}, ${ip}, ${ua})
+      VALUES (${pollId}, ${optionId}, ${ip}, ${ua})
     `;
 
     return NextResponse.json({ ok: true });

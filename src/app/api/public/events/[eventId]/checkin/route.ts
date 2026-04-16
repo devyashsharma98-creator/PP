@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { withPublicRateLimit } from "@/lib/middleware/rate-limit";
 
 const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
@@ -7,9 +8,13 @@ const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ eventId: string }> },
 ) {
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rateRes = withPublicRateLimit(clientIp);
+  if (rateRes) return rateRes;
+
   if (!sql) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
 
   try {
@@ -23,8 +28,15 @@ export async function POST(
       return NextResponse.json({ error: "Event is not open for check-in." }, { status: 403 });
     }
 
-    const currentCount = event.vritt_checked_in_count || 0;
-    await sql`UPDATE public.events SET vritt_checked_in_count = ${currentCount + 1} WHERE id = ${eventId} AND vritt_checked_in_count = ${currentCount}`;
+    const updatedRows = await sql`
+      UPDATE public.events
+      SET vritt_checked_in_count = COALESCE(vritt_checked_in_count, 0) + 1
+      WHERE id = ${eventId}
+      RETURNING vritt_checked_in_count
+    `;
+    if (!updatedRows[0]) {
+      return NextResponse.json({ error: "Check-in update failed." }, { status: 409 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

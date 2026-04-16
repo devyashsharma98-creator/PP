@@ -17,6 +17,7 @@ export const articleStatusSchema = z.enum([
   'pending_aayam_review',
   'pending_vibhag_review',
   'pending_prant_authorization',
+  'authorized_public',
   'published',
   'archived',
   'rejected',

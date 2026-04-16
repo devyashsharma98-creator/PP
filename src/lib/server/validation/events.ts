@@ -19,6 +19,7 @@ export const eventStatusSchema = z.enum([
   'pending_vibhag_review',
   'pending_prant_authorization',
   'pending_prant_dual_authorization',
+  'authorized_public',
   'published',
   'escalated_kshetra',
   'returned_for_revision',

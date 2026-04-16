@@ -15,6 +15,7 @@ import { hasRoleOrAbove } from "@/lib/permissions";
 import { updateArticleSchema } from "@/lib/validators/articles";
 import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
 type Params = { articleId: string };
 
@@ -39,6 +40,10 @@ export const GET = withAuth(async (req: NextRequest, ctx, params) => {
   });
 
   if (!article) return notFound("Article not found.");
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, article, ctx.session.userId)) {
+    return forbidden("You do not have access to this article.");
+  }
 
   // Karyakarta can only view own articles or published ones
   const isKaryakartaOnly =

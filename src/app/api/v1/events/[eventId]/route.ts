@@ -18,6 +18,7 @@ import { hasRoleOrAbove } from "@/lib/permissions";
 import { updateEventSchema } from "@/lib/validators/events";
 import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
 type Params = { eventId: string };
 
@@ -49,6 +50,10 @@ export const GET = withAuth(async (req: NextRequest, ctx, params) => {
   });
 
   if (!event) return notFound("Event not found.");
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, event, ctx.session.userId)) {
+    return forbidden("You do not have access to this event.");
+  }
 
   return apiSuccess(event);
 });

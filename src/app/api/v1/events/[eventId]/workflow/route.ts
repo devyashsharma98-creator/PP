@@ -21,6 +21,7 @@ import { validateEventTransition } from "@/lib/permissions/event-workflow";
 import { eventWorkflowSchema } from "@/lib/validators/events";
 import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 import type { EventStatus } from "@/lib/permissions/event-workflow";
 
 type Params = { eventId: string };
@@ -46,9 +47,13 @@ export const POST = withAuth(async (req: NextRequest, ctx, params) => {
   // Load event
   const event = await db.query.events.findFirst({
     where: and(eq(events.id, eventId), eq(events.orgId, ctx.session.orgId)),
-    columns: { id: true, title: true, status: true, unitId: true, createdBy: true },
+    columns: { id: true, title: true, status: true, unitId: true, departmentId: true, createdBy: true },
   });
   if (!event) return notFound("Event not found.");
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, event, ctx.session.userId)) {
+    return forbidden("You do not have access to transition this event.");
+  }
 
   // Validate transition through state machine
   const transitionError = validateEventTransition(

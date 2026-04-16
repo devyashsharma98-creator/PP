@@ -114,5 +114,11 @@ export const publicRegistrationSchema = z.object({
   hasSpecialNeeds: z.boolean().optional().default(false),
   notes: z.string().max(2000).optional(),
   answers: z.record(z.string()).optional(),
+  customAnswers: z.record(z.string().trim().min(1).max(1000)).optional(),
 });
 export type PublicRegistrationInput = z.infer<typeof publicRegistrationSchema>;
+
+export const publicVoteSchema = z.object({
+  optionId: z.string().uuid("Valid optionId required."),
+});
+export type PublicVoteInput = z.infer<typeof publicVoteSchema>;

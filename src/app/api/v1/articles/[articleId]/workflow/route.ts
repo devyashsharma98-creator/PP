@@ -23,6 +23,7 @@ import {
 import { articleWorkflowSchema } from "@/lib/validators/articles";
 import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
 import { auditAndActivity } from "@/lib/audit";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
 type Params = { articleId: string };
 
@@ -52,10 +53,17 @@ export const POST = withAuth(async (req: NextRequest, ctx, params) => {
       title: true,
       status: true,
       authorUserId: true,
+      unitId: true,
+      departmentId: true,
+      createdBy: true,
       valuesChecklist: true,
     },
   });
   if (!article) return notFound("Article not found.");
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
+  if (!rowMatchesScope(scopedAccess, article, ctx.session.userId)) {
+    return forbidden("You do not have access to transition this article.");
+  }
 
   // Merge in any submitted valuesChecklist update
   const currentChecklist = (article.valuesChecklist as {

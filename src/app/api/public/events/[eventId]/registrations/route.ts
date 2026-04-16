@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { createHash } from "node:crypto";
+import { publicRegistrationSchema } from "@/lib/validators/events";
+import { withPublicRateLimit } from "@/lib/middleware/rate-limit";
 
 const isNeonConfigured = Boolean(process.env.NEON_DATABASE_URL);
 const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
@@ -14,6 +16,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ eventId: string }> },
 ) {
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rateRes = withPublicRateLimit(clientIp);
+  if (rateRes) return rateRes;
+
   if (!sql) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
 
   try {
@@ -21,21 +27,25 @@ export async function POST(
     if (!isValidUuid(eventId)) return NextResponse.json({ error: "Invalid event ID." }, { status: 400 });
 
     const body = await req.json();
-    if (!body?.name?.trim()) return NextResponse.json({ error: "Name is required." }, { status: 400 });
+    const parsed = publicRegistrationSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors[0]?.message ?? "Invalid registration payload." }, { status: 400 });
+    }
+    const input = parsed.data;
 
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip = forwardedFor?.split(",")[0]?.trim() ?? null;
     const ua = req.headers.get("user-agent");
-    const hash = createHash("sha256").update(`${eventId}:${body.name}:${body.phone ?? ""}:${body.city ?? ""}`).digest("hex");
+    const hash = createHash("sha256").update(`${eventId}:${input.name}:${input.phone ?? ""}:${input.city ?? ""}`).digest("hex");
 
     const result = await sql`
       INSERT INTO public.event_registrations (event_id, name, phone, city, attending_count, has_special_needs, notes, public_submission_key_hash, submitted_from_ip, submitted_user_agent)
-      VALUES (${eventId}, ${body.name.trim()}, ${body.phone?.trim() || null}, ${body.city?.trim() || null}, ${Math.max(1, body.attendingCount ?? 1)}, ${Boolean(body.hasSpecialNeeds)}, ${body.notes?.trim() || null}, ${hash}, ${ip}, ${ua})
+      VALUES (${eventId}, ${input.name.trim()}, ${input.phone?.trim() || null}, ${input.city?.trim() || null}, ${Math.max(1, input.attendingCount ?? 1)}, ${Boolean(input.hasSpecialNeeds)}, ${input.notes?.trim() || null}, ${hash}, ${ip}, ${ua})
       RETURNING id
     `;
 
     const registrationId = result[0]?.id as string | undefined;
-    const customAnswers = body.customAnswers && typeof body.customAnswers === "object" ? body.customAnswers : null;
+    const customAnswers = input.customAnswers ?? input.answers ?? null;
 
     if (registrationId && customAnswers) {
       for (const [questionKey, answer] of Object.entries(customAnswers)) {

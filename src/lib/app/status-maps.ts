@@ -74,3 +74,15 @@ export const validUiEventStatuses = Object.keys(uiToDbEventStatus) as [string, .
 
 /** Valid UI-facing article status strings (keys of uiToDbArticleStatus) */
 export const validUiArticleStatuses = Object.keys(uiToDbArticleStatus) as [string, ...string[]];
+
+const LEGACY_DB_STATUS_MAP: Record<string, string> = {
+  published: "authorized_public",
+};
+
+export function canonicalizeDbEventStatus(status: string): string {
+  return LEGACY_DB_STATUS_MAP[status] ?? status;
+}
+
+export function canonicalizeDbArticleStatus(status: string): string {
+  return LEGACY_DB_STATUS_MAP[status] ?? status;
+}
