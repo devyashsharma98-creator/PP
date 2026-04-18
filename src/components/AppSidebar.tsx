@@ -7,19 +7,22 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { PragyaLogo } from "@/components/PragyaLogo";
 
 import { useAppContext } from "@/context/AppContext";
 import { getNavGroups } from "@/lib/app/navigation";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const { lang, permissions, viewer } = useAppContext();
+  const { lang, permissions, viewer, authReady } = useAppContext();
   const t = useT();
+  const signOut = useSignOut();
 
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
@@ -39,9 +42,14 @@ export function AppSidebar() {
       <div className="shrink-0 border-b border-sidebar-border px-4 py-4">
         {!collapsed ? <p className="shell-copy mb-3 text-sidebar-foreground/55">Bhopal Vibhag</p> : null}
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_18px_30px_-22px_hsl(27_100%_50%/0.8)]">
+          <Link
+            href="/parichay"
+            prefetch={false}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_18px_30px_-22px_hsl(27_100%_50%/0.8)]"
+            aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+          >
             <PragyaLogo className="h-8 w-8" />
-          </div>
+          </Link>
           <AnimatePresence>
             {!collapsed ? (
               <motion.div
@@ -117,11 +125,29 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="px-3 pb-4">
+      <div className="space-y-2 px-3 pb-4">
+        {authReady ? (
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-destructive/15 hover:text-destructive",
+              collapsed && "justify-center px-0",
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!collapsed ? <span>{t("Sign out", "लॉग आउट")}</span> : null}
+          </button>
+        ) : null}
         <button
+          type="button"
           onClick={() => setCollapsed((current) => !current)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="ml-auto flex rounded-full p-2 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={cn(
+            "flex rounded-full p-2 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            !collapsed && "ml-auto",
+            collapsed && "mx-auto",
+          )}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>

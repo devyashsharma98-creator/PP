@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Grid2x2, MoreHorizontal } from "lucide-react";
+import { Grid2x2, LogOut, MoreHorizontal } from "lucide-react";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAppContext } from "@/context/AppContext";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { getMobilePrimaryNav, getNavGroups, getOverflowNavItems } from "@/lib/app/navigation";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/useT";
@@ -15,7 +16,8 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const t = useT();
   const [open, setOpen] = useState(false);
-  const { lang, permissions, viewer } = useAppContext();
+  const { lang, permissions, viewer, authReady } = useAppContext();
+  const signOut = useSignOut();
 
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),
@@ -153,6 +155,22 @@ export function MobileBottomNav() {
                 </div>
               ))}
             </div>
+
+            {authReady ? (
+              <div className="mt-6 border-t border-border pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    void signOut();
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className={cn(lang === "hi" && "font-devanagari")}>{t("Sign out", "लॉग आउट")}</span>
+                </button>
+              </div>
+            ) : null}
           </SheetContent>
         </Sheet>
       </div>

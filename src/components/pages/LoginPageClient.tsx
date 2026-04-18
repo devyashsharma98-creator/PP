@@ -126,7 +126,10 @@ function LoginForm() {
 
       const primaryRoleCode = authPayload?.primaryRoleCode as RoleCode | undefined;
       const roleLandingPath = getRoleLandingPath(roleCodes, primaryRoleCode);
-      const destination = new URL(requestedReturnTo || roleLandingPath, window.location.origin);
+      const rawReturn = requestedReturnTo?.trim() ?? "";
+      const useRoleLanding =
+        !rawReturn || rawReturn === "/" || rawReturn === "/parichay" || rawReturn.startsWith("/parichay?");
+      const destination = new URL(useRoleLanding ? roleLandingPath : rawReturn, window.location.origin);
 
       if (destination.origin !== window.location.origin) {
         destination.pathname = roleLandingPath;

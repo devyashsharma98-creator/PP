@@ -5,11 +5,12 @@ import { motion, type Variants } from "framer-motion";
 import {
   ArrowRight, BookOpen, Flame,
   Megaphone, Compass, Sparkles, Star,
-  Heart, Home, Leaf, Shield, Zap, ChevronRight,
+  Heart, Home, Leaf, LogIn, Shield, Zap, ChevronRight,
   Lightbulb, Network, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
+import { getRoleLandingPath } from "@/lib/app/role-routing";
 import { cn } from "@/lib/utils";
 
 // ── Sacred Mandala SVG ────────────────────────────────────────────────────────
@@ -130,12 +131,48 @@ const fadeUp: Variants = {
 };
 
 export default function Parichay() {
-  const { lang } = useAppContext();
+  const { lang, viewer } = useAppContext();
   const isHi = lang === "hi";
+  const isSignedIn = Boolean(viewer);
+  const deskPath = isSignedIn
+    ? getRoleLandingPath(viewer?.effectiveRoles, viewer?.primaryRoleCode)
+    : null;
+  const loginHref = "/login?returnTo=%2Fdashboard";
 
   return (
     <div className="bg-background text-foreground selection:bg-primary/20">
-      
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-8">
+          <Link href="/parichay" className="flex min-w-0 items-center gap-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl saffron-gradient ring-1 ring-primary/15">
+              <Home className="h-4 w-4 text-primary-foreground" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                {isHi ? "प्रज्ञा प्रवाह" : "Pragya Pravah"}
+              </p>
+              <p className={cn("truncate text-xs font-semibold text-foreground", isHi && "font-devanagari")}>
+                {isHi ? "परिचय" : "Introduction"}
+              </p>
+            </div>
+          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            {isSignedIn && deskPath ? (
+              <Button asChild size="sm" className="rounded-full">
+                <Link href={deskPath}>{isHi ? "कार्यक्षेत्र" : "Workspace"}</Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" variant="default" className="gap-1.5 rounded-full">
+                <Link href={loginHref} prefetch={false}>
+                  <LogIn className="h-3.5 w-3.5" aria-hidden />
+                  {isHi ? "लॉगिन" : "Sign in"}
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
       {/* ── Editorial Hero ────────────────────────────────────────────────── */}
       <section className="relative min-h-[70vh] flex items-center overflow-hidden border-b border-border/40 bg-[hsl(220_32%_8%)] text-white px-4 md:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,_hsl(27_100%_50%_/_0.12)_0%,_transparent_50%)]" />
@@ -164,7 +201,11 @@ export default function Parichay() {
               </div>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button asChild size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base shadow-xl shadow-primary/20">
-                  <Link href="/dashboard" className="flex items-center justify-center">
+                  <Link
+                    href={isSignedIn && deskPath ? deskPath : loginHref}
+                    prefetch={false}
+                    className="flex items-center justify-center"
+                  >
                     {isHi ? "कार्यप्रवाह देखें" : "View Operations"}
                     <ArrowRight className="ml-2 md:ml-3 h-4 md:h-5 w-4 md:w-5" />
                   </Link>
@@ -387,7 +428,7 @@ export default function Parichay() {
           </h2>
           <div className="pt-8 flex justify-center">
             <Button asChild size="lg" className="h-16 rounded-full px-12 text-lg shadow-2xl shadow-primary/30">
-              <Link href="/dashboard">
+              <Link href={isSignedIn && deskPath ? deskPath : loginHref} prefetch={false}>
                 {isHi ? "कार्यप्रवाह में प्रवेश करें" : "Enter Operational Workflow"}
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Link>

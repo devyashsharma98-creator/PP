@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAppContext, type Role } from '@/context/AppContext';
 import { canonicalRoleLabels, canonicalRoleLabelsHi, roleLabels, roleLabelsHi } from '@/lib/app/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +17,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadCount } from '@/hooks/api/use-notifications';
+import { useSignOut } from '@/hooks/use-sign-out';
 
 function getShellFrame(pathname: string, role: Role) {
   if (pathname === '/' || pathname === '/overview') {
@@ -133,9 +134,9 @@ function getShellFrame(pathname: string, role: Role) {
 }
 
 export function Navbar() {
-  const { role, setRole, lang, setLang, events, articles, isAuthenticated, permissions, viewer } = useAppContext();
+  const { role, setRole, lang, setLang, events, articles, isAuthenticated, authReady, permissions, viewer } = useAppContext();
   const pathname = usePathname();
-  const router = useRouter();
+  const signOut = useSignOut();
   const t = useT();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -227,16 +228,7 @@ export function Navbar() {
 
   const toggleTheme = useCallback(() => setTheme(theme === 'dark' ? 'light' : 'dark'), [theme, setTheme]);
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch {
-      // Best-effort
-    } finally {
-      router.push('/login');
-      router.refresh();
-    }
-  }, [router]);
+  const showSignOut = authReady;
 
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 md:px-6 md:pt-4">
@@ -270,9 +262,15 @@ export function Navbar() {
                 {t('Bhopal Vibhag', 'भोपाल विभाग')}
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]">
+                <Link
+                  href="/parichay"
+                  prefetch={false}
+                  onClick={() => setOpen(false)}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]"
+                  aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+                >
                   <PragyaLogo className="h-7 w-7" />
-                </div>
+                </Link>
                 <div className="min-w-0 space-y-1">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/60">
                     {t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}
@@ -321,17 +319,30 @@ export function Navbar() {
         </Sheet>
 
         <div className="flex items-center gap-2 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden">
+          <Link
+            href="/parichay"
+            prefetch={false}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden"
+            aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+          >
             <PragyaLogo className="h-6 w-6" />
-          </div>
-          <div className="space-y-0.5 min-w-0">
+          </Link>
+            <div className="space-y-0.5 min-w-0">
             <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="shell-panel-copy hidden lg:block shrink-0">{t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}</span>
               <span className="text-muted-foreground/60 hidden lg:block shrink-0">•</span>
-              <h2 className={cn('text-sm md:text-base font-bold tracking-tight truncate', lang === 'hi' && 'font-devanagari')}>
+              <Link
+                href="/parichay"
+                prefetch={false}
+                className={cn(
+                  "min-w-0 truncate text-left text-sm font-bold tracking-tight transition-colors hover:text-primary md:text-base",
+                  lang === "hi" && "font-devanagari",
+                )}
+                title={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+              >
                 {t(shellFrame.titleEn, shellFrame.titleHi)}
-              </h2>
+              </Link>
             </div>
           </div>
         </div>
@@ -486,15 +497,17 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Logout */}
-        {isAuthenticated && (
+        {/* Sign out — always in ERP shell after workspace is ready (covers demo mode without viewer). */}
+        {showSignOut && (
           <button
-            onClick={handleLogout}
+            type="button"
+            onClick={() => void signOut()}
             aria-label={t('Sign Out', 'लॉग आउट')}
-            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:px-3"
             title={t('Sign Out', 'लॉग आउट')}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className="hidden text-xs font-semibold md:inline">{t('Sign out', 'लॉग आउट')}</span>
           </button>
         )}
       </div>

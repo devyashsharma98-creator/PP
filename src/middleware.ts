@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_EXACT_PATHS = new Set([
+  "/",
   "/login",
   "/parichay",
   "/history",

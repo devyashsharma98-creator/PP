@@ -2,6 +2,7 @@ import {
   BookOpen,
   Calendar,
   History,
+  Home,
   LayoutDashboard,
   Megaphone,
   MessagesSquare,
@@ -9,7 +10,6 @@ import {
   Newspaper,
   PenLine,
   ShieldCheck,
-  UserCircle,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -48,11 +48,11 @@ const coordinationNavItems: NavItem[] = [
 ];
 
 const referenceNavItems: NavItem[] = [
+  { label: "Landing", sublabel: "\u092a\u0930\u093f\u091a\u092f \u092a\u0943\u0937\u094d\u0920", icon: Home, path: "/parichay" },
   { label: "Vimarsh", sublabel: "\u0935\u093f\u0937\u092f \u0935 \u0935\u093f\u092e\u0930\u094d\u0936", icon: MessagesSquare, path: "/vimarsh" },
   { label: "Library", sublabel: "\u0908-\u092a\u0941\u0938\u094d\u0924\u0915\u093e\u0932\u092f", icon: BookOpen, path: "/library" },
   { label: "Published", sublabel: "\u092a\u094d\u0930\u0915\u093e\u0936\u093f\u0924 \u0915\u093e\u0930\u094d\u092f", icon: Newspaper, path: "/feed" },
   { label: "Structure", sublabel: "\u092d\u0942\u092e\u093f\u0915\u093e \u0930\u091a\u0928\u093e", icon: Network, path: "/dayitv" },
-  { label: "Parichay", sublabel: "\u092a\u0930\u093f\u091a\u092f", icon: UserCircle, path: "/parichay" },
   { label: "History", sublabel: "\u0938\u0902\u0926\u0930\u094d\u092d \u0907\u0924\u093f\u0939\u093e\u0938", icon: History, path: "/history" },
 ];
 

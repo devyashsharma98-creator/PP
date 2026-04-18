@@ -1,20 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import LoginPageClient from "@/components/pages/LoginPageClient";
-import { getRoleLandingPath } from "@/lib/app/role-routing";
-import { getSession } from "@/lib/auth/session";
-
-const NEON_SESSION_COOKIE = "pp_neon_session";
-
-export default async function Page() {
-  const store = await cookies();
-  const sessionCookieName = process.env.SESSION_COOKIE_NAME ?? "pp_session";
-  const session =
-    store.get(sessionCookieName)?.value ?? store.get(NEON_SESSION_COOKIE)?.value;
-
-  if (!session) return <LoginPageClient />;
-
-  const verifiedSession = await getSession();
-  redirect(getRoleLandingPath(verifiedSession?.effectiveRoleCodes, verifiedSession?.primaryRoleCode));
+/** Site entry: always open on the public landing (Parichay). Auth and ERP routes use /login and /dashboard. */
+export default function Page() {
+  redirect("/parichay");
 }
