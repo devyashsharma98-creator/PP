@@ -61,11 +61,21 @@ export function AppSidebar() {
                 <h1 className={cn("text-sm font-bold tracking-tight text-sidebar-accent-foreground", lang === "hi" && "font-devanagari")}>
                   {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
                 </h1>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/58">
-                  Internal institutional console
+                <p
+                  className={cn(
+                    "text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/58",
+                    lang === "hi" && "font-devanagari tracking-[0.14em]",
+                  )}
+                >
+                  {t("Internal institutional console", "आंतरिक संस्थागत प्रणाली")}
                 </p>
-                <p className="text-[11px] leading-5 text-sidebar-foreground/72">
-                  ERP workflow, approvals, and coordination.
+                <p
+                  className={cn(
+                    "text-[11px] leading-5 text-sidebar-foreground/72",
+                    lang === "hi" && "font-devanagari",
+                  )}
+                >
+                  {t("ERP workflow, approvals, and coordination.", "ईआरपी कार्यप्रवाह, अनुमोदन और समन्वय।")}
                 </p>
               </motion.div>
             ) : null}

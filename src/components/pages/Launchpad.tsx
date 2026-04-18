@@ -20,7 +20,7 @@ import {
   Users,
 } from "lucide-react";
 
-import type { AalekhArticle, GatividhiEvent, PracharStatus } from "@/context/AppContext";
+import type { AalekhArticle, ArticleStatus, GatividhiEvent, PracharStatus } from "@/context/AppContext";
 import { useAppContext } from "@/context/AppContext";
 import { useOverview } from "@/hooks/api/use-overview";
 import { useUnreadCount } from "@/hooks/api/use-notifications";
@@ -30,6 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CanonicalRoleCode } from "@/lib/app/contracts";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
+import { eventStatusHi } from "@/components/pages/dashboard/config";
+import { statusHi as articleStatusHi } from "@/components/pages/aalekh/shared";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 
@@ -301,8 +303,8 @@ export default function Launchpad() {
           id: event.id,
           kind: "prachar",
           title: event.title,
-          meta: `${resolvedCount}/4 channels resolved`,
-          statusLabel: "Reach pending",
+          meta: t(`${resolvedCount}/4 channels resolved`, `${resolvedCount}/4 माध्यम पूर्ण`),
+          statusLabel: t("Reach pending", "पहुँच लंबित"),
           href: "/prachar",
         });
       });
@@ -317,73 +319,93 @@ export default function Launchpad() {
     personalEvents,
     pracharCampaigns.open,
     primaryRoleCode,
+    t,
   ]);
 
-  const quickActions = [
-    {
-      key: "events",
-      title: "Event Workflow",
-      body: isHi ? "पूर्व-कार्यक्रम योजना, वृत्त, उपस्थिति और अनुमोदन।" : "Pre-event planning, vritt, attendance, approvals.",
-      href: "/dashboard",
-      icon: LayoutDashboard,
-      accent: "from-primary/12 to-primary/4 border-primary/20",
-      highlight: true,
-    },
-    {
-      key: "prachar",
-      title: "Prachar Follow-through",
-      body: isHi ? "चैनल कवरेज पूर्ण करें और छोड़े गए प्लेटफ़ॉर्म का कारण दर्ज करें।" : "Complete channel coverage and document skipped platforms.",
-      href: "/prachar",
-      icon: Megaphone,
-      accent: "from-emerald-500/12 to-emerald-500/4 border-emerald-500/20",
-      highlight: true,
-    },
-    {
-      key: "aalekh",
-      title: "Aalekh Desk",
-      body: isHi ? "नियंत्रित कार्यप्रवाह के माध्यम से लिखें, समीक्षा करें और प्रकाशित करें।" : "Write, review, and publish through the governed workflow.",
-      href: "/aalekh",
-      icon: PenLine,
-      accent: "from-blue-500/12 to-blue-500/4 border-blue-500/20",
-      highlight: false,
-    },
-    {
-      key: "calendar",
-      title: "Annual Calendar",
-      body: isHi ? "आगामी कार्यक्रम और स्मरण लय देखें।" : "See upcoming programmes and reminder rhythms.",
-      href: "/calendar",
-      icon: CalendarDays,
-      accent: "from-amber-500/12 to-amber-500/4 border-amber-500/20",
-      highlight: false,
-    },
-    {
-      key: "vimarsh",
-      title: "Vimarsh Topics",
-      body: isHi ? "चयनित विमर्श सामग्री और विषय संसाधन खोलें।" : "Open curated discourse material and subject resources.",
-      href: "/vimarsh",
-      icon: MessagesSquare,
-      accent: "from-violet-500/12 to-violet-500/4 border-violet-500/20",
-      highlight: false,
-    },
-    {
-      key: "library",
-      title: "E-Library",
-      body: isHi ? "मंडलियों और सत्रों के लिए PDF और अध्ययन सामग्री देखें।" : "Access PDFs and study material for circles and sessions.",
-      href: "/library",
-      icon: BookOpen,
-      accent: "from-orange-500/12 to-orange-500/4 border-orange-500/20",
-      highlight: false,
-    },
-    {
-      key: "sampark",
-      title: "Sampark Directory",
-      body: isHi ? "इकाइयों और आयामों में सही सम्पर्क खोजें।" : "Find the right contact across units and aayams.",
-      href: "/directory",
-      icon: Users,
-      accent: "from-slate-500/12 to-slate-500/4 border-slate-500/20",
-      highlight: false,
-    },
-  ] as const;
+  const quickActions = useMemo(
+    () =>
+      [
+        {
+          key: "events",
+          title: t("Event workflow", "कार्यक्रम कार्यप्रवाह"),
+          body: t(
+            "Pre-event planning, vritt, attendance, approvals.",
+            "पूर्व-कार्यक्रम योजना, वृत्त, उपस्थिति और अनुमोदन।",
+          ),
+          href: "/dashboard",
+          icon: LayoutDashboard,
+          accent: "from-primary/12 to-primary/4 border-primary/20",
+          highlight: true,
+        },
+        {
+          key: "prachar",
+          title: t("Prachar follow-through", "प्रचार अनुवर्तन"),
+          body: t(
+            "Complete channel coverage and document skipped platforms.",
+            "चैनल कवरेज पूर्ण करें और छोड़े गए माध्यमों का कारण दर्ज करें।",
+          ),
+          href: "/prachar",
+          icon: Megaphone,
+          accent: "from-emerald-500/12 to-emerald-500/4 border-emerald-500/20",
+          highlight: true,
+        },
+        {
+          key: "aalekh",
+          title: t("Aalekh desk", "आलेख डेस्क"),
+          body: t(
+            "Write, review, and publish through the governed workflow.",
+            "नियंत्रित कार्यप्रवाह के माध्यम से लिखें, समीक्षा करें और प्रकाशित करें।",
+          ),
+          href: "/aalekh",
+          icon: PenLine,
+          accent: "from-blue-500/12 to-blue-500/4 border-blue-500/20",
+          highlight: false,
+        },
+        {
+          key: "calendar",
+          title: t("Annual calendar", "वार्षिक पंचांग"),
+          body: t("See upcoming programmes and reminder rhythms.", "आगामी कार्यक्रम और स्मरण लय देखें।"),
+          href: "/calendar",
+          icon: CalendarDays,
+          accent: "from-amber-500/12 to-amber-500/4 border-amber-500/20",
+          highlight: false,
+        },
+        {
+          key: "vimarsh",
+          title: t("Vimarsh topics", "विमर्श विषय"),
+          body: t(
+            "Open curated discourse material and subject resources.",
+            "चयनित विमर्श सामग्री और विषय संसाधन खोलें।",
+          ),
+          href: "/vimarsh",
+          icon: MessagesSquare,
+          accent: "from-violet-500/12 to-violet-500/4 border-violet-500/20",
+          highlight: false,
+        },
+        {
+          key: "library",
+          title: t("E-Library", "ई-पुस्तकालय"),
+          body: t(
+            "Access PDFs and study material for circles and sessions.",
+            "मंडलियों और सत्रों हेतु पीडीएफ़ व अध्ययन सामग्री देखें।",
+          ),
+          href: "/library",
+          icon: BookOpen,
+          accent: "from-orange-500/12 to-orange-500/4 border-orange-500/20",
+          highlight: false,
+        },
+        {
+          key: "sampark",
+          title: t("Sampark directory", "सम्पर्क निर्देशिका"),
+          body: t("Find the right contact across units and aayams.", "इकाइयों और आयामों में सही सम्पर्क खोजें।"),
+          href: "/directory",
+          icon: Users,
+          accent: "from-slate-500/12 to-slate-500/4 border-slate-500/20",
+          highlight: false,
+        },
+      ] as const,
+    [t],
+  );
 
   const contexts = [
     {
@@ -440,7 +462,10 @@ export default function Launchpad() {
           : `${actionableEvents.length + actionableArticles.length}`,
       detail:
         overview && !overviewQuery.isError
-          ? `${overview.workflow.pendingEvents} events · ${overview.workflow.pendingArticles} articles`
+          ? t(
+              `${overview.workflow.pendingEvents} events · ${overview.workflow.pendingArticles} articles`,
+              `${overview.workflow.pendingEvents} कार्यक्रम · ${overview.workflow.pendingArticles} आलेख`,
+            )
           : t("Pending items across approval lanes.", "अनुमोदन धाराओं में लंबित प्रविष्टियाँ।"),
       icon: Clock,
       tone: "warn" as const,
@@ -474,11 +499,19 @@ export default function Launchpad() {
     ...(dashboardLane === "prant"
       ? [
           {
-            title: isKshetraLane ? t("Escalation pressure", "????????? ????") : t("Final approvals", "????? ???????"),
+            title: isKshetraLane
+              ? t("Escalation pressure", "अग्रेषण दबाव")
+              : t("Final approvals", "अंतिम अनुमोदन"),
             value: `${isKshetraLane ? (overview ? overview.workflow.stalledEvents + overview.workflow.stalledArticles : 0) : (overview?.workflow.roleLaneCounts?.find((lane) => lane.lane === "Prant review")?.count ?? 0)}`,
             detail: isKshetraLane
-              ? t("Stalled cross-vibhag items needing kshetra attention.", "??????? ????? ???? ???? ????-??????? ?????????????")
-              : t("Items currently awaiting prant authorization.", "??????? ??????? ?? ????????? ?? ??? ?????????????"),
+              ? t(
+                  "Stalled cross-vibhag items needing kshetra attention.",
+                  "कई विभागों से जुड़े अटके कार्य जिन पर क्षेत्रीय ध्यान देना आवश्यक है।",
+                )
+              : t(
+                  "Items currently awaiting prant authorization.",
+                  "वर्तमान में प्रान्त अनुमोदन की प्रतीक्षा में लंबित प्रविष्टियाँ।",
+                ),
             icon: isKshetraLane ? AlertTriangle : ShieldCheck,
             tone:
               (isKshetraLane
@@ -498,34 +531,34 @@ export default function Launchpad() {
     dashboardLane === "super_admin"
       ? {
           seal: "ERP Governance Center",
-          sealHi: "????? ???? ??????",
+          sealHi: "ईआरपी शासन केन्द्र",
           title: "System Oversight Dashboard",
-          titleHi: "?????? ?????? ????????",
-          subtitle: t(
+          titleHi: "प्रणाली पर्यवेक्षण डैशबोर्ड",
+          subtitleEn:
             "Monitor account health, blocked workflows, hierarchy gaps, and organisation-wide operational pressure.",
-            "???? ?????????, ???? ???????????, ?????????? ???? ?? ??????-?????? ??????? ???? ?? ?? ?? ????? ?? ??????",
-          ),
+          subtitleHi:
+            "खातों की स्थिति, अवरुद्ध कार्यप्रवाह, पदानुक्रम में अंतराल और संपूर्ण संगठन के संचालन दबाव पर नज़र रखें।",
         }
       : isKshetraLane
         ? {
             seal: "Kshetra Review Center",
-            sealHi: "??????? ??????? ??????",
+            sealHi: "क्षेत्र समीक्षा केन्द्र",
             title: "Kshetra Escalation Dashboard",
-            titleHi: "??????? ????????? ????????",
-            subtitle: t(
+            titleHi: "क्षेत्र अग्रेषण डैशबोर्ड",
+            subtitleEn:
               "Track cross-vibhag escalation pressure, stalled review lanes, and structural risk before wider rollout.",
-              "??????? ?? ??? ????????? ????, ???? ??????? ?????? ?? ?????????? ????? ?? ?????? ??????? ?? ???? ??????",
-            ),
+            subtitleHi:
+              "कई विभागों पर फैला अग्रेषण दबाव, रुकी हुई समीक्षा धाराएँ और व्यापक विस्तार से पहले संरचनात्मक जोखिम पर ध्यान दें।",
           }
         : {
             seal: "Prant Operations Center",
-            sealHi: "??????? ?????? ??????",
+            sealHi: "प्रान्त संचालन केन्द्र",
             title: "Prant Oversight Dashboard",
-            titleHi: "??????? ?????? ????????",
-            subtitle: t(
+            titleHi: "प्रान्त पर्यवेक्षण डैशबोर्ड",
+            subtitleEn:
               "Track final approvals, delayed vibhags, escalation pressure, and hierarchy health across the prant lane.",
-              "????? ???????, ??????? ?????, escalation pressure ?? ???????-?????? ?????????? ????????? ?? ?? ?? ????? ?? ??????",
-            ),
+            subtitleHi:
+              "अंतिम अनुमोदन, विलंबित विभाग, अग्रेषण दबाव और प्रान्त धारा में संरचना स्वास्थ्य पर नज़र रखें।",
           };
 
   return (
@@ -535,8 +568,8 @@ export default function Launchpad() {
         sealHi={dashboardFrame.sealHi}
         title={dashboardFrame.title}
         titleHi={dashboardFrame.titleHi}
-        subtitle={dashboardFrame.subtitle}
-        subtitleHi={dashboardFrame.subtitle}
+        subtitle={dashboardFrame.subtitleEn}
+        subtitleHi={dashboardFrame.subtitleHi}
         contexts={contexts}
         lang={isHi ? "hi" : "en"}
         actions={
@@ -703,19 +736,46 @@ export default function Launchpad() {
                         ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
                         : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
 
+                  const kindLabel =
+                    item.kind === "event"
+                      ? t("Event", "कार्यक्रम")
+                      : item.kind === "article"
+                        ? t("Article", "आलेख")
+                        : t("Prachar", "प्रचार");
+                  const statusHiText =
+                    item.kind === "event"
+                      ? eventStatusHi[item.statusLabel] ?? item.statusLabel
+                      : item.kind === "article"
+                        ? articleStatusHi[item.statusLabel as ArticleStatus] ?? item.statusLabel
+                        : item.statusLabel;
+
                   return (
                     <Link key={`${item.kind}-${item.id}`} href={item.href} className="group block">
                       <div className="flex items-start gap-4 rounded-2xl border border-border/70 bg-background/70 px-4 py-4 transition-all group-hover:border-primary/30">
-                        <Badge className={cn("shrink-0 border text-[10px] uppercase tracking-[0.16em]", chipClass)}>
-                          {item.kind}
+                        <Badge
+                          className={cn(
+                            "shrink-0 border text-[10px] uppercase tracking-[0.16em]",
+                            chipClass,
+                            isHi && "font-devanagari normal-case tracking-normal",
+                          )}
+                        >
+                          {kindLabel}
                         </Badge>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
+                          <p
+                            className={cn(
+                              "truncate text-sm font-semibold transition-colors group-hover:text-primary",
+                              isHi && "font-devanagari",
+                            )}
+                          >
                             {item.title}
                           </p>
-                          <p className="mt-1 truncate text-xs text-muted-foreground">{item.meta}</p>
-                          <p className="mt-2 text-[11px] text-muted-foreground">
-                            <span className="font-medium text-foreground/80">Status:</span> {item.statusLabel}
+                          <p className={cn("mt-1 truncate text-xs text-muted-foreground", isHi && "font-devanagari")}>
+                            {item.meta}
+                          </p>
+                          <p className={cn("mt-2 text-[11px] text-muted-foreground", isHi && "font-devanagari")}>
+                            <span className="font-medium text-foreground/80">{t("Status:", "स्थिति:")}</span>{" "}
+                            {t(item.statusLabel, statusHiText)}
                           </p>
                         </div>
                         <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
@@ -810,19 +870,27 @@ export default function Launchpad() {
                         <div className="grid grid-cols-3 gap-2 text-center text-xs">
                           <div>
                             <p className="font-semibold">{actor.createdCount}</p>
-                            <p className="text-muted-foreground">Created</p>
+                            <p className={cn("text-muted-foreground", isHi && "font-devanagari")}>
+                              {t("Created", "निर्मित")}
+                            </p>
                           </div>
                           <div>
                             <p className="font-semibold">{actor.reviewCount}</p>
-                            <p className="text-muted-foreground">Reviewed</p>
+                            <p className={cn("text-muted-foreground", isHi && "font-devanagari")}>
+                              {t("Reviewed", "समीक्षित")}
+                            </p>
                           </div>
                           <div>
                             <p className="font-semibold">{actor.publishedCount}</p>
-                            <p className="text-muted-foreground">Published</p>
+                            <p className={cn("text-muted-foreground", isHi && "font-devanagari")}>
+                              {t("Published", "प्रकाशित")}
+                            </p>
                           </div>
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-muted-foreground">Last action: {formatDateTime(actor.lastActionAt)}</p>
+                      <p className={cn("mt-2 text-xs text-muted-foreground", isHi && "font-devanagari")}>
+                        {t("Last action:", "अंतिम कार्यवाही:")} {formatDateTime(actor.lastActionAt)}
+                      </p>
                     </div>
                   ))}
                 </div>

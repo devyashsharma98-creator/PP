@@ -25,7 +25,7 @@ function getShellFrame(pathname: string, role: Role) {
       titleEn: 'Overview',
       titleHi: 'अवलोकन',
       subtitleEn: 'Start here for system health, hierarchy checks, and cross-workflow visibility.',
-      subtitleHi: 'सिस्टम health, hierarchy checks और workflow visibility के लिए यहीं से शुरुआत करें।',
+      subtitleHi: 'स्वास्थ्य जाँच, पदानुक्रम समीक्षा और कार्यप्रवाह की दृश्यता यहीं से शुरू करें।',
     };
   }
 
@@ -52,7 +52,7 @@ function getShellFrame(pathname: string, role: Role) {
       titleEn: 'Events & Approvals',
       titleHi: 'कार्यक्रम व अनुमोदन',
       subtitleEn: 'Plan programmes, move them through review, and complete the event workflow here.',
-      subtitleHi: 'कार्यक्रम योजना, review flow और final event execution यहीं से चलाएँ।',
+      subtitleHi: 'कार्यक्रम योजना, समीक्षा प्रवाह और अंतिम आयोजन इसी सतह से चलाएँ।',
     };
   }
 
@@ -76,14 +76,14 @@ function getShellFrame(pathname: string, role: Role) {
       titleEn: 'Prachar Desk',
       titleHi: 'प्रचार डेस्क',
       subtitleEn: 'Close distribution gaps, confirm channel coverage, and finish outreach follow-through.',
-      subtitleHi: 'distribution gaps बंद करें, channel coverage confirm करें, और outreach follow-through पूरा करें।',
+      subtitleHi: 'वितरण में अंतराल बंद करें, माध्यम कवरेज सुनिश्चित करें और प्रसार अनुवर्तन पूरा करें।',
     },
     {
       match: '/aalekh',
       titleEn: 'Aalekh Desk',
       titleHi: 'आलेख डेस्क',
       subtitleEn: 'Write, review, revise, and prepare institutional content for publication.',
-      subtitleHi: 'लेखन, समीक्षा, correction और publication-ready content यहीं तैयार करें।',
+      subtitleHi: 'लेखन, समीक्षा, संशोधन और प्रकाशन-तैयार सामग्री यहीं तैयार करें।',
     },
     {
       match: '/feed',
