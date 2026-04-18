@@ -17,14 +17,11 @@ const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "pp_session";
 const NEON_SESSION_COOKIE = "pp_neon_session";
 
 function isStaticAsset(pathname: string) {
-  return (
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/robots.txt") ||
-    pathname.startsWith("/sitemap") ||
-    pathname.startsWith("/assets/") ||
-    /\.[a-zA-Z0-9]+$/.test(pathname)
-  );
+  return (pathname.startsWith("/_next/") ||
+  pathname.startsWith("/favicon") ||
+  pathname.startsWith("/robots.txt") ||
+  pathname.startsWith("/sitemap") ||
+  pathname.startsWith("/assets/") || /\.[a-zA-Z0-9]+$/.test(pathname));
 }
 
 function isPublicPath(pathname: string) {
@@ -43,7 +40,7 @@ function noStore(response: NextResponse) {
   return response;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Skip auth checks for static assets and public paths
