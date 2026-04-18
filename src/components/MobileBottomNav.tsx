@@ -143,7 +143,7 @@ export function MobileBottomNav() {
                               {t(item.label, item.sublabel)}
                             </p>
                             <p className={cn("text-xs text-muted-foreground", lang === "hi" && "font-devanagari")}>
-                              {t(item.sublabel, item.sublabel)}
+                              {lang === "hi" ? item.label : item.sublabel}
                             </p>
                           </div>
                         </Link>

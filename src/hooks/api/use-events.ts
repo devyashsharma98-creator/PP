@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAppContext } from '@/context/AppContext';
 import { queryKeys } from '@/lib/query-client';
 import * as api from '@/lib/api/events';
 import type { EventFilters, CreateEventInput } from '@/lib/api/events';
@@ -22,59 +23,69 @@ export function useEvent(id: string) {
 
 export function useCreateEvent() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: (input: CreateEventInput) => api.createEvent(input),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      await refreshWorkspace();
     },
   });
 }
 
 export function useUpdateEvent() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<CreateEventInput> }) => 
       api.updateEvent(id, input),
-    onSuccess: (_, { id }) => {
+    onSuccess: async (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
+      await refreshWorkspace();
     },
   });
 }
 
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: (id: string) => api.deleteEvent(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      await refreshWorkspace();
     },
   });
 }
 
 export function useSubmitEventForReview() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: (id: string) => api.submitEventForReview(id),
-    onSuccess: (_, id) => {
+    onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
+      await refreshWorkspace();
     },
   });
 }
 
 export function usePublishEvent() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: (id: string) => api.publishEvent(id),
-    onSuccess: (_, id) => {
+    onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
+      await refreshWorkspace();
     },
   });
 }

@@ -26,6 +26,15 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 export const metadata: Metadata = {
   title: "Pragya Pravah - Bhopal Vibhag",
   description: "Pragya Pravah Management System - Bhopal Vibhag",
+  applicationName: "Pragya Pravah",
+  appleWebApp: {
+    capable: true,
+    title: "Pragya Pravah",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,6 +42,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f97316" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 };
 
 export default async function RootLayout({

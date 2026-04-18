@@ -2,8 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
-import type { GatividhiEvent, FormConfig } from '@/context/AppContext';
+import { useAppContext, type GatividhiEvent, type FormConfig } from '@/context/AppContext';
 import { dbToUiEventStatus } from '@/lib/app/status-maps';
+import { repairBrokenHindi } from '@/lib/useT';
 
 const API_BASE = '/api/v1';
 
@@ -35,12 +36,14 @@ function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
 
   return {
     id: row.id as string,
-    title: (row.title as string) || '',
-    description: (row.description as string) || '',
+    title: repairBrokenHindi(String(row.title ?? '') || ''),
+    description: repairBrokenHindi(String(row.description ?? '') || ''),
     date: dateFormatted,
     dateIso,
-    unit: ((row.unitName ?? row.unit_name ?? row.unitId ?? row.unit_id) as string) || 'Unknown',
-    submittedBy: (row.submittedByNameSnapshot as string) || 'API',
+    unit: repairBrokenHindi(
+      String((row.unitName ?? row.unit_name ?? row.unitId ?? row.unit_id) as string) || 'Unknown',
+    ),
+    submittedBy: repairBrokenHindi(String(row.submittedByNameSnapshot ?? '') || 'API'),
     status: (dbToUiEventStatus[String(row.status ?? '')] ?? 'Draft') as GatividhiEvent['status'],
     checklist: {
       designing: Boolean((row.checklist as Record<string, unknown> | undefined)?.designing),
@@ -78,6 +81,7 @@ export function useDashboardEvents() {
 
 export function useCreateDashboardEvent() {
   const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
   return useMutation({
     mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string }) => {
       return fetchApi<Record<string, unknown>>('/events', {
@@ -85,14 +89,16 @@ export function useCreateDashboardEvent() {
         body: JSON.stringify(input),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+      await refreshWorkspace();
     },
   });
 }
 
 export function useUpdateEventStatus() {
   const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
   return useMutation({
     mutationFn: async ({ id, toStatus, notes }: { id: string; toStatus: string; notes?: string }) => {
       return fetchApi<Record<string, unknown>>(`/events/${id}/workflow`, {
@@ -100,8 +106,9 @@ export function useUpdateEventStatus() {
         body: JSON.stringify({ toStatus, notes }),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+      await refreshWorkspace();
     },
   });
 }

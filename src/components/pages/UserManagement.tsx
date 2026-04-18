@@ -71,7 +71,7 @@ import type { CanonicalRoleCode } from "@/lib/app/contracts";
 import { canonicalRoleLabels, canonicalRoleLabelsHi } from "@/lib/app/constants";
 import { getPrimaryRole, resolvePermissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { useT } from "@/lib/useT";
+import { displayBilingualHi, repairBrokenHindi, useT } from "@/lib/useT";
 
 type StatusFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | CanonicalRoleCode;
@@ -158,7 +158,7 @@ function formatDateTime(value: string | null | undefined, lang: "en" | "hi") {
 }
 
 function getRoleLabel(roleCode: CanonicalRoleCode, lang: "en" | "hi") {
-  return lang === "hi" ? canonicalRoleLabelsHi[roleCode] : canonicalRoleLabels[roleCode];
+  return lang === "hi" ? repairBrokenHindi(canonicalRoleLabelsHi[roleCode] ?? roleCode) : canonicalRoleLabels[roleCode];
 }
 
 function createStrongPassword() {
@@ -377,22 +377,27 @@ export default function UserManagement() {
   const assignRoleReady = Boolean(assignRoleCode) && scopeTargetReady;
 
   const unitNameById = useMemo(
-    () => new Map(units.map((unit) => [unit.id, lang === "hi" ? unit.nameHi ?? unit.name : unit.name])),
+    () => new Map(units.map((unit) => [unit.id, displayBilingualHi(unit.name, unit.nameHi, lang)])),
     [lang, units],
   );
   const departmentNameById = useMemo(
-    () => new Map(departments.map((department) => [department.id, lang === "hi" ? department.nameHi ?? department.name : department.name])),
+    () =>
+      new Map(
+        departments.map((department) => [department.id, displayBilingualHi(department.name, department.nameHi, lang)]),
+      ),
     [departments, lang],
   );
 
   function formatAssignmentScope(assignment: UserDetail["roleAssignments"][number]) {
-    if (assignment.scopeType === "org") return scopeOptions?.org?.name ?? t("Whole organisation", "???? ??????");
+    if (assignment.scopeType === "org") return scopeOptions?.org?.name ?? t("Whole organisation", "पूरी संस्था");
     if (assignment.scopeType === "unit") {
-      return assignment.unitId ? unitNameById.get(assignment.unitId) ?? t("Selected unit", "????? ????") : t("Unit scope", "???? ???????");
+      return assignment.unitId
+        ? unitNameById.get(assignment.unitId) ?? t("Selected unit", "चयनित इकाई")
+        : t("Unit scope", "इकाई क्षेत्र");
     }
     if (assignment.scopeType === "department") {
       return assignment.departmentId
-        ? departmentNameById.get(assignment.departmentId) ?? t("Selected aayam", "????? ????")
+        ? departmentNameById.get(assignment.departmentId) ?? t("Selected aayam", "चयनित आयाम")
         : t("Aayam scope", "आयाम क्षेत्र");
     }
     return getScopeTypeLabel(assignment.scopeType, lang);
@@ -764,7 +769,8 @@ export default function UserManagement() {
                         <div className="min-w-0 space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate text-base font-semibold">
-                              {user.displayName || user.email || t("Unnamed account", "???? ??? ?? ????")}
+                              {displayBilingualHi(user.displayName || user.email || "", user.displayNameHi, lang) ||
+                                t("Unnamed account", "अनाम खाता")}
                             </p>
                             <Badge variant={user.isActive ? "default" : "secondary"}>
                               {user.isActive ? t("Active", "सक्रिय") : t("Inactive", "निष्क्रिय")}
@@ -774,7 +780,7 @@ export default function UserManagement() {
                           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-1.5">
                               <Mail className="h-3.5 w-3.5" />
-                              {user.email || t("No email", "??? ???? ????")}
+                              {user.email || t("No email", "कोई ईमेल नहीं")}
                             </span>
                             {user.phone ? (
                               <span className="inline-flex items-center gap-1.5">
@@ -889,7 +895,11 @@ export default function UserManagement() {
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <CardTitle className="text-xl">
-                          {selectedUser.displayName || selectedUser.email || t("Unnamed account", "बिना नाम का खाता")}
+                          {displayBilingualHi(
+                            selectedUser.displayName || selectedUser.email || "",
+                            selectedUser.displayNameHi,
+                            lang,
+                          ) || t("Unnamed account", "बिना नाम का खाता")}
                         </CardTitle>
                         <Badge variant={selectedUser.isActive ? "default" : "secondary"}>
                           {selectedUser.isActive ? t("Active", "सक्रिय") : t("Inactive", "निष्क्रिय")}
@@ -1086,7 +1096,7 @@ export default function UserManagement() {
                             <SelectContent>
                               {units.map((unit) => (
                                 <SelectItem key={unit.id} value={unit.id}>
-                                  {lang === "hi" ? unit.nameHi ?? unit.name : unit.name}
+                                  {displayBilingualHi(unit.name, unit.nameHi, lang)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1104,7 +1114,7 @@ export default function UserManagement() {
                             <SelectContent>
                               {departments.map((department) => (
                                 <SelectItem key={department.id} value={department.id}>
-                                  {lang === "hi" ? department.nameHi ?? department.name : department.name}
+                                  {displayBilingualHi(department.name, department.nameHi, lang)}
                                   {department.unitId ? ` - ${unitNameById.get(department.unitId) ?? ""}` : ""}
                                 </SelectItem>
                               ))}
@@ -1123,14 +1133,14 @@ export default function UserManagement() {
 
                       {selectedAssignRolePreview ? (
                         <div className="rounded-2xl border border-border/60 bg-background/70 px-3 py-3 text-xs text-muted-foreground lg:col-span-2">
-                          <p className="font-medium text-foreground">{t("Preview", "???????????")}: {getRoleLabel(assignRoleCode as CanonicalRoleCode, lang)}</p>
+                          <p className="font-medium text-foreground">{t("Preview", "पूर्वावलोकन")}: {getRoleLabel(assignRoleCode as CanonicalRoleCode, lang)}</p>
                           <p className="mt-1">
-                            {t("Scope", "???????")}: {getScopeTypeLabel(assignScopeType, lang)}
-                            {assignScopeType === "unit" && assignUnitId ? ` - ${unitNameById.get(assignUnitId) ?? t("Selected unit", "????? ????")}` : ""}
-                            {assignScopeType === "department" && assignDepartmentId ? ` - ${departmentNameById.get(assignDepartmentId) ?? t("Selected aayam", "????? ????")}` : ""}
+                            {t("Scope", "क्षेत्र")}: {getScopeTypeLabel(assignScopeType, lang)}
+                            {assignScopeType === "unit" && assignUnitId ? ` - ${unitNameById.get(assignUnitId) ?? t("Selected unit", "चयनित इकाई")}` : ""}
+                            {assignScopeType === "department" && assignDepartmentId ? ` - ${departmentNameById.get(assignDepartmentId) ?? t("Selected aayam", "चयनित आयाम")}` : ""}
                           </p>
                           <p className="mt-1">
-                            {t("Capabilities", "????????")}: {ACCESS_ROWS.filter((row) => selectedAssignRolePreview[row.key]).map((row) => (lang === "hi" ? row.areaHi : row.area)).join(", ") || t("Restricted", "?????")}
+                            {t("Capabilities", "क्षमताएँ")}: {ACCESS_ROWS.filter((row) => selectedAssignRolePreview[row.key]).map((row) => (lang === "hi" ? row.areaHi : row.area)).join(", ") || t("Restricted", "प्रतिबंधित")}
                           </p>
                         </div>
                       ) : null}

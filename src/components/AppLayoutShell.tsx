@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { PageTransition } from "@/components/PageTransition";
 import { Skeleton } from "@/components/Skeletons";
 import { useAppContext } from "@/context/AppContext";
+import { useT } from "@/lib/useT";
 
 const FULL_BLEED_PUBLIC_PATHS = new Set(["/login"]);
 const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh", "/library", "/feed", "/history", "/guide"]);
@@ -22,7 +23,8 @@ export function AppLayoutShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { authReady, isAuthenticated } = useAppContext();
+  const { authReady, isAuthenticated, lang } = useAppContext();
+  const t = useT();
 
   const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
   const isGuestRootEntry = pathname === "/" && !isAuthenticated;
@@ -54,10 +56,17 @@ export function AppLayoutShell({
         <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center">
           <div className="institution-panel w-full max-w-3xl space-y-6 px-6 py-8 md:px-8">
             <div className="space-y-2">
-              <p className="section-seal">Internal institutional console</p>
-              <h1 className="text-2xl font-semibold tracking-tight">Loading dashboard context...</h1>
-              <p className="text-sm text-muted-foreground">
-                Securing access and preparing the correct dayitva lane.
+              <p className="section-seal">
+                {t("Internal institutional console", "आंतरिक संस्थागत कंसोल")}
+              </p>
+              <h1 className={lang === "hi" ? "text-2xl font-semibold tracking-tight font-devanagari" : "text-2xl font-semibold tracking-tight"}>
+                {t("Loading workspace…", "कार्यक्षेत्र लोड हो रहा है…")}
+              </h1>
+              <p className={lang === "hi" ? "text-sm text-muted-foreground font-devanagari leading-relaxed" : "text-sm text-muted-foreground leading-relaxed"}>
+                {t(
+                  "Securing your session and loading the correct role lane.",
+                  "आपका सत्र सुरक्षित कर रहे हैं और सही भूमिका धारा तैयार कर रहे हैं।",
+                )}
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">

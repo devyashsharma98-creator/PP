@@ -16,7 +16,7 @@ const DATABASE_URL =
   "";
 
 if (!DATABASE_URL) {
-  console.error("âŒ  DATABASE_URL not set");
+  console.error("DATABASE_URL not set");
   process.exit(1);
 }
 
@@ -27,16 +27,16 @@ const DEMO_PASSWORD = process.env.APP_DEMO_PASSWORD ?? "Password123!";
 const ORG_CODE = process.env.APP_ORG_CODE ?? "bhopal_vibhag";
 
 async function seed() {
-  console.log("ðŸŒ±  Seeding Pragya Pravah DBâ€¦\n");
+  console.log("Seeding Pragya Pravah DB...\n");
 
-  // â”€â”€ 1. Org â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  console.log("  [1/5] Org settingsâ€¦");
+  // --- 1. Org ---
+  console.log("  [1/5] Org settings...");
   const [org] = await db
     .insert(schema.orgSettings)
     .values({
       orgCode: ORG_CODE,
-      name: "Pragya Pravah â€“ Bhopal Vibhag",
-      nameHi: "à¤ªà¥à¤°à¤œà¥à¤žà¤¾ à¤ªà¥à¤°à¤µà¤¾à¤¹ â€“ à¤­à¥‹à¤ªà¤¾à¤² à¤µà¤¿à¤­à¤¾à¤—",
+      name: "Pragya Pravah – Bhopal Vibhag",
+      nameHi: "प्रज्ञा प्रवाह – भोपाल विभाग",
       isActive: true,
       metadata: {},
     })
@@ -51,18 +51,18 @@ async function seed() {
 
   console.log(`     org_id = ${orgId}`);
 
-  // â”€â”€ 2. Roles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  console.log("  [2/5] Rolesâ€¦");
+  // --- 2. Roles ---
+  console.log("  [2/5] Roles...");
   const roleDefs = [
-    { code: "super_admin",        priority: "0", name: "Super Admin",         nameHi: "à¤¸à¥à¤ªà¤° à¤µà¥à¤¯à¤µà¤¸à¥à¤¥à¤¾à¤ªà¤•" },
-    { code: "org_admin",          priority: "1", name: "Org Admin",           nameHi: "à¤¸à¤‚à¤¸à¥à¤¥à¤¾ à¤µà¥à¤¯à¤µà¤¸à¥à¤¥à¤¾à¤ªà¤•" },
-    { code: "kshetra_reviewer",   priority: "2", name: "Kshetra Reviewer",    nameHi: "à¤•à¥à¤·à¥‡à¤¤à¥à¤° à¤¸à¤®à¥€à¤•à¥à¤·à¤•" },
-    { code: "prant_sanyojak",     priority: "3", name: "Prant Sanyojak",      nameHi: "à¤ªà¥à¤°à¤¾à¤¨à¥à¤¤ à¤¸à¤‚à¤¯à¥‹à¤œà¤•" },
-    { code: "prant_aayam_pramukh",priority: "4", name: "Prant Aayam Pramukh",nameHi: "à¤ªà¥à¤°à¤¾à¤¨à¥à¤¤ à¤†à¤¯à¤¾à¤® à¤ªà¥à¤°à¤®à¥à¤–" },
-    { code: "vibhag_pramukh",     priority: "5", name: "Vibhag Pramukh",      nameHi: "à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–" },
-    { code: "aayam_pramukh",      priority: "6", name: "Aayam Pramukh",       nameHi: "à¤†à¤¯à¤¾à¤® à¤ªà¥à¤°à¤®à¥à¤–" },
-    { code: "unit_head",          priority: "7", name: "Unit Head",            nameHi: "à¤‡à¤•à¤¾à¤ˆ à¤ªà¥à¤°à¤®à¥à¤–" },
-    { code: "karyakarta",         priority: "8", name: "Karyakarta",           nameHi: "à¤•à¤¾à¤°à¥à¤¯à¤•à¤°à¥à¤¤à¤¾" },
+    { code: "super_admin",        priority: "0", name: "Super Admin",         nameHi: "सुपर व्यवस्थापक" },
+    { code: "org_admin",          priority: "1", name: "Org Admin",           nameHi: "संस्था व्यवस्थापक" },
+    { code: "kshetra_reviewer",   priority: "2", name: "Kshetra Reviewer",    nameHi: "क्षेत्र समीक्षक" },
+    { code: "prant_sanyojak",     priority: "3", name: "Prant Sanyojak",      nameHi: "प्रान्त संयोजक" },
+    { code: "prant_aayam_pramukh",priority: "4", name: "Prant Aayam Pramukh",nameHi: "प्रान्त आयाम प्रमुख" },
+    { code: "vibhag_pramukh",     priority: "5", name: "Vibhag Pramukh",      nameHi: "विभाग प्रमुख" },
+    { code: "aayam_pramukh",      priority: "6", name: "Aayam Pramukh",       nameHi: "आयाम प्रमुख" },
+    { code: "unit_head",          priority: "7", name: "Unit Head",            nameHi: "इकाई प्रमुख" },
+    { code: "karyakarta",         priority: "8", name: "Karyakarta",           nameHi: "कार्यकर्ता" },
   ] as const;
 
   for (const r of roleDefs) {
@@ -77,15 +77,15 @@ async function seed() {
   const roleByCode = Object.fromEntries(allRoles.map((r) => [r.code, r.id]));
   console.log(`     seeded ${allRoles.length} roles`);
 
-  // â”€â”€ 3. Root unit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  console.log("  [3/5] Root unitâ€¦");
+  // --- 3. Root unit ---
+  console.log("  [3/5] Root unit...");
   const [unit] = await db
     .insert(schema.units)
     .values({
       orgId,
       code: "bhopal_vibhag_root",
       name: "Bhopal Vibhag",
-      nameHi: "à¤­à¥‹à¤ªà¤¾à¤² à¤µà¤¿à¤­à¤¾à¤—",
+      nameHi: "भोपाल विभाग",
       unitKind: "vibhag",
       isActive: true,
     })
@@ -240,8 +240,8 @@ async function seed() {
     `;
   }
 
-  // â”€â”€ 4. Demo users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  console.log("  [4/5] Demo usersâ€¦");
+  // --- 4. Demo users ---
+  console.log("  [4/5] Demo users...");
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   const demoUsers = [
@@ -277,7 +277,7 @@ async function seed() {
     {
       email: "demo.vibhag@example.com",
       displayName: "Demo Vibhag Pramukh",
-      displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤µà¤¿à¤­à¤¾à¤— à¤ªà¥à¤°à¤®à¥à¤–",
+      displayNameHi: "डेमो विभाग प्रमुख",
       roleCode: "vibhag_pramukh" as const,
       scopeType: "unit" as const,
       unitId: canonicalUnitId,
@@ -285,7 +285,7 @@ async function seed() {
     {
       email: "demo.aayam@example.com",
       displayName: "Demo Aayam Pramukh",
-      displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤†à¤¯à¤¾à¤® à¤ªà¥à¤°à¤®à¥à¤–",
+      displayNameHi: "डेमो आयाम प्रमुख",
       roleCode: "aayam_pramukh" as const,
       scopeType: "department" as const,
       departmentId: localAayamId,
@@ -293,7 +293,7 @@ async function seed() {
     {
       email: "demo.unithead@example.com",
       displayName: "Demo Unit Head",
-      displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤‡à¤•à¤¾à¤ˆ à¤ªà¥à¤°à¤®à¥à¤–",
+      displayNameHi: "डेमो इकाई प्रमुख",
       roleCode: "unit_head" as const,
       scopeType: "unit" as const,
       unitId: canonicalUnitId,
@@ -301,7 +301,7 @@ async function seed() {
     {
       email: "demo.karyakarta@example.com",
       displayName: "Demo Karyakarta",
-      displayNameHi: "à¤¡à¥‡à¤®à¥‹ à¤•à¤¾à¤°à¥à¤¯à¤•à¤°à¥à¤¤à¤¾",
+      displayNameHi: "डेमो कार्यकर्ता",
       roleCode: "karyakarta" as const,
       scopeType: "unit" as const,
       unitId: canonicalUnitId,
@@ -364,18 +364,18 @@ async function seed() {
     }
   }
 
-  // â”€â”€ 5. Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  console.log("\nâœ…  Seed complete!\n");
+  // --- 5. Summary ---
+  console.log("\nSeed complete.\n");
   console.log("  Demo credentials (all share the same password):");
   console.log(`  Password: ${DEMO_PASSWORD}\n`);
   for (const u of demoUsers) {
-    console.log(`  ${u.roleCode.padEnd(20)} â†’ ${u.email}`);
+    console.log(`  ${u.roleCode.padEnd(20)} -> ${u.email}`);
   }
   console.log("");
 }
 
 seed().catch((err) => {
-  console.error("âŒ  Seed failed:", err);
+  console.error("Seed failed:", err);
   process.exit(1);
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAppContext } from '@/context/AppContext';
 import { queryKeys } from '@/lib/query-client';
 import * as api from '@/lib/api/users';
 import type { UserFilters, UpdateUserInput } from '@/lib/api/users';
@@ -22,13 +23,15 @@ export function useUser(id: string) {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  
+  const { refreshWorkspace } = useAppContext();
+
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateUserInput }) => 
       api.updateUser(id, input),
-    onSuccess: (_, { id }) => {
+    onSuccess: async (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.user(id) });
+      await refreshWorkspace();
     },
   });
 }

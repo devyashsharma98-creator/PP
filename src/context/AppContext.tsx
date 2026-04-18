@@ -81,6 +81,8 @@ interface AppState {
   ) => Promise<boolean>;
   markAttendance: (eventId: string, options?: { skipRemote?: boolean }) => void;
   vimarshTopics: VimarshTopic[];
+  /** Reload `/api/app/bootstrap` so Launchpad, Prachar, and Aalekh match the server after `/api/v1` mutations. */
+  refreshWorkspace: () => Promise<void>;
 }
 
 const defaultPermissions: AppPermissionSummary = {
@@ -547,6 +549,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [persistAppAction]);
 
+  const refreshWorkspace = useCallback(async () => {
+    await loadRemoteBootstrap();
+  }, [loadRemoteBootstrap]);
+
   const contextValue = useMemo(() => ({
     role, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
     lang, setLang,
@@ -555,6 +561,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     articles, addArticle, updateArticleStatus,
     pracharStatuses, updatePracharPlatform,
     vimarshTopics,
+    refreshWorkspace,
   }), [
     role, setRole, viewer, permissions, authReady,
     lang, setLang,
@@ -563,6 +570,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     articles, addArticle, updateArticleStatus,
     pracharStatuses, updatePracharPlatform,
     vimarshTopics,
+    refreshWorkspace,
   ]);
 
   return (

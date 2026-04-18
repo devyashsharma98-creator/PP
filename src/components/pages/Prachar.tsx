@@ -40,17 +40,17 @@ interface PracharContextItem {
 
 const platforms: Platform[] = [
   { key: 'whatsapp', label: 'WhatsApp Groups', labelHi: 'WhatsApp ग्रुप', icon: MessageCircle, color: 'text-success' },
-  { key: 'facebook', label: 'Facebook Page', labelHi: 'Facebook à¤ªà¥‡à¤œ', icon: Globe, color: 'text-info' },
+  { key: 'facebook', label: 'Facebook Page', labelHi: 'Facebook पेज', icon: Globe, color: 'text-info' },
   { key: 'instagram', label: 'Instagram', labelHi: 'Instagram', icon: Camera, color: 'text-destructive' },
-  { key: 'telegram', label: 'Telegram Channel', labelHi: 'Telegram à¤šà¥ˆà¤¨à¤²', icon: Navigation, color: 'text-primary' },
+  { key: 'telegram', label: 'Telegram Channel', labelHi: 'Telegram चैनल', icon: Navigation, color: 'text-primary' },
 ];
 
 const templates = [
-  { id: 't1', name: 'Event Poster', nameHi: 'à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤ªà¥‹à¤¸à¥à¤Ÿà¤°', desc: 'Standard event announcement', descHi: 'à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤•à¥€ à¤®à¤¾à¤¨à¤• à¤˜à¥‹à¤·à¤£à¤¾', icon: Layout, gradient: 'from-orange-500 to-amber-500' },
-  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'विमर्श उद्धरण कार्ड', desc: 'Quote card for discourse topics', descHi: 'à¤µà¤¿à¤®à¤°à¥à¤¶ à¤µà¤¿à¤·à¤¯à¥‹à¤‚ à¤•à¥‡ à¤²à¤¿à¤ à¤‰à¤¦à¥à¤§à¤°à¤£ à¤•à¤¾à¤°à¥à¤¡', icon: Palette, gradient: 'from-violet-500 to-purple-500' },
-  { id: 't3', name: 'Book Discussion', nameHi: 'पुस्तक चर्चा', desc: 'Book review announcement', descHi: 'à¤ªà¥à¤¸à¥à¤¤à¤• à¤¸à¤®à¥€à¤•à¥à¤·à¤¾ à¤˜à¥‹à¤·à¤£à¤¾', icon: Layout, gradient: 'from-blue-500 to-cyan-500' },
+  { id: 't1', name: 'Event Poster', nameHi: 'कार्यक्रम पोस्टर', desc: 'Standard event announcement', descHi: 'कार्यक्रम की मानक घोषणा', icon: Layout, gradient: 'from-orange-500 to-amber-500' },
+  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'विमर्श उद्धरण कार्ड', desc: 'Quote card for discourse topics', descHi: 'विमर्श विषयों के लिए उद्धरण कार्ड', icon: Palette, gradient: 'from-violet-500 to-purple-500' },
+  { id: 't3', name: 'Book Discussion', nameHi: 'पुस्तक चर्चा', desc: 'Book review announcement', descHi: 'पुस्तक समीक्षा घोषणा', icon: Layout, gradient: 'from-blue-500 to-cyan-500' },
   { id: 't4', name: 'Youth Program', nameHi: 'युवा कार्यक्रम', desc: 'Yuva aayam event template', descHi: 'युवा आयाम कार्यक्रम टेम्पलेट', icon: Palette, gradient: 'from-emerald-500 to-green-500' },
-  { id: 't5', name: 'Sammelan Invite', nameHi: 'सम्मेलन आमंत्रण', desc: 'Conference invitation template', descHi: '  पत्र', icon: Layout, gradient: 'from-rose-500 to-pink-500' },
+  { id: 't5', name: 'Sammelan Invite', nameHi: 'सम्मेलन आमंत्रण', desc: 'Conference invitation template', descHi: 'सम्मेलन आमंत्रण पत्र', icon: Layout, gradient: 'from-rose-500 to-pink-500' },
 ];
 
 function PracharMasthead({
@@ -81,11 +81,11 @@ function PracharMasthead({
         </div>
 
         <div className="prachar-authority-card">
-          <p className="shell-copy">{t('Action rights', 'à¤•à¤¾à¤°à¥à¤¯ à¤…à¤§à¤¿à¤•à¤¾à¤°')}</p>
+          <p className="shell-copy">{t('Action rights', 'कार्य अधिकार')}</p>
           <p className="prachar-authority-title">
             {canAct
-              ? t('Campaign closure and follow-through', 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤”à¤° à¤…à¤¨à¥à¤µà¤°à¥à¤¤à¤¨')
-              : t('Campaign visibility and status awareness', 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾ à¤”à¤° à¤¸à¥à¤¥à¤¿à¤¤à¤¿ à¤¸à¤®à¤')}
+              ? t('Campaign closure and follow-through', 'अभियान पूर्णता और अनुवर्तन')
+              : t('Campaign visibility and status awareness', 'अभियान दृश्यता और स्थिति समझ')}
           </p>
           <p className="prachar-authority-detail">
             {canAct
@@ -115,25 +115,25 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
         labelEn: 'Current lane',
         labelHi: 'वर्तमान धारा',
         valueEn: 'Final dissemination oversight',
-        valueHi: 'à¤…à¤‚à¤¤à¤¿à¤® à¤ªà¥à¤°à¤¸à¤¾à¤° à¤…à¤¨à¥à¤¶à¥à¤°à¤µà¤£',
+        valueHi: 'अंतिम प्रसार अनुश्रवण',
         detailEn: 'Track completion across units and keep every published campaign moving.',
-        detailHi: 'à¤‡à¤•à¤¾à¤‡à¤¯à¥‹à¤‚ à¤®à¥‡à¤‚ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤¦à¥‡à¤–à¥‡à¤‚ à¤”à¤° à¤ªà¥à¤°à¤¤à¥à¤¯à¥‡à¤• à¤ªà¥à¤°à¤•à¤¾à¤¶à¤¿à¤¤ à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤•à¥‹ à¤†à¤—à¥‡ à¤¬à¤¢à¤¼à¤¾à¤¤à¥‡ à¤°à¤¹à¥‡à¤‚à¥¤',
+        detailHi: 'इकाइयों में पूर्णता देखें और प्रत्येक प्रकाशित अभियान को आगे बढ़ाते रहें।',
       },
       {
         labelEn: 'Institutional priority',
-        labelHi: 'à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤—à¤¤ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾',
+        labelHi: 'संस्थागत प्राथमिकता',
         valueEn: pendingCount === 0 ? 'All campaigns closed' : `${pendingCount} campaigns pending closure`,
-        valueHi: pendingCount === 0 ? 'à¤¸à¤­à¥€ à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤ªà¥‚à¤°à¥à¤£' : `${pendingCount} à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤•à¥€ à¤ªà¥à¤°à¤¤à¥€à¤•à¥à¤·à¤¾ à¤®à¥‡à¤‚`,
+        valueHi: pendingCount === 0 ? 'सभी अभियान पूर्ण' : `${pendingCount} अभियान पूर्णता की प्रतीक्षा में`,
         detailEn: 'Resolve incomplete platform coverage before the next public cycle.',
-        detailHi: 'à¤…à¤—à¤²à¥‡ à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤• à¤šà¤•à¥à¤° à¤¸à¥‡ à¤ªà¤¹à¤²à¥‡ à¤…à¤§à¥‚à¤°à¤¾ à¤®à¤‚à¤š-à¤µà¤¿à¤¤à¤°à¤£ à¤ªà¥‚à¤°à¤¾ à¤•à¤°à¥‡à¤‚à¥¤',
+        detailHi: 'अगले सार्वजनिक चक्र से पहले अधूरे मंच-वितरण पूरे करें।',
       },
       {
         labelEn: 'Coordination mode',
-        labelHi: 'à¤¸à¤®à¤¨à¥à¤µà¤¯ à¤¸à¥à¤µà¤°à¥‚à¤ª',
+        labelHi: 'समन्वय स्वरूप',
         valueEn: canAct ? 'Direct platform accountability' : 'Read-only oversight',
-        valueHi: canAct ? 'à¤ªà¥à¤°à¤¤à¥à¤¯à¤•à¥à¤· à¤®à¤‚à¤š à¤‰à¤¤à¥à¤¤à¤°à¤¦à¤¾à¤¯à¤¿à¤¤à¥à¤µ' : 'à¤•à¥‡à¤µà¤² à¤…à¤¨à¥à¤¶à¥à¤°à¤µà¤£',
+        valueHi: canAct ? 'प्रत्यक्ष मंच उत्तरदायित्व' : 'केवल अनुश्रवण',
         detailEn: 'Close gaps quickly and keep proof of dissemination visible.',
-        detailHi: 'à¤•à¤®à¤¿à¤¯à¥‹à¤‚ à¤•à¥‹ à¤¶à¥€à¤˜à¥à¤° à¤ªà¥‚à¤°à¤¾ à¤•à¤°à¥‡à¤‚ à¤”à¤° à¤ªà¥à¤°à¤¸à¤¾à¤° à¤•à¤¾ à¤ªà¥à¤°à¤®à¤¾à¤£ à¤¸à¥à¤ªà¤·à¥à¤Ÿ à¤°à¤–à¥‡à¤‚à¥¤',
+        detailHi: 'कमियों को शीघ्र पूरा करें और प्रसार का प्रमाण स्पष्ट रखें।',
       },
     ];
   }
@@ -144,25 +144,25 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
         labelEn: 'Current lane',
         labelHi: 'वर्तमान धारा',
         valueEn: 'Campaign ownership desk',
-        valueHi: 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¸à¥à¤µà¤¾à¤®à¤¿à¤¤à¥à¤µ à¤•à¤•à¥à¤·',
+        valueHi: 'अभियान स्वामित्व कक्ष',
         detailEn: 'Carry approved work into organised circulation and follow through platform by platform.',
-        detailHi: 'à¤…à¤¨à¥à¤®à¥‹à¤¦à¤¿à¤¤ à¤•à¤¾à¤°à¥à¤¯ à¤•à¥‹ à¤¸à¤‚à¤—à¤ à¤¿à¤¤ à¤ªà¥à¤°à¤¸à¤¾à¤° à¤®à¥‡à¤‚ à¤²à¥‡ à¤œà¤¾à¤à¤ à¤”à¤° à¤ªà¥à¤°à¤¤à¥à¤¯à¥‡à¤• à¤®à¤‚à¤š à¤ªà¤° à¤…à¤¨à¥à¤µà¤°à¥à¤¤à¤¨ à¤°à¤–à¥‡à¤‚à¥¤',
+        detailHi: 'अनुमोदित कार्य को संगठित प्रसार में ले जाएँ और प्रत्येक मंच पर अनुवर्तन रखें।',
       },
       {
         labelEn: 'Institutional priority',
-        labelHi: 'à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤—à¤¤ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾',
+        labelHi: 'संस्थागत प्राथमिकता',
         valueEn: pendingCount === 0 ? 'Campaigns ready for closure' : `${pendingCount} campaigns need channel action`,
-        valueHi: pendingCount === 0 ? 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾ à¤¹à¥‡à¤¤à¥ à¤¤à¥ˆà¤¯à¤¾à¤°' : `${pendingCount} à¤…à¤­à¤¿à¤¯à¤¾à¤¨à¥‹à¤‚ à¤•à¥‹ à¤šà¥ˆà¤¨à¤² à¤•à¤¾à¤°à¥à¤°à¤µà¤¾à¤ˆ à¤šà¤¾à¤¹à¤¿à¤`,
+        valueHi: pendingCount === 0 ? 'अभियान पूर्णता हेतु तैयार' : `${pendingCount} अभियानों को चैनल कार्रवाई चाहिए`,
         detailEn: 'Keep each event visible across the required outreach surfaces.',
-        detailHi: 'à¤ªà¥à¤°à¤¤à¥à¤¯à¥‡à¤• à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤•à¥‹ à¤†à¤µà¤¶à¥à¤¯à¤• à¤ªà¥à¤°à¤šà¤¾à¤° à¤®à¤¾à¤§à¥à¤¯à¤®à¥‹à¤‚ à¤ªà¤° à¤¦à¥ƒà¤¶à¥à¤¯ à¤¬à¤¨à¤¾à¤ à¤°à¤–à¥‡à¤‚à¥¤',
+        detailHi: 'प्रत्येक कार्यक्रम को आवश्यक प्रचार माध्यमों पर दृश्य बनाए रखें।',
       },
       {
         labelEn: 'Coordination mode',
-        labelHi: 'à¤¸à¤®à¤¨à¥à¤µà¤¯ à¤¸à¥à¤µà¤°à¥‚à¤ª',
+        labelHi: 'समन्वय स्वरूप',
         valueEn: canAct ? 'Platform execution and documentation' : 'Campaign visibility',
-        valueHi: canAct ? 'à¤®à¤‚à¤š à¤•à¥à¤°à¤¿à¤¯à¤¾à¤¨à¥à¤µà¤¯à¤¨ à¤”à¤° à¤¦à¤¸à¥à¤¤à¤¾à¤µà¥‡à¤œà¥€à¤•à¤°à¤£' : 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾',
+        valueHi: canAct ? 'मंच क्रियान्वयन और दस्तावेज़ीकरण' : 'अभियान दृश्यता',
         detailEn: 'Use skip reasons only when a channel is intentionally not used.',
-        detailHi: 'à¤•à¤¿à¤¸à¥€ à¤®à¤‚à¤š à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤œà¤¾à¤¨à¤¬à¥‚à¤à¤•à¤° à¤¨ à¤¹à¥‹à¤¨à¥‡ à¤ªà¤° à¤¹à¥€ à¤•à¤¾à¤°à¤£ à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚à¥¤',
+        detailHi: 'जब किसी मंच का उपयोग जानबूझकर न होने पर ही कारण दर्ज करें।',
       },
     ];
   }
@@ -173,25 +173,25 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
         labelEn: 'Current lane',
         labelHi: 'वर्तमान धारा',
         valueEn: 'Unit dissemination visibility',
-        valueHi: 'à¤‡à¤•à¤¾à¤ˆ à¤ªà¥à¤°à¤¸à¤¾à¤° à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾',
+        valueHi: 'इकाई प्रसार दृश्यता',
         detailEn: 'Review how approved work is progressing into outreach after publication.',
-        detailHi: 'à¤ªà¥à¤°à¤•à¤¾à¤¶à¤¨ à¤•à¥‡ à¤¬à¤¾à¤¦ à¤…à¤¨à¥à¤®à¥‹à¤¦à¤¿à¤¤ à¤•à¤¾à¤°à¥à¤¯ à¤•à¤¾ à¤ªà¥à¤°à¤šà¤¾à¤° à¤®à¥‡à¤‚ à¤ªà¥à¤°à¤—à¤¤à¤¿ à¤¦à¥‡à¤–à¥‡à¤‚à¥¤',
+        detailHi: 'प्रकाशन के बाद अनुमोदित कार्य का प्रचार में प्रगति देखें।',
       },
       {
         labelEn: 'Institutional priority',
-        labelHi: 'à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤—à¤¤ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾',
+        labelHi: 'संस्थागत प्राथमिकता',
         valueEn: pendingCount === 0 ? 'No open follow-through' : `${pendingCount} campaigns still open`,
-        valueHi: pendingCount === 0 ? 'à¤•à¥‹à¤ˆ à¤–à¥à¤²à¤¾ à¤…à¤¨à¥à¤µà¤°à¥à¤¤à¤¨ à¤¨à¤¹à¥€à¤‚' : `${pendingCount} à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤…à¤­à¥€ à¤–à¥à¤²à¥‡ à¤¹à¥ˆà¤‚`,
+        valueHi: pendingCount === 0 ? 'कोई खुला अनुवर्तन नहीं' : `${pendingCount} अभियान अभी खुले हैं`,
         detailEn: 'Use this page to understand campaign movement and support pending closures.',
-        detailHi: 'à¤‡à¤¸ à¤ªà¥ƒà¤·à¥à¤  à¤¸à¥‡ à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤•à¥€ à¤—à¤¤à¤¿ à¤¸à¤®à¤à¥‡à¤‚ à¤”à¤° à¤²à¤‚à¤¬à¤¿à¤¤ à¤ªà¥‚à¤°à¥à¤£à¤¤à¤¾à¤“à¤‚ à¤•à¥‹ à¤¸à¤¹à¤¾à¤°à¤¾ à¤¦à¥‡à¤‚à¥¤',
+        detailHi: 'इस पृष्ठ से अभियान की गति समझें और लंबित पूर्णताओं को सहारा दें।',
       },
       {
         labelEn: 'Coordination mode',
-        labelHi: 'à¤¸à¤®à¤¨à¥à¤µà¤¯ à¤¸à¥à¤µà¤°à¥‚à¤ª',
+        labelHi: 'समन्वय स्वरूप',
         valueEn: canAct ? 'Operational support' : 'Observation and support',
-        valueHi: canAct ? 'à¤ªà¥à¤°à¤šà¤¾à¤²à¤¨ à¤¸à¤¹à¤¯à¥‹à¤—' : 'à¤…à¤µà¤²à¥‹à¤•à¤¨ à¤”à¤° à¤¸à¤¹à¤¯à¥‹à¤—',
+        valueHi: canAct ? 'प्रचालन सहयोग' : 'अवलोकन और सहयोग',
         detailEn: 'The final dissemination checklist is maintained at the responsible coordination lane.',
-        detailHi: 'à¤…à¤‚à¤¤à¤¿à¤® à¤ªà¥à¤°à¤šà¤¾à¤° à¤šà¥‡à¤•à¤²à¤¿à¤¸à¥à¤Ÿ à¤œà¤¿à¤®à¥à¤®à¥‡à¤¦à¤¾à¤° à¤¸à¤®à¤¨à¥à¤µà¤¯ à¤§à¤¾à¤°à¤¾ à¤®à¥‡à¤‚ à¤°à¤–à¥€ à¤œà¤¾à¤¤à¥€ à¤¹à¥ˆà¥¤',
+        detailHi: 'अंतिम प्रचार चेकलिस्ट जिम्मेदार समन्वय धारा में रखी जाती है।',
       },
     ];
   }
@@ -201,25 +201,25 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
       labelEn: 'Current lane',
       labelHi: 'वर्तमान धारा',
       valueEn: 'Public reach visibility',
-      valueHi: 'à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤• à¤ªà¤¹à¥à¤‚à¤š à¤¦à¥ƒà¤¶à¥à¤¯à¤¤à¤¾',
+      valueHi: 'सार्वजनिक पहुँच दृश्यता',
       detailEn: 'See how approved work becomes organised public communication.',
-      detailHi: 'à¤¦à¥‡à¤–à¥‡à¤‚ à¤•à¤¿ à¤…à¤¨à¥à¤®à¥‹à¤¦à¤¿à¤¤ à¤•à¤¾à¤°à¥à¤¯ à¤•à¥ˆà¤¸à¥‡ à¤¸à¤‚à¤—à¤ à¤¿à¤¤ à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤• à¤¸à¤‚à¤µà¤¾à¤¦ à¤¬à¤¨à¤¤à¤¾ à¤¹à¥ˆà¥¤',
+      detailHi: 'देखें कि अनुमोदित कार्य कैसे संगठित सार्वजनिक संवाद बनता है।',
     },
     {
       labelEn: 'Institutional priority',
-      labelHi: 'à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤—à¤¤ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾',
+      labelHi: 'संस्थागत प्राथमिकता',
       valueEn: pendingCount === 0 ? 'Campaigns are closed' : `${pendingCount} campaigns in motion`,
-      valueHi: pendingCount === 0 ? 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤ªà¥‚à¤°à¥à¤£ à¤¹à¥ˆà¤‚' : `${pendingCount} à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤—à¤¤à¤¿à¤®à¤¾à¤¨ à¤¹à¥ˆà¤‚`,
+      valueHi: pendingCount === 0 ? 'अभियान पूर्ण हैं' : `${pendingCount} अभियान गतिमान हैं`,
       detailEn: 'Understand the dissemination state even when you are not the final coordinator.',
-      detailHi: 'à¤…à¤‚à¤¤à¤¿à¤® à¤¸à¤®à¤¨à¥à¤µà¤¯à¤• à¤¨ à¤¹à¥‹à¤¨à¥‡ à¤ªà¤° à¤­à¥€ à¤ªà¥à¤°à¤¸à¤¾à¤° à¤¸à¥à¤¥à¤¿à¤¤à¤¿ à¤•à¥‹ à¤¸à¤®à¤à¥‡à¤‚à¥¤',
+      detailHi: 'अंतिम समन्वयक न होने पर भी प्रसार स्थिति को समझें।',
     },
     {
       labelEn: 'Coordination mode',
-      labelHi: 'à¤¸à¤®à¤¨à¥à¤µà¤¯ à¤¸à¥à¤µà¤°à¥‚à¤ª',
+      labelHi: 'समन्वय स्वरूप',
       valueEn: canAct ? 'Campaign support' : 'View-only campaign context',
-      valueHi: canAct ? 'à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¸à¤¹à¤¯à¥‹à¤—' : 'à¤•à¥‡à¤µà¤² à¤¦à¥ƒà¤¶à¥à¤¯ à¤…à¤­à¤¿à¤¯à¤¾à¤¨ à¤¸à¤‚à¤¦à¤°à¥à¤­',
+      valueHi: canAct ? 'अभियान सहयोग' : 'केवल दृश्य अभियान संदर्भ',
       detailEn: 'Use the command center to see what has moved, what is pending, and what still needs attention.',
-      detailHi: 'à¤•à¥Œà¤¨ à¤¸à¤¾ à¤•à¤¾à¤°à¥à¤¯ à¤†à¤—à¥‡ à¤¬à¤¢à¤¼à¤¾, à¤•à¥à¤¯à¤¾ à¤²à¤‚à¤¬à¤¿à¤¤ à¤¹à¥ˆ à¤”à¤° à¤•à¤¿à¤¸à¥‡ à¤§à¥à¤¯à¤¾à¤¨ à¤šà¤¾à¤¹à¤¿à¤, à¤¯à¤¹ à¤¯à¤¹à¤¾à¤‚ à¤¦à¥‡à¤–à¥‡à¤‚à¥¤',
+      detailHi: 'कौन सा कार्य आगे बढ़ा, क्या लंबित है और किसे ध्यान चाहिए, यह यहाँ देखें।',
     },
   ];
 }
@@ -460,12 +460,12 @@ export default function Prachar() {
                         const handleToggle = (nextDone: boolean) => {
                           if (!permissions.canUpdatePrachar) return;
                           if (nextDone) {
-                            // Marking done â€” clear skip reason
+                            // Marking done — clear skip reason
                             setPendingSkipKey(null);
                             setPendingSkipText('');
                             void updatePracharPlatform(event.id, platform.key, true, null);
                           } else {
-                            // Unchecking â€” prompt for skip reason
+                            // Unchecking — prompt for skip reason
                             setPendingSkipKey(skipKey);
                             setPendingSkipText(existingReason ?? '');
                           }

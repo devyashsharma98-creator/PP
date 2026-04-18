@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +24,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useT } from "@/lib/useT";
+import { displayBilingualHi, useT } from "@/lib/useT";
 import type { FormConfig, GatividhiEvent } from "@/lib/app/contracts";
 
 import { checklistItems, eventTemplates, expertPool, suggestedQuestions, type SuggestedExpert } from "./config";
@@ -298,11 +298,15 @@ export function UnitDashboardView({
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
         seal={isKaryakartaLane ? "Karyakarta Work Desk" : "Unit Activity Desk"}
-        sealHi={isKaryakartaLane ? "?????????? ????? ?????" : "???? ??????? ?????"}
+        sealHi={isKaryakartaLane ? "कार्यकर्ता कार्य डेस्क" : "इकाई गतिविधि डेस्क"}
         title={isKaryakartaLane ? "Karyakarta Dashboard" : "Gatividhi Dashboard"}
-        titleHi={isKaryakartaLane ? "?????????? ????????" : "??????? ????????"}
+        titleHi={isKaryakartaLane ? "कार्यकर्ता डैशबोर्ड" : "गतिविधि डैशबोर्ड"}
         subtitle={isKaryakartaLane ? "See assigned work, pending contributions, and current activity in one place." : "Programme planning, review movement, and post-event follow-through for your unit in one place."}
-        subtitleHi={isKaryakartaLane ? "????????? ?????, ????? ?????? ?? ??????? ??????? ?? ?? ????? ?? ??????" : "???? ???? ?? ??? ????????? ?????, ??????? ?????? ?? ?????????????? ???????? ?? ?? ????? ???"}
+        subtitleHi={
+          isKaryakartaLane
+            ? "सौंपा गया कार्य, लंबित योगदान और वर्तमान गतिविधि — एक ही स्थान पर।"
+            : "इकाई हेतु कार्यक्रम योजना, समीक्षा की गति और कार्यक्रम के बाद की पूर्ति — एक ही दृश्य में।"
+        }
         contexts={[
           {
             labelEn: "Operational scope",
@@ -337,12 +341,11 @@ export function UnitDashboardView({
 
       <div className="flex justify-end">
         {permissions.canCreateEvent && (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> {t("Create New Event", "नया कार्यक्रम बनाएं")}
-              </Button>
-            </DialogTrigger>
+          <>
+            <Button type="button" onClick={() => setDialogOpen(true)} className="shadow-sm transition-shadow hover:shadow-md">
+              <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "नया कार्यक्रम बनाएं")}
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent className="bg-popover sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="font-devanagari">{t("New Gatividhi", "नई गतिविधि")}</DialogTitle>
@@ -558,7 +561,7 @@ export function UnitDashboardView({
                             <span className="text-[10px] font-bold text-white">{expert.name.charAt(0)}</span>
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-bold">{lang === "hi" ? expert.nameHi : expert.name}</p>
+                            <p className="truncate text-xs font-bold">{displayBilingualHi(expert.name, expert.nameHi, lang)}</p>
                             <div className="flex gap-1 overflow-hidden">
                               {expert.vakshe.slice(0, 2).map((vakshe, vaksheIndex) => (
                                 <span key={vaksheIndex} className="text-[8px] font-medium text-primary">
@@ -581,7 +584,8 @@ export function UnitDashboardView({
                 </Button>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </>
         )}
       </div>
 
@@ -601,11 +605,44 @@ export function UnitDashboardView({
         </motion.div>
       )}
 
+      {myEvents.length === 0 ? (
+        <div
+          className="institution-panel flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-14 text-center"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+            <CalendarDays className="h-7 w-7" aria-hidden />
+          </div>
+          <div className="max-w-md space-y-2">
+            <h2 className={lang === "hi" ? "text-lg font-semibold font-devanagari" : "text-lg font-semibold tracking-tight"}>
+              {t("No programmes in your lane yet", "अभी आपकी धारा में कोई कार्यक्रम नहीं है")}
+            </h2>
+            <p className={lang === "hi" ? "text-sm text-muted-foreground font-devanagari leading-relaxed" : "text-sm text-muted-foreground leading-relaxed"}>
+              {permissions.canCreateEvent
+                ? t(
+                    "Create your first event to start checklist, registration form, and review flow — everything stays in one place.",
+                    "पहला कार्यक्रम बनाएँ: चेकलिस्ट, पंजीकरण फ़ॉर्म और समीक्षा प्रवाह — सब एक जगह।",
+                  )
+                : t(
+                    "When your unit head assigns or submits programmes, they will appear here with status and next steps.",
+                    "जब इकाई प्रमुख कार्यक्रम सौंपेंगे या भेजेंगे, वे यहाँ स्थिति और अगले कदमों के साथ दिखेंगे।",
+                  )}
+            </p>
+          </div>
+          {permissions.canCreateEvent ? (
+            <Button type="button" size="lg" className="mt-2 gap-2 rounded-2xl px-8 shadow-md" onClick={() => setDialogOpen(true)}>
+              <Plus className="h-5 w-5" aria-hidden />
+              {t("Create your first event", "पहला कार्यक्रम बनाएँ")}
+            </Button>
+          ) : null}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <AnimatePresence>
           {myEvents.map((event, index) => (
             <motion.div key={event.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
-              <Card className="glass-card h-full hover-lift">
+              <Card className="glass-card h-full hover-lift [content-visibility:auto] [contain-intrinsic-size:auto_280px]">
                 <CardContent className="space-y-3 pt-5">
                   <div className="flex items-start justify-between">
                     <h3 className="mr-2 flex-1 text-sm font-semibold leading-snug">{event.title}</h3>
@@ -708,6 +745,7 @@ export function UnitDashboardView({
           ))}
         </AnimatePresence>
       </div>
+      )}
 
       <Dialog open={!!pollCreateEvent} onOpenChange={(open) => !open && setPollCreateEvent(null)}>
         <DialogContent className="bg-popover sm:max-w-md">

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { getNavGroups } from '@/lib/app/navigation';
 import { cn } from '@/lib/utils';
-import { useT } from '@/lib/useT';
+import { repairBrokenHindi, useT } from '@/lib/useT';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -154,9 +154,16 @@ export function Navbar() {
     () => getNavGroups(showAdminControls, viewer?.primaryRoleCode ? [viewer.primaryRoleCode] : null),
     [showAdminControls, viewer?.primaryRoleCode],
   );
-  const currentRoleLabel = viewer?.primaryRoleCode
-    ? (lang === 'hi' ? canonicalRoleLabelsHi[viewer.primaryRoleCode] : canonicalRoleLabels[viewer.primaryRoleCode])
-    : (lang === 'hi' ? roleLabelsHi[role] : roleLabels[role]);
+  const currentRoleLabel =
+    lang === "hi"
+      ? repairBrokenHindi(
+          viewer?.primaryRoleCode
+            ? canonicalRoleLabelsHi[viewer.primaryRoleCode]
+            : roleLabelsHi[role],
+        )
+      : viewer?.primaryRoleCode
+        ? canonicalRoleLabels[viewer.primaryRoleCode]
+        : roleLabels[role];
 
   // Real unread count from API with 30s polling
   const { data: unreadCount = 0 } = useUnreadCount(isAuthenticated);
