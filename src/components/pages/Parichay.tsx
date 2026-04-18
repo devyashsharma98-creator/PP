@@ -210,8 +210,13 @@ export default function Parichay() {
                     <ArrowRight className="ml-2 md:ml-3 h-4 md:h-5 w-4 md:w-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base border-white/20 hover:bg-white/5 text-white">
-                  <Link href="/vimarsh" className="flex items-center justify-center">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="w-full sm:w-auto h-12 md:h-14 rounded-full border border-white/35 bg-white/10 px-8 text-sm text-white shadow-none backdrop-blur-sm md:h-14 md:px-10 md:text-base hover:border-white/55 hover:bg-white/20 hover:text-white focus-visible:ring-white/50 [&_svg]:text-white"
+                >
+                  <Link href="/vimarsh" className="flex items-center justify-center gap-2 text-white">
                     {isHi ? "विमर्श पढ़ें" : "Read Vimarsh"}
                   </Link>
                 </Button>
