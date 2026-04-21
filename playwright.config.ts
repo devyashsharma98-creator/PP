@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 60_000,
   retries: 0,
   use: {
-    baseURL: process.env.BASE_URL || "https://pragya-pravah-ui.vercel.app",
+    baseURL: process.env.BASE_URL || "http://127.0.0.1:3000",
     headless: true,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",

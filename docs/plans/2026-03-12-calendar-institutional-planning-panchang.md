@@ -37,7 +37,7 @@ await expect(page.getByText(/Agenda and Reminders/i)).toBeVisible();
 Run:
 
 ```bash
-$env:BASE_URL='https://pragya-pravah-ui.vercel.app'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
+$env:BASE_URL='http://127.0.0.1:3000'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
 ```
 
 Expected:
@@ -239,7 +239,7 @@ Use subtle Bharat-rooted cues only.
 Run:
 
 ```bash
-$env:BASE_URL='https://pragya-pravah-ui.vercel.app'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
+$env:BASE_URL='http://127.0.0.1:3000'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
 ```
 
 Expected:
@@ -279,24 +279,24 @@ Expected:
 git push origin main
 ```
 
-**Step 3: Wait for Vercel production readiness**
+**Step 3: Wait for production readiness**
 
 Run:
 
 ```bash
-vercel inspect pragya-pravah-ui.vercel.app
+Invoke-WebRequest -Uri "$env:BASE_URL/api/health" -UseBasicParsing
 ```
 
 Expected:
 
-- production deployment shows `Ready`
+- production health check returns HTTP 200
 
 **Step 4: Run targeted live smoke**
 
 Run:
 
 ```bash
-$env:BASE_URL='https://pragya-pravah-ui.vercel.app'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
+$env:BASE_URL='<production-url>'; npx playwright test e2e/demo-smoke.spec.ts -g "calendar presents the institutional planning masthead|calendar shows the hybrid planning surface|calendar exposes agenda and reminder framing" --reporter=line
 ```
 
 Expected:
@@ -308,7 +308,7 @@ Expected:
 Run:
 
 ```bash
-$env:BASE_URL='https://pragya-pravah-ui.vercel.app'; npx playwright test e2e/demo-smoke.spec.ts --reporter=line
+$env:BASE_URL='<production-url>'; npx playwright test e2e/demo-smoke.spec.ts --reporter=line
 ```
 
 Expected:
