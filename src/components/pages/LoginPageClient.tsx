@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, BookOpenText, Loader2, LogIn, ShieldCheck } from "lucide-react";
 
 import { PragyaLogo } from "@/components/PragyaLogo";
@@ -36,6 +37,11 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [flip, setFlip] = useState<"en" | "hi">("en");
+  useEffect(() => {
+    const id = setInterval(() => setFlip((v) => (v === "en" ? "hi" : "en")), 3800);
+    return () => clearInterval(id);
+  }, []);
 
   const copy = isHi
     ? {
@@ -194,32 +200,87 @@ function LoginForm() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(21rem,29rem)] lg:items-start xl:gap-10">
           <section className="space-y-5">
-            <div className="login-editorial-hero">
-              <div className="flex items-start gap-4">
-                <div className="login-editorial-mark">
-                  <PragyaLogo className="h-12 w-12 md:h-14 md:w-14" />
-                </div>
+            <div className="login-editorial-hero relative overflow-hidden">
+              <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-primary/5 blur-3xl" />
+
+              <div className="relative flex items-start gap-4">
+                <span className="relative inline-flex items-center justify-center h-14 w-14 md:h-16 md:w-16 shrink-0">
+                  <motion.span
+                    aria-hidden
+                    className="absolute inset-0 rounded-full bg-primary/25 blur-md"
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+                    transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <span className="relative inline-flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-[1.1rem] bg-gradient-to-br from-[#ffdcc6] via-[#f57c00] to-[#964900] shadow-[0_16px_28px_-18px_rgba(150,73,0,0.65)] ring-1 ring-primary/20">
+                    <PragyaLogo className="h-10 w-10 md:h-12 md:w-12 drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
+                  </span>
+                  <span className="absolute -right-0.5 -top-0.5 inline-flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+                  </span>
+                </span>
 
                 <div className="min-w-0 space-y-2">
-                  <p className="shell-copy">{copy.heroSeal}</p>
-                  <h1 className={cn("text-4xl font-bold tracking-tight md:text-6xl", isHi && "font-devanagari")}>
-                    {copy.title}
-                  </h1>
+                  <div className="flex flex-col leading-none">
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-muted-foreground">
+                      {copy.heroSeal}
+                    </span>
+                    <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.32em] text-primary/80">
+                      Bharat · भारत
+                    </span>
+                  </div>
+
+                  <div className="relative block h-12 md:h-16 overflow-hidden">
+                    <AnimatePresence mode="wait" initial={false}>
+                      {flip === "en" ? (
+                        <motion.h1
+                          key="en"
+                          className="absolute inset-0 font-serif text-4xl md:text-6xl font-bold tracking-tight text-foreground"
+                          initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
+                          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                          exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+                          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          Pragya Pravah
+                        </motion.h1>
+                      ) : (
+                        <motion.h1
+                          key="hi"
+                          className="absolute inset-0 font-serif text-4xl md:text-6xl font-bold tracking-tight text-foreground font-devanagari"
+                          initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
+                          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                          exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+                          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                          lang="hi"
+                        >
+                          प्रज्ञा प्रवाह
+                        </motion.h1>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div className="relative h-[2px] w-48 overflow-hidden rounded-full bg-primary/15">
+                    <motion.span
+                      className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-primary to-transparent"
+                      animate={{ x: ["-100%", "300%"] }}
+                      transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-3 pt-1">
+              <div className="relative space-y-3 pt-1">
                 <p className={cn("max-w-2xl text-lg font-medium text-foreground/88 md:text-2xl", isHi && "font-devanagari")}>
                   {copy.tagline}
                 </p>
                 <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">{copy.description}</p>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="relative flex flex-wrap gap-2 pt-2">
                 {copy.highlights.map((item) => (
                   <span
                     key={item}
-                    className="inline-flex items-center rounded-full border border-border/70 bg-background/72 px-3 py-1.5 text-xs font-medium text-foreground/80"
+                    className="inline-flex items-center rounded-full border border-primary/20 bg-background/72 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-[0_2px_10px_-6px_rgba(150,73,0,0.4)]"
                   >
                     {item}
                   </span>

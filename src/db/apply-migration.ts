@@ -23,6 +23,31 @@ if (!DATABASE_URL) {
 
 const sql = neon(DATABASE_URL);
 
+type MigrationError = {
+  message: string;
+  code?: string;
+};
+
+function toMigrationError(error: unknown): MigrationError {
+  if (error instanceof Error) {
+    const code = (error as Error & { code?: unknown }).code;
+    return {
+      message: error.message,
+      code: typeof code === "string" ? code : undefined,
+    };
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const record = error as Record<string, unknown>;
+    return {
+      message: typeof record.message === "string" ? record.message : String(error),
+      code: typeof record.code === "string" ? record.code : undefined,
+    };
+  }
+
+  return { message: String(error) };
+}
+
 async function run() {
   const migrationPath = join(
     __dirname,
@@ -48,12 +73,13 @@ async function run() {
       await sql.query(stmt);
       ok++;
       process.stdout.write(`  [${i + 1}/${statements.length}] ✓\r`);
-    } catch (err: any) {
+    } catch (caught) {
+      const err = toMigrationError(caught);
       // Ignore "already exists" errors (idempotent re-run)
       if (
-        err?.message?.includes("already exists") ||
-        err?.code === "42P07" || // duplicate_table
-        err?.code === "42710"    // duplicate_object (enum)
+        err.message.includes("already exists") ||
+        err.code === "42P07" || // duplicate_table
+        err.code === "42710"    // duplicate_object (enum)
       ) {
         skipped++;
         process.stdout.write(`  [${i + 1}/${statements.length}] ~ (skip: already exists)\r`);

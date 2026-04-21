@@ -1,446 +1,661 @@
 "use client";
 
 import Link from "next/link";
-import { motion, type Variants } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight, BookOpen, Flame,
-  Megaphone, Compass, Sparkles, Star,
-  Heart, Home, Leaf, LogIn, Shield, Zap, ChevronRight,
-  Lightbulb, Network, GraduationCap,
+  Menu,
+  BookOpenText,
+  Users,
+  Building2,
+  Compass,
+  ScrollText,
+  FlaskConical,
+  Scale,
+  ArrowRight,
+  Info,
+  Target,
+  History,
+  LayoutGrid,
+  Landmark,
+  LogOut,
+  Languages,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { useAppContext } from "@/context/AppContext";
+import { useT } from "@/lib/useT";
+import { useSignOut } from "@/hooks/use-sign-out";
+import { getNavGroups } from "@/lib/app/navigation";
 import { getRoleLandingPath } from "@/lib/app/role-routing";
+import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
+import { PragyaLogo } from "@/components/PragyaLogo";
 import { cn } from "@/lib/utils";
 
-// ── Sacred Mandala SVG ────────────────────────────────────────────────────────
-function Mandala({ className }: { className?: string }) {
-  const petals8 = [0, 45, 90, 135, 180, 225, 270, 315];
-  const rays16 = Array.from({ length: 16 }, (_, i) => i * 22.5);
-  
+// ── Brand Mark: animated bilingual name + logo ───────────────────────────────
+function BrandMark() {
+  const [flip, setFlip] = useState<"en" | "hi">("en");
+  useEffect(() => {
+    const id = setInterval(() => setFlip((v) => (v === "en" ? "hi" : "en")), 3800);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <svg viewBox="0 0 240 240" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="120" cy="120" r="116" stroke="currentColor" strokeWidth="0.5" opacity="0.15" />
-      {petals8.map((angle, i) => (
-        <ellipse key={i} cx="120" cy="62" rx="14" ry="52"
-          fill="currentColor" fillOpacity="0.04"
-          stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.6"
-          transform={`rotate(${angle} 120 120)`} />
-      ))}
-      <circle cx="120" cy="120" r="68" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
-      {rays16.map((angle, i) => {
-        const rad = (angle - 90) * (Math.PI / 180);
-        const x1 = +(120 + 30 * Math.cos(rad)).toFixed(4), y1 = +(120 + 30 * Math.sin(rad)).toFixed(4);
-        const x2 = +(120 + 43 * Math.cos(rad)).toFixed(4), y2 = +(120 + 43 * Math.sin(rad)).toFixed(4);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" />;
-      })}
-      <circle cx="120" cy="120" r="28" fill="currentColor" fillOpacity="0.05" stroke="currentColor" strokeOpacity="0.4" strokeWidth="0.6" />
-      <circle cx="120" cy="120" r="4" fill="currentColor" fillOpacity="0.5" />
-    </svg>
+    <Link href="/parichay" className="group flex items-center gap-3 min-w-0" aria-label="Pragya Pravah — Home">
+      <span className="relative inline-flex items-center justify-center h-10 w-10 shrink-0">
+        <motion.span
+          aria-hidden
+          className="absolute inset-0 rounded-full bg-[#f57c00]/25 blur-md"
+          animate={{ scale: [1, 1.15, 1], opacity: [0.45, 0.75, 0.45] }}
+          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.span
+          className="relative inline-flex items-center justify-center h-10 w-10 rounded-[0.9rem] bg-gradient-to-br from-[#ffdcc6] via-[#f57c00] to-[#964900] shadow-[0_10px_24px_-12px_rgba(150,73,0,0.65)] ring-1 ring-[#964900]/15"
+          whileHover={{ rotate: [0, -4, 4, 0] }}
+          transition={{ duration: 0.6 }}
+        >
+          <PragyaLogo className="h-7 w-7 drop-shadow-[0_1px_1px_rgba(0,0,0,0.15)]" />
+        </motion.span>
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-[#f57c00] opacity-75 animate-ping" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#964900]" />
+        </span>
+      </span>
+      <span className="relative flex flex-col leading-none min-w-0">
+        <span className="text-[9px] uppercase tracking-[0.32em] text-[#8b7263] font-extrabold">
+          Bharat · भारत
+        </span>
+        <span className="relative block h-7 md:h-8 overflow-hidden w-[220px] md:w-[260px]">
+          <AnimatePresence mode="wait" initial={false}>
+            {flip === "en" ? (
+              <motion.span
+                key="en"
+                className="absolute inset-0 font-serif font-bold text-[#964900] uppercase tracking-[0.22em] text-lg md:text-xl whitespace-nowrap"
+                initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: -16, opacity: 0, filter: "blur(4px)" }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              >
+                PRAGYA PRAVAH
+              </motion.span>
+            ) : (
+              <motion.span
+                key="hi"
+                className="absolute inset-0 font-serif font-bold text-[#964900] tracking-[0.08em] text-xl md:text-2xl whitespace-nowrap"
+                initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: -16, opacity: 0, filter: "blur(4px)" }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                lang="hi"
+              >
+                प्रज्ञा प्रवाह
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </span>
+        <span className="relative mt-1 h-[2px] w-full overflow-hidden rounded-full bg-[#dec1af]/40">
+          <motion.span
+            className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[#f57c00] to-transparent"
+            animate={{ x: ["-100%", "300%"] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
+          />
+        </span>
+      </span>
+    </Link>
   );
 }
 
-// ── Sutra Divider ────────────────────────────────────────────────────────────
-function SutraDivider() {
+// ── Shared: TopAppBar (wired to AppContext) ──────────────────────────────────
+function TopAppBar() {
+  const { lang, setLang, isAuthenticated, viewer, permissions } = useAppContext();
+  const t = useT();
+  const signOut = useSignOut();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const showAdminControls =
+    permissions.canManageUsers ||
+    Boolean(viewer?.effectiveRoles?.some((r) => r === "super_admin" || r === "org_admin"));
+  const navigationGroups = useMemo(
+    () => getNavGroups(showAdminControls, viewer?.primaryRoleCode ? [viewer.primaryRoleCode] : null),
+    [showAdminControls, viewer?.primaryRoleCode],
+  );
+  const landingPath = getRoleLandingPath(
+    viewer?.effectiveRoles ?? null,
+    viewer?.primaryRoleCode ?? null,
+  );
+
   return (
-    <div className="flex items-center gap-6 my-8">
-      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-      <span className="text-primary/40 text-sm">✦</span>
-      <div className="flex-1 h-px bg-gradient-to-l from-transparent via-primary/30 to-transparent" />
-    </div>
+    <header className="fixed top-0 w-full flex justify-between items-center px-6 md:px-8 h-20 bg-[#faf9f6]/90 backdrop-blur-xl z-50 border-b border-[#dec1af]/10 shadow-[0_4px_20px_rgba(150,73,0,0.05)]">
+      <div className="flex items-center gap-4">
+        {isAuthenticated ? (
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="text-[#964900] active:scale-95 duration-200 ease-out"
+                aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] bg-white p-0 border-r border-[#dec1af]/30">
+            <SheetTitle className="sr-only">{t("Navigation", "नेविगेशन")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {t("Primary navigation links.", "मुख्य नेविगेशन लिंक।")}
+            </SheetDescription>
+            <div className="border-b border-[#dec1af]/30 px-6 py-5">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-[#636262]">
+                {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
+              </p>
+              <h2 className="font-serif text-xl font-bold text-[#964900] mt-1">
+                {t("Parichay", "परिचय")}
+              </h2>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
+              {navigationGroups.map((group) => (
+                <div key={group.title} className="mb-4 space-y-1">
+                  <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-[#636262]">
+                    {t(group.title, group.titleHi)}
+                  </p>
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      prefetch={false}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#1a1c1a] hover:bg-[#f4f3f1] transition-colors"
+                    >
+                      <item.icon className="w-4 h-4 shrink-0 text-[#964900]" />
+                      <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>
+                        {t(item.label, item.sublabel)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  signOut();
+                }}
+                className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors mt-4"
+              >
+                <LogOut className="w-4 h-4" />
+                {t("Sign out", "निकासी")}
+              </button>
+            </nav>
+          </SheetContent>
+        </Sheet>
+        ) : null}
+        <BrandMark />
+      </div>
+      <nav className="hidden md:flex items-center gap-8 text-sm uppercase tracking-widest font-extrabold">
+        <a className="text-[#964900] font-bold" href="#mission">{t("Mission", "उद्देश्य")}</a>
+        <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#pillars">{t("Pillars", "स्तंभ")}</a>
+        <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#dimensions">{t("Dimensions", "आयाम")}</a>
+        <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#social">{t("Social", "सामाजिक")}</a>
+      </nav>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setLang(lang === "hi" ? "en" : "hi")}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#dec1af] text-[#964900] text-xs uppercase tracking-widest font-bold hover:bg-[#f4f3f1] transition-colors"
+          aria-label={t("Toggle language", "भाषा बदलें")}
+        >
+          <Languages className="w-3.5 h-3.5" />
+          {lang === "hi" ? "EN" : "हिं"}
+        </button>
+        {isAuthenticated ? (
+          <Link
+            href={landingPath}
+            className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl bg-[#964900] text-white text-xs uppercase tracking-widest font-bold hover:bg-[#f57c00] transition-colors"
+          >
+            {t("Enter Console", "कार्यक्षेत्र")}
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl bg-[#964900] text-white text-xs uppercase tracking-widest font-bold hover:bg-[#f57c00] transition-colors"
+          >
+            {t("Sign In", "प्रवेश")}
+          </Link>
+        )}
+      </div>
+    </header>
   );
 }
 
-// ── Section Label ────────────────────────────────────────────────────────────
-function SectionLabel({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+// ── Hero ─────────────────────────────────────────────────────────────────────
+function Hero() {
+  const t = useT();
   return (
-    <span className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-primary/25 bg-primary/10 text-primary text-[10px] tracking-[0.22em] uppercase font-bold">
-      <Icon className="w-3.5 h-3.5" />
-      {label}
-    </span>
+    <section
+      id="mission"
+      className="relative min-h-[819px] flex flex-col justify-center px-6 md:px-20 py-24 overflow-hidden"
+      style={{
+        backgroundColor: "#faf9f6",
+        backgroundImage:
+          "radial-gradient(circle at 20% 10%, rgba(245,124,0,0.08), transparent 40%), radial-gradient(circle at 80% 90%, rgba(150,73,0,0.06), transparent 50%)",
+      }}
+    >
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="space-y-8">
+          <span className="inline-block px-4 py-1 rounded-full bg-[#e3e2e0] text-[#964900] font-bold text-xs uppercase tracking-widest">
+            {t("Digital Home for Thought", "विचार का डिजिटल निवास")}
+          </span>
+          <h2 className="font-serif text-6xl md:text-8xl italic font-light tracking-tighter text-[#964900] leading-none">
+            Parichay
+            <br />
+            <span className="not-italic font-bold text-[#1a1c1a]" lang="hi">परिचय</span>
+          </h2>
+          <div className="space-y-4 border-l-4 border-[#f57c00] pl-6">
+            <p className="font-serif text-2xl italic text-[#574235] leading-relaxed">
+              &ldquo;Connecting the roots of Bharat with the aspirations of the modern world.&rdquo;
+            </p>
+            <p className="text-lg text-[#636262] leading-relaxed" lang="hi">
+              भारत की जड़ों को आधुनिक विश्व की आकांक्षाओं के साथ जोड़ना।
+            </p>
+          </div>
+        </div>
+        <div className="relative">
+          <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700 bg-gradient-to-br from-[#964900] via-[#f57c00] to-[#ffb786] flex items-center justify-center">
+            <Landmark className="w-40 h-40 text-white/30" aria-hidden />
+          </div>
+          <div className="absolute -bottom-10 -left-4 md:-left-10 bg-white p-6 md:p-8 rounded-3xl shadow-xl max-w-xs transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+            <p className="font-serif text-[#964900] text-lg md:text-xl font-bold leading-tight">
+              {t("Bharat-centered", "भारत-केंद्रित")}
+              <br />
+              {t("Intellectualism", "बौद्धिकता")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-const LAKSHYA = [
-  {
-    num: "०१", titleEn: "Age-appropriate Reconstruction", titleHi: "युगानुकूल पुनर्रचना",
-    hi: "उदात्त हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा एवं सूत्रों की खोज करना।",
-    en: "Discovering directions for age-appropriate reconstruction of national life in every sphere based on elevated Hindu life values.",
-  },
-  {
-    num: "०२", titleEn: "Global Network", titleHi: "वैश्विक तंत्र",
-    hi: "भारतीयत्व एवं समग्र मानवता में विश्वास रखने वाले विचारशील लोगों का, समूहों का एवं प्रबुद्ध विशेषज्ञ मंडलों (Think Tanks) का शक्तिशाली व सक्रिय वैश्विक तंत्र खड़ा करना।",
-    en: "Building a powerful global network of thinkers, groups and enlightened Think Tanks who believe in Bharatiyatva and universal humanity.",
-  },
-  {
-    num: "०३", titleEn: "Awakening 'Swa'", titleHi: "स्व बोध जागरण",
-    hi: "भारतीय नागरिकों में 'स्व' बोध जागृत करने हेतु वातावरण तैयार करना।",
-    en: "Creating an environment to awaken 'Swa' Bodh — self-awareness and civilisational consciousness — among Indian citizens.",
-  },
-  {
-    num: "०४", titleEn: "Intellectual Leadership", titleHi: "वैश्विक नेतृत्व",
-    hi: "प्रज्ञा के क्षेत्र में वैश्विक नेतृत्व करने की दिशा में भारत को तैयार करना।",
-    en: "Preparing India for global leadership in the field of Pragya — intellectual wisdom and knowledge.",
-  },
-];
-
-const UDDESHYA = [
-  {
-    icon: Network,
-    hi: "शोध", en: "Research",
-    descHi: "भूराजनीति, दर्शन, संस्कृति, साहित्य, इतिहास, पर्यावरण आदि पर गहन शोध एवं विश्लेषण। समाधान-उन्मुख अध्ययन समूह।",
-    descEn: "Deep research on geopolitics, philosophy, culture, literature and history. Solution-oriented study groups.",
-  },
-  {
-    icon: BookOpen,
-    hi: "सामग्री निर्माण", en: "Content Creation",
-    descHi: "विश्वस्तरीय पत्रिका, पुस्तकें, शोध प्रबंध, दृश्य/श्रव्य सामग्री एवं पॉडकास्ट का निर्माण।",
-    descEn: "World-class journals, books, research papers, audio/video content and podcasts for intellectual outreach.",
-  },
-  {
-    icon: Megaphone,
-    hi: "प्रसार एवं जागरण", en: "Outreach & Awakening",
-    descHi: "संगोष्ठी, कार्यशाला, विचार संगम के माध्यम से व्यापक जन जागरण एवं वैश्विक प्रज्ञावान तंत्र का निर्माण।",
-    descEn: "Mass awakening through seminars, workshops and Vichar Sangam — building a global network of prajna-minded people.",
-  },
-];
-
-const AAYAMS = [
-  { name: "युवा आयाम", en: "Yuva Aayam", icon: Flame },
-  { name: "महिला आयाम", en: "Mahila Aayam", icon: Heart },
-  { name: "शोध आयाम", en: "Shodh Aayam", icon: GraduationCap },
-  { name: "प्रचार आयाम", en: "Prachar Aayam", icon: Megaphone },
-];
-
-const PANCH = [
-  { num: "१", hi: "सामाजिक समरसता", en: "Social Harmony", icon: Heart },
-  { num: "२", hi: "कुटुंब प्रबोधन", en: "Family Awakening", icon: Home },
-  { num: "३", hi: "पर्यावरण संरक्षण", en: "Environmental Protection", icon: Leaf },
-  { num: "४", hi: "नागरिक कर्तव्य", en: "Civic Duty", icon: Shield },
-  { num: "५", hi: "स्व का बोध", en: "Swa Bodh", icon: Zap },
-];
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
-  },
+// ── Core Objectives ──────────────────────────────────────────────────────────
+type Objective = {
+  icon: React.ElementType;
+  titleEn: string;
+  titleHi: string;
+  bodyEn: string;
+  bodyHi: string;
+  highlight?: boolean;
 };
 
-export default function Parichay() {
-  const { lang, viewer } = useAppContext();
-  const isHi = lang === "hi";
-  const isSignedIn = Boolean(viewer);
-  const deskPath = isSignedIn
-    ? getRoleLandingPath(viewer?.effectiveRoles, viewer?.primaryRoleCode)
-    : null;
-  const loginHref = "/login?returnTo=%2Fdashboard";
+const OBJECTIVES: Objective[] = [
+  {
+    icon: BookOpenText,
+    titleEn: "Narrative Building",
+    titleHi: "विमर्श निर्माण",
+    bodyEn:
+      "Developing an authentic discourse on Indian culture, values, and global contributions through rigorous intellectual research.",
+    bodyHi:
+      "कठोर बौद्धिक शोध के माध्यम से भारतीय संस्कृति, मूल्यों और वैश्विक योगदान पर प्रामाणिक विमर्श का विकास।",
+  },
+  {
+    icon: Users,
+    titleEn: "Intellectual Unity",
+    titleHi: "बौद्धिक एकता",
+    bodyEn:
+      "Providing a unified platform for thinkers, scholars, and activists to converge and share Bharat-centric perspectives.",
+    bodyHi:
+      "विचारकों, विद्वानों और कार्यकर्ताओं को एकत्र कर भारत-केन्द्रित दृष्टि साझा करने का एकीकृत मंच।",
+    highlight: true,
+  },
+  {
+    icon: Building2,
+    titleEn: "Social Policy",
+    titleHi: "सामाजिक नीति",
+    bodyEn:
+      "Influencing the social and cultural policies of the nation through grounded insights and traditional wisdom.",
+    bodyHi:
+      "आधारभूत दृष्टि एवं परम्परागत प्रज्ञा से राष्ट्र की सामाजिक एवं सांस्कृतिक नीतियों को प्रभावित करना।",
+  },
+];
 
+function CoreObjectives() {
+  const t = useT();
+  const { lang } = useAppContext();
   return (
-    <div className="bg-background text-foreground selection:bg-primary/20">
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-8">
-          <Link href="/parichay" className="flex min-w-0 items-center gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl saffron-gradient ring-1 ring-primary/15">
-              <Home className="h-4 w-4 text-primary-foreground" aria-hidden />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                {isHi ? "प्रज्ञा प्रवाह" : "Pragya Pravah"}
-              </p>
-              <p className={cn("truncate text-xs font-semibold text-foreground", isHi && "font-devanagari")}>
-                {isHi ? "परिचय" : "Introduction"}
-              </p>
-            </div>
-          </Link>
-          <div className="flex shrink-0 items-center gap-2">
-            {isSignedIn && deskPath ? (
-              <Button asChild size="sm" className="rounded-full">
-                <Link href={deskPath}>{isHi ? "कार्यक्षेत्र" : "Workspace"}</Link>
-              </Button>
-            ) : (
-              <Button asChild size="sm" variant="default" className="gap-1.5 rounded-full">
-                <Link href={loginHref} prefetch={false}>
-                  <LogIn className="h-3.5 w-3.5" aria-hidden />
-                  {isHi ? "लॉगिन" : "Sign in"}
-                </Link>
-              </Button>
-            )}
-          </div>
+    <section className="bg-[#f4f3f1] py-24 px-6 md:px-20">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-16 flex flex-col items-center text-center">
+          <h3 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-[#1a1c1a]">
+            {t("Core Objectives", "मुख्य उद्देश्य")}{" "}
+            <span className="font-normal text-[#964900] italic" lang={lang === "hi" ? "en" : "hi"}>
+              {lang === "hi" ? "(Core Objectives)" : "(मुख्य उद्देश्य)"}
+            </span>
+          </h3>
+          <div className="w-24 h-1 bg-[#f57c00] rounded-full" />
         </div>
-      </header>
-
-      {/* ── Editorial Hero ────────────────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden border-b border-border/40 bg-[hsl(220_32%_8%)] text-white px-4 md:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,_hsl(27_100%_50%_/_0.12)_0%,_transparent_50%)]" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 opacity-10 pointer-events-none">
-          <Mandala className="w-[800px] h-[800px] animate-spin-slow" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto w-full relative z-10 py-24">
-          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-10">
-              <SectionLabel icon={Compass} label={isHi ? "संगठन परिचय" : "Organisation Overview"} />
-              <div className="space-y-6">
-                <h1 className="font-devanagari text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight">
-                  प्रज्ञा प्रवाह
-                </h1>
-                <p className="max-w-2xl text-xl md:text-2xl font-medium text-primary leading-relaxed">
-                  {isHi 
-                    ? "भारत-केंद्रित चिंतन, संवाद और संगठित कार्य का वैश्विक तंत्र।" 
-                    : "A global network for Bharat-centered thought, discourse, and organized action."}
-                </p>
-                <p className="max-w-2xl text-base md:text-lg text-white/60 leading-relaxed">
-                  {isHi
-                    ? "अखिल भारतीय चिंतन शिविर (नवंबर २०२४) में परिभाषित — संगठन की दृष्टि, लक्ष्य, उद्देश्य और आयामों का समग्र परिचय।"
-                    : "Defined at the All-India Chintan Shivir (November 2024) — a complete introduction to the organisation's vision, mission, and operational dimensions."}
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button asChild size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full px-8 md:px-10 text-sm md:text-base shadow-xl shadow-primary/20">
-                  <Link
-                    href={isSignedIn && deskPath ? deskPath : loginHref}
-                    prefetch={false}
-                    className="flex items-center justify-center"
-                  >
-                    {isHi ? "कार्यप्रवाह देखें" : "View Operations"}
-                    <ArrowRight className="ml-2 md:ml-3 h-4 md:h-5 w-4 md:w-5" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="lg"
-                  className="w-full sm:w-auto h-12 md:h-14 rounded-full border border-white/35 bg-white/10 px-8 text-sm text-white shadow-none backdrop-blur-sm md:h-14 md:px-10 md:text-base hover:border-white/55 hover:bg-white/20 hover:text-white focus-visible:ring-white/50 [&_svg]:text-white"
-                >
-                  <Link href="/vimarsh" className="flex items-center justify-center gap-2 text-white">
-                    {isHi ? "विमर्श पढ़ें" : "Read Vimarsh"}
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── High-Impact Vision ───────────────────────────────────────────── */}
-      <section className="parchment-panel py-24 md:py-32 px-4 border-b border-border/40">
-        <div className="max-w-5xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center space-y-12">
-            <SectionLabel icon={Sparkles} label={isHi ? "दृष्टि · Vision" : "Vision"} />
-            <div className="space-y-10">
-              <h2 className="font-devanagari text-4xl md:text-6xl font-bold leading-tight tracking-tight text-foreground max-w-4xl mx-auto">
-                प्रज्ञा आधारित हिंदू जीवन मूल्यों से प्रेरित,{" "}
-                <span className="text-primary italic font-serif underline decoration-primary/20 decoration-8 underline-offset-8">
-                  लोक कल्याणकारी
-                </span>{" "}
-                वैश्विक समाज रचना।
-              </h2>
-              <p className="text-xl md:text-2xl text-muted-foreground font-medium max-w-3xl mx-auto">
-                Building a welfare-oriented global society inspired by Pragya-based Hindu life values.
-              </p>
-            </div>
-            <div className="pt-12">
-              <div className="mx-auto w-px h-24 bg-gradient-to-b from-primary/60 to-transparent" />
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Stepped Mission ──────────────────────────────────────────────── */}
-      <section className="py-24 md:py-32 px-4 bg-background">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-20">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="space-y-8 lg:sticky lg:top-32 h-fit">
-              <SectionLabel icon={Compass} label={isHi ? "लक्ष्य · Mission" : "Mission"} />
-              <h3 className="text-4xl md:text-5xl font-bold tracking-tight">
-                {isHi ? "प्रज्ञा प्रवाह के चार लक्ष्य" : "Four Core Objectives"}
-              </h3>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-md">
-                {isHi
-                  ? "लक्ष्य वे चार दिशाएँ हैं जो इस दृष्टि तक पहुँचने के मार्ग हैं।"
-                  : "These four pillars constitute the directional path toward our civilisational vision."}
-              </p>
-            </motion.div>
-
-            <div className="space-y-12">
-              {LAKSHYA.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.6 }}
-                  className="group relative pl-16 pb-12 border-l border-border/60 last:border-0 last:pb-0"
-                >
-                  <div className="absolute left-[-21px] top-0 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary text-primary font-bold text-sm shadow-[0_0_15px_rgba(255,100,0,0.2)]">
-                    {item.num}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {OBJECTIVES.map((obj) => {
+            const Icon = obj.icon;
+            const base = obj.highlight
+              ? "p-10 rounded-[2.5rem] shadow-xl md:scale-105 transition-all duration-500 relative overflow-hidden bg-[#2f312f]"
+              : "bg-white p-10 rounded-[2.5rem] shadow-sm hover:shadow-[0_20px_40px_rgba(150,73,0,0.06)] transition-all duration-500 border border-[#dec1af]/20";
+            return (
+              <div key={obj.titleEn} className={`group ${base}`}>
+                {obj.highlight && (
+                  <div className="absolute top-4 right-4 opacity-5">
+                    <Landmark className="w-40 h-40 text-white" aria-hidden />
                   </div>
-                  <div className="space-y-5">
-                    <div className="space-y-2">
-                      <h4 className="text-2xl font-bold group-hover:text-primary transition-colors">{item.titleEn}</h4>
-                      <p className="font-devanagari text-xl font-semibold text-foreground/80">{item.titleHi}</p>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-8 pt-2">
-                      <p className="text-sm md:text-base leading-relaxed text-muted-foreground">
-                        {item.en}
-                      </p>
-                      <p className="font-devanagari text-sm md:text-base leading-relaxed text-foreground/70">
-                        {item.hi}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Asymmetric Goals ─────────────────────────────────────────────── */}
-      <section className="pravah-lattice-bg py-24 md:py-32 px-4 border-y border-border/40 bg-muted/20">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-20">
-            <SectionLabel icon={GraduationCap} label={isHi ? "उद्देश्य · Goals" : "Goals"} />
-            <h3 className="mt-8 text-4xl md:text-5xl font-bold tracking-tight">
-              {isHi ? "कार्य के तीन उद्देश्य" : "Three Pillars of Action"}
-            </h3>
-          </motion.div>
-
-          <div className="grid gap-12">
-            {UDDESHYA.map((g, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className={cn(
-                  "flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16",
-                  i % 2 === 1 && "lg:flex-row-reverse"
                 )}
-              >
-                <div className="flex-1 rounded-[3rem] border border-border/60 bg-background/80 p-8 md:p-12 shadow-sm flex flex-col justify-center space-y-6 group hover:border-primary/40 transition-all">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                    <g.icon className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-3xl font-bold">{g.en}</h4>
-                    <p className="font-devanagari text-2xl font-semibold text-foreground/80">{g.hi}</p>
-                  </div>
+                <div
+                  className={
+                    obj.highlight
+                      ? "w-16 h-16 bg-[#f57c00] rounded-2xl flex items-center justify-center text-white mb-8"
+                      : "w-16 h-16 bg-[#964900]/10 rounded-2xl flex items-center justify-center text-[#964900] mb-8 group-hover:bg-[#f57c00] group-hover:text-white transition-colors duration-300"
+                  }
+                >
+                  <Icon className="w-7 h-7" />
                 </div>
-                <div className="flex-1 flex flex-col justify-center space-y-8 py-4">
-                  <p className="text-lg leading-relaxed text-muted-foreground">
-                    {g.descEn}
-                  </p>
-                  <p className="font-devanagari text-lg leading-relaxed text-foreground/70">
-                    {g.descHi}
-                  </p>
-                  <div className="w-24 h-px bg-primary/40" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <h4 className={`font-serif text-2xl font-bold mb-2 ${obj.highlight ? "text-white" : "text-[#1a1c1a]"}`}>
+                  {t(obj.titleEn, obj.titleHi)}
+                </h4>
+                <h5 className="text-sm font-bold text-[#f57c00] uppercase tracking-widest mb-6" lang={lang === "hi" ? "en" : "hi"}>
+                  {lang === "hi" ? obj.titleEn : obj.titleHi}
+                </h5>
+                <p className={obj.highlight ? "text-[#e3e2e0] leading-relaxed" : "text-[#636262] leading-relaxed"}>
+                  {t(obj.bodyEn, obj.bodyHi)}
+                </p>
+              </div>
+            );
+          })}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── Dimensions ───────────────────────────────────────────────────── */}
-      <section className="py-24 md:py-32 px-4 bg-background overflow-hidden">
-        <div className="max-w-7xl mx-auto relative">
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 opacity-[0.03] pointer-events-none">
-            <Mandala className="w-[600px] h-[600px]" />
-          </div>
-          
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="mb-16">
-            <SectionLabel icon={Network} label={isHi ? "आयाम · Dimensions" : "Dimensions"} />
-            <h3 className="mt-8 text-4xl md:text-5xl font-bold tracking-tight">
-              {isHi ? "संगठन के आयाम" : "Organisational Dimensions"}
-            </h3>
-          </motion.div>
+// ── Action Pillars ───────────────────────────────────────────────────────────
+const PILLARS = [
+  {
+    num: "01",
+    titleEn: "Seminars & Conclaves",
+    titleHi: "संगोष्ठी एवं सम्मेलन",
+    bodyEn: "Bringing together the brightest minds for thematic discussions across the country.",
+    bodyHi: "देशभर के श्रेष्ठ विचारकों को विषयगत विमर्श के लिए एकत्र करना।",
+    href: "/calendar",
+  },
+  {
+    num: "02",
+    titleEn: "Digital Publications",
+    titleHi: "डिजिटल प्रकाशन",
+    bodyEn: "Curating research papers and long-form articles for a global digital audience.",
+    bodyHi: "वैश्विक डिजिटल पाठकों के लिए शोध पत्र एवं दीर्घ लेखों का संकलन।",
+    href: "/aalekh",
+  },
+  {
+    num: "03",
+    titleEn: "Cultural Mentorship",
+    titleHi: "सांस्कृतिक मार्गदर्शन",
+    bodyEn: "Nurturing a new generation of thinkers rooted in Indian ethos.",
+    bodyHi: "भारतीय संस्कार में दीक्षित नवीन विचारक पीढ़ी का निर्माण।",
+    href: "/vimarsh",
+  },
+];
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {AAYAMS.map((a, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, duration: 0.5 }}
-                className="group rounded-3xl border border-border/60 bg-card/30 p-8 flex flex-col items-center text-center space-y-6 transition-all hover:border-primary/40 hover:bg-card/50"
+function ActionPillars() {
+  const t = useT();
+  const { lang } = useAppContext();
+  return (
+    <section id="pillars" className="py-24 px-6 md:px-20 bg-[#faf9f6]">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-16 items-center">
+        <div className="w-full md:w-1/2 order-2 md:order-1">
+          <div className="space-y-12">
+            {PILLARS.map((p) => (
+              <Link
+                key={p.num}
+                href={p.href}
+                className="flex gap-6 group cursor-pointer"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                  <a.icon className="h-7 w-7" />
-                </div>
-                <div>
-                  <h4 className="font-devanagari text-xl font-bold">{a.name}</h4>
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">{a.en}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Five Transformations ─────────────────────────────────────────── */}
-      <section className="relative py-24 md:py-32 px-4 bg-[hsl(220_28%_10%)] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_hsl(27_100%_50%_/_0.1)_0%,_transparent_70%)]" />
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-20">
-            <SectionLabel icon={Star} label={isHi ? "पंच परिवर्तन" : "Pancha Parivartan"} />
-            <h3 className="mt-8 text-4xl md:text-5xl font-bold tracking-tight">
-              {isHi ? "पाँच सामाजिक परिवर्तन" : "Five Social Transformations"}
-            </h3>
-          </motion.div>
-
-          <div className="grid md:grid-cols-5 gap-4">
-            {PANCH.map((p, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.6 }}
-                className="group relative rounded-3xl border border-white/10 bg-white/5 p-8 flex flex-col items-center text-center space-y-6 transition-all hover:border-primary/40 hover:bg-white/10"
-              >
-                <div className="text-5xl font-bold text-primary/20 font-devanagari absolute top-4 left-4 group-hover:text-primary/40 transition-colors">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full border-2 border-[#f57c00] flex items-center justify-center font-serif font-bold text-xl text-[#964900] group-hover:bg-[#f57c00] group-hover:text-white transition-all duration-300">
                   {p.num}
                 </div>
-                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary z-10">
-                  <p.icon className="w-8 h-8" />
+                <div>
+                  <h4 className="font-serif text-2xl font-bold text-[#1a1c1a]">
+                    {t(p.titleEn, p.titleHi)}
+                  </h4>
+                  <p className="text-[#636262] mt-2">{t(p.bodyEn, p.bodyHi)}</p>
+                  <p className="text-sm font-bold text-[#f57c00] mt-1 uppercase tracking-wide" lang={lang === "hi" ? "en" : "hi"}>
+                    {lang === "hi" ? p.titleEn : p.titleHi}
+                  </p>
                 </div>
-                <div className="z-10">
-                  <h4 className="font-devanagari text-xl font-bold">{p.hi}</h4>
-                  <p className="text-xs text-white/40 uppercase tracking-widest mt-1">{p.en}</p>
-                </div>
-              </motion.div>
+              </Link>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* ── Editorial Conclusion ────────────────────────────────────────── */}
-      <section className="px-4 py-32 border-t border-border/40">
-        <div className="max-w-4xl mx-auto text-center space-y-12">
-          <div className="mx-auto w-24 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-          <p className="text-sm uppercase tracking-[0.4em] font-bold text-primary">Pragya Pravah</p>
-          <h2 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
-            Giving institutional strength to <br />
-            <span className="italic font-serif text-primary">Bharat-centred thought.</span>
-          </h2>
-          <div className="pt-8 flex justify-center">
-            <Button asChild size="lg" className="h-16 rounded-full px-12 text-lg shadow-2xl shadow-primary/30">
-              <Link href={isSignedIn && deskPath ? deskPath : loginHref} prefetch={false}>
-                {isHi ? "कार्यप्रवाह में प्रवेश करें" : "Enter Operational Workflow"}
-                <ArrowRight className="ml-3 h-6 w-6" />
-              </Link>
-            </Button>
+        <div className="w-full md:w-1/2 order-1 md:order-2">
+          <div className="relative">
+            <div className="absolute -inset-4 bg-[#f57c00]/10 rounded-[3rem] blur-xl" />
+            <div className="relative rounded-[3rem] shadow-2xl aspect-[4/3] bg-gradient-to-br from-[#1a1c1a] via-[#574235] to-[#964900] flex items-center justify-center">
+              <Compass className="w-32 h-32 text-white/30" aria-hidden />
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
+
+// ── Dimensions ───────────────────────────────────────────────────────────────
+const DIMENSIONS = [
+  { icon: ScrollText, labelEn: "History & Ethos", labelHi: "इतिहास एवं लोकाचार", href: "/history" },
+  { icon: Compass, labelEn: "Arts & Aesthetics", labelHi: "कला एवं सौन्दर्य", href: "/vimarsh" },
+  { icon: FlaskConical, labelEn: "Ancient Science", labelHi: "प्राचीन विज्ञान", href: "/library" },
+  { icon: Scale, labelEn: "Dharma & Law", labelHi: "धर्म एवं विधि", href: "/vimarsh" },
+];
+
+function Dimensions() {
+  const t = useT();
+  return (
+    <section id="dimensions" className="py-24 px-6 md:px-20 bg-[#e9e8e5] relative overflow-hidden">
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#f57c00]/5 rounded-full blur-3xl" />
+      <div className="max-w-7xl mx-auto relative">
+        <div className="flex flex-col md:flex-row justify-between md:items-end gap-6 mb-16">
+          <div>
+            <h3 className="font-serif text-5xl font-bold text-[#1a1c1a]">
+              {t("Dimensions", "आयाम")}
+            </h3>
+            <p className="text-[#f57c00] font-extrabold uppercase tracking-widest mt-2" lang="hi">
+              क्षेत्र एवं आयाम
+            </p>
+          </div>
+          <Link
+            href="/library"
+            className="inline-flex items-center bg-[#964900] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#f57c00] hover:-translate-y-1 transition-all duration-300 shadow-lg"
+          >
+            {t("Explore All", "सब देखें")}
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {DIMENSIONS.map(({ icon: Icon, labelEn, labelHi, href }) => (
+            <Link
+              key={labelEn}
+              href={href}
+              className="aspect-square bg-white rounded-[2rem] p-8 flex flex-col justify-between hover:bg-[#964900] group transition-all duration-500 cursor-pointer"
+            >
+              <Icon className="w-10 h-10 text-[#964900] group-hover:text-white transition-colors" aria-hidden />
+              <div className="font-serif text-xl font-bold text-[#1a1c1a] group-hover:text-white transition-colors">
+                {t(labelEn, labelHi)}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Social Transformation ────────────────────────────────────────────────────
+const SOCIAL = [
+  { num: "01", titleEn: "Community Resonance", titleHi: "सामुदायिक गूंज", href: "/prachar" },
+  { num: "02", titleEn: "Educational Reform", titleHi: "शिक्षा सुधार", href: "/aalekh" },
+  { num: "03", titleEn: "Youth Empowerment", titleHi: "युवा सशक्तिकरण", href: "/dayitv" },
+];
+
+function SocialTransformation() {
+  const t = useT();
+  const { lang } = useAppContext();
+  return (
+    <section id="social" className="py-24 px-6 md:px-20 bg-[#faf9f6]">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-16 text-center">
+          <h3 className="font-serif text-4xl font-bold text-[#1a1c1a]">
+            {t("Social Transformation", "सामाजिक परिवर्तन")}
+          </h3>
+          <p className="text-[#636262] italic">
+            {t(
+              "The journey of societal awakening through intellectual depth.",
+              "बौद्धिक गहनता के माध्यम से सामाजिक जागरण की यात्रा।",
+            )}
+          </p>
+        </div>
+        <div className="space-y-4">
+          {SOCIAL.map((s) => (
+            <Link
+              key={s.num}
+              href={s.href}
+              className="group flex items-center gap-6 md:gap-8 p-6 md:p-8 rounded-3xl hover:bg-[#f4f3f1] transition-all duration-300 cursor-pointer border border-transparent hover:border-[#dec1af]/30"
+            >
+              <div className="text-4xl md:text-5xl font-serif font-bold text-[#dec1af] group-hover:text-[#f57c00] transition-colors duration-300">
+                {s.num}
+              </div>
+              <div className="flex-1">
+                <h4 className="font-serif text-xl md:text-2xl font-bold text-[#1a1c1a]">
+                  {t(s.titleEn, s.titleHi)}
+                </h4>
+                <p className="text-[#636262] text-sm uppercase tracking-wider font-bold" lang={lang === "hi" ? "en" : "hi"}>
+                  {lang === "hi" ? s.titleEn : s.titleHi}
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-[#f57c00] opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300" />
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── CTA ──────────────────────────────────────────────────────────────────────
+function CallToAction() {
+  const t = useT();
+  const { isAuthenticated, viewer } = useAppContext();
+  const landingPath = getRoleLandingPath(
+    viewer?.effectiveRoles ?? null,
+    viewer?.primaryRoleCode ?? null,
+  );
+  const primaryHref = isAuthenticated ? landingPath : "/login";
+  const primaryLabelEn = isAuthenticated ? "Enter Console" : "Join Community";
+  const primaryLabelHi = isAuthenticated ? "कार्यक्षेत्र में प्रवेश" : "समुदाय से जुड़ें";
+
+  return (
+    <section className="mx-6 md:mx-20 mb-24 relative rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-[#964900] py-24 text-center text-white">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#964900] to-[#f57c00] opacity-60" />
+      <div className="relative z-10 max-w-2xl mx-auto px-6 md:px-8">
+        <h3 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+          {t("Become a part of the Pravah.", "प्रवाह का अंग बनें।")}
+        </h3>
+        <p className="text-base md:text-lg text-white/80 mb-10 leading-relaxed">
+          {t(
+            "Join thousands of thinkers contributing to the revival of Bharat's intellectual prowess.",
+            "भारत की बौद्धिक शक्ति के पुनरुद्धार में योगदान देने वाले सहस्रों विचारकों से जुड़ें।",
+          )}
+        </p>
+        <div className="flex flex-col md:flex-row justify-center gap-4">
+          <Link
+            href={primaryHref}
+            className="bg-white text-[#964900] px-10 py-4 rounded-2xl font-bold hover:bg-[#ffffff] hover:scale-105 transition-all duration-300 shadow-xl"
+          >
+            {t(primaryLabelEn, primaryLabelHi)}
+          </Link>
+          <Link
+            href="/aalekh"
+            className="border-2 border-white/40 text-white px-10 py-4 rounded-2xl font-bold hover:bg-white/10 transition-all duration-300"
+          >
+            {t("Read Archives", "संग्रह पढ़ें")}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Right Rail ───────────────────────────────────────────────────────────────
+function SideRail() {
+  const items = [
+    { icon: Info, href: "#mission", label: "Mission", active: true },
+    { icon: Target, href: "#pillars", label: "Pillars" },
+    { icon: LayoutGrid, href: "#dimensions", label: "Dimensions" },
+    { icon: Users, href: "#social", label: "Social" },
+    { icon: History, href: "/history", label: "History" },
+  ];
+  return (
+    <aside className="fixed right-0 top-20 h-[calc(100vh-5rem)] w-20 flex-col items-center py-10 gap-8 hidden md:flex border-l border-[#dec1af]/20 bg-white z-40">
+      {items.map(({ icon: Icon, href, label, active }) => (
+        <a
+          key={label}
+          href={href}
+          aria-label={label}
+          className={active ? "text-[#964900]" : "text-[#636262] hover:text-[#964900] transition-colors"}
+        >
+          <Icon className="w-6 h-6" />
+        </a>
+      ))}
+    </aside>
+  );
+}
+
+// ── Mobile Bottom Nav ────────────────────────────────────────────────────────
+function MobileBottomNav() {
+  const t = useT();
+  const items = [
+    { icon: BookOpenText, href: "#mission", labelEn: "Mission", labelHi: "उद्देश्य", active: true },
+    { icon: Landmark, href: "#pillars", labelEn: "Pillars", labelHi: "स्तंभ" },
+    { icon: LayoutGrid, href: "#dimensions", labelEn: "Dimensions", labelHi: "आयाम" },
+    { icon: Users, href: "#social", labelEn: "Social", labelHi: "सामाजिक" },
+  ];
+  return (
+    <footer className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-end px-6 py-4 bg-[#faf9f6]/95 backdrop-blur-2xl z-50 rounded-t-[2.5rem] border-t border-[#f57c00]/20 shadow-[0_-15px_40px_rgba(150,73,0,0.08)]">
+      {items.map(({ icon: Icon, href, labelEn, labelHi, active }) => (
+        <a
+          key={labelEn}
+          href={href}
+          className={
+            active
+              ? "flex flex-col items-center justify-center bg-gradient-to-br from-[#964900] to-[#f57c00] text-white rounded-2xl px-5 py-2 shadow-lg shadow-[#f57c00]/20 -translate-y-1 transition-all duration-500"
+              : "flex flex-col items-center justify-center text-[#636262] px-5 py-2 opacity-70 hover:text-[#964900] hover:opacity-100 hover:scale-110 transition-all duration-500"
+          }
+        >
+          <Icon className="w-5 h-5" />
+          <span className="text-[10px] uppercase font-extrabold tracking-[0.15em] mt-1">
+            {t(labelEn, labelHi)}
+          </span>
+        </a>
+      ))}
+    </footer>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+export default function Parichay() {
+  return (
+    <div
+      className="bg-[#faf9f6] text-[#1a1c1a] overflow-x-hidden min-h-screen"
+      style={{ fontFamily: "Manrope, ui-sans-serif, system-ui, sans-serif" }}
+    >
+      <TopAppBar />
+      <main className="pt-20 md:pr-20">
+        <Hero />
+        <CoreObjectives />
+        <ActionPillars />
+        <Dimensions />
+        <SocialTransformation />
+        <CallToAction />
+      </main>
+      <SideRail />
+      <MobileBottomNav />
     </div>
   );
 }

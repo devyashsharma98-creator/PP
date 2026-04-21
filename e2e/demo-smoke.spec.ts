@@ -57,7 +57,7 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByRole("button", { name: "Vibhag Pramukh" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Karyakarta" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Unit Head" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Aayam Pramukh" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Aayam Pramukh Load", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Super Admin" })).toBeVisible();
   });
 
@@ -403,17 +403,17 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByText(/Bhopal Vibhag Activity Console/i)).toBeVisible();
   });
 
-  test("13 - root renders the ERP login entry for unauthenticated users", async ({
+  test("13 - root renders the public landing for unauthenticated users", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await expect(page.locator("main").getByRole("heading", { name: /Pragya Pravah/i })).toBeVisible();
-  await expect(page.locator("main")).toContainText(/Internal access panel|Secure access/i);
-  await expect(page.locator("body")).not.toContainText(/global network|Fields of Work|Choose Your Path/i);
+  await page.waitForURL("**/parichay", { timeout: 10_000 });
+  await expect(page.locator("#main-content")).toContainText(/Pragya Pravah|प्रज्ञा प्रवाह|Organisation Overview/i);
+  await expect(page.locator("body")).not.toContainText(/Activity ledger|Karyakarta \(Writer\)/i);
 });
 
-test("13b - authenticated / shows the ERP operational home", async ({ page }) => {
+test("13b - authenticated / still opens the public landing", async ({ page }) => {
   await loginAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
   if (page.url().includes("/login")) {
@@ -422,13 +422,13 @@ test("13b - authenticated / shows the ERP operational home", async ({ page }) =>
   }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.waitForURL("**/overview**", { timeout: 10_000 });
+  await page.waitForURL("**/parichay", { timeout: 10_000 });
 
-  await expect(page.locator("main")).toContainText(/Overview|Approval visibility|Hierarchy health/i, { timeout: 15000 });
-  await expect(page.locator("main")).not.toContainText(/Enter Demo Console/i);
+  await expect(page.locator("#main-content")).toContainText(/Pragya Pravah|प्रज्ञा प्रवाह|Organisation Overview/i, { timeout: 15000 });
+  await expect(page.locator("body")).not.toContainText(/Activity ledger|Karyakarta \(Writer\)/i);
 });
 
-test("13c - all logged-in roles see summary oversight without admin-only detail", async ({ page }) => {
+test("13c - overview sends non-admin roles to their work desk without admin-only detail", async ({ page }) => {
   await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
 
   if (page.url().includes("/login")) {
@@ -438,9 +438,8 @@ test("13c - all logged-in roles see summary oversight without admin-only detail"
 
   await page.goto("/overview", { waitUntil: "domcontentloaded" });
 
-  await expect(page.locator("main")).toContainText(/Login health/i, { timeout: 15000 });
-  await expect(page.locator("main")).toContainText(/Approval visibility/i, { timeout: 15000 });
-  await expect(page.locator("main")).toContainText(/Hierarchy health/i, { timeout: 15000 });
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.locator("main")).toContainText(/Karyakarta Work Desk|Karyakarta Dashboard/i, { timeout: 15000 });
   await expect(page.locator("main")).not.toContainText(/Recent logins|Recent workflow actors|Open System Access/i);
 });
 
