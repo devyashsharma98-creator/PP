@@ -191,7 +191,7 @@ function TopAppBar() {
         <a className="text-[#964900] font-bold" href="#mission">{t("Mission", "उद्देश्य")}</a>
         <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#pillars">{t("Pillars", "स्तंभ")}</a>
         <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#dimensions">{t("Dimensions", "आयाम")}</a>
-        <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#social">{t("Social", "सामाजिक")}</a>
+        <a className="text-[#636262] hover:text-[#f57c00] transition-colors" href="#social">{t("Structure", "कार्य")}</a>
       </nav>
       <div className="flex items-center gap-3">
         <button
@@ -238,7 +238,7 @@ function Hero() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">
           <span className="inline-block px-4 py-1 rounded-full bg-[#e3e2e0] text-[#964900] font-bold text-xs uppercase tracking-widest">
-            {t("Digital Home for Thought", "विचार का डिजिटल निवास")}
+            {t("Pragya Pravah Introduction", "प्रज्ञा प्रवाह परिचय")}
           </span>
           <h2 className="font-serif text-6xl md:text-8xl italic font-light tracking-tighter text-[#964900] leading-none">
             Parichay
@@ -247,10 +247,10 @@ function Hero() {
           </h2>
           <div className="space-y-4 border-l-4 border-[#f57c00] pl-6">
             <p className="font-serif text-2xl italic text-[#574235] leading-relaxed">
-              &ldquo;Connecting the roots of Bharat with the aspirations of the modern world.&rdquo;
+              &ldquo;A global network for era-appropriate reconstruction of national life, rooted in noble Hindu life values.&rdquo;
             </p>
             <p className="text-lg text-[#636262] leading-relaxed" lang="hi">
-              भारत की जड़ों को आधुनिक विश्व की आकांक्षाओं के साथ जोड़ना।
+              उदात्त हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा में भारतीयत्व में विश्वास रखने वाले विचारशील लोगों, समूहों और प्रबुद्ध विशेषज्ञ मंडलों का वैश्विक तंत्र।
             </p>
           </div>
         </div>
@@ -260,9 +260,9 @@ function Hero() {
           </div>
           <div className="absolute -bottom-10 -left-4 md:-left-10 bg-white p-6 md:p-8 rounded-3xl shadow-xl max-w-xs transform -rotate-3 hover:rotate-0 transition-transform duration-500">
             <p className="font-serif text-[#964900] text-lg md:text-xl font-bold leading-tight">
-              {t("Bharat-centered", "भारत-केंद्रित")}
+              {t("Pragya-based", "प्रज्ञा आधारित")}
               <br />
-              {t("Intellectualism", "बौद्धिकता")}
+              {t("Global Society", "वैश्विक समाज रचना")}
             </p>
           </div>
         </div>
@@ -284,31 +284,40 @@ type Objective = {
 const OBJECTIVES: Objective[] = [
   {
     icon: BookOpenText,
-    titleEn: "Narrative Building",
-    titleHi: "विमर्श निर्माण",
+    titleEn: "Vision",
+    titleHi: "दृष्टि",
     bodyEn:
-      "Developing an authentic discourse on Indian culture, values, and global contributions through rigorous intellectual research.",
+      "To shape a welfare-oriented global social order inspired by wisdom-based Hindu life values.",
     bodyHi:
-      "कठोर बौद्धिक शोध के माध्यम से भारतीय संस्कृति, मूल्यों और वैश्विक योगदान पर प्रामाणिक विमर्श का विकास।",
+      "प्रज्ञा आधारित हिंदू जीवन मूल्यों से प्रेरित, लोक कल्याणकारी वैश्विक समाज रचना।",
   },
   {
     icon: Users,
-    titleEn: "Intellectual Unity",
-    titleHi: "बौद्धिक एकता",
+    titleEn: "Era-appropriate Renewal",
+    titleHi: "युगानुकूल पुनर्रचना",
     bodyEn:
-      "Providing a unified platform for thinkers, scholars, and activists to converge and share Bharat-centric perspectives.",
+      "Discover directions and principles for renewal in every field of national life on the foundation of noble Hindu life values.",
     bodyHi:
-      "विचारकों, विद्वानों और कार्यकर्ताओं को एकत्र कर भारत-केन्द्रित दृष्टि साझा करने का एकीकृत मंच।",
+      "उदात्त हिंदू जीवन मूल्यों के आधार पर राष्ट्र जीवन के प्रत्येक क्षेत्र में युगानुकूल पुनर्रचना की दिशा एवं सूत्रों की खोज करना।",
     highlight: true,
   },
   {
     icon: Building2,
-    titleEn: "Social Policy",
-    titleHi: "सामाजिक नीति",
+    titleEn: "Active Global Network",
+    titleHi: "सक्रिय वैश्विक तंत्र",
     bodyEn:
-      "Influencing the social and cultural policies of the nation through grounded insights and traditional wisdom.",
+      "Build a strong network of thinkers, groups, and think tanks who believe in Bharatiyata and integral humanity.",
     bodyHi:
-      "आधारभूत दृष्टि एवं परम्परागत प्रज्ञा से राष्ट्र की सामाजिक एवं सांस्कृतिक नीतियों को प्रभावित करना।",
+      "भारतीयत्व एवं समग्र मानवता में विश्वास रखने वाले विचारशील लोगों, समूहों और प्रबुद्ध विशेषज्ञ मंडलों का शक्तिशाली व सक्रिय वैश्विक तंत्र खड़ा करना।",
+  },
+  {
+    icon: Landmark,
+    titleEn: "Swabodh & Leadership",
+    titleHi: "स्वबोध एवं नेतृत्व",
+    bodyEn:
+      "Create an environment for awakening 'swa' among citizens and prepare Bharat for global leadership in the field of Pragya.",
+    bodyHi:
+      "भारतीय नागरिकों में 'स्व' बोध जागृत करने हेतु वातावरण तैयार करना और प्रज्ञा के क्षेत्र में वैश्विक नेतृत्व के लिए भारत को तैयार करना।",
   },
 ];
 
@@ -320,14 +329,14 @@ function CoreObjectives() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 flex flex-col items-center text-center">
           <h3 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-[#1a1c1a]">
-            {t("Core Objectives", "मुख्य उद्देश्य")}{" "}
+            {t("Vision & Mission", "दृष्टि एवं लक्ष्य")}{" "}
             <span className="font-normal text-[#964900] italic" lang={lang === "hi" ? "en" : "hi"}>
-              {lang === "hi" ? "(Core Objectives)" : "(मुख्य उद्देश्य)"}
+              {lang === "hi" ? "(Vision & Mission)" : "(दृष्टि एवं लक्ष्य)"}
             </span>
           </h3>
           <div className="w-24 h-1 bg-[#f57c00] rounded-full" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {OBJECTIVES.map((obj) => {
             const Icon = obj.icon;
             const base = obj.highlight
@@ -371,26 +380,26 @@ function CoreObjectives() {
 const PILLARS = [
   {
     num: "01",
-    titleEn: "Seminars & Conclaves",
-    titleHi: "संगोष्ठी एवं सम्मेलन",
-    bodyEn: "Bringing together the brightest minds for thematic discussions across the country.",
-    bodyHi: "देशभर के श्रेष्ठ विचारकों को विषयगत विमर्श के लिए एकत्र करना।",
-    href: "/calendar",
+    titleEn: "Research",
+    titleHi: "शोध",
+    bodyEn: "Research and analysis on nationally significant subjects such as geopolitics, philosophy, culture, literature, history, and environment.",
+    bodyHi: "राष्ट्रीय दृष्टिकोण से संबंधित भू-राजनीति, दर्शन, संस्कृति, साहित्य, इतिहास, पर्यावरण आदि विषयों पर विस्तृत शोध एवं विश्लेषण।",
+    href: "/aalekh",
   },
   {
     num: "02",
-    titleEn: "Digital Publications",
-    titleHi: "डिजिटल प्रकाशन",
-    bodyEn: "Curating research papers and long-form articles for a global digital audience.",
-    bodyHi: "वैश्विक डिजिटल पाठकों के लिए शोध पत्र एवं दीर्घ लेखों का संकलन।",
+    titleEn: "Content Creation",
+    titleHi: "सामग्री निर्माण",
+    bodyEn: "Publish journals, scholarly books, research papers, and audio-visual material that carry Bharat-centered ideas into intellectual spaces.",
+    bodyHi: "पत्रिका, विद्वत्तापूर्ण पुस्तकें, शोध प्रबंध तथा दृश्य-श्रव्य सामग्री के माध्यम से भारतीयत्व आधारित विचारों को वैचारिक क्षेत्र में ले जाना।",
     href: "/aalekh",
   },
   {
     num: "03",
-    titleEn: "Cultural Mentorship",
-    titleHi: "सांस्कृतिक मार्गदर्शन",
-    bodyEn: "Nurturing a new generation of thinkers rooted in Indian ethos.",
-    bodyHi: "भारतीय संस्कार में दीक्षित नवीन विचारक पीढ़ी का निर्माण।",
+    titleEn: "Propagation & Awakening",
+    titleHi: "प्रचार, प्रसार एवं जागरण",
+    bodyEn: "Take ideas and content to studying and thinking communities through seminars, workshops, Vichar Sangam, and modern communication channels.",
+    bodyHi: "संगोष्ठी, सेमिनार, कार्यशाला, विचार संगम और आधुनिक प्रचार-प्रसार माध्यमों से अध्ययनशील एवं चिंतक वर्ग तक विचार और सामग्री पहुँचाना।",
     href: "/vimarsh",
   },
 ];
@@ -440,10 +449,10 @@ function ActionPillars() {
 
 // ── Dimensions ───────────────────────────────────────────────────────────────
 const DIMENSIONS = [
-  { icon: ScrollText, labelEn: "History & Ethos", labelHi: "इतिहास एवं लोकाचार", href: "/history" },
-  { icon: Compass, labelEn: "Arts & Aesthetics", labelHi: "कला एवं सौन्दर्य", href: "/vimarsh" },
-  { icon: FlaskConical, labelEn: "Ancient Science", labelHi: "प्राचीन विज्ञान", href: "/library" },
-  { icon: Scale, labelEn: "Dharma & Law", labelHi: "धर्म एवं विधि", href: "/vimarsh" },
+  { icon: Users, labelEn: "Youth", labelHi: "युवा", href: "/dayitv" },
+  { icon: Scale, labelEn: "Women", labelHi: "महिला", href: "/vimarsh" },
+  { icon: FlaskConical, labelEn: "Research", labelHi: "शोध", href: "/aalekh" },
+  { icon: ScrollText, labelEn: "Prachar", labelHi: "प्रचार", href: "/prachar" },
 ];
 
 function Dimensions() {
@@ -458,7 +467,7 @@ function Dimensions() {
               {t("Dimensions", "आयाम")}
             </h3>
             <p className="text-[#f57c00] font-extrabold uppercase tracking-widest mt-2" lang="hi">
-              क्षेत्र एवं आयाम
+              युवा, महिला, शोध और प्रचार
             </p>
           </div>
           <Link
@@ -489,9 +498,10 @@ function Dimensions() {
 
 // ── Social Transformation ────────────────────────────────────────────────────
 const SOCIAL = [
-  { num: "01", titleEn: "Community Resonance", titleHi: "सामुदायिक गूंज", href: "/prachar" },
-  { num: "02", titleEn: "Educational Reform", titleHi: "शिक्षा सुधार", href: "/aalekh" },
-  { num: "03", titleEn: "Youth Empowerment", titleHi: "युवा सशक्तिकरण", href: "/dayitv" },
+  { num: "01", titleEn: "Prant & Unit Work", titleHi: "प्रांत और इकाई कार्य", href: "/dayitv" },
+  { num: "02", titleEn: "Study Centers", titleHi: "अध्ययन केंद्र", href: "/library" },
+  { num: "03", titleEn: "Teaching Centers", titleHi: "शिक्षण केंद्र", href: "/calendar" },
+  { num: "04", titleEn: "Subject Study Teams", titleHi: "विषय अध्ययन टोली", href: "/vimarsh" },
 ];
 
 function SocialTransformation() {
@@ -502,12 +512,12 @@ function SocialTransformation() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-16 text-center">
           <h3 className="font-serif text-4xl font-bold text-[#1a1c1a]">
-            {t("Social Transformation", "सामाजिक परिवर्तन")}
+            {t("Work Structure", "कार्य का स्वरूप")}
           </h3>
           <p className="text-[#636262] italic">
             {t(
-              "The journey of societal awakening through intellectual depth.",
-              "बौद्धिक गहनता के माध्यम से सामाजिक जागरण की यात्रा।",
+              "Prant, unit, study center, teaching center, and subject-team work arranged for sustained intellectual activity.",
+              "प्रांत, इकाई, अध्ययन केंद्र, शिक्षण केंद्र और विषय अध्ययन टोली के माध्यम से निरंतर वैचारिक कार्य की रचना।",
             )}
           </p>
         </div>
@@ -547,20 +557,20 @@ function CallToAction() {
     viewer?.primaryRoleCode ?? null,
   );
   const primaryHref = isAuthenticated ? landingPath : "/login";
-  const primaryLabelEn = isAuthenticated ? "Enter Console" : "Join Community";
-  const primaryLabelHi = isAuthenticated ? "कार्यक्षेत्र में प्रवेश" : "समुदाय से जुड़ें";
+  const primaryLabelEn = isAuthenticated ? "Enter Console" : "Sign In";
+  const primaryLabelHi = isAuthenticated ? "कार्यक्षेत्र में प्रवेश" : "प्रवेश करें";
 
   return (
     <section className="mx-6 md:mx-20 mb-24 relative rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-[#964900] py-24 text-center text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-[#964900] to-[#f57c00] opacity-60" />
       <div className="relative z-10 max-w-2xl mx-auto px-6 md:px-8">
         <h3 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-          {t("Become a part of the Pravah.", "प्रवाह का अंग बनें।")}
+          {t("Carry Panch Parivartan into public life.", "पंच परिवर्तन को जन जीवन में उतारें।")}
         </h3>
         <p className="text-base md:text-lg text-white/80 mb-10 leading-relaxed">
           {t(
-            "Join thousands of thinkers contributing to the revival of Bharat's intellectual prowess.",
-            "भारत की बौद्धिक शक्ति के पुनरुद्धार में योगदान देने वाले सहस्रों विचारकों से जुड़ें।",
+            "Social harmony, family awakening, environmental protection, civic duty, and awareness of swa provide the practical direction for this work.",
+            "सामाजिक समरसता, कुटुंब प्रबोधन, पर्यावरण संरक्षण, नागरिक कर्तव्य और स्व का बोध इस कार्य की व्यावहारिक दिशा हैं।",
           )}
         </p>
         <div className="flex flex-col md:flex-row justify-center gap-4">
@@ -588,7 +598,7 @@ function SideRail() {
     { icon: Info, href: "#mission", label: "Mission", active: true },
     { icon: Target, href: "#pillars", label: "Pillars" },
     { icon: LayoutGrid, href: "#dimensions", label: "Dimensions" },
-    { icon: Users, href: "#social", label: "Social" },
+    { icon: Users, href: "#social", label: "Structure" },
     { icon: History, href: "/history", label: "History" },
   ];
   return (
@@ -614,7 +624,7 @@ function MobileBottomNav() {
     { icon: BookOpenText, href: "#mission", labelEn: "Mission", labelHi: "उद्देश्य", active: true },
     { icon: Landmark, href: "#pillars", labelEn: "Pillars", labelHi: "स्तंभ" },
     { icon: LayoutGrid, href: "#dimensions", labelEn: "Dimensions", labelHi: "आयाम" },
-    { icon: Users, href: "#social", labelEn: "Social", labelHi: "सामाजिक" },
+    { icon: Users, href: "#social", labelEn: "Structure", labelHi: "कार्य" },
   ];
   return (
     <footer className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-end px-6 py-4 bg-[#faf9f6]/95 backdrop-blur-2xl z-50 rounded-t-[2.5rem] border-t border-[#f57c00]/20 shadow-[0_-15px_40px_rgba(150,73,0,0.08)]">
