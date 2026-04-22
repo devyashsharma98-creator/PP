@@ -454,6 +454,36 @@ test("13e - landing previews the approved article showcase", async ({ page }) =>
   await expect(showcase).toContainText(/Social publish queue|सामाजिक प्रकाशन कतार/i);
 });
 
+test("13f - landing article showcase uses approved public articles when available", async ({ page }) => {
+  await page.route("**/api/public/articles?limit=3", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: [
+          {
+            id: "article-1",
+            title: "Mock Approved Karyakarta Article",
+            summary: "A vetted article summary ready for public social publishing.",
+            category: "shodh",
+            authorName: "Mock Karyakarta",
+            socialUrl: "https://example.com/social-post",
+            publishedAt: "2026-04-22T00:00:00.000Z",
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto("/parichay", { waitUntil: "domcontentloaded" });
+
+  const showcase = page.getByLabel("Approved article showcase");
+  await expect(showcase).toContainText("Mock Approved Karyakarta Article");
+  await expect(showcase).toContainText("Mock Karyakarta");
+  await expect(showcase).toContainText(/Published article|प्रकाशित आलेख/i);
+});
+
 test("13c - overview sends non-admin roles to their work desk without admin-only detail", async ({ page }) => {
   await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
 

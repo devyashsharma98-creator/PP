@@ -240,7 +240,21 @@ type ArticleShowcaseItem = {
   channels: string[];
 };
 
-const APPROVED_ARTICLE_PREVIEWS: ArticleShowcaseItem[] = [];
+type PublicArticleSummary = {
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  authorName: string;
+  socialUrl: string | null;
+  publishedAt: string;
+  channels?: string[];
+};
+
+type PublicArticlesResponse = {
+  success?: boolean;
+  data?: PublicArticleSummary[];
+};
 
 const ARTICLE_PLACEHOLDER_ARTIFACTS: ArticleShowcaseItem[] = [
   {
@@ -284,13 +298,60 @@ const ARTICLE_PLACEHOLDER_ARTIFACTS: ArticleShowcaseItem[] = [
   },
 ];
 
+function normalizePublishedArticle(article: PublicArticleSummary): ArticleShowcaseItem {
+  const category = article.category ? article.category.charAt(0).toUpperCase() + article.category.slice(1) : "Aalekh";
+  const channels = article.channels?.length
+    ? article.channels.map((channel) => channel.charAt(0).toUpperCase() + channel.slice(1))
+    : article.socialUrl
+      ? ["Website", "Social"]
+      : ["Website"];
+
+  return {
+    titleEn: article.title,
+    titleHi: article.title,
+    excerptEn: article.summary || "Approved article ready for public reading and social distribution.",
+    excerptHi: article.summary || "स्वीकृत आलेख सार्वजनिक पठन और सामाजिक प्रसार के लिए तैयार है।",
+    authorEn: article.authorName || "Karyakarta",
+    authorHi: article.authorName || "कार्यकर्ता",
+    laneEn: "Published article",
+    laneHi: "प्रकाशित आलेख",
+    channels: [category, ...channels].slice(0, 3),
+  };
+}
+
 function ArticleShowcaseArtifact() {
   const t = useT();
-  const { lang } = useAppContext();
-  const items =
-    APPROVED_ARTICLE_PREVIEWS.length > 0 ? APPROVED_ARTICLE_PREVIEWS : ARTICLE_PLACEHOLDER_ARTIFACTS;
+  const [publishedArticles, setPublishedArticles] = useState<ArticleShowcaseItem[]>([]);
+  const items = publishedArticles.length > 0 ? publishedArticles : ARTICLE_PLACEHOLDER_ARTIFACTS;
   const [activeIndex, setActiveIndex] = useState(0);
   const activeItem = items[activeIndex % items.length];
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPublishedArticles() {
+      try {
+        const response = await fetch("/api/public/articles?limit=3");
+        if (!response.ok) return;
+        const payload = (await response.json()) as PublicArticlesResponse;
+        const articles = Array.isArray(payload.data)
+          ? payload.data.filter((article) => article.title?.trim()).map(normalizePublishedArticle)
+          : [];
+        if (!cancelled && articles.length > 0) {
+          setPublishedArticles(articles);
+          setActiveIndex(0);
+        }
+      } catch {
+        // Keep the placeholder artifacts when public article data is unavailable.
+      }
+    }
+
+    loadPublishedArticles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -312,7 +373,9 @@ function ArticleShowcaseArtifact() {
               {t("Approved Article Showcase", "प्रकाशन योग्य आलेख")}
             </p>
             <p className="mt-1 text-xs font-semibold text-[#636262]">
-              {t("Awaiting approved articles", "स्वीकृत आलेख प्रतीक्षित")}
+              {publishedArticles.length > 0
+                ? t("Approved articles live", "स्वीकृत आलेख उपलब्ध")
+                : t("Awaiting approved articles", "स्वीकृत आलेख प्रतीक्षित")}
             </p>
           </div>
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#964900] text-white">
