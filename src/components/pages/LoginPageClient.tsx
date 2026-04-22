@@ -233,15 +233,18 @@ function LoginForm() {
                     </span>
                   </div>
 
-                  <div className="relative block h-12 md:h-16 overflow-hidden">
+                  <div
+                    data-testid="login-bilingual-title"
+                    className="relative block min-h-16 md:min-h-24 overflow-visible"
+                  >
                     <AnimatePresence mode="wait" initial={false}>
                       {flip === "en" ? (
                         <motion.h1
                           key="en"
-                          className="absolute inset-0 font-serif text-4xl md:text-6xl font-bold tracking-tight text-foreground"
-                          initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
+                          className="block font-serif text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap"
+                          initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
                           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                          exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+                          exit={{ y: -14, opacity: 0, filter: "blur(4px)" }}
                           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                         >
                           Pragya Pravah
@@ -249,10 +252,10 @@ function LoginForm() {
                       ) : (
                         <motion.h1
                           key="hi"
-                          className="absolute inset-0 font-serif text-4xl md:text-6xl font-bold tracking-tight text-foreground font-devanagari"
-                          initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
+                          className="block font-serif text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap font-devanagari"
+                          initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
                           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                          exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+                          exit={{ y: -14, opacity: 0, filter: "blur(4px)" }}
                           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                           lang="hi"
                         >

@@ -61,6 +61,22 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
     await expect(page.getByRole("button", { name: "Super Admin" })).toBeVisible();
   });
 
+  test("1b - login bilingual title animation does not clip either language", async ({ page }) => {
+    await page.goto("/login");
+
+    const titleSlot = page.getByTestId("login-bilingual-title");
+    await expect(titleSlot).toBeVisible();
+    await expect(titleSlot).toHaveCSS("overflow-x", "visible");
+    await expect(titleSlot).toHaveCSS("overflow-y", "visible");
+
+    const heading = titleSlot.getByRole("heading", { level: 1 });
+    await expect(heading).toHaveCSS("white-space", "nowrap");
+
+    const hindiHeading = titleSlot.locator('h1[lang="hi"]');
+    await expect(hindiHeading).toBeVisible({ timeout: 6_000 });
+    await expect(hindiHeading).toHaveCSS("white-space", "nowrap");
+  });
+
   test("2 — demo account pill fills email and password", async ({ page }) => {
     await page.goto("/login");
 
