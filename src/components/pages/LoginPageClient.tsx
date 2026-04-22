@@ -37,8 +37,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [flip, setFlip] = useState<"en" | "hi">("en");
   useEffect(() => {
+    setHydrated(true);
     const id = setInterval(() => setFlip((v) => (v === "en" ? "hi" : "en")), 3800);
     return () => clearInterval(id);
   }, []);
@@ -319,7 +321,7 @@ function LoginForm() {
                     onChange={(event) => setEmail(event.target.value)}
                     required
                     autoComplete="email"
-                    disabled={loading}
+                    disabled={!hydrated || loading}
                     className="h-11 rounded-xl border-border/70 bg-background/88"
                   />
                 </div>
@@ -334,7 +336,7 @@ function LoginForm() {
                     onChange={(event) => setPassword(event.target.value)}
                     required
                     autoComplete="current-password"
-                    disabled={loading}
+                    disabled={!hydrated || loading}
                     className="h-11 rounded-xl border-border/70 bg-background/88"
                   />
                 </div>
@@ -346,7 +348,7 @@ function LoginForm() {
                   </div>
                 ) : null}
 
-                <Button type="submit" className="h-11 w-full rounded-xl" disabled={loading}>
+                <Button type="submit" className="h-11 w-full rounded-xl" disabled={!hydrated || loading}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
                   {loading ? copy.signingIn : copy.signIn}
                 </Button>
@@ -367,6 +369,7 @@ function LoginForm() {
                       key={account.email}
                       type="button"
                       onClick={() => fillDemoAccount(account.email)}
+                      disabled={!hydrated || loading}
                       className="demo-account-chip"
                       aria-label={`${isHi ? account.labelHi : account.labelEn} ${copy.demoAction}`}
                     >
