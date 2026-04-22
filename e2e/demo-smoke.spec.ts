@@ -428,6 +428,16 @@ test("13b - authenticated / still opens the public landing", async ({ page }) =>
   await expect(page.locator("body")).not.toContainText(/Activity ledger|Karyakarta \(Writer\)/i);
 });
 
+test("13e - landing previews the approved article showcase", async ({ page }) => {
+  await page.goto("/parichay", { waitUntil: "domcontentloaded" });
+
+  const showcase = page.getByLabel("Approved article showcase");
+  await expect(showcase).toBeVisible();
+  await expect(showcase).toContainText(/Approved Article Showcase|प्रकाशन योग्य आलेख/i);
+  await expect(showcase).toContainText(/Awaiting approved articles|स्वीकृत आलेख प्रतीक्षित/i);
+  await expect(showcase).toContainText(/Social publish queue|सामाजिक प्रकाशन कतार/i);
+});
+
 test("13c - overview sends non-admin roles to their work desk without admin-only detail", async ({ page }) => {
   await loginAs(page, KARYAKARTA_EMAIL, DEMO_PASSWORD);
 
@@ -483,4 +493,3 @@ test("14 - /directory redirects unauthenticated user to /login", async ({ page }
     }
   });
 });
-

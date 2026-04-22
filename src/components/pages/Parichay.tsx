@@ -8,8 +8,13 @@ import {
   BookOpenText,
   Users,
   Building2,
+  CheckCircle2,
   Compass,
+  Newspaper,
+  Quote,
   ScrollText,
+  Share2,
+  Sparkles,
   FlaskConical,
   Scale,
   ArrowRight,
@@ -223,6 +228,175 @@ function TopAppBar() {
 }
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
+type ArticleShowcaseItem = {
+  titleEn: string;
+  titleHi: string;
+  excerptEn: string;
+  excerptHi: string;
+  authorEn: string;
+  authorHi: string;
+  laneEn: string;
+  laneHi: string;
+  channels: string[];
+};
+
+const APPROVED_ARTICLE_PREVIEWS: ArticleShowcaseItem[] = [];
+
+const ARTICLE_PLACEHOLDER_ARTIFACTS: ArticleShowcaseItem[] = [
+  {
+    titleEn: "Swabodh in Public Life",
+    titleHi: "जन जीवन में स्वबोध",
+    excerptEn:
+      "A concise article preview showing how an approved Karyakarta write-up will appear before social publishing.",
+    excerptHi:
+      "स्वीकृत कार्यकर्ता आलेख सामाजिक प्रकाशन से पहले इस प्रकार संक्षिप्त रूप में दिखाई देगा।",
+    authorEn: "Karyakarta Article",
+    authorHi: "कार्यकर्ता आलेख",
+    laneEn: "Vibhag review complete",
+    laneHi: "विभाग समीक्षा पूर्ण",
+    channels: ["Website", "WhatsApp", "Social"],
+  },
+  {
+    titleEn: "Panch Parivartan Notes",
+    titleHi: "पंच परिवर्तन टिप्पणी",
+    excerptEn:
+      "Approved notes can surface here with their core idea, review state, and publication channels.",
+    excerptHi:
+      "स्वीकृत टिप्पणियां यहां मूल विचार, समीक्षा स्थिति और प्रकाशन माध्यमों के साथ दिखाई देंगी।",
+    authorEn: "Aalekh Desk",
+    authorHi: "आलेख डेस्क",
+    laneEn: "Ready for social queue",
+    laneHi: "सामाजिक कतार हेतु तैयार",
+    channels: ["Feed", "Poster", "Thread"],
+  },
+  {
+    titleEn: "Research-led Vimarsh",
+    titleHi: "शोध आधारित विमर्श",
+    excerptEn:
+      "When the article archive has approved work, this space can rotate the best pieces automatically.",
+    excerptHi:
+      "आलेख संग्रह में स्वीकृत कार्य आने पर यह स्थान श्रेष्ठ आलेखों को स्वतः बदलते हुए दिखा सकेगा।",
+    authorEn: "Research Contributor",
+    authorHi: "शोध सहयोगी",
+    laneEn: "Publication artifact",
+    laneHi: "प्रकाशन आर्टिफैक्ट",
+    channels: ["Library", "Facebook", "X"],
+  },
+];
+
+function ArticleShowcaseArtifact() {
+  const t = useT();
+  const { lang } = useAppContext();
+  const items =
+    APPROVED_ARTICLE_PREVIEWS.length > 0 ? APPROVED_ARTICLE_PREVIEWS : ARTICLE_PLACEHOLDER_ARTIFACTS;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeItem = items[activeIndex % items.length];
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % items.length);
+    }, 4200);
+
+    return () => clearInterval(id);
+  }, [items.length]);
+
+  return (
+    <div
+      aria-label="Approved article showcase"
+      className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700 bg-[#1a1c1a] p-5 md:p-6 text-white"
+    >
+      <div className="flex h-full flex-col rounded-[2rem] border border-white/12 bg-[#fbf6ef] text-[#1a1c1a] shadow-inner">
+        <div className="flex items-center justify-between gap-3 border-b border-[#dec1af]/50 px-5 py-4">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#964900]">
+              {t("Approved Article Showcase", "प्रकाशन योग्य आलेख")}
+            </p>
+            <p className="mt-1 text-xs font-semibold text-[#636262]">
+              {t("Awaiting approved articles", "स्वीकृत आलेख प्रतीक्षित")}
+            </p>
+          </div>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#964900] text-white">
+            <Newspaper className="h-5 w-5" />
+          </span>
+        </div>
+
+        <div className="flex flex-1 flex-col justify-between p-5">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.article
+              key={activeItem.titleEn}
+              className="space-y-5"
+              initial={{ y: 18, opacity: 0, filter: "blur(4px)" }}
+              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              exit={{ y: -18, opacity: 0, filter: "blur(4px)" }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f57c00]/12 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#964900]">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  {t(activeItem.laneEn, activeItem.laneHi)}
+                </span>
+                <Quote className="h-8 w-8 shrink-0 text-[#dec1af]" />
+              </div>
+
+              <div>
+                <h3 className="font-serif text-2xl font-bold leading-tight text-[#1a1c1a]">
+                  {t(activeItem.titleEn, activeItem.titleHi)}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[#636262]">
+                  {t(activeItem.excerptEn, activeItem.excerptHi)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[#dec1af]/50 bg-white/80 p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#8b7263]">
+                  {t("Contributor", "योगदानकर्ता")}
+                </p>
+                <p className="mt-1 font-serif text-lg font-bold text-[#964900]">
+                  {t(activeItem.authorEn, activeItem.authorHi)}
+                </p>
+              </div>
+            </motion.article>
+          </AnimatePresence>
+
+          <div className="space-y-4 pt-5">
+            <div className="flex flex-wrap gap-2">
+              {activeItem.channels.map((channel) => (
+                <span
+                  key={channel}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#dec1af]/70 bg-white px-3 py-1.5 text-[11px] font-bold text-[#574235]"
+                >
+                  <Share2 className="h-3 w-3 text-[#f57c00]" />
+                  {channel}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-[#1a1c1a] px-4 py-3 text-white">
+              <span className="inline-flex items-center gap-2 text-xs font-bold">
+                <Sparkles className="h-4 w-4 text-[#ffb786]" />
+                {t("Social publish queue", "सामाजिक प्रकाशन कतार")}
+              </span>
+              <span className="text-xs font-bold text-[#ffb786]">
+                {String(activeIndex + 1).padStart(2, "0")}/{String(items.length).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex gap-2" aria-hidden>
+              {items.map((item, index) => (
+                <span
+                  key={item.titleEn}
+                  className={cn(
+                    "h-1.5 flex-1 rounded-full transition-colors",
+                    index === activeIndex ? "bg-[#f57c00]" : "bg-[#dec1af]",
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Hero() {
   const t = useT();
   return (
@@ -255,9 +429,7 @@ function Hero() {
           </div>
         </div>
         <div className="relative">
-          <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700 bg-gradient-to-br from-[#964900] via-[#f57c00] to-[#ffb786] flex items-center justify-center">
-            <Landmark className="w-40 h-40 text-white/30" aria-hidden />
-          </div>
+          <ArticleShowcaseArtifact />
           <div className="absolute -bottom-10 -left-4 md:-left-10 bg-white p-6 md:p-8 rounded-3xl shadow-xl max-w-xs transform -rotate-3 hover:rotate-0 transition-transform duration-500">
             <p className="font-serif text-[#964900] text-lg md:text-xl font-bold leading-tight">
               {t("Pragya-based", "प्रज्ञा आधारित")}
