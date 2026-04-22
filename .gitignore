@@ -24,8 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.vercel
-
 # Next.js
 .next/
 out/
@@ -37,12 +35,29 @@ next-env.d.ts
 artifacts/
 nul
 ecosystem.config.cjs
+deploy*.tar.gz
 
-# QA test artifacts — never commit these
+# Generated local artifacts
+# Local tool state
+.kilo/
+.omx/
+
+# QA/test/temp artifacts - never commit these
 *.png
 *.m4a
 *.mp4
 *.mp3
+test-results/
+tmp_chunks/
+tmp_dashboard_chunks/
+tmp_*.log
+tmp_*.err.log
+tmp_*.pid
+tmp_*.html
+live-*.json
+live-*.ps1
+*_results.json
+auth-assets-*.json
 *_check.txt
 *_snapshot.txt
 *_sync*.txt

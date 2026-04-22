@@ -80,7 +80,7 @@ This document provides a comprehensive redesign of the Pragya Pravah ERP system 
 │  Repositories │ Queries │ Migrations │ Schema                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                    INFRASTRUCTURE                              │
-│  Neon DB │ Vercel │ CI/CD │ Monitoring │ Security              │
+│  Neon DB │ Hosting │ CI/CD │ Monitoring │ Security              │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

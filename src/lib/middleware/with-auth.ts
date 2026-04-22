@@ -94,7 +94,7 @@ export function withPermission(
 
 /**
  * Extract the client IP from a Next.js request.
- * Handles Cloudflare, Vercel, and direct connections.
+ * Handles Cloudflare, reverse proxies, and direct connections.
  */
 export function getClientIp(req: NextRequest): string {
   return (

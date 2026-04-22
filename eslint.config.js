@@ -5,7 +5,28 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".next", "node_modules", "src/types/database.ts", "supabase/functions/**"] },
+  {
+    ignores: [
+      "dist",
+      "dist-ssr",
+      "out",
+      ".next",
+      ".next/**",
+      ".open-next",
+      ".open-next/**",
+      ".worktrees",
+      ".worktrees/**",
+      "node_modules",
+      "test-results",
+      "test-results/**",
+      "tmp_chunks",
+      "tmp_chunks/**",
+      "tmp_dashboard_chunks",
+      "tmp_dashboard_chunks/**",
+      "src/types/database.ts",
+      "supabase/functions/**",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

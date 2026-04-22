@@ -1,8 +1,9 @@
 "use client";
 
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PragyaLogo } from '@/components/PragyaLogo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -113,36 +114,115 @@ function VimarshMasthead({
   t: (en: string, hi: string) => string;
   contexts: VimarshContextItem[];
 }) {
+  const [flip, setFlip] = useState<'en' | 'hi'>('en');
+  useEffect(() => {
+    const id = setInterval(() => setFlip((v) => (v === 'en' ? 'hi' : 'en')), 3800);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="vimarsh-masthead space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Vimarsh Command Center', 'विमर्श संचालन कक्ष')}</p>
+    <div className="vimarsh-masthead relative space-y-6 overflow-hidden rounded-[2rem] border border-primary/10 bg-gradient-to-br from-primary/[0.04] via-background to-background p-6 md:p-8">
+      <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-primary/5 blur-3xl" />
+
+      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="relative inline-flex items-center justify-center h-10 w-10 shrink-0">
+              <motion.span
+                aria-hidden
+                className="absolute inset-0 rounded-full bg-primary/25 blur-md"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-gradient-to-br from-[#ffdcc6] via-[#f57c00] to-[#964900] shadow-[0_10px_24px_-12px_rgba(150,73,0,0.55)] ring-1 ring-primary/15">
+                <PragyaLogo className="h-7 w-7 drop-shadow-[0_1px_1px_rgba(0,0,0,0.15)]" />
+              </span>
+              <span className="absolute -right-0.5 -top-0.5 inline-flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+            </span>
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-muted-foreground">
+                {t('Vimarsh Command Center', 'विमर्श संचालन कक्ष')}
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-primary/80 font-bold mt-0.5">
+                Bharat · भारत
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Discourse, Assertion & Counter', 'विमर्श, मंडन एवं खंडन')}
-            </h1>
+            <div className="relative block h-10 md:h-12 overflow-hidden">
+              <AnimatePresence mode="wait" initial={false}>
+                {flip === 'en' ? (
+                  <motion.h1
+                    key="en"
+                    className="absolute inset-0 font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+                    initial={{ y: 18, opacity: 0, filter: 'blur(4px)' }}
+                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                    exit={{ y: -18, opacity: 0, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    Discourse, Assertion &amp; Counter
+                  </motion.h1>
+                ) : (
+                  <motion.h1
+                    key="hi"
+                    className="absolute inset-0 font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground font-devanagari"
+                    initial={{ y: 18, opacity: 0, filter: 'blur(4px)' }}
+                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                    exit={{ y: -18, opacity: 0, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    lang="hi"
+                  >
+                    विमर्श, मंडन एवं खंडन
+                  </motion.h1>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="relative h-[2px] w-40 overflow-hidden rounded-full bg-primary/15">
+              <motion.span
+                className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-primary to-transparent"
+                animate={{ x: ['-100%', '300%'] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'linear' }}
+              />
+            </div>
             <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
               {t(
                 'Shape the narrative, affirm the civilisational truth, and counter misinformation through disciplined intellectual action.',
-                'कथ्य को आकार दें, सभ्यतागत सत्य का मंडन करें और अनुशासित बौद्धिक कार्य के माध्यम से कुप्रचार का खंडन करें।'
+                'कथ्य को आकार दें, सभ्यतागत सत्य का मंडन करें और अनुशासित बौद्धिक कार्य के माध्यम से कुप्रचार का खंडन करें।',
               )}
             </p>
           </div>
         </div>
+
+        <div className="home-sequence-strip shrink-0 self-start">
+          <span>{t('Observe', 'अवलोकन')}</span>
+          <span>•</span>
+          <span>{t('Analyze', 'विश्लेषण')}</span>
+          <span>•</span>
+          <span>{t('Respond', 'प्रतिसाद')}</span>
+        </div>
       </div>
 
-      <div className="vimarsh-context-grid">
-        {contexts.map((ctx) => (
-          <div key={ctx.labelEn} className="vimarsh-context-card">
+      <div className="vimarsh-context-grid relative">
+        {contexts.map((ctx, i) => (
+          <motion.div
+            key={ctx.labelEn}
+            className="vimarsh-context-card relative overflow-hidden"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-primary via-primary/60 to-transparent" aria-hidden />
             <p className="shell-copy">{t(ctx.labelEn, ctx.labelHi)}</p>
             <p className="vimarsh-context-value">
               {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}
             </p>
-            <p className="vimarsh-context-detail">
-              {t(ctx.detailEn, ctx.detailHi)}
-            </p>
-          </div>
+            <p className="vimarsh-context-detail">{t(ctx.detailEn, ctx.detailHi)}</p>
+          </motion.div>
         ))}
       </div>
     </div>
