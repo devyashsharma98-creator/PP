@@ -23,6 +23,14 @@ const nextConfig = {
           },
         ],
       },
+      // Required for SharedArrayBuffer used by web-llm WebGPU inference
+      {
+        source: '/(aalekh|dashboard|vimarsh)',
+        headers: [
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+        ],
+      },
     ];
   },
 };
