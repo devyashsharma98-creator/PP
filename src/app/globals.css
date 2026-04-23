@@ -56,10 +56,11 @@
 
     --radius: 0.625rem;
 
-    --font-display: var(--font-ui-inter);
-    --font-body: var(--font-ui-inter);
-    --font-devanagari: var(--font-ui-noto-devanagari);
-    --font-devanagari-display: var(--font-ui-noto-devanagari);
+    --font-display: var(--font-ui-sans);
+    --font-body: var(--font-ui-sans);
+    --font-serif: var(--font-ui-serif);
+    --font-devanagari: var(--font-ui-devanagari);
+    --font-devanagari-display: var(--font-ui-devanagari);
     }
 
     .dark {

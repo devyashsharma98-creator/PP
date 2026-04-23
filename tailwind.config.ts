@@ -15,12 +15,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['var(--font-ui-inter)', 'sans-serif'],
-        sans: ['var(--font-ui-inter)', 'sans-serif'],
-        display: ['var(--font-ui-inter)', 'sans-serif'],
-        body: ['var(--font-ui-inter)', 'sans-serif'],
-        devanagari: ['var(--font-ui-noto-devanagari)', 'sans-serif'],
-        devanagariDisplay: ['var(--font-ui-noto-devanagari)', 'sans-serif'],
+        serif: ['var(--font-ui-serif)', 'Georgia', 'serif'],
+        sans: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        body: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        devanagari: ['var(--font-ui-devanagari)', 'var(--font-ui-sans)', 'sans-serif'],
+        devanagariDisplay: ['var(--font-ui-devanagari)', 'var(--font-ui-sans)', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

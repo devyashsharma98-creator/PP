@@ -498,6 +498,7 @@ export default function Prachar() {
                                 id={`${event.id}-${platform.key}`}
                                 checked={checked}
                                 disabled={!permissions.canUpdatePrachar}
+                                onClick={e => e.stopPropagation()}
                                 onCheckedChange={v => handleToggle(!!v)}
                               />
                               <div className="min-w-0 flex-1">

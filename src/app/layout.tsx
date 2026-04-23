@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Inter,
-  Noto_Sans_Devanagari,
+  IBM_Plex_Sans,
+  IBM_Plex_Sans_Devanagari,
+  IBM_Plex_Serif,
 } from "next/font/google";
 import { AppLayoutShell } from "@/components/AppLayoutShell";
 import { ClientProviders } from "@/components/ClientProviders";
@@ -9,18 +10,25 @@ import { ToastProvider } from "@/components/ToastProvider";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
-const inter = Inter({
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-ui-inter",
+  variable: "--font-ui-sans",
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const notoSansDevanagari = Noto_Sans_Devanagari({
+const plexSansDevanagari = IBM_Plex_Sans_Devanagari({
   subsets: ["latin", "devanagari"],
-  variable: "--font-ui-noto-devanagari",
+  variable: "--font-ui-devanagari",
   display: "swap",
   weight: ["400", "500", "600", "700"],
+});
+
+const plexSerif = IBM_Plex_Serif({
+  subsets: ["latin"],
+  variable: "--font-ui-serif",
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -57,7 +65,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`scroll-smooth ${inter.variable} ${notoSansDevanagari.variable}`}
+      className={`scroll-smooth ${plexSans.variable} ${plexSansDevanagari.variable} ${plexSerif.variable}`}
     >
       <body className="font-body antialiased selection:bg-primary/20 selection:text-primary">
         <ClientProviders>
