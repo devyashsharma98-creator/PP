@@ -6,6 +6,9 @@ import { useDashboardEvents, useUpdateEventStatus } from "@/hooks/api/use-dashbo
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { checklistItems, dashboardStatusBadgeClass, eventStatusHi } from "@/components/pages/dashboard/config";
+import { useBonsaiLLM } from "@/hooks/use-bonsai-llm";
+import { vrittSystemPrompt, vrittUserMessage } from "@/lib/bonsai/prompts";
+import type { Lang } from "@/lib/app/contracts";
 import { VibhagDashboardView } from "@/components/pages/dashboard/VibhagDashboardView";
 import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardView";
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
@@ -22,6 +25,7 @@ export default function Dashboard() {
   const { role, lang, permissions, viewer, events: demoEvents, updateEventStatus, updateVritt } = useAppContext();
   const { addToast } = useToast();
   const t = useT();
+  const { status: bonsaiStatus, generate: bonsaiGenerate, initModel: bonsaiInit } = useBonsaiLLM();
   const primaryRoleCode = viewer?.primaryRoleCode ?? getCanonicalRoleFromUiRole(role);
   const dashboardLane = getDashboardLane(primaryRoleCode);
   
@@ -83,41 +87,72 @@ export default function Dashboard() {
     setVrittEvent(event);
   };
 
-  const generateSmartDraft = () => {
+  const generateSmartDraft = async () => {
     if (!vrittEvent) return;
-    const isHi = lang === 'hi';
-    const lines: string[] = [];
 
-    // Header
-    lines.push(isHi ? `॥ वृत्त : ${vrittEvent.title} ॥` : `!! Vritt : ${vrittEvent.title} !!`);
-    lines.push(isHi ? `दिनांक: ${vrittEvent.date} | इकाई: ${vrittEvent.unit}` : `Date: ${vrittEvent.date} | Unit: ${vrittEvent.unit}`);
-    lines.push("");
-
-    // Description/Goal
-    if (vrittEvent.description) {
-      lines.push(isHi ? `मुख्य उद्देश्य: ${vrittEvent.description}` : `Core Objective: ${vrittEvent.description}`);
-      lines.push("");
-    }
-
-    // Vyavastha/Checklist items
-    const checkedItems = Object.entries(vrittEvent.checklist)
-      .filter(([_, checked]) => !!checked)
+    const checkedArrangements = Object.entries(vrittEvent.checklist)
+      .filter(([, checked]) => !!checked)
       .map(([key]) => checklistItems.find(i => i.key === key))
-      .filter(Boolean);
+      .filter(Boolean)
+      .map(item => t(item!.en, item!.hi));
 
-    if (checkedItems.length > 0) {
-      lines.push(isHi ? "समीक्षा (व्यवस्थाएँ):" : "Operational Review (Arrangements):");
-      checkedItems.forEach(item => {
-        lines.push(`• ${t(item!.en, item!.hi)}: ${isHi ? '[सफल/सुधार अपेक्षित]' : '[Successful / Needs Improvement]'}`);
-      });
-      lines.push("");
-    }
-
-    // Statistics from registrations
     const regCount = vrittEvent.registrations?.length ?? 0;
     const totalPeople = vrittEvent.registrations?.reduce((s, r) => s + r.attendingCount, 0) ?? 0;
     const checkedIn = vrittEvent.vrittCheckedInCount ?? 0;
 
+    // Use LLM when ready; otherwise fall back to template draft
+    if (bonsaiStatus === "ready") {
+      addToast(t('Sahayak is drafting…', 'सहायक लिख रहा है…'), 'info');
+      const ctx = {
+        title: vrittEvent.title,
+        date: vrittEvent.date,
+        unit: vrittEvent.unit,
+        description: vrittEvent.description,
+        checkedArrangements,
+        registrationCount: regCount,
+        expectedAttendance: totalPeople,
+        checkIns: checkedIn,
+      };
+      const result = await bonsaiGenerate({
+        systemPrompt: vrittSystemPrompt(lang as Lang),
+        userMessage: vrittUserMessage(lang as Lang, ctx),
+        maxTokens: 500,
+        temperature: 0.5,
+        onToken: (_token, full) =>
+          setVrittForm(p => ({ ...p, content: full })),
+      });
+      if (result) {
+        setVrittForm(p => ({
+          ...p,
+          content: result,
+          attendanceCount: checkedIn || totalPeople || p.attendanceCount,
+        }));
+        addToast(t('Sahayak draft ready!', 'सहायक ड्राफ्ट तैयार!'), 'success');
+      }
+      return;
+    }
+
+    // If model not loaded yet, trigger init for next time and fall back to template
+    if (bonsaiStatus === "idle") {
+      bonsaiInit();
+    }
+
+    const isHi = lang === 'hi';
+    const lines: string[] = [];
+    lines.push(isHi ? `॥ वृत्त : ${vrittEvent.title} ॥` : `!! Vritt : ${vrittEvent.title} !!`);
+    lines.push(isHi ? `दिनांक: ${vrittEvent.date} | इकाई: ${vrittEvent.unit}` : `Date: ${vrittEvent.date} | Unit: ${vrittEvent.unit}`);
+    lines.push("");
+    if (vrittEvent.description) {
+      lines.push(isHi ? `मुख्य उद्देश्य: ${vrittEvent.description}` : `Core Objective: ${vrittEvent.description}`);
+      lines.push("");
+    }
+    if (checkedArrangements.length > 0) {
+      lines.push(isHi ? "समीक्षा (व्यवस्थाएँ):" : "Operational Review (Arrangements):");
+      checkedArrangements.forEach(name => {
+        lines.push(`• ${name}: ${isHi ? '[सफल/सुधार अपेक्षित]' : '[Successful / Needs Improvement]'}`);
+      });
+      lines.push("");
+    }
     if (regCount > 0 || checkedIn > 0) {
       lines.push(isHi ? "उपस्थिति एवं सहभागिता:" : "Attendance & Participation:");
       if (regCount > 0) {
@@ -129,15 +164,12 @@ export default function Dashboard() {
       }
       lines.push("");
     }
-
-    // Final result
     lines.push(isHi ? "निष्कर्ष / आगामी योजना:" : "Conclusion / Next Steps:");
     lines.push(isHi ? "[कार्यक्रम का सारांश और आगामी कार्ययोजना यहाँ लिखें]" : "[Write event summary and future action points here]");
-
     setVrittForm(p => ({
       ...p,
       content: lines.join("\n"),
-      attendanceCount: checkedIn || totalPeople || p.attendanceCount
+      attendanceCount: checkedIn || totalPeople || p.attendanceCount,
     }));
     addToast(t('Smart Draft generated!', 'स्मार्ट ड्राफ्ट तैयार!'), 'info');
   };

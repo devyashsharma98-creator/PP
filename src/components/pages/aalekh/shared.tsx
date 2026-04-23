@@ -19,6 +19,7 @@ import {
   ExternalLink, ChevronDown, ChevronRight,
   RotateCcw, Send, FileText, AlertTriangle, User, CalendarDays
 } from "lucide-react";
+import { AalekhAIPanel } from "@/components/pages/aalekh/AalekhAIPanel";
 import { cn } from "@/lib/utils";
 
 export const statusColors: Record<ArticleStatus, string> = {
@@ -245,6 +246,14 @@ export function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof empty
               </span>
             </div>
           </div>
+          <AalekhAIPanel
+            content={form.content}
+            category={form.category}
+            onAcceptContent={(text) => setForm(p => ({ ...p, content: text }))}
+            onAcceptSummary={(text) => setForm(p => ({ ...p, summary: text }))}
+            onAcceptTitle={(text) => setForm(p => ({ ...p, title: text }))}
+          />
+
           <div>
             <Label>{t("Summary", "सारांश")} <span className="text-muted-foreground text-xs">({t("auto-filled, editable", "स्वतः भरा, संपादन योग्य")})</span></Label>
             <Textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))} rows={2} placeholder={t("Short excerpt for the feed...", "फ़ीड के लिए संक्षिप्त विवरण...")} />
