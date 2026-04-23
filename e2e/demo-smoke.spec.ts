@@ -495,14 +495,14 @@ test.skip("13f - landing article showcase uses approved public articles when ava
   await expect(showcase).toContainText(/Published article|प्रकाशित आलेख/i);
 });
 
-test("13g - parichay uses the editorial rail hero and visible workstreams", async ({ page }) => {
+test("13g - parichay uses the institutional overview hero and visible workstreams", async ({ page }) => {
   await page.goto("/parichay", { waitUntil: "domcontentloaded" });
   const hero = page.locator("#mission");
 
   await expect(
-    hero.getByRole("heading", { name: /Ideas, dialogue, and organised public action/i }),
+    hero.getByRole("heading", { name: /Institutional overview of Pragya Pravah workstreams/i }),
   ).toBeVisible();
-  await expect(hero.getByText(/विचार, विमर्श और संगठित लोक-कार्य/i)).toBeVisible();
+  await expect(hero.getByText(/Public interface for publication, dissemination, discourse, and reporting/i)).toBeVisible();
   await expect(hero.getByRole("link", { name: /Explore Work|कार्य प्रवाह देखें/i })).toBeVisible();
   await expect(hero.getByRole("link", { name: /Sign In|प्रवेश/i }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Aalekh|आलेख/i }).first()).toBeVisible();
@@ -517,6 +517,20 @@ test("13h - parichay keeps the approved article showcase in the public landing",
   const showcase = page.getByLabel("Approved article showcase");
   await expect(showcase).toBeVisible();
   await expect(showcase).toContainText(/Approved Article Showcase|प्रकाशन योग्य आलेख/i);
+});
+
+test("13i - parichay reads like an institutional overview page", async ({ page }) => {
+  await page.goto("/parichay", { waitUntil: "domcontentloaded" });
+  const hero = page.locator("#mission");
+
+  await expect(
+    hero.getByRole("heading", { name: /Institutional overview of Pragya Pravah workstreams/i }),
+  ).toBeVisible();
+  await expect(
+    hero.getByText(/Public interface for publication, dissemination, discourse, and reporting/i),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Core public workstreams/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Current public output/i })).toBeVisible();
 });
 
 test("13c - overview sends non-admin roles to their work desk without admin-only detail", async ({ page }) => {

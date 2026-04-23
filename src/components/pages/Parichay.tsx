@@ -82,9 +82,9 @@ const WORKSTREAMS: Workstream[] = [
     icon: BookOpenText,
     titleEn: "Aalekh",
     titleHi: "आलेख",
-    summaryEn: "Long-form writing, research notes, and publication-ready argument.",
+    summaryEn: "Publication desk for essays, research notes, and review-ready article drafting.",
     summaryHi: "दीर्घ लेखन, शोध टिप्पणी और प्रकाशन-योग्य वैचारिक सामग्री।",
-    actionEn: "Enter the writing desk",
+    actionEn: "Open publication desk",
     actionHi: "लेखन कक्ष देखें",
   },
   {
@@ -93,9 +93,9 @@ const WORKSTREAMS: Workstream[] = [
     icon: Share2,
     titleEn: "Prachar",
     titleHi: "प्रचार",
-    summaryEn: "Campaign circulation, public distribution, and accountability for reach.",
+    summaryEn: "Dissemination desk for campaign circulation, distribution discipline, and reach tracking.",
     summaryHi: "अभियान प्रसार, सार्वजनिक वितरण और पहुँच की उत्तरदायी व्यवस्था।",
-    actionEn: "See dissemination work",
+    actionEn: "Review dissemination desk",
     actionHi: "प्रसार कार्य देखें",
   },
   {
@@ -104,9 +104,9 @@ const WORKSTREAMS: Workstream[] = [
     icon: Users,
     titleEn: "Vimarsh",
     titleHi: "विमर्श",
-    summaryEn: "Forums, dialogues, and study-led conversation in the public domain.",
+    summaryEn: "Discourse desk for forums, review sessions, and study-led public discussion.",
     summaryHi: "सार्वजनिक क्षेत्र में विमर्श, संवाद और अध्ययन-आधारित चर्चा।",
-    actionEn: "Explore public discussions",
+    actionEn: "Open discourse desk",
     actionHi: "विमर्श देखें",
   },
   {
@@ -115,9 +115,9 @@ const WORKSTREAMS: Workstream[] = [
     icon: ScrollText,
     titleEn: "Vritt",
     titleHi: "वृत्त",
-    summaryEn: "Institutional reporting, event rhythm, and records of public action.",
+    summaryEn: "Reporting desk for event records, attendance updates, and operational follow-through.",
     summaryHi: "संस्थागत वृत्त, आयोजन-लय और सार्वजनिक कार्य का संक्षिप्त अभिलेख।",
-    actionEn: "Review field reports",
+    actionEn: "Review reporting desk",
     actionHi: "कार्य-वृत्त देखें",
   },
 ];
@@ -128,7 +128,7 @@ const CREDIBILITY_SIGNALS: CredibilitySignal[] = [
     valueHi: "४",
     labelEn: "Integrated public workstreams",
     labelHi: "एकीकृत सार्वजनिक कार्य-प्रवाह",
-    noteEn: "Writing, dissemination, discourse, and reporting operate on one institutional surface.",
+    noteEn: "Publication, dissemination, discourse, and reporting are organized on one institutional surface.",
     noteHi: "लेखन, प्रसार, विमर्श और वृत्त एक ही संस्थागत पटल पर संचालित होते हैं।",
   },
   {
@@ -136,7 +136,7 @@ const CREDIBILITY_SIGNALS: CredibilitySignal[] = [
     valueHi: "द्विभाषी",
     labelEn: "Public communication format",
     labelHi: "सार्वजनिक संप्रेषण प्रारूप",
-    noteEn: "English and Hindi are presented together without duplicating the full page line by line.",
+    noteEn: "English and Hindi remain visible together across headings, labels, and public descriptions.",
     noteHi: "अंग्रेज़ी और हिंदी साथ उपस्थित हैं, पर पूरा पृष्ठ पंक्ति-दर-पंक्ति दोहराया नहीं जाता।",
   },
   {
@@ -144,28 +144,28 @@ const CREDIBILITY_SIGNALS: CredibilitySignal[] = [
     valueHi: "निरंतर",
     labelEn: "Editorial to field rhythm",
     labelHi: "संपादकीय से क्षेत्र-कार्य लय",
-    noteEn: "Research, dialogue, publication, and field follow-through remain connected.",
+    noteEn: "Review, approval, publication, and field follow-through remain connected across the cycle.",
     noteHi: "शोध, विमर्श, प्रकाशन और क्षेत्रीय अनुवर्तन एक-दूसरे से जुड़े रहते हैं।",
   },
 ];
 
 const PARTICIPATION_PATHS: ParticipationPath[] = [
   {
-    titleEn: "Study and contribute",
+    titleEn: "Review public output",
     titleHi: "अध्ययन और योगदान",
-    bodyEn: "Begin with published material, current themes, and writing-oriented public work.",
+    bodyEn: "Begin with current articles, dissemination material, discussion themes, and published field reports.",
     bodyHi: "प्रकाशित सामग्री, वर्तमान विषयों और लेखन-आधारित सार्वजनिक कार्य से आरम्भ करें।",
   },
   {
-    titleEn: "Join a workstream",
+    titleEn: "Connect with a workstream",
     titleHi: "कार्य-प्रवाह से जुड़ें",
-    bodyEn: "Move from reading into Aalekh, Vimarsh, Prachar, or Vritt based on your working context.",
+    bodyEn: "Move into Aalekh, Prachar, Vimarsh, or Vritt according to your institutional role and working context.",
     bodyHi: "अपने कार्य-संदर्भ के अनुसार आलेख, विमर्श, प्रचार या वृत्त से जुड़ें।",
   },
   {
-    titleEn: "Enter the institutional console",
+    titleEn: "Use member access",
     titleHi: "संस्थागत कक्ष में प्रवेश",
-    bodyEn: "Existing karyakartas and members can sign in directly without crossing a marketing-style homepage.",
+    bodyEn: "Existing karyakartas and members can enter the console directly for ongoing work, review, and reporting.",
     bodyHi: "विद्यमान कार्यकर्ता और सदस्य बिना विपणन-शैली पृष्ठ से गुज़रे सीधे प्रवेश कर सकते हैं।",
   },
 ];
@@ -411,32 +411,32 @@ function EditorialVisual() {
   const t = useT();
 
   return (
-    <div className="relative overflow-hidden border border-[#d6c1ac] bg-[#efe4d7] p-5 md:p-6">
+    <div className="relative overflow-hidden border border-[#c9b6a5] bg-[#ebe2d7] p-5 md:p-6">
       <div className="grid gap-4">
-        <div className="flex items-center justify-between border-b border-[#cdb39d] pb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
-          <span>{t("Editorial Surface", "संपादकीय पटल")}</span>
+        <div className="flex items-center justify-between border-b border-[#bea592] pb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#6d523f]">
+          <span>{t("Institutional Surface", "संपादकीय पटल")}</span>
           <span>{t("Public-facing", "सार्वजनिक")}</span>
         </div>
         <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
           <div className="grid gap-3">
-            <div className="border border-[#cdb39d] bg-[#f5ede2] p-4">
+            <div className="border border-[#bea592] bg-[#f4efe8] p-4">
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#7a5a42]">
-                {t("Discipline", "संयम")}
+                {t("Overview", "संयम")}
               </p>
               <p className="mt-3 font-serif text-2xl leading-tight text-[#24160f]">
-                {t("Thought to public action", "विचार से लोक-कार्य")}
+                {t("Publication to public interface", "विचार से लोक-कार्य")}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="border border-[#cdb39d] bg-[#f7f1e8] p-4 text-sm text-[#5e4b3d]">
-                {t("Study", "अध्ययन")}
+              <div className="border border-[#bea592] bg-[#f6f2ec] p-4 text-sm text-[#5e4b3d]">
+                {t("Review", "अध्ययन")}
               </div>
-              <div className="border border-[#cdb39d] bg-[#f7f1e8] p-4 text-sm text-[#5e4b3d]">
-                {t("Dialogue", "विमर्श")}
+              <div className="border border-[#bea592] bg-[#f6f2ec] p-4 text-sm text-[#5e4b3d]">
+                {t("Reporting", "विमर्श")}
               </div>
             </div>
           </div>
-          <div className="relative min-h-[220px] border border-[#b99679] bg-[#6f4f39] p-5 text-[#f7f1e8]">
+          <div className="relative min-h-[220px] border border-[#9f7c64] bg-[#5d3e2b] p-5 text-[#f4efe8]">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(247,241,232,0.08)_1px,transparent_1px),linear-gradient(rgba(247,241,232,0.08)_1px,transparent_1px)] bg-[size:32px_32px]" />
             <div className="relative grid h-full content-between gap-6">
               <div>
@@ -444,7 +444,7 @@ function EditorialVisual() {
                   {t("Institutional rhythm", "संस्थागत लय")}
                 </p>
                 <p className="mt-3 max-w-sm font-serif text-3xl leading-tight">
-                  {t("Serious public work needs editorial clarity and operational memory.", "गंभीर लोक-कार्य को संपादकीय स्पष्टता और संस्थागत स्मृति चाहिए।")}
+                  {t("Serious public work depends on review discipline, publication flow, and operational memory.", "गंभीर लोक-कार्य को संपादकीय स्पष्टता और संस्थागत स्मृति चाहिए।")}
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#e7d5c3]">
@@ -464,8 +464,8 @@ function WorkstreamRail() {
   const t = useT();
 
   return (
-    <div className="border border-[#d6c1ac] bg-[#f7f1e8]">
-      <div className="border-b border-[#d6c1ac] px-5 py-4">
+    <div className="border border-[#c9b6a5] bg-[#f4efe8]">
+      <div className="border-b border-[#c9b6a5] px-5 py-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#7a5a42]">
           {t("Workstreams", "कार्य-प्रवाह")}
         </p>
@@ -478,25 +478,25 @@ function WorkstreamRail() {
             <Link
               key={stream.id}
               href={stream.href}
-              className="grid gap-3 border-b border-[#e5d8cb] px-5 py-5 transition-colors hover:bg-[#f1e7db]"
+              className="grid gap-3 border-b border-[#d6c6ba] px-5 py-5 transition-colors hover:bg-[#ebe2d7]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#ccb49d] text-[#6f4f39]">
+                  <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#c2a996] text-[#5d3e2b]">
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <div>
                     <h3 className="font-serif text-2xl text-[#24160f]">
                       {t(stream.titleEn, stream.titleHi)}
                     </h3>
-                    <p className="mt-2 max-w-md text-sm leading-6 text-[#5e4b3d]">
+                    <p className="mt-2 max-w-md text-sm leading-6 text-[#59463a]">
                       {t(stream.summaryEn, stream.summaryHi)}
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#6f4f39]" />
+                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#5d3e2b]" />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8a6851]">
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#7b604e]">
                 {t(stream.actionEn, stream.actionHi)}
               </span>
             </Link>
@@ -627,8 +627,8 @@ function ProofBand({
   const t = useT();
 
   return (
-    <div className="grid gap-6 border-t border-[#d6c1ac] pt-8 lg:grid-cols-[0.9fr_0.9fr_1.2fr]">
-      <div className="border border-[#d6c1ac] bg-[#f7f1e8] p-5">
+    <div className="grid gap-6 border-t border-[#c9b6a5] pt-8 lg:grid-cols-[0.9fr_0.9fr_1.2fr]">
+      <div className="border border-[#c9b6a5] bg-[#f4efe8] p-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
           {t("Featured Output", "प्रमुख प्रकाशन")}
         </p>
@@ -638,7 +638,7 @@ function ProofBand({
         <p className="mt-3 text-sm leading-7 text-[#5e4b3d]">
           {t(featuredItem.excerptEn, featuredItem.excerptHi)}
         </p>
-        <div className="mt-5 border-t border-[#e2d3c5] pt-4">
+        <div className="mt-5 border-t border-[#d6c6ba] pt-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a6851]">
             {t("Current lane", "वर्तमान प्रवाह")}
           </p>
@@ -648,13 +648,13 @@ function ProofBand({
         </div>
       </div>
 
-      <div className="border border-[#d6c1ac] bg-[#f7f1e8] p-5">
+      <div className="border border-[#c9b6a5] bg-[#f4efe8] p-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
           {t("Institutional Signals", "संस्थागत संकेत")}
         </p>
         <div className="mt-5 space-y-5">
           {CREDIBILITY_SIGNALS.slice(0, 2).map((signal) => (
-            <div key={signal.labelEn} className="border-t border-[#e2d3c5] pt-4 first:border-t-0 first:pt-0">
+            <div key={signal.labelEn} className="border-t border-[#d6c6ba] pt-4 first:border-t-0 first:pt-0">
               <p className="font-serif text-3xl text-[#24160f]">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
@@ -686,24 +686,30 @@ function Hero({
   const t = useT();
 
   return (
-    <section id="mission" className="bg-[#f4efe6] px-6 pb-16 pt-12 md:px-10 md:pb-24 lg:px-14">
-      <div className="mx-auto max-w-7xl border border-[#d6c1ac] bg-[#f7f1e8] px-6 py-8 md:px-10 md:py-10">
+    <section id="mission" className="bg-[#ece4db] px-6 pb-16 pt-12 md:px-10 md:pb-24 lg:px-14">
+      <div className="mx-auto max-w-7xl border border-[#c9b6a5] bg-[#f4efe8] px-6 py-8 md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="space-y-8">
             <div className="space-y-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#7a5a42]">
-                {t("Movement of ideas and public work", "विचार और लोक-कार्य का प्रवाह")}
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6d523f]">
+                {t("Institutional overview", "विचार और लोक-कार्य का प्रवाह")}
               </p>
-              <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-[#24160f] md:text-7xl">
-                Ideas, dialogue, and organised public action.
+              <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-[#1f140d] md:text-7xl">
+                Institutional overview of Pragya Pravah workstreams.
               </h1>
-              <p className="max-w-2xl text-xl leading-8 text-[#5e4b3d]" lang="hi">
-                विचार, विमर्श और संगठित लोक-कार्य के माध्यम से राष्ट्रीय जीवन की युगानुकूल दिशा।
+              <p className="max-w-2xl text-xl leading-8 text-[#5a4639]" lang="hi">
+                प्रज्ञा प्रवाह के कार्य-प्रवाहों का सार्वजनिक संस्थागत अवलोकन।
               </p>
-              <p className="max-w-3xl text-base leading-7 text-[#5e4b3d] md:text-lg">
+              <p className="max-w-3xl text-base leading-7 text-[#5a4639] md:text-lg">
                 {t(
-                  "Pragya Pravah brings writing, dissemination, discourse, and institutional reporting into one disciplined public surface.",
+                  "Public interface for publication, dissemination, discourse, and reporting.",
                   "प्रज्ञा प्रवाह लेखन, प्रसार, विमर्श और संस्थागत वृत्त को एक संयत सार्वजनिक पटल पर एकत्र करता है।",
+                )}
+              </p>
+              <p className="max-w-3xl text-sm leading-7 text-[#6b5648] md:text-base">
+                {t(
+                  "This page presents the institution through its operating domains, current public output, and access paths for contributors and members.",
+                  "यह पृष्ठ संस्था को उसके कार्य-क्षेत्र, वर्तमान सार्वजनिक सामग्री और योगदानकर्ताओं एवं सदस्यों के प्रवेश-पथ के माध्यम से प्रस्तुत करता है।",
                 )}
               </p>
             </div>
@@ -711,14 +717,14 @@ function Hero({
             <div className="flex flex-wrap gap-3">
               <Link
                 href="#workstreams"
-                className="inline-flex items-center gap-2 bg-[#6f4f39] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[#8a623f]"
+                className="inline-flex items-center gap-2 bg-[#5d3e2b] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[#734d34]"
               >
                 <span>{t("Explore Work", "कार्य प्रवाह देखें")}</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 border border-[#cdb39d] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#6f4f39] transition-colors hover:bg-[#f1e7db]"
+                className="inline-flex items-center gap-2 border border-[#bea592] bg-[#f8f4ef] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#5d3e2b] transition-colors hover:bg-[#eee5db]"
               >
                 {t("Sign In", "प्रवेश")}
               </Link>
@@ -740,17 +746,17 @@ function WorkstreamsSection() {
   const t = useT();
 
   return (
-    <section id="workstreams" className="bg-[#fbf7f1] px-6 py-20 md:px-10 lg:px-14">
+    <section id="workstreams" className="bg-[#f2ede6] px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
-          eyebrowEn="Public domains of work"
+          eyebrowEn="Workstream overview"
           eyebrowHi="सार्वजनिक कार्य-क्षेत्र"
-          titleEn="The workstreams come first."
+          titleEn="Core public workstreams"
           titleHi="यहाँ कार्य-प्रवाह पहले दिखाई देते हैं।"
-          bodyEn="A first-time visitor should understand the institution through its public work, not through software modules or generic vision statements."
+          bodyEn="Each workstream describes a visible institutional function: publication, dissemination, discourse, or reporting."
           bodyHi="पहली बार आने वाला व्यक्ति संस्था को उसके सार्वजनिक कार्य से समझे, न कि सॉफ़्टवेयर मॉड्यूल या सामान्य घोषणाओं से।"
         />
-        <div className="grid gap-px bg-[#d6c1ac] md:grid-cols-2">
+        <div className="grid gap-px bg-[#c9b6a5] md:grid-cols-2">
           {WORKSTREAMS.map((stream) => {
             const Icon = stream.icon as ComponentType<{ className?: string }>;
 
@@ -758,23 +764,23 @@ function WorkstreamsSection() {
               <Link
                 key={stream.id}
                 href={stream.href}
-                className="grid gap-5 bg-[#fbf7f1] p-7 transition-colors hover:bg-[#f3e8dc]"
+                className="grid gap-5 bg-[#f6f2ec] p-7 transition-colors hover:bg-[#ede4da]"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#ccb49d] text-[#6f4f39]">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#c2a996] text-[#5d3e2b]">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <ArrowRight className="h-4 w-4 text-[#6f4f39]" />
+                  <ArrowRight className="h-4 w-4 text-[#5d3e2b]" />
                 </div>
                 <div>
                   <h3 className="font-serif text-3xl text-[#24160f]">
                     {t(stream.titleEn, stream.titleHi)}
                   </h3>
-                  <p className="mt-3 max-w-md text-base leading-7 text-[#5e4b3d]">
+                  <p className="mt-3 max-w-md text-base leading-7 text-[#59463a]">
                     {t(stream.summaryEn, stream.summaryHi)}
                   </p>
                 </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8a6851]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#7b604e]">
                   {t(stream.actionEn, stream.actionHi)}
                 </p>
               </Link>
@@ -790,32 +796,32 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
   const t = useT();
 
   return (
-    <section id="current-work" className="bg-[#efe4d7] px-6 py-20 md:px-10 lg:px-14">
+    <section id="current-work" className="bg-[#e7ddd2] px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <SectionHeading
-          eyebrowEn="Current Work"
+          eyebrowEn="Public output"
           eyebrowHi="वर्तमान कार्य"
-          titleEn="Featured public output should prove activity, not just aspiration."
+          titleEn="Current public output"
           titleHi="प्रमुख सार्वजनिक सामग्री केवल उद्देश्य नहीं, सक्रियता भी सिद्ध करे।"
-          bodyEn="The landing page needs one current output that demonstrates that research and public-facing work are both alive."
+          bodyEn="Recent publications and approved artifacts show the current rhythm of public work across the institution."
           bodyHi="इस पृष्ठ पर एक ऐसा वर्तमान उदाहरण होना चाहिए जो दिखाए कि शोध और सार्वजनिक कार्य दोनों सक्रिय हैं।"
         />
         <div className="grid gap-6">
-          <div className="border border-[#ccb49d] bg-[#f7f1e8] p-6">
+          <div className="border border-[#c2a996] bg-[#f4efe8] p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
               {t("Featured output", "प्रमुख सामग्री")}
             </p>
             <h3 className="mt-4 font-serif text-3xl leading-tight text-[#24160f]">
               {t(featuredItem.titleEn, featuredItem.titleHi)}
             </h3>
-            <p className="mt-4 text-base leading-7 text-[#5e4b3d]">
+            <p className="mt-4 text-base leading-7 text-[#59463a]">
               {t(featuredItem.excerptEn, featuredItem.excerptHi)}
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {featuredItem.channels.map((channel) => (
                 <span
                   key={channel}
-                  className="inline-flex items-center gap-1.5 border border-[#d6c1ac] bg-[#fbf7f1] px-3 py-1 text-[11px] font-semibold text-[#5e4b3d]"
+                  className="inline-flex items-center gap-1.5 border border-[#d0bcab] bg-[#f7f3ed] px-3 py-1 text-[11px] font-semibold text-[#59463a]"
                 >
                   <Share2 className="h-3 w-3 text-[#8a623f]" />
                   {channel}
@@ -823,16 +829,16 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
               ))}
             </div>
           </div>
-          <div className="grid gap-px bg-[#ccb49d] md:grid-cols-2">
-            <div className="bg-[#f7f1e8] p-6">
+          <div className="grid gap-px bg-[#c2a996] md:grid-cols-2">
+            <div className="bg-[#f4efe8] p-6">
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
-                {t("Editorial lane", "संपादकीय प्रवाह")}
+                {t("Workstream lane", "संपादकीय प्रवाह")}
               </p>
               <p className="mt-3 font-serif text-2xl text-[#24160f]">
                 {t(featuredItem.laneEn, featuredItem.laneHi)}
               </p>
             </div>
-            <div className="bg-[#f7f1e8] p-6">
+            <div className="bg-[#f4efe8] p-6">
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
                 {t("Contributor", "योगदानकर्ता")}
               </p>
@@ -851,26 +857,26 @@ function CredibilitySection() {
   const t = useT();
 
   return (
-    <section className="bg-[#fbf7f1] px-6 py-20 md:px-10 lg:px-14">
+    <section className="bg-[#f2ede6] px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
           eyebrowEn="Institutional Credibility"
           eyebrowHi="संस्थागत विश्वसनीयता"
-          titleEn="Authority should come from structure and continuity."
+          titleEn="Institutional signals"
           titleHi="अधिकार-विश्वास संरचना और निरंतरता से निर्मित होता है।"
-          bodyEn="This page should feel serious because the work is structured, current, and legible, not because it is overloaded with decorative metrics."
+          bodyEn="These signals summarize how the platform keeps public output, bilingual communication, and follow-through connected."
           bodyHi="यह पृष्ठ इसलिए गंभीर लगे कि कार्य संरचित, वर्तमान और स्पष्ट है; केवल सजावटी आँकड़ों की भीड़ से नहीं।"
         />
-        <div className="grid gap-px bg-[#d6c1ac] md:grid-cols-3">
+        <div className="grid gap-px bg-[#c9b6a5] md:grid-cols-3">
           {CREDIBILITY_SIGNALS.map((signal) => (
-            <div key={signal.labelEn} className="bg-[#fbf7f1] p-7">
+            <div key={signal.labelEn} className="bg-[#f6f2ec] p-7">
               <p className="font-serif text-4xl text-[#24160f]">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
               <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[#6f4f39]">
                 {t(signal.labelEn, signal.labelHi)}
               </p>
-              <p className="mt-4 text-sm leading-7 text-[#5e4b3d]">
+              <p className="mt-4 text-sm leading-7 text-[#59463a]">
                 {t(signal.noteEn, signal.noteHi)}
               </p>
             </div>
@@ -890,48 +896,48 @@ function ParticipationSection() {
   const primaryLabelHi = isAuthenticated ? "कार्यक्षेत्र में प्रवेश" : "प्रवेश";
 
   return (
-    <section id="participate" className="bg-[#efe4d7] px-6 py-20 md:px-10 lg:px-14">
+    <section id="participate" className="bg-[#e7ddd2] px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
           eyebrowEn="Participation"
           eyebrowHi="सहभागिता"
-          titleEn="Participation should follow understanding."
+          titleEn="Participation and access"
           titleHi="सहभागिता, समझ के बाद आए।"
-          bodyEn="The landing page should invite the right next step without crowding the first fold or collapsing into a sign-in gate."
+          bodyEn="Public visitors can review the workstreams first, while existing members can move directly into the console for active tasks."
           bodyHi="यह पृष्ठ सही अगले कदम का आमंत्रण दे, पर प्रथम पटल को भीड़भाड़ वाला या केवल प्रवेश-द्वार न बनाए।"
         />
-        <div className="grid gap-px bg-[#ccb49d] lg:grid-cols-[1fr_0.9fr]">
-          <div className="grid gap-px bg-[#ccb49d]">
+        <div className="grid gap-px bg-[#c2a996] lg:grid-cols-[1fr_0.9fr]">
+          <div className="grid gap-px bg-[#c2a996]">
             {PARTICIPATION_PATHS.map((path) => (
-              <div key={path.titleEn} className="bg-[#f7f1e8] p-6">
+              <div key={path.titleEn} className="bg-[#f4efe8] p-6">
                 <h3 className="font-serif text-2xl text-[#24160f]">
                   {t(path.titleEn, path.titleHi)}
                 </h3>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5e4b3d]">
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[#59463a]">
                   {t(path.bodyEn, path.bodyHi)}
                 </p>
               </div>
             ))}
           </div>
-          <div className="flex flex-col justify-between bg-[#6f4f39] p-8 text-[#f7f1e8]">
+          <div className="flex flex-col justify-between bg-[#5d3e2b] p-8 text-[#f4efe8]">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#d8c7b7]">
                 {t("Next step", "अगला कदम")}
               </p>
               <h3 className="mt-4 font-serif text-3xl leading-tight">
-                {t("Move from reading into work with a visible and disciplined path.", "पठन से कार्य की ओर एक स्पष्ट और संयत मार्ग से बढ़ें।")}
+                {t("Use the public overview to identify the right workstream, then continue through the appropriate access path.", "पठन से कार्य की ओर एक स्पष्ट और संयत मार्ग से बढ़ें।")}
               </h3>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 bg-[#f7f1e8] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#6f4f39] transition-colors hover:bg-white"
+                className="inline-flex items-center gap-2 bg-[#f4efe8] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#5d3e2b] transition-colors hover:bg-white"
               >
                 {t(primaryLabelEn, primaryLabelHi)}
               </Link>
               <Link
                 href="#workstreams"
-                className="inline-flex items-center gap-2 border border-[#b99679] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#f7f1e8] transition-colors hover:bg-[#7e5b43]"
+                className="inline-flex items-center gap-2 border border-[#b99679] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#f4efe8] transition-colors hover:bg-[#734d34]"
               >
                 {t("Explore Work", "कार्य प्रवाह देखें")}
               </Link>
@@ -947,13 +953,13 @@ function LandingFooter() {
   const t = useT();
 
   return (
-    <footer className="border-t border-[#d6c1ac] bg-[#f7f1e8] px-6 py-12 md:px-10 lg:px-14">
+    <footer className="border-t border-[#c9b6a5] bg-[#f4efe8] px-6 py-12 md:px-10 lg:px-14">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_0.8fr_0.8fr]">
         <div className="space-y-4">
           <BrandMark />
           <p className="max-w-md text-sm leading-7 text-[#5e4b3d]">
             {t(
-              "A public-facing editorial and institutional surface for writing, discourse, dissemination, and field reporting.",
+              "Public institutional overview for publication, dissemination, discourse, and reporting.",
               "लेखन, विमर्श, प्रसार और क्षेत्रीय वृत्त के लिए एक सार्वजनिक संपादकीय एवं संस्थागत पटल।",
             )}
           </p>
