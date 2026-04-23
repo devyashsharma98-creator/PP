@@ -232,11 +232,11 @@ function usePublicArticleArtifacts() {
 function BrandMark() {
   return (
     <Link href="/parichay" className="group flex min-w-0 items-center gap-3" aria-label="Pragya Pravah Home">
-      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#cfb8a3] bg-[#f6efe5] text-[#6f4f39]">
+      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
         <PragyaLogo className="h-7 w-7" />
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8a6851]">
+        <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary/80">
           Pragya Pravah
         </span>
         <span className="font-serif text-lg font-semibold text-[#24160f]" lang="hi">
@@ -263,25 +263,25 @@ function TopAppBar() {
   const landingPath = getRoleLandingPath(viewer?.effectiveRoles ?? null, viewer?.primaryRoleCode ?? null);
 
   return (
-    <header className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-[#d8c7b7] bg-[#f4efe6]/95 px-6 backdrop-blur md:px-8">
+    <header className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-primary/15 bg-background/95 px-6 backdrop-blur md:px-8">
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button
-                className="text-[#6f4f39] transition-colors hover:text-[#24160f]"
+                className="text-primary transition-colors hover:text-foreground"
                 aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
               >
                 <Menu className="h-6 w-6" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] border-r border-[#d8c7b7] bg-[#f7f1e8] p-0">
+            <SheetContent side="left" className="w-[300px] border-r border-primary/15 bg-background p-0">
               <SheetTitle className="sr-only">{t("Navigation", "नेविगेशन")}</SheetTitle>
               <SheetDescription className="sr-only">
                 {t("Primary navigation links.", "मुख्य नेविगेशन लिंक।")}
               </SheetDescription>
-              <div className="border-b border-[#d8c7b7] px-6 py-5">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-[#7a6759]">
+              <div className="border-b border-primary/15 px-6 py-5">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">
                   {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
                 </p>
                 <h2 className="mt-1 font-serif text-xl font-bold text-[#24160f]">
@@ -291,7 +291,7 @@ function TopAppBar() {
               <nav className="flex-1 overflow-y-auto px-3 py-4">
                 {navigationGroups.map((group) => (
                   <div key={group.title} className="mb-4 space-y-1">
-                    <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-[#7a6759]">
+                    <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-primary/70">
                       {t(group.title, group.titleHi)}
                     </p>
                     {group.items.map((item) => (
@@ -300,9 +300,9 @@ function TopAppBar() {
                         href={item.path}
                         prefetch={false}
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#24160f] transition-colors hover:bg-[#efe4d7]"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                       >
-                        <item.icon className="h-4 w-4 shrink-0 text-[#6f4f39]" />
+                        <item.icon className="h-4 w-4 shrink-0 text-primary" />
                         <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>
                           {t(item.label, item.sublabel)}
                         </span>
@@ -327,7 +327,7 @@ function TopAppBar() {
         <BrandMark />
       </div>
 
-      <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.22em] text-[#6f4f39] md:flex">
+      <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.22em] text-primary/80 md:flex">
         <a href="#mission" className="transition-colors hover:text-[#24160f]">
           {t("Mission", "ध्येय")}
         </a>
@@ -345,7 +345,7 @@ function TopAppBar() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setLang(lang === "hi" ? "en" : "hi")}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-[#d8c7b7] px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#6f4f39] transition-colors hover:bg-[#efe4d7]"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
           aria-label={t("Toggle language", "भाषा बदलें")}
         >
           <Languages className="h-3.5 w-3.5" />
@@ -354,7 +354,7 @@ function TopAppBar() {
         {isAuthenticated ? (
           <Link
             href={landingPath}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6f4f39] text-white transition-colors hover:bg-[#8a623f] sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
             aria-label={t("Enter Console", "कार्यक्षेत्र में प्रवेश")}
           >
             <LayoutGrid className="h-4 w-4 sm:hidden" />
@@ -363,7 +363,7 @@ function TopAppBar() {
         ) : (
           <Link
             href="/login"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6f4f39] text-white transition-colors hover:bg-[#8a623f] sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
             aria-label={t("Sign In", "प्रवेश")}
           >
             <LogIn className="h-4 w-4 sm:hidden" />
@@ -394,13 +394,13 @@ function SectionHeading({
 
   return (
     <div className="max-w-3xl space-y-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#7a5a42]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
         {t(eyebrowEn, eyebrowHi)}
       </p>
       <h2 className="font-serif text-4xl leading-tight text-[#24160f] md:text-5xl">
         {t(titleEn, titleHi)}
       </h2>
-      <p className="max-w-2xl text-base leading-7 text-[#5e4b3d] md:text-lg">
+      <p className="max-w-2xl text-base leading-7 text-foreground/80 md:text-lg">
         {t(bodyEn, bodyHi)}
       </p>
     </div>
@@ -411,16 +411,16 @@ function EditorialVisual() {
   const t = useT();
 
   return (
-    <div className="relative overflow-hidden border border-[#c9b6a5] bg-[#ebe2d7] p-5 md:p-6">
+    <div className="relative overflow-hidden border border-primary/20 bg-accent/55 p-5 md:p-6">
       <div className="grid gap-4">
-        <div className="flex items-center justify-between border-b border-[#bea592] pb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#6d523f]">
+        <div className="flex items-center justify-between border-b border-primary/15 pb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
           <span>{t("Institutional Surface", "संपादकीय पटल")}</span>
           <span>{t("Public-facing", "सार्वजनिक")}</span>
         </div>
         <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
           <div className="grid gap-3">
-            <div className="border border-[#bea592] bg-[#f4efe8] p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#7a5a42]">
+            <div className="border border-primary/15 bg-background/90 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 {t("Overview", "संयम")}
               </p>
               <p className="mt-3 font-serif text-2xl leading-tight text-[#24160f]">
@@ -428,29 +428,29 @@ function EditorialVisual() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="border border-[#bea592] bg-[#f6f2ec] p-4 text-sm text-[#5e4b3d]">
+              <div className="border border-primary/15 bg-background/80 p-4 text-sm text-foreground/80">
                 {t("Review", "अध्ययन")}
               </div>
-              <div className="border border-[#bea592] bg-[#f6f2ec] p-4 text-sm text-[#5e4b3d]">
+              <div className="border border-primary/15 bg-background/80 p-4 text-sm text-foreground/80">
                 {t("Reporting", "विमर्श")}
               </div>
             </div>
           </div>
-          <div className="relative min-h-[220px] border border-[#9f7c64] bg-[#5d3e2b] p-5 text-[#f4efe8]">
+          <div className="relative min-h-[220px] border border-primary/35 bg-primary p-5 text-primary-foreground">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(247,241,232,0.08)_1px,transparent_1px),linear-gradient(rgba(247,241,232,0.08)_1px,transparent_1px)] bg-[size:32px_32px]" />
             <div className="relative grid h-full content-between gap-6">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#d7c0aa]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground/75">
                   {t("Institutional rhythm", "संस्थागत लय")}
                 </p>
                 <p className="mt-3 max-w-sm font-serif text-3xl leading-tight">
                   {t("Serious public work depends on review discipline, publication flow, and operational memory.", "गंभीर लोक-कार्य को संपादकीय स्पष्टता और संस्थागत स्मृति चाहिए।")}
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#e7d5c3]">
-                <span className="border border-[#9f7a58] px-3 py-2">{t("Aalekh", "आलेख")}</span>
-                <span className="border border-[#9f7a58] px-3 py-2">{t("Prachar", "प्रचार")}</span>
-                <span className="border border-[#9f7a58] px-3 py-2">{t("Vimarsh", "विमर्श")}</span>
+              <div className="grid grid-cols-3 gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground/90">
+                <span className="border border-primary-foreground/30 px-3 py-2">{t("Aalekh", "आलेख")}</span>
+                <span className="border border-primary-foreground/30 px-3 py-2">{t("Prachar", "प्रचार")}</span>
+                <span className="border border-primary-foreground/30 px-3 py-2">{t("Vimarsh", "विमर्श")}</span>
               </div>
             </div>
           </div>
@@ -464,9 +464,9 @@ function WorkstreamRail() {
   const t = useT();
 
   return (
-    <div className="border border-[#c9b6a5] bg-[#f4efe8]">
-      <div className="border-b border-[#c9b6a5] px-5 py-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#7a5a42]">
+    <div className="border border-primary/20 bg-background/95">
+      <div className="border-b border-primary/15 px-5 py-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
           {t("Workstreams", "कार्य-प्रवाह")}
         </p>
       </div>
@@ -478,25 +478,25 @@ function WorkstreamRail() {
             <Link
               key={stream.id}
               href={stream.href}
-              className="grid gap-3 border-b border-[#d6c6ba] px-5 py-5 transition-colors hover:bg-[#ebe2d7]"
+              className="grid gap-3 border-b border-primary/10 px-5 py-5 transition-colors hover:bg-accent/60"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#c2a996] text-[#5d3e2b]">
+                  <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <div>
                     <h3 className="font-serif text-2xl text-[#24160f]">
                       {t(stream.titleEn, stream.titleHi)}
                     </h3>
-                    <p className="mt-2 max-w-md text-sm leading-6 text-[#59463a]">
+                    <p className="mt-2 max-w-md text-sm leading-6 text-foreground/75">
                       {t(stream.summaryEn, stream.summaryHi)}
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#5d3e2b]" />
+                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-primary" />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#7b604e]">
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
                 {t(stream.actionEn, stream.actionHi)}
               </span>
             </Link>
@@ -529,20 +529,20 @@ function ArticleShowcaseArtifact({
   return (
     <div
       aria-label="Approved article showcase"
-      className="border border-[#d6c1ac] bg-[#f7f1e8] text-[#24160f]"
+      className="border border-primary/20 bg-background text-foreground"
     >
-      <div className="flex items-center justify-between border-b border-[#d6c1ac] px-5 py-4">
+      <div className="flex items-center justify-between border-b border-primary/15 px-5 py-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#7a5a42]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
             {t("Approved Article Showcase", "प्रकाशन योग्य आलेख")}
           </p>
-          <p className="mt-1 text-sm text-[#5e4b3d]">
+          <p className="mt-1 text-sm text-foreground/70">
             {hasPublishedArticles
               ? t("Approved articles live", "स्वीकृत आलेख उपलब्ध")
               : t("Awaiting approved articles", "स्वीकृत आलेख प्रतीक्षित")}
           </p>
         </div>
-        <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#ccb49d] text-[#6f4f39]">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
           <Newspaper className="h-5 w-5" />
         </span>
       </div>
@@ -558,11 +558,11 @@ function ArticleShowcaseArtifact({
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-start justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 border border-[#d6c1ac] bg-[#f4eadf] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#6f4f39]">
+              <span className="inline-flex items-center gap-1.5 border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 {t(activeItem.laneEn, activeItem.laneHi)}
               </span>
-              <span className="text-xs font-semibold text-[#8a6851]">
+              <span className="text-xs font-semibold text-primary/70">
                 {String(activeIndex + 1).padStart(2, "0")}/{String(items.length).padStart(2, "0")}
               </span>
             </div>
@@ -571,17 +571,17 @@ function ArticleShowcaseArtifact({
               <h3 className="font-serif text-2xl leading-tight text-[#24160f]">
                 {t(activeItem.titleEn, activeItem.titleHi)}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-[#5e4b3d]">
+              <p className="mt-3 text-sm leading-7 text-foreground/75">
                 {t(activeItem.excerptEn, activeItem.excerptHi)}
               </p>
             </div>
 
-            <div className="grid gap-3 border-t border-[#e2d3c5] pt-4">
+            <div className="grid gap-3 border-t border-primary/10 pt-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a6851]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
                   {t("Contributor", "योगदानकर्ता")}
                 </p>
-                <p className="mt-1 font-serif text-lg text-[#6f4f39]">
+                <p className="mt-1 font-serif text-lg text-primary">
                   {t(activeItem.authorEn, activeItem.authorHi)}
                 </p>
               </div>
@@ -589,9 +589,9 @@ function ArticleShowcaseArtifact({
                 {activeItem.channels.map((channel) => (
                   <span
                     key={channel}
-                    className="inline-flex items-center gap-1.5 border border-[#d6c1ac] px-3 py-1 text-[11px] font-semibold text-[#5e4b3d]"
+                    className="inline-flex items-center gap-1.5 border border-primary/15 bg-accent/35 px-3 py-1 text-[11px] font-semibold text-foreground/75"
                   >
-                    <Share2 className="h-3 w-3 text-[#8a623f]" />
+                    <Share2 className="h-3 w-3 text-primary" />
                     {channel}
                   </span>
                 ))}
@@ -602,7 +602,7 @@ function ArticleShowcaseArtifact({
                     key={item.titleEn}
                     className={cn(
                       "h-1.5 flex-1 rounded-full transition-colors",
-                      index === activeIndex ? "bg-[#8a623f]" : "bg-[#d8c7b7]",
+                      index === activeIndex ? "bg-primary" : "bg-primary/20",
                     )}
                   />
                 ))}
@@ -627,41 +627,41 @@ function ProofBand({
   const t = useT();
 
   return (
-    <div className="grid gap-6 border-t border-[#c9b6a5] pt-8 lg:grid-cols-[0.9fr_0.9fr_1.2fr]">
-      <div className="border border-[#c9b6a5] bg-[#f4efe8] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+    <div className="grid gap-6 border-t border-primary/15 pt-8 lg:grid-cols-[0.9fr_0.9fr_1.2fr]">
+      <div className="border border-primary/20 bg-accent/45 p-5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
           {t("Featured Output", "प्रमुख प्रकाशन")}
         </p>
         <h3 className="mt-4 font-serif text-2xl leading-tight text-[#24160f]">
           {t(featuredItem.titleEn, featuredItem.titleHi)}
         </h3>
-        <p className="mt-3 text-sm leading-7 text-[#5e4b3d]">
+        <p className="mt-3 text-sm leading-7 text-foreground/75">
           {t(featuredItem.excerptEn, featuredItem.excerptHi)}
         </p>
-        <div className="mt-5 border-t border-[#d6c6ba] pt-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a6851]">
+        <div className="mt-5 border-t border-primary/10 pt-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
             {t("Current lane", "वर्तमान प्रवाह")}
           </p>
-          <p className="mt-2 text-sm font-semibold text-[#6f4f39]">
+          <p className="mt-2 text-sm font-semibold text-primary">
             {t(featuredItem.laneEn, featuredItem.laneHi)}
           </p>
         </div>
       </div>
 
-      <div className="border border-[#c9b6a5] bg-[#f4efe8] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+      <div className="border border-primary/20 bg-accent/45 p-5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
           {t("Institutional Signals", "संस्थागत संकेत")}
         </p>
         <div className="mt-5 space-y-5">
           {CREDIBILITY_SIGNALS.slice(0, 2).map((signal) => (
-            <div key={signal.labelEn} className="border-t border-[#d6c6ba] pt-4 first:border-t-0 first:pt-0">
+            <div key={signal.labelEn} className="border-t border-primary/10 pt-4 first:border-t-0 first:pt-0">
               <p className="font-serif text-3xl text-[#24160f]">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
-              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#6f4f39]">
+              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
                 {t(signal.labelEn, signal.labelHi)}
               </p>
-              <p className="mt-2 text-sm leading-6 text-[#5e4b3d]">
+              <p className="mt-2 text-sm leading-6 text-foreground/75">
                 {t(signal.noteEn, signal.noteHi)}
               </p>
             </div>
@@ -686,27 +686,27 @@ function Hero({
   const t = useT();
 
   return (
-    <section id="mission" className="bg-[#ece4db] px-6 pb-16 pt-12 md:px-10 md:pb-24 lg:px-14">
-      <div className="mx-auto max-w-7xl border border-[#c9b6a5] bg-[#f4efe8] px-6 py-8 md:px-10 md:py-10">
+    <section id="mission" className="bg-accent/35 px-6 pb-16 pt-12 md:px-10 md:pb-24 lg:px-14">
+      <div className="mx-auto max-w-7xl border border-primary/20 bg-background/95 px-6 py-8 md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="space-y-8">
             <div className="space-y-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6d523f]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
                 {t("Institutional overview", "विचार और लोक-कार्य का प्रवाह")}
               </p>
               <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-[#1f140d] md:text-7xl">
                 Institutional overview of Pragya Pravah workstreams.
               </h1>
-              <p className="max-w-2xl text-xl leading-8 text-[#5a4639]" lang="hi">
+              <p className="max-w-2xl text-xl leading-8 text-foreground/82" lang="hi">
                 प्रज्ञा प्रवाह के कार्य-प्रवाहों का सार्वजनिक संस्थागत अवलोकन।
               </p>
-              <p className="max-w-3xl text-base leading-7 text-[#5a4639] md:text-lg">
+              <p className="max-w-3xl text-base leading-7 text-foreground/82 md:text-lg">
                 {t(
                   "Public interface for publication, dissemination, discourse, and reporting.",
                   "प्रज्ञा प्रवाह लेखन, प्रसार, विमर्श और संस्थागत वृत्त को एक संयत सार्वजनिक पटल पर एकत्र करता है।",
                 )}
               </p>
-              <p className="max-w-3xl text-sm leading-7 text-[#6b5648] md:text-base">
+              <p className="max-w-3xl text-sm leading-7 text-foreground/70 md:text-base">
                 {t(
                   "This page presents the institution through its operating domains, current public output, and access paths for contributors and members.",
                   "यह पृष्ठ संस्था को उसके कार्य-क्षेत्र, वर्तमान सार्वजनिक सामग्री और योगदानकर्ताओं एवं सदस्यों के प्रवेश-पथ के माध्यम से प्रस्तुत करता है।",
@@ -717,14 +717,14 @@ function Hero({
             <div className="flex flex-wrap gap-3">
               <Link
                 href="#workstreams"
-                className="inline-flex items-center gap-2 bg-[#5d3e2b] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[#734d34]"
+                className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <span>{t("Explore Work", "कार्य प्रवाह देखें")}</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 border border-[#bea592] bg-[#f8f4ef] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#5d3e2b] transition-colors hover:bg-[#eee5db]"
+                className="inline-flex items-center gap-2 border border-primary/20 bg-background px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
               >
                 {t("Sign In", "प्रवेश")}
               </Link>
@@ -746,7 +746,7 @@ function WorkstreamsSection() {
   const t = useT();
 
   return (
-    <section id="workstreams" className="bg-[#f2ede6] px-6 py-20 md:px-10 lg:px-14">
+    <section id="workstreams" className="bg-background px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
           eyebrowEn="Workstream overview"
@@ -756,7 +756,7 @@ function WorkstreamsSection() {
           bodyEn="Each workstream describes a visible institutional function: publication, dissemination, discourse, or reporting."
           bodyHi="पहली बार आने वाला व्यक्ति संस्था को उसके सार्वजनिक कार्य से समझे, न कि सॉफ़्टवेयर मॉड्यूल या सामान्य घोषणाओं से।"
         />
-        <div className="grid gap-px bg-[#c9b6a5] md:grid-cols-2">
+        <div className="grid gap-px bg-primary/15 md:grid-cols-2">
           {WORKSTREAMS.map((stream) => {
             const Icon = stream.icon as ComponentType<{ className?: string }>;
 
@@ -764,23 +764,23 @@ function WorkstreamsSection() {
               <Link
                 key={stream.id}
                 href={stream.href}
-                className="grid gap-5 bg-[#f6f2ec] p-7 transition-colors hover:bg-[#ede4da]"
+                className="grid gap-5 bg-background p-7 transition-colors hover:bg-accent/55"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#c2a996] text-[#5d3e2b]">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <ArrowRight className="h-4 w-4 text-[#5d3e2b]" />
+                  <ArrowRight className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-serif text-3xl text-[#24160f]">
                     {t(stream.titleEn, stream.titleHi)}
                   </h3>
-                  <p className="mt-3 max-w-md text-base leading-7 text-[#59463a]">
+                  <p className="mt-3 max-w-md text-base leading-7 text-foreground/75">
                     {t(stream.summaryEn, stream.summaryHi)}
                   </p>
                 </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#7b604e]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
                   {t(stream.actionEn, stream.actionHi)}
                 </p>
               </Link>
@@ -796,7 +796,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
   const t = useT();
 
   return (
-    <section id="current-work" className="bg-[#e7ddd2] px-6 py-20 md:px-10 lg:px-14">
+    <section id="current-work" className="bg-accent/35 px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <SectionHeading
           eyebrowEn="Public output"
@@ -807,39 +807,39 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
           bodyHi="इस पृष्ठ पर एक ऐसा वर्तमान उदाहरण होना चाहिए जो दिखाए कि शोध और सार्वजनिक कार्य दोनों सक्रिय हैं।"
         />
         <div className="grid gap-6">
-          <div className="border border-[#c2a996] bg-[#f4efe8] p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+          <div className="border border-primary/20 bg-background/95 p-6">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
               {t("Featured output", "प्रमुख सामग्री")}
             </p>
             <h3 className="mt-4 font-serif text-3xl leading-tight text-[#24160f]">
               {t(featuredItem.titleEn, featuredItem.titleHi)}
             </h3>
-            <p className="mt-4 text-base leading-7 text-[#59463a]">
+            <p className="mt-4 text-base leading-7 text-foreground/75">
               {t(featuredItem.excerptEn, featuredItem.excerptHi)}
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {featuredItem.channels.map((channel) => (
                 <span
                   key={channel}
-                  className="inline-flex items-center gap-1.5 border border-[#d0bcab] bg-[#f7f3ed] px-3 py-1 text-[11px] font-semibold text-[#59463a]"
+                  className="inline-flex items-center gap-1.5 border border-primary/15 bg-accent/35 px-3 py-1 text-[11px] font-semibold text-foreground/75"
                 >
-                  <Share2 className="h-3 w-3 text-[#8a623f]" />
+                  <Share2 className="h-3 w-3 text-primary" />
                   {channel}
                 </span>
               ))}
             </div>
           </div>
-          <div className="grid gap-px bg-[#c2a996] md:grid-cols-2">
-            <div className="bg-[#f4efe8] p-6">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+          <div className="grid gap-px bg-primary/15 md:grid-cols-2">
+            <div className="bg-background/95 p-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Workstream lane", "संपादकीय प्रवाह")}
               </p>
               <p className="mt-3 font-serif text-2xl text-[#24160f]">
                 {t(featuredItem.laneEn, featuredItem.laneHi)}
               </p>
             </div>
-            <div className="bg-[#f4efe8] p-6">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+            <div className="bg-background/95 p-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Contributor", "योगदानकर्ता")}
               </p>
               <p className="mt-3 font-serif text-2xl text-[#24160f]">
@@ -857,7 +857,7 @@ function CredibilitySection() {
   const t = useT();
 
   return (
-    <section className="bg-[#f2ede6] px-6 py-20 md:px-10 lg:px-14">
+    <section className="bg-background px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
           eyebrowEn="Institutional Credibility"
@@ -867,16 +867,16 @@ function CredibilitySection() {
           bodyEn="These signals summarize how the platform keeps public output, bilingual communication, and follow-through connected."
           bodyHi="यह पृष्ठ इसलिए गंभीर लगे कि कार्य संरचित, वर्तमान और स्पष्ट है; केवल सजावटी आँकड़ों की भीड़ से नहीं।"
         />
-        <div className="grid gap-px bg-[#c9b6a5] md:grid-cols-3">
+        <div className="grid gap-px bg-primary/15 md:grid-cols-3">
           {CREDIBILITY_SIGNALS.map((signal) => (
-            <div key={signal.labelEn} className="bg-[#f6f2ec] p-7">
+            <div key={signal.labelEn} className="bg-background p-7">
               <p className="font-serif text-4xl text-[#24160f]">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
-              <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[#6f4f39]">
+              <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
                 {t(signal.labelEn, signal.labelHi)}
               </p>
-              <p className="mt-4 text-sm leading-7 text-[#59463a]">
+              <p className="mt-4 text-sm leading-7 text-foreground/75">
                 {t(signal.noteEn, signal.noteHi)}
               </p>
             </div>
@@ -896,7 +896,7 @@ function ParticipationSection() {
   const primaryLabelHi = isAuthenticated ? "कार्यक्षेत्र में प्रवेश" : "प्रवेश";
 
   return (
-    <section id="participate" className="bg-[#e7ddd2] px-6 py-20 md:px-10 lg:px-14">
+    <section id="participate" className="bg-accent/35 px-6 py-20 md:px-10 lg:px-14">
       <div className="mx-auto max-w-7xl space-y-12">
         <SectionHeading
           eyebrowEn="Participation"
@@ -906,22 +906,22 @@ function ParticipationSection() {
           bodyEn="Public visitors can review the workstreams first, while existing members can move directly into the console for active tasks."
           bodyHi="यह पृष्ठ सही अगले कदम का आमंत्रण दे, पर प्रथम पटल को भीड़भाड़ वाला या केवल प्रवेश-द्वार न बनाए।"
         />
-        <div className="grid gap-px bg-[#c2a996] lg:grid-cols-[1fr_0.9fr]">
-          <div className="grid gap-px bg-[#c2a996]">
+        <div className="grid gap-px bg-primary/15 lg:grid-cols-[1fr_0.9fr]">
+          <div className="grid gap-px bg-primary/15">
             {PARTICIPATION_PATHS.map((path) => (
-              <div key={path.titleEn} className="bg-[#f4efe8] p-6">
+              <div key={path.titleEn} className="bg-background/95 p-6">
                 <h3 className="font-serif text-2xl text-[#24160f]">
                   {t(path.titleEn, path.titleHi)}
                 </h3>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-[#59463a]">
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/75">
                   {t(path.bodyEn, path.bodyHi)}
                 </p>
               </div>
             ))}
           </div>
-          <div className="flex flex-col justify-between bg-[#5d3e2b] p-8 text-[#f4efe8]">
+          <div className="flex flex-col justify-between bg-primary p-8 text-primary-foreground">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#d8c7b7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary-foreground/75">
                 {t("Next step", "अगला कदम")}
               </p>
               <h3 className="mt-4 font-serif text-3xl leading-tight">
@@ -931,13 +931,13 @@ function ParticipationSection() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 bg-[#f4efe8] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#5d3e2b] transition-colors hover:bg-white"
+                className="inline-flex items-center gap-2 bg-background px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
               >
                 {t(primaryLabelEn, primaryLabelHi)}
               </Link>
               <Link
                 href="#workstreams"
-                className="inline-flex items-center gap-2 border border-[#b99679] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#f4efe8] transition-colors hover:bg-[#734d34]"
+                className="inline-flex items-center gap-2 border border-primary-foreground/30 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 {t("Explore Work", "कार्य प्रवाह देखें")}
               </Link>
@@ -953,11 +953,11 @@ function LandingFooter() {
   const t = useT();
 
   return (
-    <footer className="border-t border-[#c9b6a5] bg-[#f4efe8] px-6 py-12 md:px-10 lg:px-14">
+    <footer className="border-t border-primary/15 bg-background px-6 py-12 md:px-10 lg:px-14">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_0.8fr_0.8fr]">
         <div className="space-y-4">
           <BrandMark />
-          <p className="max-w-md text-sm leading-7 text-[#5e4b3d]">
+          <p className="max-w-md text-sm leading-7 text-foreground/75">
             {t(
               "Public institutional overview for publication, dissemination, discourse, and reporting.",
               "लेखन, विमर्श, प्रसार और क्षेत्रीय वृत्त के लिए एक सार्वजनिक संपादकीय एवं संस्थागत पटल।",
@@ -966,12 +966,12 @@ function LandingFooter() {
         </div>
         {FOOTER_LINK_GROUPS.map((group) => (
           <div key={group.titleEn}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#7a5a42]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
               {t(group.titleEn, group.titleHi)}
             </p>
             <div className="mt-4 grid gap-3">
               {group.links.map((link) => (
-                <Link key={`${group.titleEn}-${link.href}`} href={link.href} className="text-sm text-[#5e4b3d] transition-colors hover:text-[#24160f]">
+                <Link key={`${group.titleEn}-${link.href}`} href={link.href} className="text-sm text-foreground/75 transition-colors hover:text-primary">
                   {t(link.labelEn, link.labelHi)}
                 </Link>
               ))}
