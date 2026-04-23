@@ -32,7 +32,7 @@ interface AalekhAIPanelProps {
 function parseNumberedList(text: string): string[] {
   return text
     .split(/\n/)
-    .map((l) => l.replace(/^\d+[\.\)]\s*/, "").trim())
+    .map((l) => l.replace(/^\d+[.)]\s*/, "").trim())
     .filter(Boolean);
 }
 
