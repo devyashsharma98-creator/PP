@@ -263,113 +263,115 @@ function TopAppBar() {
   const landingPath = getRoleLandingPath(viewer?.effectiveRoles ?? null, viewer?.primaryRoleCode ?? null);
 
   return (
-    <header className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-primary/15 bg-background/95 px-6 backdrop-blur md:px-8">
-      <div className="flex items-center gap-4">
-        {isAuthenticated ? (
-          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-            <SheetTrigger asChild>
-              <button
-                className="text-primary transition-colors hover:text-foreground"
-                aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] border-r border-primary/15 bg-background p-0">
-              <SheetTitle className="sr-only">{t("Navigation", "नेविगेशन")}</SheetTitle>
-              <SheetDescription className="sr-only">
-                {t("Primary navigation links.", "मुख्य नेविगेशन लिंक।")}
-              </SheetDescription>
-              <div className="border-b border-primary/15 px-6 py-5">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">
-                  {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
-                </p>
-                <h2 className="mt-1 font-serif text-xl font-bold text-[#24160f]">
-                  {t("Parichay", "परिचय")}
-                </h2>
-              </div>
-              <nav className="flex-1 overflow-y-auto px-3 py-4">
-                {navigationGroups.map((group) => (
-                  <div key={group.title} className="mb-4 space-y-1">
-                    <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-primary/70">
-                      {t(group.title, group.titleHi)}
-                    </p>
-                    {group.items.map((item) => (
-                      <Link
-                        key={item.path}
-                        href={item.path}
-                        prefetch={false}
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                      >
-                        <item.icon className="h-4 w-4 shrink-0 text-primary" />
-                        <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>
-                          {t(item.label, item.sublabel)}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
+    <header className="fixed top-0 z-50 h-20 w-full border-b border-primary/15 bg-background/95 backdrop-blur">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center gap-4 px-6 md:px-8">
+        <div className="flex min-w-0 items-center gap-4">
+          {isAuthenticated ? (
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
                 <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    signOut();
-                  }}
-                  className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#9d2d22] transition-colors hover:bg-[#f4d8d1]"
+                  className="text-primary transition-colors hover:text-foreground"
+                  aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
                 >
-                  <LogOut className="h-4 w-4" />
-                  {t("Sign out", "निकास")}
+                  <Menu className="h-6 w-6" />
                 </button>
-              </nav>
-            </SheetContent>
-          </Sheet>
-        ) : null}
-        <BrandMark />
-      </div>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] border-r border-primary/15 bg-background p-0">
+                <SheetTitle className="sr-only">{t("Navigation", "नेविगेशन")}</SheetTitle>
+                <SheetDescription className="sr-only">
+                  {t("Primary navigation links.", "मुख्य नेविगेशन लिंक।")}
+                </SheetDescription>
+                <div className="border-b border-primary/15 px-6 py-5">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">
+                    {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
+                  </p>
+                  <h2 className="mt-1 font-serif text-xl font-bold text-[#24160f]">
+                    {t("Parichay", "परिचय")}
+                  </h2>
+                </div>
+                <nav className="flex-1 overflow-y-auto px-3 py-4">
+                  {navigationGroups.map((group) => (
+                    <div key={group.title} className="mb-4 space-y-1">
+                      <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-primary/70">
+                        {t(group.title, group.titleHi)}
+                      </p>
+                      {group.items.map((item) => (
+                        <Link
+                          key={item.path}
+                          href={item.path}
+                          prefetch={false}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0 text-primary" />
+                          <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>
+                            {t(item.label, item.sublabel)}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      signOut();
+                    }}
+                    className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#9d2d22] transition-colors hover:bg-[#f4d8d1]"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {t("Sign out", "निकास")}
+                  </button>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          ) : null}
+          <BrandMark />
+        </div>
 
-      <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.22em] text-primary/80 md:flex">
-        <a href="#mission" className="transition-colors hover:text-[#24160f]">
-          {t("Mission", "ध्येय")}
-        </a>
-        <a href="#workstreams" className="transition-colors hover:text-[#24160f]">
-          {t("Workstreams", "कार्य-प्रवाह")}
-        </a>
-        <a href="#current-work" className="transition-colors hover:text-[#24160f]">
-          {t("Current Work", "वर्तमान कार्य")}
-        </a>
-        <a href="#participate" className="transition-colors hover:text-[#24160f]">
-          {t("Participation", "सहभागिता")}
-        </a>
-      </nav>
+        <nav className="hidden flex-1 items-center justify-center gap-6 text-xs font-bold uppercase tracking-[0.22em] text-primary/80 xl:flex">
+          <a href="#mission" className="transition-colors hover:text-[#24160f]">
+            {t("Mission", "ध्येय")}
+          </a>
+          <a href="#workstreams" className="transition-colors hover:text-[#24160f]">
+            {t("Workstreams", "कार्य-प्रवाह")}
+          </a>
+          <a href="#current-work" className="transition-colors hover:text-[#24160f]">
+            {t("Current Work", "वर्तमान कार्य")}
+          </a>
+          <a href="#participate" className="transition-colors hover:text-[#24160f]">
+            {t("Participation", "सहभागिता")}
+          </a>
+        </nav>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setLang(lang === "hi" ? "en" : "hi")}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
-          aria-label={t("Toggle language", "भाषा बदलें")}
-        >
-          <Languages className="h-3.5 w-3.5" />
-          {lang === "hi" ? "EN" : "हिं"}
-        </button>
-        {isAuthenticated ? (
-          <Link
-            href={landingPath}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
-            aria-label={t("Enter Console", "कार्यक्षेत्र में प्रवेश")}
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          <button
+            onClick={() => setLang(lang === "hi" ? "en" : "hi")}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-primary/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
+            aria-label={t("Toggle language", "भाषा बदलें")}
           >
-            <LayoutGrid className="h-4 w-4 sm:hidden" />
-            <span className="hidden sm:inline">{t("Enter Console", "कार्यक्षेत्र")}</span>
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-xs sm:font-bold sm:uppercase sm:tracking-[0.18em]"
-            aria-label={t("Sign In", "प्रवेश")}
-          >
-            <LogIn className="h-4 w-4 sm:hidden" />
-            <span className="hidden sm:inline">{t("Sign In", "प्रवेश")}</span>
-          </Link>
-        )}
+            <Languages className="h-3.5 w-3.5" />
+            {lang === "hi" ? "EN" : "हिं"}
+          </button>
+          {isAuthenticated ? (
+            <Link
+              href={landingPath}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
+              aria-label={t("Enter Console", "कार्यक्षेत्र में प्रवेश")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span>{t("Enter Console", "कार्यक्षेत्र")}</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
+              aria-label={t("Sign In", "प्रवेश")}
+            >
+              <LogIn className="h-4 w-4" />
+              <span>{t("Sign In", "प्रवेश")}</span>
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -1044,7 +1046,7 @@ export default function Parichay() {
       style={{ fontFamily: "Manrope, ui-sans-serif, system-ui, sans-serif" }}
     >
       <TopAppBar />
-      <main className="pt-20 lg:pr-16">
+      <main className="pt-20">
         <Hero featuredItem={featuredItem} items={items} hasPublishedArticles={hasPublishedArticles} />
         <WorkstreamsSection />
         <FeaturedOutputSection featuredItem={featuredItem} />
@@ -1052,7 +1054,6 @@ export default function Parichay() {
         <ParticipationSection />
         <LandingFooter />
       </main>
-      <SideRail />
       <MobileBottomNav />
     </div>
   );
