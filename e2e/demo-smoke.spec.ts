@@ -46,7 +46,9 @@ test.describe("Pragya Pravah Demo Smoke Tests", () => {
 
     // Form fields present
     await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toBeEnabled();
     await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeEnabled();
 
     // Sign In button present
     await expect(

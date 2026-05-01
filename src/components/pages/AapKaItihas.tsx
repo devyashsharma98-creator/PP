@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   History, CalendarDays, MapPin, CheckCircle2, Activity,
   Sparkles, Star, Clock, BookOpen, Award, Compass, TrendingUp,
@@ -10,6 +12,8 @@ import {
 } from 'lucide-react';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
+import { useActivity } from '@/hooks/api/use-activity';
+import { useToast } from '@/components/ToastProvider';
 
 // ── AapKaItihas Context Types ───────────────────────────────────────────
 
@@ -65,20 +69,12 @@ function HistoryMasthead({
   );
 }
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-
-const historyItems = [
-  { date: '2026-02-15', title: 'Yuva Sangam organized', titleHi: 'युवा संगम आयोजित', unit: 'Bhopal Shahar', type: 'Event' },
-  { date: '2026-01-20', title: 'Joined Prachar Aayam', titleHi: 'प्रचार आयाम में शामिल', unit: 'Bhopal', type: 'Milestone' },
-  { date: '2025-12-10', title: 'Bharatiya Vigyan Pradarshani', titleHi: 'भारतीय विज्ञान प्रदर्शनी', unit: 'Raisen', type: 'Event' },
-  { date: '2025-11-05', title: 'Promoted to Unit Head', titleHi: 'इकाई प्रमुख पदोन्नत', unit: 'Bhopal Shahar', type: 'Milestone' },
-  { date: '2025-09-18', title: 'Samajik Samarasta Sammelan', titleHi: 'सामाजिक समरसता सम्मेलन', unit: 'Sehore', type: 'Event' },
-  { date: '2025-08-15', title: 'Independence Day celebration', titleHi: 'स्वतंत्रता दिवस समारोह', unit: 'Bhopal Shahar', type: 'Event' },
-  { date: '2025-06-01', title: 'Completed Karyakarta Training', titleHi: 'कार्यकर्ता प्रशिक्षण पूर्ण', unit: 'Vidisha', type: 'Milestone' },
-  { date: '2025-03-22', title: 'E-Library contribution — 5 books uploaded', titleHi: 'ई-पुस्तकालय में 5 पुस्तकें अपलोड', unit: 'Bhopal', type: 'Contribution' },
-  { date: '2024-12-01', title: 'First event organized as Karyakarta', titleHi: 'कार्यकर्ता के रूप में पहला कार्यक्रम', unit: 'Bhopal Shahar', type: 'Event' },
-  { date: '2024-08-10', title: 'Onboarded as Karyakarta', titleHi: 'कार्यकर्ता के रूप में जुड़े', unit: 'Bhopal Shahar', type: 'Milestone' },
-];
+// ── Type derivation from activity action ─────────────────────────────────────
+function deriveType(action: string, entityType: string | null): 'Event' | 'Milestone' | 'Contribution' {
+  if (entityType === 'event' || action.startsWith('event.')) return 'Event';
+  if (entityType === 'article' || action.startsWith('article.')) return 'Contribution';
+  return 'Milestone';
+}
 
 const typeConfig: Record<string, { color: string; bg: string; border: string; icon: typeof Star }> = {
   Event: { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: CalendarDays },
@@ -93,14 +89,62 @@ const historicalFacts = [
   { year: '1468', event: 'छापेखाने के आविष्कारक जोहान गुटेनबर्ग का निधन।', eventEn: 'Johann Gutenberg, inventor of the printing press, passed away.' },
 ];
 
+// ── Skeleton ─────────────────────────────────────────────────────────────────
+function ActivitySkeleton() {
+  return (
+    <div className="relative pl-4 sm:pl-0 max-w-4xl mx-auto">
+      <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary via-border to-transparent opacity-30" />
+      <div className="space-y-8">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex flex-col sm:flex-row gap-6 sm:gap-8 relative group">
+            <Skeleton className="w-12 h-12 rounded-2xl shrink-0 ml-[1px] sm:ml-0 z-10" />
+            <Card className="institution-panel flex-1 border-border/60 bg-background/40">
+              <CardContent className="py-6 px-6 space-y-3">
+                <Skeleton className="h-4 w-20 rounded-full" />
+                <Skeleton className="h-6 w-3/4" />
+                <div className="flex gap-3">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 
 export default function AapKaItihas() {
   const t = useT();
   const isHi = t('en', 'hi') === 'hi';
   const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const { data: activities, isLoading, error } = useActivity(true);
+  const { addToast } = useToast();
 
-  // Stats
+  useEffect(() => {
+    if (error) {
+      addToast(
+        t('Failed to load activity history', 'गतिविधि इतिहास लोड करने में विफल'),
+        'error',
+      );
+    }
+  }, [error, addToast, t]);
+
+  const historyItems = useMemo(() => {
+    if (!activities) return [];
+    return activities.map((item) => ({
+      id: item.id,
+      date: typeof item.createdAt === 'string' ? item.createdAt.slice(0, 10) : new Date(item.createdAt).toISOString().slice(0, 10),
+      title: item.summary || item.action,
+      titleHi: item.summary || item.action,
+      unit: item.actorNameSnapshot || '—',
+      type: deriveType(item.action, item.entityType),
+    }));
+  }, [activities]);
+
   const eventCount = historyItems.filter(i => i.type === 'Event').length;
 
   const contexts: HistoryContextItem[] = [
@@ -193,70 +237,86 @@ export default function AapKaItihas() {
           </div>
         </div>
 
-        <div className="relative pl-4 sm:pl-0 max-w-4xl mx-auto">
-          {/* Timeline line */}
-          <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary via-border to-transparent opacity-30" />
+        {isLoading && <ActivitySkeleton />}
 
-          <div className="space-y-8">
-            {historyItems.map((item, i) => {
-              const cfg = typeConfig[item.type] || typeConfig.Event;
-              const Icon = cfg.icon;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 + i * 0.03 }}
-                  className="flex flex-col sm:flex-row gap-6 sm:gap-8 relative group"
-                >
-                  {/* Timeline dot */}
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center z-10 shrink-0 transition-all duration-500",
-                    "bg-background border-2 shadow-md group-hover:scale-110 group-hover:rotate-12 ml-[1px] sm:ml-0",
-                    cfg.border
-                  )}>
-                    <Icon className={cn("w-6 h-6", cfg.color)} />
-                  </div>
-
-                  <Card className="institution-panel flex-1 hover-lift border-border/60 hover:border-primary/30 transition-all duration-500 bg-background/40">
-                    <CardContent className="py-6 px-6">
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                        <div className="space-y-3">
-                          <div className="space-y-1">
-                            <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-[0.2em] py-1 px-2.5 mb-2", cfg.bg, cfg.color)}>
-                              {item.type}
-                            </Badge>
-                            <h3 className={cn(
-                              "font-bold text-lg md:text-xl tracking-tight text-foreground/90",
-                              isHi ? "font-devanagari" : ""
-                            )}>
-                              {isHi ? item.titleHi : item.title}
-                            </h3>
-                          </div>
-                          <div className="flex items-center gap-5 text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">
-                            <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
-                              <Clock className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.date}
-                            </span>
-                            <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
-                              <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.unit}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="hidden md:block">
-                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity", cfg.bg)}>
-                            <CheckCircle2 className={cn("w-5 h-5", cfg.color)} />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+        {!isLoading && historyItems.length === 0 && (
+          <div className="text-center py-16 bg-muted/30 rounded-[2rem] border border-dashed border-border/80">
+            <Activity className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+            <p className={cn('text-sm font-medium text-muted-foreground', isHi && 'font-devanagari')}>
+              {t('No activities recorded yet.', 'अभी कोई गतिविधि दर्ज नहीं।')}
+            </p>
+            <p className={cn('text-xs text-muted-foreground/60 mt-1', isHi && 'font-devanagari')}>
+              {t('Your institutional journey will appear here as you take action.', 'जैसे ही आप कार्य करेंगे, आपकी संस्थागत यात्रा यहाँ दिखाई देगी।')}
+            </p>
           </div>
-        </div>
+        )}
+
+        {!isLoading && historyItems.length > 0 && (
+          <div className="relative pl-4 sm:pl-0 max-w-4xl mx-auto">
+            {/* Timeline line */}
+            <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-primary via-border to-transparent opacity-30" />
+
+            <div className="space-y-8">
+              {historyItems.map((item, i) => {
+                const cfg = typeConfig[item.type] || typeConfig.Event;
+                const Icon = cfg.icon;
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 + i * 0.03 }}
+                    className="flex flex-col sm:flex-row gap-6 sm:gap-8 relative group"
+                  >
+                    {/* Timeline dot */}
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl flex items-center justify-center z-10 shrink-0 transition-all duration-500",
+                      "bg-background border-2 shadow-md group-hover:scale-110 group-hover:rotate-12 ml-[1px] sm:ml-0",
+                      cfg.border
+                    )}>
+                      <Icon className={cn("w-6 h-6", cfg.color)} />
+                    </div>
+
+                    <Card className="institution-panel flex-1 hover-lift border-border/60 hover:border-primary/30 transition-all duration-500 bg-background/40">
+                      <CardContent className="py-6 px-6">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-[0.2em] py-1 px-2.5 mb-2", cfg.bg, cfg.color)}>
+                                {item.type}
+                              </Badge>
+                              <h3 className={cn(
+                                "font-bold text-lg md:text-xl tracking-tight text-foreground/90",
+                                isHi ? "font-devanagari" : ""
+                              )}>
+                                {isHi ? item.titleHi : item.title}
+                              </h3>
+                            </div>
+                            <div className="flex items-center gap-5 text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">
+                              <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
+                                <Clock className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.date}
+                              </span>
+                              <span className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-lg border border-border/40">
+                                <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{item.unit}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="hidden md:block">
+                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity", cfg.bg)}>
+                              <CheckCircle2 className={cn("w-5 h-5", cfg.color)} />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Bottom alignment card */}

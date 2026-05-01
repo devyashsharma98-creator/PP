@@ -1,5 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Dashboard from "@/components/pages/Dashboard";
+import { PrajnaDashboard } from "@/components/pages/PrajnaDashboard";
 import { requirePageSession } from "@/lib/server/require-page-session";
 
 export default async function DashboardPage() {
@@ -7,7 +7,7 @@ export default async function DashboardPage() {
 
   return (
     <ErrorBoundary>
-      <Dashboard />
+      <PrajnaDashboard />
     </ErrorBoundary>
   );
 }

@@ -7,7 +7,8 @@ Next.js App Router frontend for Pragya Pravah workflow operations, now wired to 
 - Next.js (App Router, TypeScript)
 - React
 - Tailwind CSS + shadcn/ui
-- Supabase (Postgres, Auth, Storage, Edge Functions scaffold)
+- Neon Serverless Postgres (primary database)
+- Supabase (migrations, CLI, storage policies scaffold)
 
 ## Project Structure
 
@@ -48,15 +49,20 @@ Copy `.env.example` to `.env.local` and set values.
 
 Required keys:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `DATABASE_URL` (Neon Postgres connection string)
+- `JWT_SECRET` (min 32 chars; used for session signing)
+- `APP_ORG_CODE` (e.g., `bhopal_vibhag`)
+
+For Supabase CLI workflows:
+
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD` (for CLI `db push` / `link`)
 
 Optional:
 
-- `NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH=true` for prototype role switching in the navbar
+- `NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH=true` for prototype role switching in the navbar (only shows when user has multiple roles)
+- `NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK=true` to show empty-state messages when APIs return no data
+- `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` for file uploads
 
 ## Install / Run
 
@@ -118,6 +124,37 @@ This updates `src/types/database.ts` from the linked project.
 
 ## Notes / TODOs
 
-- Internal app action routes currently use server-side service role for prototype continuity. Replace with authenticated session-aware server actions/route guards before production launch.
-- Auth UI/session flows are not fully implemented yet; role switching remains demo-only and is env-gated.
-- Upload signing + attachment flows are scaffolded conceptually but not fully implemented in the UI.
+- App action routes now use authenticated session context instead of server-side service role.
+- Real JWT auth is implemented; demo role switch is restricted to multi-role users and remains env-gated.
+- Presigned upload endpoint is implemented and UI hooks are available; full attachment integration remains in progress.
+
+## Recently Fixed
+
+### Data & APIs
+- **Directory** page now fetches real member data from `/api/v1/directory` instead of a hardcoded array.
+- **Dayitv** page now fetches real org structure from `/api/v1/org/structure` instead of hardcoded vibhag/aayam lists.
+- **AnnualCalendar** no longer injects fake `STATIC_EVENTS`; it relies entirely on real event data from the API.
+- **Vimarsh** page now fetches thematic topics from `/api/v1/vimarsh/topics` instead of static bindu arrays.
+- **AapKaItihas** (history) page now fetches from `/api/v1/activity` instead of a hardcoded timeline.
+- **AppContext** mock fallback data (`initialEvents`, `initialArticles`, `initialPracharStatuses`) has been removed. Empty states are shown when no data exists.
+
+### Auth & Security
+- Auth/session architecture moved from prototype service-role calls to authenticated session-aware server actions and route guards.
+- Demo role switch is now restricted to users who actually have multiple effective roles.
+- `availableRoles` derived state exposed from `AppContext` so UI only shows switchable roles.
+
+### Performance & Infra
+- Cache headers in `next.config.mjs` split by route type: static assets get `immutable`, public pages get `stale-while-revalidate`, and protected/API routes stay `no-store`.
+- `@types/react` upgraded to v19 to match React 19 runtime.
+- PWA manifest (`manifest.json`) and service worker (`sw.js`) added with shell precaching.
+- SEO metadata expanded: Open Graph, Twitter cards, keywords, authors, robots.
+
+### Uploads & Attachments
+- Upload signing scaffold replaced with a working `/api/v1/upload/presigned` endpoint and corresponding `usePresignedUpload` hook.
+- File upload supports S3-compatible storage (Cloudflare R2) via dynamic AWS SDK imports with graceful fallback when not configured.
+
+### Testing & Reliability
+- E2E test stability: login retry loop (3 attempts), `test.slow()` on multi-step aalekh workflow tests, and explicit calendar button selectors via aria-label.
+- `useSimulationWorkspace` mocks carry a warning comment to migrate to seeded DB data.
+- Error boundaries (`error.tsx`) added to all major routes for graceful failure handling.
+- Notifications polling interval standardized (30s) across list and unread-count hooks.

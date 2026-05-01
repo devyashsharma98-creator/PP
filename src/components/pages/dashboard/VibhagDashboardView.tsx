@@ -35,7 +35,7 @@ export function VibhagDashboardView({
   const units = new Set(events.map((event) => event.unit)).size;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="dashboard-page">
       <Masthead
         seal="Bhopal Vibhag Activity Console"
         sealHi="भोपाल विभाग गतिविधि डेस्क"
@@ -71,7 +71,7 @@ export function VibhagDashboardView({
         ]}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="dashboard-kpi-grid">
         {[
           {
             label: t("Total Events", "कुल कार्यक्रम"),
@@ -158,7 +158,7 @@ export function VibhagDashboardView({
               {pending.map((event) => (
                 <motion.div
                   key={event.id}
-                  className="flex flex-col justify-between gap-4 rounded-lg border border-border/50 bg-muted/50 p-4 sm:flex-row sm:items-center"
+                  className="dashboard-list-item flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold md:text-base">{event.title}</p>
@@ -242,11 +242,11 @@ export function VibhagDashboardView({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="dashboard-panel-grid">
             {events
               .filter((event) => event.status === "Published")
               .map((event) => (
-                <div key={event.id} className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-4">
+                <div key={event.id} className="dashboard-list-item space-y-3 bg-muted/20">
                   <div className="flex items-start justify-between">
                     <h4 className="text-sm font-bold leading-tight">{event.title}</h4>
                     <Badge className="border-0 bg-green-500/10 text-[9px] font-bold uppercase tracking-widest text-green-600">

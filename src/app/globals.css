@@ -655,12 +655,52 @@
       radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 34%);
   }
 
+  .dashboard-page {
+    @apply space-y-5 md:space-y-6;
+  }
+
+  .dashboard-kpi-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .dashboard-panel-grid {
+    @apply grid grid-cols-1 gap-4 lg:grid-cols-2;
+  }
+
+  .dashboard-record-grid {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .dashboard-action-row {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end;
+  }
+
+  .dashboard-action-button {
+    @apply w-full sm:w-auto;
+  }
+
   .dashboard-context-grid {
     @apply grid gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-4;
   }
 
   .dashboard-context-card {
     @apply institution-panel-muted px-3 py-2.5 md:px-4 md:py-3;
+  }
+
+  .dashboard-list-item {
+    @apply rounded-xl border border-border/60 bg-background/75 p-4 md:rounded-2xl;
+  }
+
+  .dashboard-empty-panel {
+    @apply institution-panel flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-14 text-center;
+  }
+
+  .dashboard-response-stats {
+    @apply mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .dashboard-response-stat {
+    @apply dashboard-list-item flex items-center gap-3;
   }
 
   .dashboard-context-value {

@@ -9,6 +9,8 @@ export function useNotifications(filters?: NotificationFilters) {
   return useQuery({
     queryKey: queryKeys.notifications(filters as Record<string, unknown>),
     queryFn: () => api.fetchNotifications(filters),
+    refetchInterval: 30000,
+    staleTime: 15000,
   });
 }
 

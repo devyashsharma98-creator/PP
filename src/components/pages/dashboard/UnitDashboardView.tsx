@@ -295,7 +295,7 @@ export function UnitDashboardView({
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="dashboard-page">
       <Masthead
         seal={isKaryakartaLane ? "Karyakarta Work Desk" : "Unit Activity Desk"}
         sealHi={isKaryakartaLane ? "कार्यकर्ता कार्य डेस्क" : "इकाई गतिविधि डेस्क"}
@@ -337,16 +337,24 @@ export function UnitDashboardView({
             detailHi: "प्रकाशित कार्य, फ़ॉर्म, मतदान और वृत्त अद्यतन को योजना धारा से जुड़ा रखें।",
           },
         ]}
+        actions={
+          permissions.canCreateEvent ? (
+            <div className="dashboard-action-row">
+              <Button
+                type="button"
+                onClick={() => setDialogOpen(true)}
+                className="dashboard-action-button shadow-sm transition-shadow hover:shadow-md"
+              >
+                <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "à¤¨à¤¯à¤¾ à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤¬à¤¨à¤¾à¤à¤‚")}
+              </Button>
+            </div>
+          ) : undefined
+        }
       />
 
-      <div className="flex justify-end">
-        {permissions.canCreateEvent && (
-          <>
-            <Button type="button" onClick={() => setDialogOpen(true)} className="shadow-sm transition-shadow hover:shadow-md">
-              <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "नया कार्यक्रम बनाएं")}
-            </Button>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="bg-popover sm:max-w-lg">
+      {permissions.canCreateEvent && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-popover sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="font-devanagari">{t("New Gatividhi", "नई गतिविधि")}</DialogTitle>
                 <DialogDescription>
@@ -583,11 +591,9 @@ export function UnitDashboardView({
                   {t("Submit for Review", "समीक्षा के लिए भेजें")}
                 </Button>
               </form>
-            </DialogContent>
-            </Dialog>
-          </>
-        )}
-      </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {submitted && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
@@ -607,7 +613,7 @@ export function UnitDashboardView({
 
       {myEvents.length === 0 ? (
         <div
-          className="institution-panel flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-14 text-center"
+          className="dashboard-empty-panel"
           role="status"
           aria-live="polite"
         >
@@ -638,12 +644,12 @@ export function UnitDashboardView({
           ) : null}
         </div>
       ) : (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="dashboard-record-grid">
         <AnimatePresence>
           {myEvents.map((event, index) => (
             <motion.div key={event.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
-              <Card className="glass-card h-full hover-lift [content-visibility:auto] [contain-intrinsic-size:auto_280px]">
-                <CardContent className="space-y-3 pt-5">
+              <Card className="institution-panel h-full hover-lift [content-visibility:auto] [contain-intrinsic-size:auto_300px]">
+                <CardContent className="flex h-full flex-col space-y-3 pt-5">
                   <div className="flex items-start justify-between">
                     <h3 className="mr-2 flex-1 text-sm font-semibold leading-snug">{event.title}</h3>
                     <Badge className={`${statusBadge(event.status)} shrink-0 text-[10px]`}>{statusLabel(event.status)}</Badge>
@@ -662,7 +668,7 @@ export function UnitDashboardView({
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <User className="h-3 w-3" /> {event.submittedBy}
                   </div>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
                     {event.status === "Draft" && permissions.canCreateEvent && (
                       <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)}>
                         <ArrowRight className="mr-1 h-3 w-3" />
@@ -921,16 +927,18 @@ export function UnitDashboardView({
                 const totalPeople = registrations.reduce((sum, registration) => sum + registration.attendingCount, 0);
                 const cities = new Set(registrations.map((registration) => registration.city)).size;
                 return (
-                  <div className="mb-5 grid grid-cols-3 gap-3">
+                  <div className="dashboard-response-stats">
                     {[
                       { label: t("Registrations", "पंजीकरण"), value: registrations.length, icon: ClipboardCheck, color: "text-primary" },
                       { label: t("Total People", "कुल लोग"), value: totalPeople, icon: Users, color: "text-info" },
                       { label: t("Cities", "शहर"), value: cities, icon: Building2, color: "text-success" },
                     ].map((stat) => (
-                      <div key={stat.label} className="rounded-xl border border-border/60 bg-card p-3 text-center">
-                        <stat.icon className={`mx-auto mb-1 h-4 w-4 ${stat.color}`} />
-                        <p className="text-xl font-bold">{stat.value}</p>
-                        <p className="text-[10px] leading-tight text-muted-foreground font-devanagari">{stat.label}</p>
+                      <div key={stat.label} className="dashboard-response-stat justify-center text-center">
+                        <div>
+                          <stat.icon className={`mx-auto mb-1 h-4 w-4 ${stat.color}`} />
+                          <p className="text-xl font-bold">{stat.value}</p>
+                          <p className="font-devanagari text-[10px] leading-tight text-muted-foreground">{stat.label}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -995,4 +1003,3 @@ export function UnitDashboardView({
     </motion.div>
   );
 }
-

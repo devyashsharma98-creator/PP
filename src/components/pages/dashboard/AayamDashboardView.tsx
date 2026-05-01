@@ -32,7 +32,7 @@ export function AayamDashboardView({
   const statusLabel = (status: string) => t(status, eventStatusHi[status] ?? status);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="dashboard-page">
       <Masthead
         seal={isPrantAayamLane ? "Prant Aayam Review Desk" : "Aayam Review Desk"}
         sealHi={isPrantAayamLane ? "प्रान्त आयाम समीक्षा डेस्क" : "आयाम समीक्षा डेस्क"}
@@ -84,10 +84,10 @@ export function AayamDashboardView({
         ]}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="dashboard-panel-grid">
         <Card className="institution-panel">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="dashboard-section-heading">
               <Clock className="h-4 w-4 text-primary" />{" "}
               {t(`Pending Reviews (${pendingReview.length})`, `समीक्षा प्रतीक्षित (${pendingReview.length})`)}
             </CardTitle>
@@ -99,7 +99,7 @@ export function AayamDashboardView({
               </p>
             ) : (
               pendingReview.map((event) => (
-                <motion.div key={event.id} className="space-y-3 rounded-lg border border-border/50 bg-accent/50 p-4">
+                <motion.div key={event.id} className="dashboard-list-item space-y-3 bg-accent/50">
                   <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold md:text-base">{event.title}</p>
@@ -140,13 +140,13 @@ export function AayamDashboardView({
 
         <Card className="institution-panel">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="dashboard-section-heading">
               <TrendingUp className="h-4 w-4 text-success" /> {t(`Forwarded (${forwarded.length})`, `अग्रेषित (${forwarded.length})`)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {forwarded.map((event) => (
-              <div key={event.id} className="rounded-lg border border-border/30 bg-muted/30 p-4">
+              <div key={event.id} className="dashboard-list-item bg-muted/30">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-medium">{event.title}</p>
                   <Badge className={statusBadge(event.status)}>{statusLabel(event.status)}</Badge>

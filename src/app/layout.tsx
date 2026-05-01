@@ -32,9 +32,23 @@ const plexSerif = IBM_Plex_Serif({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pragyapravah.org"),
   title: "Pragya Pravah - Bhopal Vibhag",
   description: "Pragya Pravah Management System - Bhopal Vibhag",
   applicationName: "Pragya Pravah",
+  manifest: "/manifest.json",
+  keywords: ["Pragya Pravah", "Bhopal", "cultural organization", "India"],
+  authors: [{ name: "Pragya Pravah Bhopal Vibhag" }],
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    siteName: "Pragya Pravah",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@PragyaPravah",
+  },
   appleWebApp: {
     capable: true,
     title: "Pragya Pravah",

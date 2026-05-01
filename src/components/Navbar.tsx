@@ -134,7 +134,7 @@ function getShellFrame(pathname: string, role: Role) {
 }
 
 export function Navbar() {
-  const { role, setRole, lang, setLang, events, articles, isAuthenticated, authReady, permissions, viewer } = useAppContext();
+  const { role, setRole, lang, setLang, events, articles, isAuthenticated, authReady, permissions, viewer, availableRoles } = useAppContext();
   const pathname = usePathname();
   const signOut = useSignOut();
   const t = useT();
@@ -143,10 +143,12 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [bellBounce, setBellBounce] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [hideOnScroll, setHideOnScroll] = useState(false);
   const prevCountRef = useRef(0);
   const notifRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
-  const canUseDemoRoleSwitch = demoRoleSwitchEnabled && !isAuthenticated;
+  const canUseDemoRoleSwitch = demoRoleSwitchEnabled && availableRoles.length > 1;
   const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
@@ -230,8 +232,43 @@ export function Navbar() {
 
   const showSignOut = authReady;
 
+  useEffect(() => {
+    if (open || notifOpen) {
+      setHideOnScroll(false);
+      return;
+    }
+
+    const scrollRoot = document.getElementById("main-content");
+    const target: HTMLElement | Window = scrollRoot ?? window;
+
+    const getY = () => (scrollRoot ? scrollRoot.scrollTop : window.scrollY);
+    lastScrollYRef.current = getY();
+
+    const handleScroll = () => {
+      const currentY = getY();
+      const scrollingDown = currentY > lastScrollYRef.current + 8;
+      const scrollingUp = currentY < lastScrollYRef.current - 8;
+
+      if (currentY < 24 || scrollingUp) {
+        setHideOnScroll(false);
+      } else if (scrollingDown && currentY > 96) {
+        setHideOnScroll(true);
+      }
+
+      lastScrollYRef.current = currentY;
+    };
+
+    target.addEventListener("scroll", handleScroll, { passive: true });
+    return () => target.removeEventListener("scroll", handleScroll);
+  }, [open, notifOpen]);
+
   return (
-    <header className="sticky top-0 z-20 px-3 pt-3 md:px-6 md:pt-4">
+    <header
+      className={cn(
+        "sticky top-0 z-20 px-3 pt-3 transition-transform duration-300 md:px-6 md:pt-4",
+        hideOnScroll && "-translate-y-[120%]",
+      )}
+    >
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 rounded-xl bg-background px-4 py-2 text-sm font-semibold shadow-lg ring-2 ring-primary"
@@ -482,9 +519,9 @@ export function Navbar() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border border-border shadow-lg z-50">
-                  {(Object.entries(roleLabels) as [Role, string][]).map(([key, label]) => (
+                  {availableRoles.map((key) => (
                     <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
-                      {lang === 'hi' ? roleLabelsHi[key] : label}
+                      {lang === 'hi' ? roleLabelsHi[key] : roleLabels[key]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -515,5 +552,4 @@ export function Navbar() {
     </header>
   );
 }
-
 

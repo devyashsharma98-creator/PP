@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s -c /tmp/c1.txt -b /tmp/c1.txt -X POST http://localhost:3000/api/auth/login -H 'content-type: application/json' -d '{\"email\":\"demo.prant@example.com\",\"password\":\"Password123!\"}')",
+      "Bash(curl -s -b /tmp/c1.txt http://localhost:3000/api/app/bootstrap)",
+      "Bash(git add *)"
     ]
   }
 }

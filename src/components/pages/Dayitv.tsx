@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   ChevronDown, ChevronRight, Network, Crown, Shield, User,
   BookOpen, GraduationCap, FlaskConical, Tag, Building2, MapPin,
@@ -12,6 +14,9 @@ import {
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
+import { useOrgStructure } from '@/hooks/api/use-org-structure';
+import { useAppContext } from '@/context/AppContext';
+import { useToast } from '@/components/ToastProvider';
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -23,28 +28,13 @@ const aayamColors: Record<string, string> = {
   Vimarsh: 'bg-violet-500/15 text-violet-500',
 };
 
-const vibhags = [
-  {
-    name: 'Bhopal Vibhag',
-    nameHi: 'भोपाल विभाग',
-    sanyojak: 'Shri Rajendra Jain',
-    isCurrent: true,
-    aayams: [
-      { name: 'Yuva', pramukh: 'Suresh Yadav', contact: '98265XXXXX' },
-      { name: 'Mahila', pramukh: 'Sunita Chouhan', contact: '98270XXXXX' },
-      { name: 'Shodh', pramukh: 'Kavita Singh', contact: '98264XXXXX' },
-      { name: 'Prachar', pramukh: 'Ramesh Sharma', contact: '98261XXXXX' },
-      { name: 'Vimarsh', pramukh: 'Anil Verma', contact: '98263XXXXX' },
-    ],
-  },
-  { name: 'Vidisha Vibhag', nameHi: 'विदिशा विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Sehore Vibhag', nameHi: 'सीहोर विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Narmadapuram Vibhag', nameHi: 'नर्मदापुरम विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Rajgarh Vibhag', nameHi: 'राजगढ़ विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Gwalior Vibhag', nameHi: 'ग्वालियर विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Jabalpur Vibhag', nameHi: 'जबलपुर विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-  { name: 'Indore Vibhag', nameHi: 'इंदौर विभाग', sanyojak: 'Shri [Name]', isCurrent: false, aayams: [] },
-];
+const aayamKindToLabel: Record<string, string> = {
+  yuva: 'Yuva',
+  mahila: 'Mahila',
+  shodh: 'Shodh',
+  prachar: 'Prachar',
+  vimarsh: 'Vimarsh',
+};
 
 const vishayas = [
   'समाजशास्त्र', 'राजनीति शास्त्र', 'अर्थशास्त्र', 'इतिहास', 'दर्शन',
@@ -161,12 +151,94 @@ function InfoCard({ icon: Icon, titleHi, titleEn, descHi, descEn, color = 'text-
   );
 }
 
+function DayitvSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="institution-panel border-border/60 bg-background/30">
+            <CardContent className="py-5 px-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <Skeleton className="w-10 h-10 rounded-2xl shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 
 export default function Dayitv() {
   const t = useT();
   const isHi = t('en', 'hi') === 'hi';
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['Bhopal Vibhag']));
+  const { data: orgData, isLoading, error } = useOrgStructure();
+  const { viewer } = useAppContext();
+  const { addToast } = useToast();
+
+  const viewerUnitId = viewer?.assignments?.find((a) => a.isPrimary)?.unitId ?? null;
+
+  useEffect(() => {
+    if (error) {
+      addToast(
+        isHi ? 'संरचना लोड करने में विफल' : 'Failed to load org structure',
+        'error',
+        isHi ? 'कृपया पुनः प्रयास करें' : 'Please try again'
+      );
+    }
+  }, [error, addToast, isHi]);
+
+  const vibhags = useMemo(() => {
+    if (!orgData) return [];
+
+    const orgName = orgData.org.name ?? 'Current Vibhag';
+    const orgNameHi = orgData.org.nameHi ?? orgName;
+
+    // Current vibhag with aayams
+    const currentVibhag = {
+      name: orgName,
+      nameHi: orgNameHi,
+      sanyojak: 'Shri [Name]',
+      isCurrent: true,
+      aayams: orgData.departments
+        .filter((d) => ['yuva', 'mahila', 'shodh', 'prachar', 'vimarsh'].includes(d.departmentKind))
+        .map((d) => ({
+          name: aayamKindToLabel[d.departmentKind] ?? d.name,
+          pramukh: orgData.heads[d.id] ?? '[Name]',
+          contact: '[Contact]',
+        })),
+    };
+
+    // Other vibhags from units
+    const otherVibhags = orgData.units.map((u) => ({
+      name: u.name,
+      nameHi: u.nameHi ?? u.name,
+      sanyojak: 'Shri [Name]',
+      isCurrent: u.id === viewerUnitId,
+      aayams: [] as { name: string; pramukh: string; contact: string }[],
+    }));
+
+    return [currentVibhag, ...otherVibhags];
+  }, [orgData, viewerUnitId]);
+
+  const [expanded, setExpanded] = useState<Set<string>>(new Set([orgData?.org.name ?? '']));
+
+  // Keep expanded in sync when org data loads
+  useEffect(() => {
+    if (orgData?.org.name) {
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        next.add(orgData.org.name!);
+        return next;
+      });
+    }
+  }, [orgData?.org.name]);
 
   const toggle = (name: string) => {
     setExpanded(prev => {
@@ -409,99 +481,113 @@ export default function Dayitv() {
                 <MapPin className="w-5 h-5 text-primary" />
               </div>
               <h2 className="font-bold text-lg font-devanagari tracking-tight">
-                {t('Vibhag Level — 8 Operational Vibhags', 'विभाग स्तर — ८ सक्रिय विभाग')}
+                {t(`Vibhag Level — ${vibhags.length} Operational Vibhags`, `विभाग स्तर — ${vibhags.length} सक्रिय विभाग`)}
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {vibhags.map((vibhag, i) => {
-                const isOpen = expanded.has(vibhag.name);
-                return (
-                  <motion.div
-                    key={vibhag.name}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 + i * 0.05 }}
-                  >
-                    <Card className={cn(
-                      "institution-panel overflow-hidden transition-all duration-300",
-                      vibhag.isCurrent ? "border-primary/40 shadow-lg ring-1 ring-primary/10" : "hover:border-primary/30",
-                      isOpen && "ring-1 ring-primary/20 bg-background/40"
-                    )}>
-                      <button
-                        className="w-full text-left"
-                        onClick={() => vibhag.aayams.length > 0 && toggle(vibhag.name)}
-                      >
-                        <CardHeader className="py-5 px-6">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="space-y-2 min-w-0">
-                              <div className="flex items-center gap-3">
-                                <h3 className="font-bold text-base font-devanagari text-foreground/90 tracking-tight truncate">
-                                  {isHi ? vibhag.nameHi : vibhag.name}
-                                </h3>
-                                {vibhag.isCurrent && (
-                                  <Badge className="text-[10px] bg-primary/10 text-primary px-2 py-0 border-0 font-bold uppercase tracking-widest">
-                                    {t('Current', 'वर्तमान')}
-                                  </Badge>
-                                )}
+            {isLoading ? (
+              <DayitvSkeleton />
+            ) : error ? (
+              <div className="text-center py-20 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
+                <Users className="w-10 h-10 text-muted-foreground/20 mx-auto mb-4" />
+                <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">
+                  {t('Unable to load structure.', 'संरचना लोड करने में असमर्थ।')}
+                </p>
+                <Button variant="link" onClick={() => window.location.reload()} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+                  {t('Retry', 'पुनः प्रयास करें')}
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {vibhags.map((vibhag, i) => {
+                  const isOpen = expanded.has(vibhag.name);
+                  return (
+                    <motion.div
+                      key={vibhag.name}
+                      initial={{ opacity: 0, y: 12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.1 + i * 0.05 }}
+                    >
+                      <Card className={cn(
+                        "institution-panel overflow-hidden transition-all duration-300",
+                        vibhag.isCurrent ? "border-primary/40 shadow-lg ring-1 ring-primary/10" : "hover:border-primary/30",
+                        isOpen && "ring-1 ring-primary/20 bg-background/40"
+                      )}>
+                        <button
+                          className="w-full text-left"
+                          onClick={() => vibhag.aayams.length > 0 && toggle(vibhag.name)}
+                        >
+                          <CardHeader className="py-5 px-6">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="space-y-2 min-w-0">
+                                <div className="flex items-center gap-3">
+                                  <h3 className="font-bold text-base font-devanagari text-foreground/90 tracking-tight truncate">
+                                    {isHi ? vibhag.nameHi : vibhag.name}
+                                  </h3>
+                                  {vibhag.isCurrent && (
+                                    <Badge className="text-[10px] bg-primary/10 text-primary px-2 py-0 border-0 font-bold uppercase tracking-widest">
+                                      {t('Current', 'वर्तमान')}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-[11px] md:text-xs text-muted-foreground flex items-center gap-2">
+                                  <User className="w-3.5 h-3.5 opacity-60" />
+                                  {t('Vibhag Sanyojak', 'विभाग संयोजक')}: <span className="text-foreground/80 font-semibold">{vibhag.sanyojak}</span>
+                                </p>
                               </div>
-                              <p className="text-[11px] md:text-xs text-muted-foreground flex items-center gap-2">
-                                <User className="w-3.5 h-3.5 opacity-60" />
-                                {t('Vibhag Sanyojak', 'विभाग संयोजक')}: <span className="text-foreground/80 font-semibold">{vibhag.sanyojak}</span>
-                              </p>
+                              {vibhag.aayams.length > 0 && (
+                                <div className={cn(
+                                  "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm shrink-0",
+                                  isOpen ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                                )}>
+                                  {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                                </div>
+                              )}
                             </div>
-                            {vibhag.aayams.length > 0 && (
-                              <div className={cn(
-                                "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm shrink-0",
-                                isOpen ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                              )}>
-                                {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-                              </div>
-                            )}
-                          </div>
-                        </CardHeader>
-                      </button>
+                          </CardHeader>
+                        </button>
 
-                      <AnimatePresence>
-                        {isOpen && vibhag.aayams.length > 0 && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.35, ease: "easeInOut" }}
-                            className="overflow-hidden"
-                          >
-                            <div className="border-t border-border/50 px-6 pb-6 pt-4 space-y-4 bg-muted/10">
-                              <p className="shell-copy font-bold text-[10px]">{t('Aayam Responsibilities', 'आयाम दायित्व टोली')}</p>
-                              <div className="grid gap-2.5">
-                                {vibhag.aayams.map(aayam => (
-                                  <div
-                                    key={aayam.name}
-                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 px-4 rounded-2xl bg-background/70 border border-border/50 hover:border-primary/30 transition-all shadow-sm group"
-                                  >
-                                    <div className="flex items-center gap-4">
-                                      <Badge className={cn("text-[10px] border-0 shrink-0 font-bold min-w-[70px] justify-center py-1 tracking-widest uppercase", aayamColors[aayam.name])}>
-                                        {aayam.name}
-                                      </Badge>
-                                      <span className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{aayam.pramukh}</span>
+                        <AnimatePresence>
+                          {isOpen && vibhag.aayams.length > 0 && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="border-t border-border/50 px-6 pb-6 pt-4 space-y-4 bg-muted/10">
+                                <p className="shell-copy font-bold text-[10px]">{t('Aayam Responsibilities', 'आयाम दायित्व टोली')}</p>
+                                <div className="grid gap-2.5">
+                                  {vibhag.aayams.map(aayam => (
+                                    <div
+                                      key={aayam.name}
+                                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 px-4 rounded-2xl bg-background/70 border border-border/50 hover:border-primary/30 transition-all shadow-sm group"
+                                    >
+                                      <div className="flex items-center gap-4">
+                                        <Badge className={cn("text-[10px] border-0 shrink-0 font-bold min-w-[70px] justify-center py-1 tracking-widest uppercase", aayamColors[aayam.name])}>
+                                          {aayam.name}
+                                        </Badge>
+                                        <span className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{aayam.pramukh}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 pl-2 sm:pl-0 bg-muted/40 sm:bg-transparent rounded-lg p-1.5 sm:p-0">
+                                        <Zap className="w-3.5 h-3.5 text-primary/40 group-hover:text-primary/60" />
+                                        <span className="text-xs text-muted-foreground font-mono font-medium">{aayam.contact}</span>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-2 pl-2 sm:pl-0 bg-muted/40 sm:bg-transparent rounded-lg p-1.5 sm:p-0">
-                                      <Zap className="w-3.5 h-3.5 text-primary/40 group-hover:text-primary/60" />
-                                      <span className="text-xs text-muted-foreground font-mono font-medium">{aayam.contact}</span>
-                                    </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -113,7 +113,7 @@ export function Masthead({
               )}
             </div>
           </div>
-          {actions && <div className="shrink-0 lg:pb-1">{actions}</div>}
+          {actions && <div className="w-full shrink-0 lg:w-auto lg:pb-1">{actions}</div>}
         </div>
 
         {stats && stats.length > 0 && (

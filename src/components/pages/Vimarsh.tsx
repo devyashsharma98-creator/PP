@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search, ChevronDown, ChevronRight, ExternalLink, Play, BookOpen,
   Swords, Shield, Target, MessagesSquare, AlertTriangle, Globe,
@@ -16,86 +17,23 @@ import {
 import { useT } from '@/lib/useT';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
-import { Masthead } from '@/components/Masthead';
-
-
-// ── Vimarsh Bindu data ──────────────────────────────────────────────────────
-
-const ATMA_BODH_BINDU = [
-  {
-    group: "आत्म बोध",
-    en: "Self-Awareness",
-    icon: Target,
-    color: "text-orange-500",
-    border: "border-orange-500/25",
-    bg: "bg-orange-500/8",
-    items: [
-      { hi: "स्वत्व", en: "स्वत्व — Indigenous identity and civilisational self-consciousness" },
-      { hi: "हिंदुत्व", en: "हिंदुत्व — Philosophical, cultural and civilisational understanding" },
-      { hi: "भारत बोध", en: "भारत बोध — Understanding India's civilisational identity and its global role" },
-    ],
-  },
-  {
-    group: "विभाजन की शक्तियाँ",
-    en: "Forces of Division",
-    icon: AlertTriangle,
-    color: "text-red-500",
-    border: "border-red-500/25",
-    bg: "bg-red-500/8",
-    items: [
-      { hi: "कट्टरपंथी इस्लाम", en: "Radical Islamism — extremist spread targeting Bharatiya social fabric" },
-      { hi: "प्रसारवादी चर्च", en: "Missionary Church — proselytisation targeting tribal and marginalised communities" },
-      { hi: "सांस्कृतिक मार्क्सवाद", en: "Cultural Marxism — ideological framework targeting Dharmic civilisation" },
-      { hi: "वैश्विक बाज़ारवादी शक्तियां", en: "Global Market Forces — homogenising cultural and economic pressures" },
-    ],
-  },
-  {
-    group: "सामाजिक अलगाव के लक्षित समूह",
-    en: "Targeted Groups (Social Alienation)",
-    icon: Shield,
-    color: "text-blue-500",
-    border: "border-blue-500/25",
-    bg: "bg-blue-500/8",
-    items: [
-      { hi: "अनुसूचित जाति", en: "Scheduled Castes — counter divisive anti-India narratives" },
-      { hi: "अनुसूचित जनजाति", en: "Scheduled Tribes — restore connection with Bharatiya identity" },
-      { hi: "महिला वर्ग", en: "Women — Shakti-centred counter-narrative to western feminist frameworks" },
-      { hi: "युवा वर्ग", en: "Youth — ground young Indians in civilisational values" },
-    ],
-  },
-  {
-    group: "भौगोलिक अलगाव के लक्षित क्षेत्र",
-    en: "Targeted Regions (Geographic Alienation)",
-    icon: Globe,
-    color: "text-emerald-500",
-    border: "border-emerald-500/25",
-    bg: "bg-emerald-500/8",
-    items: [
-      { hi: "उत्तर-दक्षिण", en: "North-South divide — counter Dravidian ideology's anti-Hindi/Hindu frames" },
-      { hi: "उत्तर-पूर्व भारत (मणिपुर, नागालैंड)", en: "North-East — tribal integration, counter Christian separatist narratives in Manipur, Nagaland" },
-      { hi: "पंजाब (खालिस्तान)", en: "Punjab — Sikh-Hindu unity narratives, counter Khalistan separatism" },
-      { hi: "जम्मू कश्मीर", en: "Jammu Kashmir — restore Kashmiri Pandit history, cultural reintegration" },
-    ],
-  },
-];
-
-const OTHER_BINDU = [
-  "राष्ट्रीय सुरक्षा",
-  "राष्ट्रीय स्वयंसेवक संघ",
-  "आर्थिक विकास",
-  "संविधान",
-  "वैश्विक विषय",
-  "सिख अध्ययन",
-  "पड़ौसी देश",
-  "बौद्ध अध्ययन",
-  "कला, संस्कृति, इतिहास",
-];
+import { useVimarshTopics } from '@/hooks/api/use-vimarsh-topics';
+import { useToast } from '@/components/ToastProvider';
 
 // Resource type → display config
 const RESOURCE_TYPE_CONFIG: Record<string, { label: string; labelHi: string; icon: typeof ExternalLink; color: string }> = {
   article: { label: 'Articles', labelHi: 'लेख', icon: ExternalLink, color: 'text-primary' },
   video: { label: 'Videos', labelHi: 'वीडियो', icon: Play, color: 'text-destructive' },
   book: { label: 'E-Library', labelHi: 'ई-पुस्तकालय', icon: BookOpen, color: 'text-success' },
+};
+
+// Group config for theming API groups
+const GROUP_CONFIG: Record<string, { labelHi: string; labelEn: string; icon: typeof Target; color: string; border: string; bg: string }> = {
+  atma_bodh: { labelHi: 'आत्म बोध', labelEn: 'Self-Awareness', icon: Target, color: 'text-orange-500', border: 'border-orange-500/25', bg: 'bg-orange-500/8' },
+  forces_of_division: { labelHi: 'विभाजन की शक्तियाँ', labelEn: 'Forces of Division', icon: AlertTriangle, color: 'text-red-500', border: 'border-red-500/25', bg: 'bg-red-500/8' },
+  targeted_groups: { labelHi: 'सामाजिक अलगाव के लक्षित समूह', labelEn: 'Targeted Groups', icon: Shield, color: 'text-blue-500', border: 'border-blue-500/25', bg: 'bg-blue-500/8' },
+  targeted_regions: { labelHi: 'भौगोलिक अलगाव के लक्षित क्षेत्र', labelEn: 'Targeted Regions', icon: Globe, color: 'text-emerald-500', border: 'border-emerald-500/25', bg: 'bg-emerald-500/8' },
+  other: { labelHi: 'अन्य', labelEn: 'Other', icon: Library, color: 'text-violet-500', border: 'border-violet-500/25', bg: 'bg-violet-500/8' },
 };
 
 interface VimarshContextItem {
@@ -229,12 +167,54 @@ function VimarshMasthead({
   );
 }
 
+function VimarshBinduSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="institution-panel border-border/60 bg-background/30">
+          <CardContent className="pt-6 pb-6 space-y-5">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-12 h-12 rounded-2xl shrink-0" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="flex items-start gap-3">
+                  <Skeleton className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export default function Vimarsh() {
   const tr = useT();
   const { vimarshTopics } = useAppContext();
+  const { data: topicGroups, isLoading, error } = useVimarshTopics();
+  const { addToast } = useToast();
   const isHi = tr('en', 'hi') === 'hi';
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (error) {
+      addToast(
+        tr('Failed to load discourse topics', 'विमर्श विषय लोड करने में विफल'),
+        'error',
+      );
+    }
+  }, [error, addToast, tr]);
 
   const filtered = useMemo(() => vimarshTopics.filter(t =>
     t.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -353,7 +333,7 @@ export default function Vimarsh() {
         </Card>
       </section>
 
-      {/* ── SECTION: Vimarsh Bindu ───────────────────────────────────────── */}
+      {/* ── SECTION: Vimarsh Bindu (API-driven) ─────────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
@@ -365,53 +345,92 @@ export default function Vimarsh() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {ATMA_BODH_BINDU.map((group, gi) => (
-            <motion.div
-              key={gi}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: gi * 0.05 }}
-            >
-              <Card className={cn("institution-panel h-full hover-lift transition-all duration-300", group.border, group.bg)}>
-                <CardContent className="pt-6 pb-6 space-y-5">
-                  <div className="flex items-center gap-4">
-                    <div className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center shadow-sm", group.bg, group.border)}>
-                      <group.icon className={cn("w-6 h-6", group.color)} />
-                    </div>
-                    <div>
-                      <h4 className={cn("font-bold text-lg font-devanagari leading-none", group.color)}>{group.group}</h4>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1.5">{group.en}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {group.items.map((item, ii) => (
-                      <div key={ii} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-background/60 transition-colors border border-transparent hover:border-border/40">
-                        <ChevronRight className={cn("w-4 h-4 mt-0.5 shrink-0", group.color)} />
-                        <div className="space-y-0.5">
-                          <span className="font-devanagari text-sm font-semibold text-foreground/90">{item.hi}</span>
-                          {!isHi && <p className="text-[11px] text-muted-foreground leading-relaxed">{item.en}</p>}
+        {isLoading && <VimarshBinduSkeleton />}
+
+        {!isLoading && topicGroups && topicGroups.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {topicGroups.map((group, gi) => {
+              const config = GROUP_CONFIG[group.group] ?? GROUP_CONFIG.other;
+              const Icon = config.icon;
+              return (
+                <motion.div
+                  key={group.group}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: gi * 0.05 }}
+                >
+                  <Card className={cn("institution-panel h-full hover-lift transition-all duration-300", config.border, config.bg)}>
+                    <CardContent className="pt-6 pb-6 space-y-5">
+                      <div className="flex items-center gap-4">
+                        <div className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center shadow-sm", config.bg, config.border)}>
+                          <Icon className={cn("w-6 h-6", config.color)} />
+                        </div>
+                        <div>
+                          <h4 className={cn("font-bold text-lg font-devanagari leading-none", config.color)}>
+                            {isHi ? config.labelHi : config.labelEn}
+                          </h4>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1.5">
+                            {isHi ? config.labelEn : config.labelHi}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        <Card className="institution-panel-muted p-6">
-          <h4 className="shell-copy mb-5">{tr('Additional Vimarsh Points', 'अन्य विमर्श बिंदु')}</h4>
-          <div className="flex flex-wrap gap-2.5">
-            {OTHER_BINDU.map((b, i) => (
-              <Badge key={i} variant="outline" className="font-devanagari text-xs px-4 py-1.5 bg-background/50 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-default">
-                {b}
-              </Badge>
-            ))}
+                      <div className="space-y-3">
+                        {group.topics.map((topic) => (
+                          <div key={topic.id} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-background/60 transition-colors border border-transparent hover:border-border/40">
+                            <ChevronRight className={cn("w-4 h-4 mt-0.5 shrink-0", config.color)} />
+                            <div className="space-y-1 min-w-0">
+                              <span className="font-devanagari text-sm font-semibold text-foreground/90">
+                                {isHi ? (topic.titleHi || topic.title) : topic.title}
+                              </span>
+                              {((isHi ? topic.descriptionHi : topic.description) || topic.description) && (
+                                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                  {isHi
+                                    ? (topic.descriptionHi || topic.description || '')
+                                    : (topic.description || topic.descriptionHi || '')
+                                  }
+                                </p>
+                              )}
+                              {topic.resources.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 pt-1">
+                                  {topic.resources.slice(0, 3).map((r) => (
+                                    <a
+                                      key={r.id}
+                                      href={r.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[10px] px-2 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10 transition-colors"
+                                    >
+                                      {r.title}
+                                    </a>
+                                  ))}
+                                  {topic.resources.length > 3 && (
+                                    <span className="text-[10px] text-muted-foreground px-1">
+                                      +{topic.resources.length - 3}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
-        </Card>
+        )}
+
+        {!isLoading && (!topicGroups || topicGroups.length === 0) && (
+          <div className="text-center py-24 bg-muted/30 rounded-[2rem] border border-dashed border-border/80">
+            <Target className="w-16 h-16 mx-auto text-muted-foreground/20 mb-6" />
+            <p className="text-base font-devanagari text-muted-foreground font-medium">
+              {tr('No discourse topics available yet.', 'अभी कोई विमर्श विषय उपलब्ध नहीं।')}
+            </p>
+          </div>
+        )}
       </section>
 
       {/* ── SECTION: Topic Explorer ───────────────────────────────────── */}

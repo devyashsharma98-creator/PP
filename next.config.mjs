@@ -6,8 +6,29 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // Static assets: allow long-term caching
       {
-        source: '/:path*',
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|otf|eot)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Public pages: allow short-term caching (ISR/CDN friendly)
+      {
+        source: '/(parichay|vimarsh|library|feed|history|guide|form|vote)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=60, stale-while-revalidate=300',
+          },
+        ],
+      },
+      // API routes and protected pages: no caching
+      {
+        source: '/(api|login|dashboard|aalekh|dayitv|prachar|calendar|directory|users|super-admin)',
         headers: [
           {
             key: 'Cache-Control',

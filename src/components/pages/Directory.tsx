@@ -1,34 +1,23 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search, Phone, MapPin, User, Mail, Users, Filter,
-  ChevronDown, ChevronRight, Compass, TrendingUp, Sparkles,
-  Network, Shield, Award, MessageCircle
+  ChevronDown, ChevronRight, Network, Shield, Award, MessageCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
 import { Masthead } from '@/components/Masthead';
+import { useDirectory } from '@/hooks/api/use-directory';
+import { useToast } from '@/components/ToastProvider';
 
-// ── Member Data ──────────────────────────────────────────────────────────────
-
-const members = [
-  { id: '1', name: 'Ramesh Sharma', nameHi: 'रमेश शर्मा', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98261XXXXX', email: 'ramesh@example.com', unit: 'Bhopal Shahar', vakshe: ['Media', 'Digital Reach'], vaksheHi: ['मीडिया', 'डिजिटल पहुंच'] },
-  { id: '2', name: 'Anil Verma', nameHi: 'अनिल वर्मा', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Vimarsh', contact: '98263XXXXX', email: 'anil@example.com', unit: 'Bhopal Shahar', vakshe: ['Colonialism', 'History'], vaksheHi: ['उपनिवेशवाद', 'इतिहास'] },
-  { id: '3', name: 'Kavita Singh', nameHi: 'कविता सिंह', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98264XXXXX', email: 'kavita@example.com', unit: 'Vidisha', vakshe: ['IKS', 'Archaeology'], vaksheHi: ['भारतीय ज्ञान परंपरा', 'पुरातत्व'] },
-  { id: '4', name: 'Pradeep Yadav', nameHi: 'प्रदीप यादव', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Yuva', contact: '98265XXXXX', email: 'pradeep@example.com', unit: 'Bhopal Shahar', vakshe: ['Public Speaking', 'Campus Connect'], vaksheHi: ['वक्तृत्व', 'कैंपस संपर्क'] },
-  { id: '5', name: 'Meena Joshi', nameHi: 'मीना जोशी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Mahila', contact: '98266XXXXX', email: 'meena@example.com', unit: 'Sehore', vakshe: ['Education Policy', 'Social Work'], vaksheHi: ['शिक्षा नीति', 'समाज कार्य'] },
-  { id: '6', name: 'Deshraj Patel', nameHi: 'देशराज पटेल', role: 'Unit Head', roleHi: 'इकाई प्रमुख', aayam: 'Prachar', contact: '98267XXXXX', email: 'deshraj@example.com', unit: 'Raisen', vakshe: ['Content Writing', 'PR'], vaksheHi: ['सामग्री लेखन', 'जनसंपर्क'] },
-  { id: '7', name: 'Suresh Yadav', nameHi: 'सुरेश यादव', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Yuva', contact: '98268XXXXX', email: 'suresh@example.com', unit: 'Bhopal Shahar', vakshe: ['Event Management', 'Youth Outreach'], vaksheHi: ['कार्यक्रम प्रबंधन', 'युवा संपर्क'] },
-  { id: '8', name: 'Rajesh Tiwari', nameHi: 'राजेश तिवारी', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Shodh', contact: '98269XXXXX', email: 'rajesh@example.com', unit: 'Vidisha', vakshe: ['Sanskrit', 'Manuscripts'], vaksheHi: ['संस्कृत', 'पांडुलिपि'] },
-  { id: '9', name: 'Deepak Kumar', nameHi: 'दीपक कुमार', role: 'Karyakarta', roleHi: 'कार्यकर्ता', aayam: 'Vimarsh', contact: '98262XXXXX', email: 'deepak@example.com', unit: 'Bhopal Shahar', vakshe: ['Social Media', 'Data Analysis'], vaksheHi: ['सोशल मीडिया', 'डेटा विश्लेषण'] },
-  { id: '10', name: 'Sunita Chouhan', nameHi: 'सुनीता चौहान', role: 'Aayam Pramukh', roleHi: 'आयाम प्रमुख', aayam: 'Mahila', contact: '98270XXXXX', email: 'sunita@example.com', unit: 'Raisen', vakshe: ['Legal', 'Policy Advocacy'], vaksheHi: ['कानूनी', 'नीति वकालत'] },
-];
+// ── Aayam styling config ─────────────────────────────────────────────────────
 
 const aayamConfig: Record<string, { color: string; bg: string; border: string }> = {
   Yuva: { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/25' },
@@ -45,6 +34,11 @@ const roleColors: Record<string, string> = {
 };
 
 const aayams = ['All', 'Yuva', 'Mahila', 'Shodh', 'Prachar', 'Vimarsh'];
+
+function getAayamStyle(departmentCode: string | null, departmentName: string | null) {
+  const key = departmentCode ?? departmentName ?? '';
+  return aayamConfig[key] ?? aayamConfig.Yuva;
+}
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -102,13 +96,44 @@ function DirectoryMasthead({
 
 function AvatarInitials({ name, aayam }: { name: string; aayam: string }) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2);
-  const cfg = aayamConfig[aayam] || aayamConfig.Yuva;
+  const cfg = getAayamStyle(aayam, aayam);
   return (
     <div className={cn(
       "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-2 transition-transform duration-500 group-hover:scale-105",
       cfg.bg, cfg.border, cfg.color
     )}>
       <span className="text-lg font-bold tracking-tighter">{initials}</span>
+    </div>
+  );
+}
+
+function DirectorySkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="institution-panel border-border/60 bg-background/30">
+          <CardContent className="py-6 px-6">
+            <div className="flex items-start gap-5">
+              <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+              <div className="flex-1 min-w-0 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-40" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <Skeleton className="h-5 w-28" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
@@ -121,17 +146,33 @@ export default function Directory() {
   const [search, setSearch] = useState('');
   const [aayamFilter, setAayamFilter] = useState('All');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const { data: members = [], isLoading, error } = useDirectory();
+  const { addToast } = useToast();
 
-  const filtered = members.filter(m => {
-    const matchAayam = aayamFilter === 'All' || m.aayam === aayamFilter;
-    const searchLower = search.toLowerCase();
-    const matchSearch = m.name.toLowerCase().includes(searchLower)
-      || m.nameHi.includes(search)
-      || m.unit.toLowerCase().includes(searchLower)
-      || m.vakshe.some(v => v.toLowerCase().includes(searchLower))
-      || m.vaksheHi.some(v => v.includes(search));
-    return matchAayam && matchSearch;
-  });
+  useEffect(() => {
+    if (error) {
+      addToast(
+        isHi ? 'निर्देशिका लोड करने में विफल' : 'Failed to load directory',
+        'error',
+        isHi ? 'कृपया पुनः प्रयास करें' : 'Please try again'
+      );
+    }
+  }, [error, addToast, isHi]);
+
+  const filtered = useMemo(() => {
+    return members.filter((m) => {
+      const dept = m.departmentName ?? m.primaryRoleName ?? '';
+      const matchAayam = aayamFilter === 'All' || dept === aayamFilter;
+      const searchLower = search.toLowerCase();
+      const matchSearch =
+        (m.displayName?.toLowerCase() ?? '').includes(searchLower) ||
+        (m.displayNameHi ?? '').includes(search) ||
+        (m.unitName?.toLowerCase() ?? '').includes(searchLower) ||
+        (m.primaryRoleName?.toLowerCase() ?? '').includes(searchLower) ||
+        (m.departmentName?.toLowerCase() ?? '').includes(searchLower);
+      return matchAayam && matchSearch;
+    });
+  }, [members, aayamFilter, search]);
 
   const contexts: DirectoryContextItem[] = [
     {
@@ -145,8 +186,8 @@ export default function Directory() {
     {
       labelEn: "Regional Footprint",
       labelHi: "क्षेत्रीय उपस्थिति",
-      valueEn: `${new Set(members.map(m => m.unit)).size} Active Units`,
-      valueHi: `${new Set(members.map(m => m.unit)).size} सक्रिय इकाइयाँ`,
+      valueEn: `${new Set(members.map(m => m.unitName).filter(Boolean)).size} Active Units`,
+      valueHi: `${new Set(members.map(m => m.unitName).filter(Boolean)).size} सक्रिय इकाइयाँ`,
       detailEn: "Presence in all major educational and urban centers.",
       detailHi: "सभी प्रमुख शैक्षिक और शहरी केंद्रों में उपस्थिति।",
     },
@@ -215,123 +256,145 @@ export default function Directory() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((m, i) => {
-              const cfg = aayamConfig[m.aayam] || aayamConfig.Yuva;
-              const isOpen = expanded === m.id;
-              return (
-                <motion.div
-                  key={m.id}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.02 }}
-                >
-                  <Card 
-                    className={cn(
-                      "institution-panel hover-lift overflow-hidden cursor-pointer transition-all duration-500 bg-background/30 group",
-                      isOpen ? `ring-2 ${cfg.border.replace('/25', '/60')} shadow-xl bg-background/60` : "border-border/60"
-                    )}
-                    onClick={() => setExpanded(isOpen ? null : m.id)}
+        {isLoading ? (
+          <DirectorySkeleton />
+        ) : error ? (
+          <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
+            <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/40">
+              <Users className="w-10 h-10 text-muted-foreground/20" />
+            </div>
+            <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">
+              {t('Unable to load directory.', 'निर्देशिका लोड करने में असमर्थ।')}
+            </p>
+            <Button variant="link" onClick={() => window.location.reload()} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+              {t('Retry', 'पुनः प्रयास करें')}
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((m, i) => {
+                const aayamLabel = m.departmentName ?? m.primaryRoleName ?? 'Yuva';
+                const aayamKey = m.departmentCode ?? m.departmentName ?? 'Yuva';
+                const cfg = getAayamStyle(aayamKey, aayamLabel);
+                const isOpen = expanded === m.id;
+                const displayName = m.displayName ?? m.email ?? 'Unknown';
+                const displayNameHi = m.displayNameHi ?? displayName;
+                const roleLabel = m.primaryRoleName ?? 'Karyakarta';
+                const roleLabelHi = m.primaryRoleNameHi ?? roleLabel;
+                return (
+                  <motion.div
+                    key={m.id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: i * 0.02 }}
                   >
-                    <CardContent className="py-6 px-6">
-                      <div className="flex items-start gap-5">
-                        <AvatarInitials name={m.name} aayam={m.aayam} />
-                        <div className="flex-1 min-w-0 space-y-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="space-y-1">
-                              <h3 className="font-bold text-lg leading-none font-devanagari text-foreground/90 group-hover:text-primary transition-colors">
-                                {isHi ? m.nameHi : m.name}
-                              </h3>
-                              <div className="flex items-center gap-2">
-                                <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-widest px-2 py-0.5", roleColors[m.role])}>
-                                  {isHi ? m.roleHi : m.role}
-                                </Badge>
-                                <span className="w-1 h-1 rounded-full bg-border" />
-                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{m.aayam} Aayam</span>
+                    <Card 
+                      className={cn(
+                        "institution-panel hover-lift overflow-hidden cursor-pointer transition-all duration-500 bg-background/30 group",
+                        isOpen ? `ring-2 ${cfg.border.replace('/25', '/60')} shadow-xl bg-background/60` : "border-border/60"
+                      )}
+                      onClick={() => setExpanded(isOpen ? null : m.id)}
+                    >
+                      <CardContent className="py-6 px-6">
+                        <div className="flex items-start gap-5">
+                          <AvatarInitials name={displayName} aayam={aayamKey} />
+                          <div className="flex-1 min-w-0 space-y-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="space-y-1">
+                                <h3 className="font-bold text-lg leading-none font-devanagari text-foreground/90 group-hover:text-primary transition-colors">
+                                  {isHi ? displayNameHi : displayName}
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={cn("text-[9px] border-0 shrink-0 font-bold uppercase tracking-widest px-2 py-0.5", roleColors[roleLabel] ?? roleColors['Karyakarta'])}>
+                                    {isHi ? roleLabelHi : roleLabel}
+                                  </Badge>
+                                  <span className="w-1 h-1 rounded-full bg-border" />
+                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{aayamLabel} Aayam</span>
+                                </div>
+                              </div>
+                              <div className={cn(
+                                "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner",
+                                isOpen ? "bg-primary text-white scale-110" : "bg-muted/60 text-muted-foreground group-hover:bg-muted"
+                              )}>
+                                {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                               </div>
                             </div>
-                            <div className={cn(
-                              "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-inner",
-                              isOpen ? "bg-primary text-white scale-110" : "bg-muted/60 text-muted-foreground group-hover:bg-muted"
-                            )}>
-                              {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-                            </div>
-                          </div>
 
-                          <div className="flex items-center gap-4 text-[11px] text-muted-foreground font-medium flex-wrap">
-                            <span className="flex items-center gap-1.5 bg-muted/40 px-2 py-0.5 rounded-lg border border-border/50">
-                              <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{m.unit}
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {(isHi ? m.vaksheHi : m.vakshe).map((v, idx) => (
-                                <span key={idx} className="text-[9px] bg-primary/5 text-primary/70 px-2 py-0.5 rounded-md border border-primary/10 font-bold uppercase tracking-widest">
-                                  {v}
-                                </span>
-                              ))}
+                            <div className="flex items-center gap-4 text-[11px] text-muted-foreground font-medium flex-wrap">
+                              <span className="flex items-center gap-1.5 bg-muted/40 px-2 py-0.5 rounded-lg border border-border/50">
+                                <MapPin className="w-3.5 h-3.5 opacity-60 text-primary/60" />{m.unitName ?? t('Unknown Unit', 'अज्ञात इकाई')}
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {[m.primaryRoleName, m.departmentName].filter(Boolean).map((v, idx) => (
+                                  <span key={idx} className="text-[9px] bg-primary/5 text-primary/70 px-2 py-0.5 rounded-md border border-primary/10 font-bold uppercase tracking-widest">
+                                    {v}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Expanded details */}
-                      <AnimatePresence>
-                        {isOpen && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.35, ease: "easeInOut" }}
-                            className="overflow-hidden"
-                          >
-                            <div className="border-t border-border/50 mt-6 pt-6 space-y-5">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                  <p className="shell-copy text-[9px] font-bold">{t('Contact Number', 'संपर्क नंबर')}</p>
-                                  <a href={`tel:${m.contact}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
-                                    <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
-                                      <Phone className="w-4 h-4 text-primary group-hover/link:animate-pulse" />
-                                    </div>
-                                    <span className="text-sm font-mono font-bold text-foreground/80 tracking-tight">{m.contact}</span>
-                                  </a>
+                        {/* Expanded details */}
+                        <AnimatePresence>
+                          {isOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="border-t border-border/50 mt-6 pt-6 space-y-5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-1.5">
+                                    <p className="shell-copy text-[9px] font-bold">{t('Contact Number', 'संपर्क नंबर')}</p>
+                                    <a href={`tel:${m.phone ?? ''}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
+                                      <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
+                                        <Phone className="w-4 h-4 text-primary group-hover/link:animate-pulse" />
+                                      </div>
+                                      <span className="text-sm font-mono font-bold text-foreground/80 tracking-tight">{m.phone ?? t('Not available', 'उपलब्ध नहीं')}</span>
+                                    </a>
+                                  </div>
+                                  <div className="space-y-1.5">
+                                    <p className="shell-copy text-[9px] font-bold">{t('Email Address', 'ईमेल पता')}</p>
+                                    <a href={`mailto:${m.email}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
+                                      <div className="w-9 h-9 rounded-xl bg-blue-500/5 flex items-center justify-center border border-blue-500/10">
+                                        <Mail className="w-4 h-4 text-blue-500" />
+                                      </div>
+                                      <span className="text-sm font-bold text-foreground/80 truncate tracking-tight">{m.email}</span>
+                                    </a>
+                                  </div>
                                 </div>
-                                <div className="space-y-1.5">
-                                  <p className="shell-copy text-[9px] font-bold">{t('Email Address', 'ईमेल पता')}</p>
-                                  <a href={`mailto:${m.email}`} className="flex items-center gap-3 p-3 rounded-2xl bg-background/80 border border-border/60 hover:border-primary/30 transition-all group/link shadow-sm">
-                                    <div className="w-9 h-9 rounded-xl bg-blue-500/5 flex items-center justify-center border border-blue-500/10">
-                                      <Mail className="w-4 h-4 text-blue-500" />
-                                    </div>
-                                    <span className="text-sm font-bold text-foreground/80 truncate tracking-tight">{m.email}</span>
-                                  </a>
+                                
+                                <div className="flex gap-3 pt-2">
+                                  <Button size="lg" variant="outline" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl border-border/70 font-bold uppercase tracking-[0.16em] hover:bg-muted/50" asChild>
+                                    <a href={`tel:${m.phone ?? ''}`}><Phone className="w-4 h-4" /> {t('Voice Call', 'कॉल करें')}</a>
+                                  </Button>
+                                  <Button size="lg" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-[0.16em] shadow-lg shadow-emerald-500/20 border-0 transition-all hover:-translate-y-0.5 active:translate-y-0" asChild>
+                                    <a href={`https://wa.me/91${(m.phone ?? '').replace(/X/g, '0').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                                    </a>
+                                  </Button>
                                 </div>
                               </div>
-                              
-                              <div className="flex gap-3 pt-2">
-                                <Button size="lg" variant="outline" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl border-border/70 font-bold uppercase tracking-[0.16em] hover:bg-muted/50" asChild>
-                                  <a href={`tel:${m.contact}`}><Phone className="w-4 h-4" /> {t('Voice Call', 'कॉल करें')}</a>
-                                </Button>
-                                <Button size="lg" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-[0.16em] shadow-lg shadow-emerald-500/20 border-0 transition-all hover:-translate-y-0.5 active:translate-y-0" asChild>
-                                  <a href={`https://wa.me/91${m.contact.replace(/X/g, '0')}`} target="_blank" rel="noopener noreferrer">
-                                    <MessageCircle className="w-4 h-4" /> WhatsApp
-                                  </a>
-                                </Button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        )}
       </section>
 
-      {filtered.length === 0 && (
+      {filtered.length === 0 && !isLoading && !error && (
         <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
           <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/40">
             <Users className="w-10 h-10 text-muted-foreground/20" />

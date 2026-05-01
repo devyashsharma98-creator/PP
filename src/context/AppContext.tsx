@@ -41,6 +41,7 @@ export type {
 
 interface AppState {
   role: Role;
+  availableRoles: Role[];
   setRole: (role: Role) => void;
   viewer: AppViewerContext | null;
   permissions: AppPermissionSummary;
@@ -104,155 +105,11 @@ const defaultVrittFields = {
   vrittStatus: 'draft' as const,
 };
 
-const initialEvents: GatividhiEvent[] = [
-  {
-    id: '1',
-    title: 'Yuva Sangam - Youth Leadership Summit',
-    description: 'Annual youth leadership and skill development summit for college students across Bhopal division.',
-    date: '2026-02-15',
-    unit: 'Bhopal Shahar',
-    submittedBy: 'Unit Head',
-    status: 'Published',
-    checklist: { designing: true, food: true, seating: true, transport: true, accommodation: false, soundMic: true, camera: true, screen: true, lights: true },
-    registrations: [
-      { id: 'r1', name: 'Priya Sharma', phone: '9876543210', city: 'Bhopal', attendingCount: 1, hasSpecialNeeds: false, submittedAt: '2026-02-10' },
-      { id: 'r2', name: 'Rahul Mishra', phone: '9812345678', city: 'Vidisha', attendingCount: 2, hasSpecialNeeds: false, submittedAt: '2026-02-12' },
-      { id: 'r3', name: 'Anita Verma', phone: '9898765432', city: 'Sehore', attendingCount: 1, hasSpecialNeeds: true, notes: 'Wheelchair access needed', submittedAt: '2026-02-13' },
-      { id: 'r4', name: 'Suresh Patel', phone: '9754321098', city: 'Bhopal', attendingCount: 3, hasSpecialNeeds: false, submittedAt: '2026-02-14' },
-    ],
-    ...defaultVrittFields,
-    vrittAttendanceCount: 250,
-    vrittCheckedInCount: 242,
-  },
-  {
-    id: '2',
-    title: 'Vaidik Ganit Karyashala',
-    description: 'Workshop on ancient Indian mathematics - Vedic Maths techniques for competitive exams.',
-    date: '2026-03-01',
-    unit: 'Vidisha',
-    submittedBy: 'Priya Patel',
-    status: 'Pending Aayam Review',
-    checklist: { designing: false, food: true, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: false, lights: false },
-    imageUrl: '',
-    formConfig: {
-      fields: { phone: true, city: true, attendingCount: true, specialNeeds: false },
-      customQuestions: [
-        { id: 'cq1', question: 'Vegetarian or Non-veg?', questionHi: 'शाकाहारी या मांसाहारी?', type: 'yesno' },
-      ],
-    },
-    polls: [
-      {
-        id: 'poll1',
-        question: 'Which date works best for this workshop?',
-        questionHi: 'कार्यशाला के लिए कौन सी तारीख उचित है?',
-        type: 'date',
-        options: [
-          { id: 'opt1', label: '15 March 2026', votes: 7 },
-          { id: 'opt2', label: '22 March 2026', votes: 4 },
-          { id: 'opt3', label: '29 March 2026', votes: 2 },
-        ],
-        isFinalized: false,
-      },
-    ],
-    ...defaultVrittFields,
-  },
-  {
-    id: '3',
-    title: 'Samajik Samarasta Sammelan',
-    description: 'Community harmony conference promoting social cohesion and cultural integration.',
-    date: '2026-03-10',
-    unit: 'Sehore',
-    submittedBy: 'Anil Verma',
-    status: 'Pending Vibhag Review',
-    checklist: { designing: true, food: true, seating: true, transport: true, accommodation: true, soundMic: true, camera: true, screen: true, lights: true },
-    report: 'Event included panel discussions, cultural performances, and community dialogue sessions.',
-    imageUrl: '',
-    ...defaultVrittFields,
-  },
-  {
-    id: '4',
-    title: 'Bharatiya Vigyan Pradarshani',
-    description: 'Exhibition showcasing contributions of ancient India to science, metallurgy, and architecture.',
-    date: '2026-03-20',
-    unit: 'Raisen',
-    submittedBy: 'Kavita Singh',
-    status: 'Published',
-    checklist: { designing: false, food: false, seating: true, transport: false, accommodation: false, soundMic: true, camera: true, screen: true, lights: false },
-    report: 'Over 100 exhibits displayed covering astronomy, medicine, mathematics and engineering.',
-    imageUrl: '',
-    registrations: [
-      { id: 'r5', name: 'Deepak Tiwari', phone: '9754399999', city: 'Raisen', attendingCount: 3, hasSpecialNeeds: false, submittedAt: '2026-03-05' },
-      { id: 'r6', name: 'Sunita Gupta', phone: '9867890123', city: 'Bhopal', attendingCount: 1, hasSpecialNeeds: false, notes: 'Vegetarian food please', submittedAt: '2026-03-07' },
-    ],
-    ...defaultVrittFields,
-  },
-  {
-    id: '5',
-    title: 'Gram Vikas Charcha',
-    description: 'Rural development dialogue focusing on self-reliance and sustainable village economy.',
-    date: '2026-02-28',
-    unit: 'Hoshangabad',
-    submittedBy: 'Suresh Yadav',
-    status: 'Draft',
-    checklist: { designing: false, food: false, seating: false, transport: false, accommodation: false, soundMic: false, camera: false, screen: false, lights: false },
-    imageUrl: '',
-    ...defaultVrittFields,
-  },
-];
-
-const defaultSkipReasons = { whatsapp: null, facebook: null, instagram: null, telegram: null };
-
-const initialPracharStatuses: PracharStatus[] = [
-  { eventId: '1', platforms: { whatsapp: true, facebook: false, instagram: false, telegram: true }, skipReasons: { ...defaultSkipReasons } },
-  { eventId: '4', platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false }, skipReasons: { ...defaultSkipReasons } },
-];
-
-const initialArticles: AalekhArticle[] = [
-  {
-    id: 'art1',
-    title: 'भारतीय ज्ञान परंपरा और आधुनिक शिक्षा',
-    content: 'भारत की प्राचीन ज्ञान परंपरा — गुरुकुल, वेद, उपनिषद — आधुनिक शिक्षा को एक नई दिशा दे सकती है। NEP 2020 इसी दिशा में एक महत्वपूर्ण कदम है। मैकाले की शिक्षा प्रणाली ने हमारी आत्मविश्वास को चोट पहुंचाई, लेकिन आज भारत अपनी जड़ों की ओर लौट रहा है। यह आलेख इस विषय पर विस्तार से विचार करता है।',
-    summary: 'How ancient Indian knowledge systems can inform modern educational practices and curriculum design.',
-    author: 'Dr. Meera Joshi',
-    date: '2026-02-10',
-    category: 'Shodh',
-    status: 'Published',
-    documentUrl: null,
-    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
-  },
-  {
-    id: 'art2',
-    title: 'Swadeshi Movement: Lessons for Atmanirbhar Bharat',
-    content: 'The historical Swadeshi movement of the early 20th century carries profound lessons for modern India. Atmanirbhar Bharat draws directly from the tradition of self-reliance rooted in Deendayal Upadhyaya\'s Integral Humanism. This article explores the parallels and what we can learn today.',
-    summary: 'Drawing parallels between the historical Swadeshi movement and modern self-reliance initiatives.',
-    author: 'Current User',
-    date: '2026-02-18',
-    category: 'Vimarsh',
-    status: 'Pending Unit Head Review',
-    socialUrl: 'https://facebook.com/pragya.pravah/posts/example',
-    documentUrl: null,
-    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
-  },
-  {
-    id: 'art3',
-    title: 'Vedic Mathematics in Competitive Exams',
-    content: 'Vedic Math sutras, rediscovered by Swami Bharati Krishna Tirtha, provide powerful shortcuts for competitive exams. These techniques are rooted in ancient Vedic traditions and prove remarkably effective for JEE and banking exam preparation. This article covers key sutras with worked examples.',
-    summary: 'Practical application of Vedic Math sutras for faster calculation in JEE and banking exams.',
-    author: 'Ravi Shankar Tiwari',
-    date: '2026-02-20',
-    category: 'Shodh',
-    status: 'Pending Aayam Review',
-    documentUrl: null,
-    valuesChecklist: { rashtraPratham: true, culturallyGrounded: true, balancedTone: true, noDivisiveContent: true },
-  },
-];
-
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
-  const demoDataFallbackEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === 'true';
 
   const [serverRole, setServerRole] = useState<Role>('karyakarta');
   const [demoRoleOverride, setDemoRoleOverride] = useState<Role | null>(null);
@@ -260,24 +117,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [permissions, setPermissions] = useState<AppPermissionSummary>(defaultPermissions);
   const [authReady, setAuthReady] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
-  const [events, setEvents] = useState<GatividhiEvent[]>(demoDataFallbackEnabled ? initialEvents : []);
-  const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>(demoDataFallbackEnabled ? initialPracharStatuses : []);
-  const [articles, setArticles] = useState<AalekhArticle[]>(demoDataFallbackEnabled ? initialArticles : []);
+  const [events, setEvents] = useState<GatividhiEvent[]>([]);
+  const [pracharStatuses, setPracharStatuses] = useState<PracharStatus[]>([]);
+  const [articles, setArticles] = useState<AalekhArticle[]>([]);
   const [vimarshTopics, setVimarshTopics] = useState<VimarshTopic[]>([]);
+
+  const availableRoles = useMemo(() => {
+    const all = viewer?.effectiveRoles ?? [];
+    return all.filter((r): r is Role =>
+      r === 'karyakarta' || r === 'unit_head' || r === 'aayam_pramukh' || r === 'vibhag_pramukh'
+    );
+  }, [viewer]);
+
+  // Reset demo role override if it's no longer in the user's effective roles
+  useEffect(() => {
+    if (demoRoleOverride && !availableRoles.includes(demoRoleOverride)) {
+      setDemoRoleOverride(null);
+    }
+  }, [availableRoles, demoRoleOverride]);
 
   const role = demoRoleSwitchEnabled && demoRoleOverride ? demoRoleOverride : serverRole;
 
   const setRole = useCallback((nextRole: Role) => {
     if (!demoRoleSwitchEnabled) return;
+    if (!availableRoles.includes(nextRole)) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[AppContext] Role "${nextRole}" not in viewer.effectiveRoles. Ignoring setRole().`);
+      }
+      return;
+    }
     setDemoRoleOverride(nextRole);
-  }, [demoRoleSwitchEnabled]);
+  }, [demoRoleSwitchEnabled, availableRoles]);
 
   const clearInternalData = useCallback(() => {
-    setEvents(demoDataFallbackEnabled ? initialEvents : []);
-    setPracharStatuses(demoDataFallbackEnabled ? initialPracharStatuses : []);
-    setArticles(demoDataFallbackEnabled ? initialArticles : []);
+    setEvents([]);
+    setPracharStatuses([]);
+    setArticles([]);
     setVimarshTopics([]);
-  }, [demoDataFallbackEnabled]);
+  }, []);
 
   const applyBootstrap = useCallback((payload: AppBootstrapPayload) => {
     if (Array.isArray(payload.events)) setEvents(payload.events as GatividhiEvent[]);
@@ -303,9 +180,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setViewer(null);
         setPermissions(defaultPermissions);
         setServerRole('karyakarta');
-        if (!demoDataFallbackEnabled) {
-          clearInternalData();
-        }
+        clearInternalData();
         setAuthReady(true);
         return;
       }
@@ -318,77 +193,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAuthReady(true);
     } catch {
       setAuthReady(true);
-      if (!demoDataFallbackEnabled) {
-        clearInternalData();
-      }
+      clearInternalData();
     }
-  }, [applyBootstrap, clearInternalData, demoDataFallbackEnabled]);
+  }, [applyBootstrap, clearInternalData]);
 
   const persistAppAction = useCallback(async (action: AppActionRequest, opts?: { refresh?: boolean }) => {
-    if (demoDataFallbackEnabled) {
-      // Handle local state updates for demo fallback
-      if (action.action === 'addArticle') {
-        const newArt: AalekhArticle = {
-          ...action.payload,
-          id: `art-${Date.now()}`,
-          status: 'Pending Unit Head Review',
-        };
-        setArticles(prev => [newArt, ...prev]);
-        return true;
-      }
-      if (action.action === 'updateArticleStatus') {
-        const { id, status, edits, reviewNotes } = action.payload;
-        setArticles(prev => prev.map(a => 
-          a.id === id 
-            ? { ...a, ...edits, status, latestReviewNotes: reviewNotes ?? null } 
-            : a
-        ));
-        return true;
-      }
-      if (action.action === 'createEvent') {
-        const newEv: GatividhiEvent = {
-          ...action.payload,
-          id: `ev-${Date.now()}`,
-          status: 'Draft',
-          ...defaultVrittFields,
-        };
-        setEvents(prev => [newEv, ...prev]);
-        return true;
-      }
-      if (action.action === 'updateEventStatus') {
-        const { id, status } = action.payload;
-        setEvents(prev => prev.map(e => e.id === id ? { ...e, status } : e));
-        return true;
-      }
-      if (action.action === 'updatePracharPlatform') {
-        const { eventId, platform, done } = action.payload;
-        setPracharStatuses(prev => {
-          const existing = prev.find(p => p.eventId === eventId);
-          if (existing) {
-            return prev.map(p => p.eventId === eventId 
-              ? { ...p, platforms: { ...p.platforms, [platform]: done } } 
-              : p
-            );
-          }
-          return [...prev, { 
-            eventId, 
-            platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false, [platform]: done },
-            skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null }
-          }];
-        });
-        return true;
-      }
-      if (action.action === 'markAttendance') {
-        const { eventId } = action.payload;
-        setEvents(prev => prev.map(e => 
-          e.id === eventId 
-            ? { ...e, vrittCheckedInCount: (e.vrittCheckedInCount || 0) + 1 } 
-            : e
-        ));
-        return true;
-      }
-    }
-
     try {
       const res = await fetch('/api/app/actions', {
         method: 'POST',
@@ -410,7 +219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {
       return false;
     }
-  }, [loadRemoteBootstrap, demoDataFallbackEnabled]);
+  }, [loadRemoteBootstrap]);
 
   useEffect(() => {
     document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
@@ -431,13 +240,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setPermissions(defaultPermissions);
       setServerRole('karyakarta');
       setAuthReady(true);
-      if (!demoDataFallbackEnabled) {
-        clearInternalData();
-      }
+      clearInternalData();
       return;
     }
     void loadRemoteBootstrap();
-  }, [clearInternalData, demoDataFallbackEnabled, loadRemoteBootstrap, pathname]);
+  }, [clearInternalData, loadRemoteBootstrap, pathname]);
 
   const addEvent = useCallback(async (event: Omit<GatividhiEvent, 'id' | 'status'>) => {
     if (!permissions.canCreateEvent) return false;
@@ -554,7 +361,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [loadRemoteBootstrap]);
 
   const contextValue = useMemo(() => ({
-    role, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
+    role, availableRoles, setRole, viewer, permissions, isAuthenticated: Boolean(viewer), authReady,
     lang, setLang,
     events, addEvent, updateEventStatus, markAttendance, addRegistration,
     updateFormConfig, addPoll, castVote, finalizePoll, updateVritt,
@@ -563,7 +370,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     vimarshTopics,
     refreshWorkspace,
   }), [
-    role, setRole, viewer, permissions, authReady,
+    role, availableRoles, setRole, viewer, permissions, authReady,
     lang, setLang,
     events, addEvent, updateEventStatus, markAttendance, addRegistration,
     updateFormConfig, addPoll, castVote, finalizePoll, updateVritt,

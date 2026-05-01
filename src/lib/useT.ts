@@ -3,6 +3,14 @@ import { useCallback } from "react";
 import { useAppContext } from "@/context/AppContext";
 import type { Lang } from "@/lib/app/contracts";
 
+/**
+ * Legacy guard for double-encoded UTF-8 mojibake.
+ *
+ * NOTE: The root fix is ensuring the database client (Neon/Postgres)
+ * connects with `client_encoding = 'UTF8'`. All new data should be
+ * stored and retrieved correctly without repair. This function is
+ * kept as a safety net for legacy rows that may still be corrupted.
+ */
 function looksLikeBrokenHindi(value: string) {
   return /[ÃÂà]/.test(value) && /[¤¥]/.test(value);
 }

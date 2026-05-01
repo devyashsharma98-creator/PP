@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use `/api/v1/*` REST endpoints instead. This legacy action router
+ * is maintained for backward compatibility during the migration period.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireNeonAuthContext, isNeonAuthRequiredError } from "@/lib/neon/auth";
 import { runNeonAppAction } from "@/lib/neon/repository";

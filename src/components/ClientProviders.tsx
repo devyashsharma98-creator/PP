@@ -6,11 +6,24 @@ import { AppProvider } from "@/context/AppContext";
 import { BonsaiProvider } from "@/context/BonsaiContext";
 
 import { ThemeProvider } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MotionConfig } from "framer-motion";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      process.env.NODE_ENV === "production" &&
+      process.env.NEXT_PUBLIC_TEST_ENV !== "true"
+    ) {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.error("Service Worker registration failed:", err);
+      });
+    }
+  }, []);
 
   return (
     <BonsaiProvider>
@@ -28,4 +41,3 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     </BonsaiProvider>
   );
 }
-

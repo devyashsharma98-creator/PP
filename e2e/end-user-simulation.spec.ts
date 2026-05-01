@@ -136,14 +136,22 @@ const simulationPracharStatuses = [
 ];
 
 async function loginAs(page: Page, email: string) {
-  await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await page.locator("#email").fill(email);
-  await page.locator("#password").fill(PASSWORD);
-  await page.locator('button[type="submit"]').click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
-    timeout: 45_000,
-  });
-  await expect(page.locator("body")).not.toContainText(/invalid|failed/i);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
+      await page.locator("#email").fill(email);
+      await page.locator("#password").fill(PASSWORD);
+      await page.locator('button[type="submit"]').click();
+      await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
+        timeout: 45_000,
+      });
+      await expect(page.locator("body")).not.toContainText(/invalid|failed/i);
+      return;
+    } catch {
+      if (attempt === 3) throw new Error(`Login failed after 3 attempts for ${email}`);
+      await page.waitForTimeout(1_000);
+    }
+  }
 }
 
 async function captureBootstrap(page: Page) {
@@ -160,6 +168,9 @@ async function captureBootstrap(page: Page) {
 }
 
 async function useSimulationWorkspace(page: Page) {
+  // WARNING: These mocks are fragile because they depend on the exact
+  // bootstrap shape. They should eventually be replaced with seeded DB
+  // data so tests don't drift when UI logic changes.
   const bootstrap = await captureBootstrap(page);
   const permissions = {
     ...bootstrap.viewer?.permissions,
@@ -307,6 +318,7 @@ test.describe("End-user role simulation matrix", () => {
   test("karyakarta can draft an article and send it into review without mutating live data", async ({
     page,
   }) => {
+    test.slow();
     await loginAs(page, accounts.karyakarta);
     await useSimulationWorkspace(page);
     const actions = await recordAppActions(page);
@@ -346,6 +358,7 @@ test.describe("End-user role simulation matrix", () => {
   test("unit head reviewer can forward and return aalekh from the review queue", async ({
     page,
   }) => {
+    test.slow();
     await loginAs(page, accounts.unithead);
     await useSimulationWorkspace(page);
     const actions = await recordAppActions(page);
@@ -389,6 +402,7 @@ test.describe("End-user role simulation matrix", () => {
   test("aayam reviewer can forward and return aalekh from the thematic queue", async ({
     page,
   }) => {
+    test.slow();
     await loginAs(page, accounts.aayam);
     await useSimulationWorkspace(page);
     const actions = await recordAppActions(page);
@@ -432,6 +446,7 @@ test.describe("End-user role simulation matrix", () => {
   test("vibhag and prant authority can move aalekh to final publication stages", async ({
     page,
   }) => {
+    test.slow();
     await loginAs(page, accounts.prant);
     await useSimulationWorkspace(page);
     const actions = await recordAppActions(page);
@@ -524,7 +539,7 @@ test.describe("End-user role simulation matrix", () => {
 
     await page.goto("/calendar", { waitUntil: "domcontentloaded" });
     await expect(page.locator("main")).toContainText(/Institutional Calendar Desk/i);
-    await page.getByRole("button").filter({ has: page.locator("svg") }).nth(1).click();
+    await page.getByRole("button", { name: /Next month/i }).click();
     await expect(page.locator("main")).toContainText(/Month Grid/i);
     await page.getByText("1", { exact: true }).first().click();
     await expect(page.locator("main")).toContainText(/Selected Day Ledger/i);

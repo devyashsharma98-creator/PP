@@ -34,7 +34,7 @@ const STATUS: Record<string, { label: string; labelHi: string; chip: string; ico
   'Published':              { label: 'Published',        labelHi: 'प्रकाशित',           chip: 'bg-success/15 text-success',              icon: CheckCircle2 },
 };
 
-// ── Static org-wide calendar events ──────────────────────────────────────────
+// ── Calendar event type ──────────────────────────────────────────────────────
 interface CalEvent {
   id: string;
   title: string;
@@ -46,24 +46,6 @@ interface CalEvent {
   recurring?: boolean;
   note?: string;
 }
-
-const STATIC_EVENTS: CalEvent[] = [
-  { id: 's1',  title: 'Youth & Dharma Sangam',      titleHi: 'युवा धर्म संगम',           date: '2026-02-28', aayam: 'Yuva',    status: 'Published',              recurring: true, note: 'Annual' },
-  { id: 's2',  title: 'IKS Book Discussion',         titleHi: 'IKS पुस्तक चर्चा',         date: '2026-02-25', aayam: 'Shodh',   status: 'Published' },
-  { id: 's3',  title: 'Mahila Shakti Sangam',        titleHi: 'महिला शक्ति संगम',         date: '2026-03-08', aayam: 'Mahila',  status: 'Published',              note: "Women's Day" },
-  { id: 's4',  title: 'Counter Narrative Workshop',  titleHi: 'प्रति-विचार कार्यशाला',    date: '2026-03-15', aayam: 'Vimarsh', status: 'Pending Aayam Review' },
-  { id: 's5',  title: 'Prachar Review Meet',         titleHi: 'प्रचार समीक्षा बैठक',      date: '2026-03-01', aayam: 'Prachar', status: 'Published' },
-  { id: 's6',  title: 'Prant Adhiveshan',            titleHi: 'प्रांत अधिवेशन',           date: '2026-03-22', aayam: 'Vibhag',  status: 'Pending Final Approval', recurring: true },
-  { id: 's7',  title: 'Vedic Math Workshop',         titleHi: 'वैदिक गणित कार्यशाला',     date: '2026-02-27', aayam: 'Shodh',   status: 'Published' },
-  { id: 's8',  title: 'Social Media Drive',          titleHi: 'सोशल मीडिया अभियान',       date: '2026-03-10', aayam: 'Prachar', status: 'Pending Aayam Review' },
-  { id: 's9',  title: 'Vichardhara Sangosthi',       titleHi: 'विचारधारा संगोष्ठी',       date: '2026-03-18', aayam: 'Vimarsh', status: 'Published',              recurring: true },
-  { id: 's10', title: 'IKS Lecture Series',          titleHi: 'IKS व्याख्यान श्रृंखला',   date: '2026-02-23', aayam: 'Shodh',   status: 'Published' },
-  { id: 's11', title: 'Yuva Niti Vimarsh',           titleHi: 'युवा नीति विमर्श',         date: '2026-03-05', aayam: 'Yuva',    status: 'Pending Aayam Review' },
-  { id: 's12', title: 'Prant Sammelan',              titleHi: 'प्रांत सम्मेलन',           date: '2026-03-28', aayam: 'Vibhag',  status: 'Published',              recurring: true },
-  { id: 's13', title: 'Mahila Leadership Camp',      titleHi: 'महिला नेतृत्व शिविर',      date: '2026-04-05', aayam: 'Mahila',  status: 'Published' },
-  { id: 's14', title: 'Digital Prachar Workshop',    titleHi: 'डिजिटल प्रचार कार्यशाला',  date: '2026-04-12', aayam: 'Prachar', status: 'Pending Aayam Review' },
-  { id: 's15', title: 'Dharma Debate — Vimarsh',     titleHi: 'धर्म वाद-विवाद — विमर्श',  date: '2026-04-20', aayam: 'Vimarsh', status: 'Published' },
-];
 
 const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_HI = ['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
@@ -259,18 +241,17 @@ export default function AnnualCalendar() {
       location: e.unit,
     })), [events]);
 
-  // Role-filtered event pool
+  // Role-filtered event pool (real events only)
   const allEvents: CalEvent[] = useMemo(() => {
-    const pool = [...STATIC_EVENTS, ...dynamicEvents];
     switch (role) {
       case 'karyakarta':
-        return pool.filter(e => e.status === 'Published');
+        return dynamicEvents.filter(e => e.status === 'Published');
       case 'unit_head':
-        return pool;
+        return dynamicEvents;
       case 'aayam_pramukh':
-        return pool.filter(e => e.status !== 'Draft');
+        return dynamicEvents.filter(e => e.status !== 'Draft');
       default: // vibhag_pramukh
-        return pool;
+        return dynamicEvents;
     }
   }, [dynamicEvents, role]);
 
@@ -461,6 +442,23 @@ export default function AnnualCalendar() {
         ))}
       </div>
 
+      {/* Empty state when no events */}
+      {allEvents.length === 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="glass-card border-dashed border-border/60 bg-muted/20">
+            <CardContent className="pt-8 pb-8 text-center space-y-3">
+              <CalendarDays className="w-10 h-10 text-muted-foreground/30 mx-auto" />
+              <p className={cn('text-sm font-medium text-muted-foreground', lang === 'hi' && 'font-devanagari')}>
+                {t('No events available yet.', 'अभी कोई कार्यक्रम उपलब्ध नहीं।')}
+              </p>
+              <p className={cn('text-xs text-muted-foreground/60', lang === 'hi' && 'font-devanagari')}>
+                {t('Events will appear here once they are created or published.', 'कार्यक्रम बनने या प्रकाशित होने पर यहाँ दिखाई देंगे।')}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Pending action banner */}
       {pendingAction.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -515,10 +513,10 @@ export default function AnnualCalendar() {
                       {t('Today', 'आज')}
                     </Button>
                   )}
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={prev}>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={prev} aria-label={t('Previous month', 'पिछला महीना')}>
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={next}>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={next} aria-label={t('Next month', 'अगला महीना')}>
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
