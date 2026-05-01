@@ -239,7 +239,7 @@ function BrandMark() {
         <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary/80">
           Pragya Pravah
         </span>
-        <span className="font-serif text-lg font-semibold text-[#24160f]" lang="hi">
+        <span className="font-serif text-lg font-semibold text-parchment-ink" lang="hi">
           प्रज्ञा प्रवाह
         </span>
       </span>
@@ -285,7 +285,7 @@ function TopAppBar() {
                   <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">
                     {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
                   </p>
-                  <h2 className="mt-1 font-serif text-xl font-bold text-[#24160f]">
+                  <h2 className="mt-1 font-serif text-xl font-bold text-parchment-ink">
                     {t("Parichay", "परिचय")}
                   </h2>
                 </div>
@@ -316,7 +316,7 @@ function TopAppBar() {
                       setMenuOpen(false);
                       signOut();
                     }}
-                    className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#9d2d22] transition-colors hover:bg-[#f4d8d1]"
+                    className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-parchment-accent transition-colors hover:bg-parchment-accent-soft"
                   >
                     <LogOut className="h-4 w-4" />
                     {t("Sign out", "निकास")}
@@ -329,16 +329,16 @@ function TopAppBar() {
         </div>
 
         <nav className="hidden flex-1 items-center justify-center gap-6 text-xs font-bold uppercase tracking-[0.22em] text-primary/80 xl:flex">
-          <a href="#mission" className="transition-colors hover:text-[#24160f]">
+          <a href="#mission" className="transition-colors hover:text-parchment-ink">
             {t("Mission", "ध्येय")}
           </a>
-          <a href="#workstreams" className="transition-colors hover:text-[#24160f]">
+          <a href="#workstreams" className="transition-colors hover:text-parchment-ink">
             {t("Workstreams", "कार्य-प्रवाह")}
           </a>
-          <a href="#current-work" className="transition-colors hover:text-[#24160f]">
+          <a href="#current-work" className="transition-colors hover:text-parchment-ink">
             {t("Current Work", "वर्तमान कार्य")}
           </a>
-          <a href="#participate" className="transition-colors hover:text-[#24160f]">
+          <a href="#participate" className="transition-colors hover:text-parchment-ink">
             {t("Participation", "सहभागिता")}
           </a>
         </nav>
@@ -399,7 +399,7 @@ function SectionHeading({
       <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
         {t(eyebrowEn, eyebrowHi)}
       </p>
-      <h2 className="font-serif text-4xl leading-tight text-[#24160f] md:text-5xl">
+      <h2 className="font-serif text-4xl leading-tight text-parchment-ink md:text-5xl">
         {t(titleEn, titleHi)}
       </h2>
       <p className="max-w-2xl text-base leading-7 text-foreground/80 md:text-lg">
@@ -425,7 +425,7 @@ function EditorialVisual() {
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 {t("Overview", "संयम")}
               </p>
-              <p className="mt-3 font-serif text-2xl leading-tight text-[#24160f]">
+              <p className="mt-3 font-serif text-2xl leading-tight text-parchment-ink">
                 {t("Publication to public interface", "विचार से लोक-कार्य")}
               </p>
             </div>
@@ -488,7 +488,7 @@ function WorkstreamRail() {
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <div>
-                    <h3 className="font-serif text-2xl text-[#24160f]">
+                    <h3 className="font-serif text-2xl text-parchment-ink">
                       {t(stream.titleEn, stream.titleHi)}
                     </h3>
                     <p className="mt-2 max-w-md text-sm leading-6 text-foreground/75">
@@ -570,7 +570,7 @@ function ArticleShowcaseArtifact({
             </div>
 
             <div>
-              <h3 className="font-serif text-2xl leading-tight text-[#24160f]">
+              <h3 className="font-serif text-2xl leading-tight text-parchment-ink">
                 {t(activeItem.titleEn, activeItem.titleHi)}
               </h3>
               <p className="mt-3 text-sm leading-7 text-foreground/75">
@@ -634,7 +634,7 @@ function ProofBand({
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
           {t("Featured Output", "प्रमुख प्रकाशन")}
         </p>
-        <h3 className="mt-4 font-serif text-2xl leading-tight text-[#24160f]">
+        <h3 className="mt-4 font-serif text-2xl leading-tight text-parchment-ink">
           {t(featuredItem.titleEn, featuredItem.titleHi)}
         </h3>
         <p className="mt-3 text-sm leading-7 text-foreground/75">
@@ -657,7 +657,7 @@ function ProofBand({
         <div className="mt-5 space-y-5">
           {CREDIBILITY_SIGNALS.slice(0, 2).map((signal) => (
             <div key={signal.labelEn} className="border-t border-primary/10 pt-4 first:border-t-0 first:pt-0">
-              <p className="font-serif text-3xl text-[#24160f]">
+              <p className="font-serif text-3xl text-parchment-ink">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
@@ -696,7 +696,7 @@ function Hero({
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
                 {t("Institutional overview", "विचार और लोक-कार्य का प्रवाह")}
               </p>
-              <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-[#1f140d] md:text-7xl">
+              <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-parchment-ink md:text-7xl">
                 Institutional overview of Pragya Pravah workstreams.
               </h1>
               <p className="max-w-2xl text-xl leading-8 text-foreground/82" lang="hi">
@@ -775,7 +775,7 @@ function WorkstreamsSection() {
                   <ArrowRight className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-3xl text-[#24160f]">
+                  <h3 className="font-serif text-3xl text-parchment-ink">
                     {t(stream.titleEn, stream.titleHi)}
                   </h3>
                   <p className="mt-3 max-w-md text-base leading-7 text-foreground/75">
@@ -813,7 +813,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
               {t("Featured output", "प्रमुख सामग्री")}
             </p>
-            <h3 className="mt-4 font-serif text-3xl leading-tight text-[#24160f]">
+            <h3 className="mt-4 font-serif text-3xl leading-tight text-parchment-ink">
               {t(featuredItem.titleEn, featuredItem.titleHi)}
             </h3>
             <p className="mt-4 text-base leading-7 text-foreground/75">
@@ -836,7 +836,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Workstream lane", "संपादकीय प्रवाह")}
               </p>
-              <p className="mt-3 font-serif text-2xl text-[#24160f]">
+              <p className="mt-3 font-serif text-2xl text-parchment-ink">
                 {t(featuredItem.laneEn, featuredItem.laneHi)}
               </p>
             </div>
@@ -844,7 +844,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Contributor", "योगदानकर्ता")}
               </p>
-              <p className="mt-3 font-serif text-2xl text-[#24160f]">
+              <p className="mt-3 font-serif text-2xl text-parchment-ink">
                 {t(featuredItem.authorEn, featuredItem.authorHi)}
               </p>
             </div>
@@ -872,7 +872,7 @@ function CredibilitySection() {
         <div className="grid gap-px bg-primary/15 md:grid-cols-3">
           {CREDIBILITY_SIGNALS.map((signal) => (
             <div key={signal.labelEn} className="bg-background p-7">
-              <p className="font-serif text-4xl text-[#24160f]">
+              <p className="font-serif text-4xl text-parchment-ink">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
               <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
@@ -912,7 +912,7 @@ function ParticipationSection() {
           <div className="grid gap-px bg-primary/15">
             {PARTICIPATION_PATHS.map((path) => (
               <div key={path.titleEn} className="bg-background/95 p-6">
-                <h3 className="font-serif text-2xl text-[#24160f]">
+                <h3 className="font-serif text-2xl text-parchment-ink">
                   {t(path.titleEn, path.titleHi)}
                 </h3>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/75">
@@ -995,13 +995,13 @@ function SideRail() {
   ];
 
   return (
-    <aside className="fixed right-0 top-20 hidden h-[calc(100vh-5rem)] w-16 flex-col items-center gap-7 border-l border-[#d6c1ac] bg-[#f4efe6] py-8 lg:flex">
+    <aside className="fixed right-0 top-20 hidden h-[calc(100vh-5rem)] w-16 flex-col items-center gap-7 border-l border-parchment-rule bg-parchment-bg-soft py-8 lg:flex">
       {items.map(({ icon: Icon, href, label }) => (
         <a
           key={label}
           href={href}
           aria-label={label}
-          className="text-[#7a5a42] transition-colors hover:text-[#24160f]"
+          className="text-parchment-ink-soft transition-colors hover:text-parchment-ink"
         >
           <Icon className="h-5 w-5" />
         </a>
@@ -1020,12 +1020,12 @@ function MobileBottomNav() {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 z-50 flex w-full justify-around border-t border-[#d6c1ac] bg-[#f4efe6]/95 px-3 py-3 backdrop-blur md:hidden">
+    <footer className="fixed bottom-0 left-0 z-50 flex w-full justify-around border-t border-parchment-rule bg-parchment-bg-soft/95 px-3 py-3 backdrop-blur md:hidden">
       {items.map(({ icon: Icon, href, labelEn, labelHi }) => (
         <a
           key={labelEn}
           href={href}
-          className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 text-[#6f4f39] transition-colors hover:bg-[#efe4d7]"
+          className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 text-parchment-ink-soft transition-colors hover:bg-parchment-bg-elev"
         >
           <Icon className="h-4.5 w-4.5" />
           <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
@@ -1042,7 +1042,7 @@ export default function Parichay() {
 
   return (
     <div
-      className="min-h-screen overflow-x-hidden bg-[#fbf7f1] text-[#24160f]"
+      className="min-h-screen overflow-x-hidden bg-parchment-bg text-parchment-ink"
       style={{ fontFamily: "Manrope, ui-sans-serif, system-ui, sans-serif" }}
     >
       <TopAppBar />

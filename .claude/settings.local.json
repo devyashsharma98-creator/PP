@@ -4,7 +4,14 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s -c /tmp/c1.txt -b /tmp/c1.txt -X POST http://localhost:3000/api/auth/login -H 'content-type: application/json' -d '{\"email\":\"demo.prant@example.com\",\"password\":\"Password123!\"}')",
       "Bash(curl -s -b /tmp/c1.txt http://localhost:3000/api/app/bootstrap)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(grep -r \"#[0-9a-f]\\\\{3,6\\\\}\\\\|rgb\\(\" /c/Users/yashs/Desktop/pp/pragya-pravah-ui/src --include=\"*.tsx\" --include=\"*.ts\")",
+      "Bash(grep -nE \"#[0-9a-fA-F]{3,8}\" src/components/pages/Parichay.tsx src/components/pages/LoginPageClient.tsx)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:3000/parichay)",
+      "Bash(curl -s 'http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__004sl_h._.css')"
     ]
   }
 }

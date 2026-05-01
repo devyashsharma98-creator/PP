@@ -61,6 +61,20 @@
     --font-serif: var(--font-ui-serif);
     --font-devanagari: var(--font-ui-devanagari);
     --font-devanagari-display: var(--font-ui-devanagari);
+
+    /* Parchment palette — used by public-facing surfaces (Parichay, Login).
+       Editorial warm ink-on-paper tones; mirrors body text + soft borders. */
+    --parchment-bg: 36 33% 95%;
+    --parchment-bg-soft: 33 30% 92%;
+    --parchment-bg-elev: 30 30% 89%;
+    --parchment-ink: 24 35% 9%;
+    --parchment-ink-soft: 24 30% 38%;
+    --parchment-rule: 30 35% 76%;
+    --parchment-accent: 5 65% 38%;
+    --parchment-accent-soft: 8 70% 89%;
+
+    /* Saffron deep stop — anchors gradients (login crest, hero glow). */
+    --saffron-deep: 27 100% 28%;
     }
 
     .dark {
@@ -97,6 +111,18 @@
     --saffron-glow: 31 100% 58%;
     --success: 152 58% 52%;
     --warning: 43 95% 58%;
+
+    /* Parchment palette — warm-dark inversion for night reading. */
+    --parchment-bg: 24 18% 8%;
+    --parchment-bg-soft: 24 16% 12%;
+    --parchment-bg-elev: 24 14% 16%;
+    --parchment-ink: 36 25% 92%;
+    --parchment-ink-soft: 30 18% 70%;
+    --parchment-rule: 24 12% 22%;
+    --parchment-accent: 12 75% 65%;
+    --parchment-accent-soft: 10 35% 22%;
+
+    --saffron-deep: 27 90% 38%;
   }
 }
 
@@ -146,7 +172,7 @@
   html[data-app-lang="hi"] h6 {
     font-family: var(--font-devanagari-display), var(--font-devanagari), sans-serif;
     letter-spacing: -0.01em;
-    line-height: 1.22;
+    line-height: 1.5;
   }
 }
 

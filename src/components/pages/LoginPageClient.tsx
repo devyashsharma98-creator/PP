@@ -212,7 +212,7 @@ function LoginForm() {
                     animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
                     transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
                   />
-                  <span className="relative inline-flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-[1.1rem] bg-gradient-to-br from-[#ffdcc6] via-[#f57c00] to-[#964900] shadow-[0_16px_28px_-18px_rgba(150,73,0,0.65)] ring-1 ring-primary/20">
+                  <span className="relative inline-flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-[1.1rem] bg-gradient-to-br from-saffron-light via-primary to-saffron-deep shadow-[0_16px_28px_-18px_hsl(var(--saffron-deep)/0.65)] ring-1 ring-primary/20">
                     <PragyaLogo className="h-10 w-10 md:h-12 md:w-12 drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
                   </span>
                   <span className="absolute -right-0.5 -top-0.5 inline-flex h-2.5 w-2.5">
@@ -283,7 +283,7 @@ function LoginForm() {
                 {copy.highlights.map((item) => (
                   <span
                     key={item}
-                    className="inline-flex items-center rounded-full border border-primary/20 bg-background/72 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-[0_2px_10px_-6px_rgba(150,73,0,0.4)]"
+                    className="inline-flex items-center rounded-full border border-primary/20 bg-background/72 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-[0_2px_10px_-6px_hsl(var(--saffron-deep)/0.4)]"
                   >
                     {item}
                   </span>

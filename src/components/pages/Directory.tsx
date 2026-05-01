@@ -16,29 +16,13 @@ import { useT } from '@/lib/useT';
 import { Masthead } from '@/components/Masthead';
 import { useDirectory } from '@/hooks/api/use-directory';
 import { useToast } from '@/components/ToastProvider';
-
-// ── Aayam styling config ─────────────────────────────────────────────────────
-
-const aayamConfig: Record<string, { color: string; bg: string; border: string }> = {
-  Yuva: { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/25' },
-  Mahila: { color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/25' },
-  Shodh: { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/25' },
-  Prachar: { color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/25' },
-  Vimarsh: { color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/25' },
-};
+import { AAYAM_CONFIG, AAYAM_LIST_WITH_ALL, getAayamStyle } from '@/lib/app/aayam-config';
 
 const roleColors: Record<string, string> = {
   'Unit Head': 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
   'Aayam Pramukh': 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
   'Karyakarta': 'bg-muted text-muted-foreground',
 };
-
-const aayams = ['All', 'Yuva', 'Mahila', 'Shodh', 'Prachar', 'Vimarsh'];
-
-function getAayamStyle(departmentCode: string | null, departmentName: string | null) {
-  const key = departmentCode ?? departmentName ?? '';
-  return aayamConfig[key] ?? aayamConfig.Yuva;
-}
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -225,8 +209,8 @@ export default function Directory() {
         </div>
 
         <div className="flex gap-2.5 flex-wrap overflow-x-auto pb-2 no-scrollbar">
-          {aayams.map(a => {
-            const cfg = a === 'All' ? null : aayamConfig[a];
+          {AAYAM_LIST_WITH_ALL.map(a => {
+            const cfg = a === 'All' ? null : AAYAM_CONFIG[a];
             return (
               <button
                 key={a}

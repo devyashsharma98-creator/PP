@@ -17,24 +17,10 @@ import { Masthead } from '@/components/Masthead';
 import { useOrgStructure } from '@/hooks/api/use-org-structure';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/components/ToastProvider';
+import { AAYAM_CONFIG, AAYAM_KIND_LABEL } from '@/lib/app/aayam-config';
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
-const aayamColors: Record<string, string> = {
-  Yuva: 'bg-orange-500/15 text-orange-500',
-  Mahila: 'bg-rose-500/15 text-rose-500',
-  Shodh: 'bg-blue-500/15 text-blue-500',
-  Prachar: 'bg-emerald-500/15 text-emerald-500',
-  Vimarsh: 'bg-violet-500/15 text-violet-500',
-};
-
-const aayamKindToLabel: Record<string, string> = {
-  yuva: 'Yuva',
-  mahila: 'Mahila',
-  shodh: 'Shodh',
-  prachar: 'Prachar',
-  vimarsh: 'Vimarsh',
-};
 
 const vishayas = [
   'समाजशास्त्र', 'राजनीति शास्त्र', 'अर्थशास्त्र', 'इतिहास', 'दर्शन',
@@ -209,7 +195,7 @@ export default function Dayitv() {
       aayams: orgData.departments
         .filter((d) => ['yuva', 'mahila', 'shodh', 'prachar', 'vimarsh'].includes(d.departmentKind))
         .map((d) => ({
-          name: aayamKindToLabel[d.departmentKind] ?? d.name,
+          name: AAYAM_KIND_LABEL[d.departmentKind] ?? d.name,
           pramukh: orgData.heads[d.id] ?? '[Name]',
           contact: '[Contact]',
         })),
@@ -566,7 +552,7 @@ export default function Dayitv() {
                                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 px-4 rounded-2xl bg-background/70 border border-border/50 hover:border-primary/30 transition-all shadow-sm group"
                                     >
                                       <div className="flex items-center gap-4">
-                                        <Badge className={cn("text-[10px] border-0 shrink-0 font-bold min-w-[70px] justify-center py-1 tracking-widest uppercase", aayamColors[aayam.name])}>
+                                        <Badge className={cn("text-[10px] border-0 shrink-0 font-bold min-w-[70px] justify-center py-1 tracking-widest uppercase", AAYAM_CONFIG[aayam.name]?.dayitvChip)}>
                                           {aayam.name}
                                         </Badge>
                                         <span className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{aayam.pramukh}</span>

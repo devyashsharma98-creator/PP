@@ -446,20 +446,20 @@ export function UnitDashboardView({
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label>{t("Upload Photos", "फ़ोटो अपलोड करें")}</Label>
-                        <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" onClick={() => setForm((previous) => ({ ...previous, fileName: "photos_event.zip" }))}>
+                        <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" role="button" tabIndex={0} onClick={() => setForm((previous) => ({ ...previous, fileName: "photos_event.zip" }))} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForm((previous) => ({ ...previous, fileName: "photos_event.zip" })); } }}>
                           {form.fileName ? <p className="text-xs font-medium text-foreground">📷 {form.fileName}</p> : <p className="text-xs">📷 {t("Photos (simulated)", "फ़ोटो (अनुकरण)")}</p>}
                         </div>
                       </div>
                       <div>
                         <Label>{t("Upload Video", "वीडियो अपलोड करें")}</Label>
-                        <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" onClick={() => setForm((previous) => ({ ...previous, videoUrl: "event_video.mp4" }))}>
+                        <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" role="button" tabIndex={0} onClick={() => setForm((previous) => ({ ...previous, videoUrl: "event_video.mp4" }))} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForm((previous) => ({ ...previous, videoUrl: "event_video.mp4" })); } }}>
                           {form.videoUrl ? <p className="text-xs font-medium text-foreground">🎥 {form.videoUrl}</p> : <p className="text-xs">🎥 {t("Video (simulated)", "वीडियो (अनुकरण)")}</p>}
                         </div>
                       </div>
                     </div>
                     <div>
                       <Label>{t("Upload Poster", "पोस्टर अपलोड करें")}</Label>
-                      <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" onClick={() => setForm((previous) => ({ ...previous, posterName: "event_poster.jpg" }))}>
+                      <div className="mt-1 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50" role="button" tabIndex={0} onClick={() => setForm((previous) => ({ ...previous, posterName: "event_poster.jpg" }))} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForm((previous) => ({ ...previous, posterName: "event_poster.jpg" })); } }}>
                         {form.posterName ? <p className="text-xs font-medium text-foreground">🖼️ {form.posterName}</p> : <p className="text-xs">🖼️ {t("Upload Poster (simulated)", "पोस्टर अपलोड करें (अनुकरण)")}</p>}
                       </div>
                     </div>

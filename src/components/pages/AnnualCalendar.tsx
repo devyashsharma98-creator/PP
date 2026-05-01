@@ -14,17 +14,8 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/useT';
+import { AAYAM_CONFIG as AAYAM } from '@/lib/app/aayam-config';
 import type { LucideIcon } from 'lucide-react';
-
-// ── Aayam colour palette ─────────────────────────────────────────────────────
-const AAYAM: Record<string, { dot: string; chip: string; label: string; labelHi: string }> = {
-  Yuva:    { dot: 'bg-orange-500',  chip: 'bg-orange-500/15 text-orange-600 border-orange-500/20',    label: 'Yuva',    labelHi: 'युवा' },
-  Mahila:  { dot: 'bg-rose-500',    chip: 'bg-rose-500/15 text-rose-600 border-rose-500/20',          label: 'Mahila',  labelHi: 'महिला' },
-  Shodh:   { dot: 'bg-blue-500',    chip: 'bg-blue-500/15 text-blue-600 border-blue-500/20',          label: 'Shodh',   labelHi: 'शोध' },
-  Prachar: { dot: 'bg-emerald-500', chip: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20', label: 'Prachar', labelHi: 'प्रचार' },
-  Vimarsh: { dot: 'bg-violet-500',  chip: 'bg-violet-500/15 text-violet-600 border-violet-500/20',   label: 'Vimarsh', labelHi: 'विमर्श' },
-  Vibhag:  { dot: 'bg-primary',     chip: 'bg-primary/15 text-primary border-primary/20',            label: 'Vibhag',  labelHi: 'विभाग' },
-};
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS: Record<string, { label: string; labelHi: string; chip: string; icon: LucideIcon }> = {
