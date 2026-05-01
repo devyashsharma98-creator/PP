@@ -14,7 +14,7 @@ import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardV
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
-import Launchpad from "@/components/pages/Launchpad";
+import { PrajnaDashboard } from "@/components/pages/PrajnaDashboard";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
 
@@ -285,7 +285,7 @@ export default function Dashboard() {
   );
 
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
-    return <Launchpad />;
+    return <PrajnaDashboard />;
   }
 
   if (dashboardLane === "vibhag") {
