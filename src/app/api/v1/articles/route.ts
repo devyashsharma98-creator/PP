@@ -20,6 +20,67 @@ import { auditAndActivity } from "@/lib/audit";
 import type { ArticleStatus } from "@/lib/permissions/article-workflow";
 import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
+/**
+ * Build the WHERE clause conditions for listing articles.
+ * Extracted to reduce cognitive complexity of the GET handler.
+ */
+function buildArticleWhereConditions(
+  q: ReturnType<typeof listArticlesQuerySchema.parse>,
+  orgId: string,
+  scopedAccess: ReturnType<typeof resolveScopedAccess>,
+  userId: string,
+): SQL<unknown> | undefined {
+  const conditions: SQL<unknown>[] = [eq(articles.orgId, orgId)];
+
+  if (q.status) conditions.push(eq(articles.status, q.status as ArticleStatus));
+  if (q.category) conditions.push(eq(articles.category, q.category));
+  if (q.authorUserId) conditions.push(eq(articles.authorUserId, q.authorUserId));
+  if (q.unitId) conditions.push(eq(articles.unitId, q.unitId));
+  if (q.departmentId) conditions.push(eq(articles.departmentId, q.departmentId));
+
+  const searchCondition = q.search
+    ? or(ilike(articles.title, `%${q.search}%`), ilike(articles.summary, `%${q.search}%`))
+    : undefined;
+
+  if (!scopedAccess.orgWide) {
+    const scopeConditions: SQL<unknown>[] = [eq(articles.authorUserId, userId)];
+    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(articles.unitId, [...scopedAccess.unitIds]));
+    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(articles.departmentId, [...scopedAccess.departmentIds]));
+    if (scopedAccess.articleIds.size > 0) scopeConditions.push(inArray(articles.id, [...scopedAccess.articleIds]));
+    const scopeClause = or(...scopeConditions);
+    if (scopeClause) conditions.push(scopeClause);
+  }
+
+  return searchCondition ? and(...conditions, searchCondition) : and(...conditions);
+}
+
+/**
+ * Emit audit log and activity feed entry for article creation.
+ */
+async function auditArticleCreated(
+  ctx: Parameters<Parameters<typeof withPermission>[1]>[1],
+  article: { id: string; title: string; category: string },
+  ip: string | null,
+) {
+  const actorName = ctx.session.displayName ?? ctx.session.email;
+  await auditAndActivity(
+    {
+      orgId: ctx.session.orgId,
+      action: "article.created",
+      actorUserId: ctx.session.userId,
+      actorEmail: ctx.session.email,
+      actorIp: ip ?? undefined,
+      entityType: "article",
+      entityId: article.id,
+      changeSummary: `Article created: "${article.title}" (category: ${article.category}).`,
+    },
+    {
+      summary: `${actorName} created article: "${article.title}".`,
+      actorNameSnapshot: actorName,
+    }
+  );
+}
+
 // ── GET ───────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx) => {
   const ip = getClientIp(req);
@@ -33,31 +94,8 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
 
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
 
-  const conditions: SQL<unknown>[] = [eq(articles.orgId, ctx.session.orgId)];
-
-  if (q.status) conditions.push(eq(articles.status, q.status as ArticleStatus));
-  if (q.category) conditions.push(eq(articles.category, q.category));
-  if (q.authorUserId) conditions.push(eq(articles.authorUserId, q.authorUserId));
-  if (q.unitId) conditions.push(eq(articles.unitId, q.unitId));
-  if (q.departmentId) conditions.push(eq(articles.departmentId, q.departmentId));
-
-  const searchCondition = q.search
-    ? or(ilike(articles.title, `%${q.search}%`), ilike(articles.summary, `%${q.search}%`))
-    : undefined;
-
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
-  if (!scopedAccess.orgWide) {
-    const scopeConditions: SQL<unknown>[] = [eq(articles.authorUserId, ctx.session.userId)];
-    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(articles.unitId, [...scopedAccess.unitIds]));
-    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(articles.departmentId, [...scopedAccess.departmentIds]));
-    if (scopedAccess.articleIds.size > 0) scopeConditions.push(inArray(articles.id, [...scopedAccess.articleIds]));
-    const scopeClause = or(...scopeConditions);
-    if (scopeClause) conditions.push(scopeClause);
-  }
-
-  const whereClause = searchCondition
-    ? and(...conditions, searchCondition)
-    : and(...conditions);
+  const whereClause = buildArticleWhereConditions(q, ctx.session.orgId, scopedAccess, ctx.session.userId);
 
   const [rows, totalRow] = await Promise.all([
     db
@@ -146,22 +184,7 @@ export const POST = withPermission("canCreateArticle", async (req: NextRequest, 
 
   if (!newArticle) return serverError("Failed to create article.");
 
-  await auditAndActivity(
-    {
-      orgId: ctx.session.orgId,
-      action: "article.created",
-      actorUserId: ctx.session.userId,
-      actorEmail: ctx.session.email,
-      actorIp: ip,
-      entityType: "article",
-      entityId: newArticle.id,
-      changeSummary: `Article created: "${input.title}" (category: ${input.category}).`,
-    },
-    {
-      summary: `${ctx.session.displayName ?? ctx.session.email} created article: "${input.title}".`,
-      actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-    }
-  );
+  await auditArticleCreated(ctx, newArticle, ip);
 
   return apiCreated(newArticle);
 });

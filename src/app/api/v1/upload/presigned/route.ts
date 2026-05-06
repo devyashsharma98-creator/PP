@@ -49,9 +49,8 @@ export const POST = withAuth(async (req: NextRequest) => {
     // Dynamic import of AWS SDK to avoid hard dependency issues.
     // If the SDK is not installed, fall back to a mock/dev mode.
     try {
-      // @ts-ignore — optional AWS SDK, not installed by default
       const { S3Client } = await import("@aws-sdk/client-s3");
-      // @ts-ignore — optional AWS SDK, not installed by default
+      // @ts-expect-error — optional AWS SDK, not installed by default
       const { createPresignedPost } = await import("@aws-sdk/s3-presigned-post");
 
       const client = new S3Client({

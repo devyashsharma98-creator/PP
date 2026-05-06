@@ -20,6 +20,82 @@ import { auditAndActivity } from "@/lib/audit";
 import type { EventStatus } from "@/lib/permissions/event-workflow";
 import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 
+/**
+ * Build the WHERE clause conditions for listing events.
+ * Extracted to reduce cognitive complexity of the GET handler.
+ */
+function buildEventWhereConditions(
+  q: ReturnType<typeof listEventsQuerySchema.parse>,
+  orgId: string,
+  scopedAccess: ReturnType<typeof resolveScopedAccess>,
+  userId: string,
+): SQL<unknown> | undefined {
+  const conditions: SQL<unknown>[] = [eq(events.orgId, orgId)];
+
+  if (q.status) conditions.push(eq(events.status, q.status as EventStatus));
+  if (q.unitId) conditions.push(eq(events.unitId, q.unitId));
+  if (q.departmentId) conditions.push(eq(events.departmentId, q.departmentId));
+  if (q.fromDate) conditions.push(gte(events.startsAt, new Date(q.fromDate)));
+  if (q.toDate) conditions.push(lte(events.startsAt, new Date(q.toDate)));
+  if (q.search) conditions.push(ilike(events.title, `%${q.search}%`));
+
+  if (!scopedAccess.orgWide) {
+    const scopeConditions: SQL<unknown>[] = [eq(events.createdBy, userId)];
+    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(events.unitId, [...scopedAccess.unitIds]));
+    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(events.departmentId, [...scopedAccess.departmentIds]));
+    if (scopedAccess.eventIds.size > 0) scopeConditions.push(inArray(events.id, [...scopedAccess.eventIds]));
+    const scopeClause = or(...scopeConditions);
+    if (scopeClause) conditions.push(scopeClause);
+  }
+
+  return and(...conditions);
+}
+
+/**
+ * Persist the initial "draft" status history for a newly created event.
+ */
+async function insertEventStatusHistory(
+  eventId: string,
+  userId: string,
+  actorName: string,
+) {
+  await db.insert(eventStatusHistory).values({
+    eventId,
+    fromStatus: null,
+    toStatus: "draft",
+    actorUserId: userId,
+    actorNameSnapshot: actorName,
+    notes: "Event created.",
+  });
+}
+
+/**
+ * Emit audit log and activity feed entry for event creation.
+ */
+async function auditEventCreated(
+  ctx: Parameters<Parameters<typeof withPermission>[1]>[1],
+  event: { id: string; title: string },
+  ip: string | null,
+) {
+  const actorName = ctx.session.displayName ?? ctx.session.email;
+  await auditAndActivity(
+    {
+      orgId: ctx.session.orgId,
+      action: "event.created",
+      actorUserId: ctx.session.userId,
+      actorEmail: ctx.session.email,
+      actorIp: ip ?? undefined,
+      entityType: "event",
+      entityId: event.id,
+      changeSummary: `Event created: "${event.title}".`,
+    },
+    {
+      summary: `${actorName} created event: "${event.title}".`,
+      actorNameSnapshot: actorName,
+    }
+  );
+}
+
 // ── GET ───────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx) => {
   const ip = getClientIp(req);
@@ -33,27 +109,8 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
 
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
 
-  // Scope: karyakarta can only see their unit's events
-  const conditions: SQL<unknown>[] = [eq(events.orgId, ctx.session.orgId)];
-
-  if (q.status) conditions.push(eq(events.status, q.status as EventStatus));
-  if (q.unitId) conditions.push(eq(events.unitId, q.unitId));
-  if (q.departmentId) conditions.push(eq(events.departmentId, q.departmentId));
-  if (q.fromDate) conditions.push(gte(events.startsAt, new Date(q.fromDate)));
-  if (q.toDate) conditions.push(lte(events.startsAt, new Date(q.toDate)));
-  if (q.search) conditions.push(ilike(events.title, `%${q.search}%`));
-
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
-  if (!scopedAccess.orgWide) {
-    const scopeConditions: SQL<unknown>[] = [eq(events.createdBy, ctx.session.userId)];
-    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(events.unitId, [...scopedAccess.unitIds]));
-    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(events.departmentId, [...scopedAccess.departmentIds]));
-    if (scopedAccess.eventIds.size > 0) scopeConditions.push(inArray(events.id, [...scopedAccess.eventIds]));
-    const scopeClause = or(...scopeConditions);
-    if (scopeClause) conditions.push(scopeClause);
-  }
-
-  const whereClause = and(...conditions);
+  const whereClause = buildEventWhereConditions(q, ctx.session.orgId, scopedAccess, ctx.session.userId);
 
   const [rows, totalRow] = await Promise.all([
     db
@@ -140,32 +197,9 @@ export const POST = withPermission("canCreateEvent", async (req: NextRequest, ct
 
   if (!newEvent) return serverError("Failed to create event.");
 
-  // Initial status history entry
-  await db.insert(eventStatusHistory).values({
-    eventId: newEvent.id,
-    fromStatus: null,
-    toStatus: "draft",
-    actorUserId: ctx.session.userId,
-    actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-    notes: "Event created.",
-  });
-
-  await auditAndActivity(
-    {
-      orgId: ctx.session.orgId,
-      action: "event.created",
-      actorUserId: ctx.session.userId,
-      actorEmail: ctx.session.email,
-      actorIp: ip,
-      entityType: "event",
-      entityId: newEvent.id,
-      changeSummary: `Event created: "${input.title}".`,
-    },
-    {
-      summary: `${ctx.session.displayName ?? ctx.session.email} created event: "${input.title}".`,
-      actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-    }
-  );
+  const actorName = ctx.session.displayName ?? ctx.session.email;
+  await insertEventStatusHistory(newEvent.id, ctx.session.userId, actorName);
+  await auditEventCreated(ctx, newEvent, ip);
 
   return apiCreated(newEvent);
 });
