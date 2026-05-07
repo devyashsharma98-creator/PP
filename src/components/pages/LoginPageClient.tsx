@@ -124,6 +124,13 @@ function LoginForm() {
       }
 
       const authPayload = data?.data ?? data;
+
+      // If first-time login, force profile setup
+      if (authPayload?.requiresPasswordChange) {
+        window.location.replace("/setup-profile");
+        return;
+      }
+
       const roleCodes = (
         Array.isArray(authPayload?.effectiveRoleCodes)
           ? authPayload.effectiveRoleCodes

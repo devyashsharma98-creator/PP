@@ -78,17 +78,24 @@ export const eventTemplates: Record<
   },
 };
 
+import type { QuestionType } from "@/lib/app/contracts";
+
 export const suggestedQuestions: {
   question: string;
   questionHi: string;
-  type: "text" | "yesno";
+  type: QuestionType;
+  options?: string[];
 }[] = [
-  { question: "T-shirt size?", questionHi: "टी-शर्ट साइज़?", type: "text" },
+  { question: "T-shirt size?", questionHi: "टी-शर्ट साइज़?", type: "select", options: ["S", "M", "L", "XL", "XXL"] },
   { question: "Vegetarian?", questionHi: "शाकाहारी?", type: "yesno" },
   { question: "Need accommodation?", questionHi: "आवास चाहिए?", type: "yesno" },
   { question: "Coming from outside city?", questionHi: "शहर से बाहर से आ रहे हैं?", type: "yesno" },
-  { question: "Preferred session time?", questionHi: "पसंदीदा सत्र समय?", type: "text" },
+  { question: "Preferred session time?", questionHi: "पसंदीदा सत्र समय?", type: "select", options: ["Morning", "Afternoon", "Evening"] },
   { question: "Bringing family?", questionHi: "परिवार ला रहे हैं?", type: "yesno" },
+  { question: "Dietary restrictions?", questionHi: "आहार संबंधी प्रतिबंध?", type: "checkbox_group", options: ["Vegan", "Gluten-free", "Jain", "No restrictions"] },
+  { question: "How did you hear about us?", questionHi: "आपने हमें कैसे सुना?", type: "select", options: ["Social Media", "Friend", "WhatsApp Group", "Poster"] },
+  { question: "Rate your interest level", questionHi: "अपनी रुचि का स्तर दें", type: "rating" },
+  { question: "Any special requirements?", questionHi: "कोई विशेष आवश्यकता?", type: "textarea" },
 ];
 
 export const expertPool = [

@@ -186,7 +186,7 @@ type ArticleRow = ScopedRowLike & {
 
 type UnitRow = { id: string; name: string; org_id?: string; parent_unit_id?: string | null; unit_kind?: string };
 type FormConfigRow = { id: string; event_id: string; collect_phone: boolean; collect_city: boolean; collect_attending_count: boolean; collect_special_needs: boolean };
-type FormQuestionRow = { id: string; form_config_id: string; event_id: string; question_key: string; label: string; label_hi: string | null; question_type: string; display_order: number };
+type FormQuestionRow = { id: string; form_config_id: string; event_id: string; question_key: string; label: string; label_hi: string | null; question_type: string; display_order: number; options_json: unknown };
 type PollRow = { id: string; event_id: string; question: string; question_hi: string | null; poll_type: string; is_finalized: boolean; winner_option_id: string | null };
 type PollOptionRow = { id: string; poll_id: string; label: string; sort_order: number; scheduled_at: string | null };
 type PollVoteRow = { poll_id: string; option_id: string };
@@ -270,6 +270,7 @@ function buildViewer(ctx: NeonAuthContext): AppViewerContext {
       canUpdatePrachar: hasAny(publishRoles),
       canManageUsers: hasAny(["super_admin", "org_admin"]),
     },
+    requiresPasswordChange: ctx.profile?.requires_password_change ?? false,
   };
 }
 
@@ -292,7 +293,7 @@ function resolveEventStartIso(input: { date?: string; dateIso?: string }) {
 
 export async function getBootstrapPayload(ctx: NeonAuthContext) {
   // Load all data in parallel
-  const [events, units, articles, formConfigs, formQuestions, polls, pollOptions, pollVotes, pracharStatuses, registrations, regAnswers, articleReviews, vimarshTopics, vimarshResources] =
+  const [events, units, articles, formConfigs, formQuestions, polls, pollOptions, pollVotes, pracharStatuses, registrations, regAnswers, articleReviews, vimarshTopics, vimarshResources, departments] =
     await Promise.all([
       sql`
         SELECT
@@ -319,6 +320,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       sql`SELECT article_id, review_notes, created_at FROM public.article_reviews ORDER BY created_at DESC`,
       sql`SELECT * FROM public.vimarsh_topics ORDER BY sort_order ASC`,
       sql`SELECT * FROM public.vimarsh_resources`,
+      sql`SELECT id, code, name FROM public.departments_or_aayams`,
     ]);
 
   const typedEvents = events as unknown as EventRow[];
@@ -335,6 +337,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   const typedArticleReviews = articleReviews as unknown as ArticleReviewRow[];
   const typedVimarshTopics = vimarshTopics as unknown as VimarshTopicRow[];
   const typedVimarshResources = vimarshResources as unknown as VimarshResourceRow[];
+  const typedDepartments = departments as unknown as Array<{ id: string; code: string; name: string }>;
 
   const scopedAccess = resolveScopedAccess(ctx.assignments, ctx.units as UnitTreeLike[]);
   const scopedEvents = filterRowsByScope(typedEvents, scopedAccess, ctx.user.id);
@@ -342,6 +345,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   const scopedEventIds = new Set(scopedEvents.map((event) => event.id));
 
   const unitsById = new Map(typedUnits.map((unit) => [unit.id, unit.name]));
+  const deptCodeById = new Map(typedDepartments.map((d) => [d.id, d.code]));
   const formConfigByEventId = new Map(typedFormConfigs.map((config) => [config.event_id, config]));
 
   const questionsByConfigId = new Map<string, FormQuestionRow[]>();
@@ -508,6 +512,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       dateIso: e.starts_at,
       unitId: e.unit_id ?? null,
       departmentId: e.department_id ?? null,
+      departmentCode: e.department_id ? (deptCodeById.get(e.department_id) ?? null) : null,
       createdByUserId: e.created_by ?? null,
       unit: e.unit_id ? (unitsById.get(e.unit_id) ?? "Unknown Unit") : "Unknown Unit",
       submittedBy: e.submitted_by_name_snapshot ?? "Current User",
@@ -541,7 +546,8 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
                 id: q.question_key,
                 question: q.label,
                 questionHi: q.label_hi ?? q.label,
-                type: q.question_type === "yesno" ? "yesno" : "text",
+                type: (q.question_type as import("@/lib/app/contracts").QuestionType) ?? "text",
+                options: Array.isArray(q.options_json) ? q.options_json.filter((o): o is string => typeof o === "string") : undefined,
               })),
           }
         : undefined,
@@ -776,11 +782,13 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
           const q = config.customQuestions[i];
           await sql`
             insert into public.event_form_questions (
-              event_id, form_config_id, question_key, label, label_hi, question_type, is_required, display_order, created_by, updated_by
+              event_id, form_config_id, question_key, label, label_hi, question_type, is_required, display_order, options_json, created_by, updated_by
             )
             values (
               ${eventId}, ${formConfigId}, ${q.id}, ${q.question}, ${q.questionHi},
-              ${q.type === "yesno" ? "yesno" : "text"}, false, ${i}, ${actorId}, ${actorId}
+              ${q.type}, false, ${i},
+              ${q.options ? JSON.stringify(q.options) : null},
+              ${actorId}, ${actorId}
             )
           `;
         }

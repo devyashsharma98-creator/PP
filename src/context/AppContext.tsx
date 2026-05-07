@@ -170,6 +170,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setViewer(payload.viewer);
       setPermissions(payload.viewer.permissions);
       setServerRole(payload.viewer.uiRole);
+      // Redirect first-time users to profile setup
+      if (payload.viewer.requiresPasswordChange && typeof window !== 'undefined' && window.location.pathname !== '/setup-profile') {
+        window.location.replace('/setup-profile');
+      }
     }
   }, []);
 

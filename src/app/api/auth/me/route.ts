@@ -34,6 +34,7 @@ export async function GET(_req: NextRequest): Promise<Response> {
       isActive: true,
       orgId: true,
       lastLoginAt: true,
+      requiresPasswordChange: true,
     },
   });
 
@@ -57,5 +58,6 @@ export async function GET(_req: NextRequest): Promise<Response> {
     departmentId: session.departmentId,
     permissions,
     lastLoginAt: profile.lastLoginAt,
+    requiresPasswordChange: profile.requiresPasswordChange,
   });
 }

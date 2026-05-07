@@ -153,5 +153,6 @@ export async function POST(req: NextRequest): Promise<Response> {
     primaryRoleCode,
     effectiveRoleCodes,
     permissions,
+    requiresPasswordChange: profile.requiresPasswordChange,
   });
 }

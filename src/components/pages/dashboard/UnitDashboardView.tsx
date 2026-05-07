@@ -62,7 +62,8 @@ export function UnitDashboardView({
   });
   const [newCustomQ, setNewCustomQ] = useState("");
   const [newCustomQHi, setNewCustomQHi] = useState("");
-  const [newCustomQType, setNewCustomQType] = useState<"text" | "yesno">("yesno");
+  const [newCustomQType, setNewCustomQType] = useState<import("@/lib/app/contracts").QuestionType>("yesno");
+  const [newCustomQOptions, setNewCustomQOptions] = useState<string[]>(["", ""]);
   const [showAddQ, setShowAddQ] = useState(false);
   const [newPollQuestion, setNewPollQuestion] = useState("");
   const [newPollQuestionHi, setNewPollQuestionHi] = useState("");
@@ -130,7 +131,7 @@ export function UnitDashboardView({
   };
 
   const addSuggestion = (suggestion: (typeof suggestedQuestions)[number]) => {
-    if (localFormConfig.customQuestions.length >= 5) return;
+    if (localFormConfig.customQuestions.length >= 10) return;
     if (localFormConfig.customQuestions.some((question) => question.question === suggestion.question)) return;
     setLocalFormConfig((previous) => ({
       ...previous,
@@ -139,7 +140,9 @@ export function UnitDashboardView({
   };
 
   const addCustomQuestion = () => {
-    if (!newCustomQ.trim() || localFormConfig.customQuestions.length >= 5) return;
+    if (!newCustomQ.trim() || localFormConfig.customQuestions.length >= 10) return;
+    const needsOptions = ["select", "multiselect", "checkbox_group", "radio_group"].includes(newCustomQType);
+    const options = needsOptions ? newCustomQOptions.filter((o) => o.trim()).map((o) => o.trim()) : undefined;
     setLocalFormConfig((previous) => ({
       ...previous,
       customQuestions: [
@@ -149,11 +152,13 @@ export function UnitDashboardView({
           question: newCustomQ.trim(),
           questionHi: newCustomQHi.trim() || newCustomQ.trim(),
           type: newCustomQType,
+          options,
         },
       ],
     }));
     setNewCustomQ("");
     setNewCustomQHi("");
+    setNewCustomQOptions(["", ""]);
     setShowAddQ(false);
   };
 
@@ -483,47 +488,121 @@ export function UnitDashboardView({
 
                     {localFormConfig.customQuestions.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Custom Questions", "कस्टम प्रश्न")}</p>
-                        {localFormConfig.customQuestions.map((question) => (
-                          <div key={question.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/40 bg-muted/50 p-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-xs font-medium">{question.question}</p>
-                              <p className="text-[10px] text-muted-foreground">{question.type === "yesno" ? "Yes/No" : "Text"}</p>
-                            </div>
-                            <button onClick={() => removeCustomQuestion(question.id)} className="shrink-0 text-muted-foreground hover:text-destructive">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ))}
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("Custom Questions", "कस्टम प्रश्न")}</p>
+                          <span className="text-[10px] text-muted-foreground">{localFormConfig.customQuestions.length}/10</span>
+                        </div>
+                        <div className="space-y-2">
+                          {localFormConfig.customQuestions.map((question, qIdx) => {
+                            const typeLabel: Record<string, string> = {
+                              yesno: "Yes/No", text: "Text", textarea: "Long Text", number: "Number",
+                              email: "Email", select: "Dropdown", multiselect: "Multi-select",
+                              checkbox_group: "Checkboxes", radio_group: "Radio", rating: "Rating", date: "Date",
+                            };
+                            const typeIcon: Record<string, string> = {
+                              yesno: "◐", text: "✎", textarea: "✐", number: "#",
+                              email: "@", select: "▼", multiselect: "☑",
+                              checkbox_group: "☑", radio_group: "◉", rating: "★", date: "📅",
+                            };
+                            return (
+                              <motion.div
+                                key={question.id}
+                                layout
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: qIdx * 0.03 }}
+                                className="group flex items-center gap-2 rounded-xl border border-border/30 bg-muted/20 p-2.5 hover:border-primary/20 hover:bg-muted/30 transition-all"
+                              >
+                                <span className="text-xs text-muted-foreground/50 font-mono w-4">{qIdx + 1}</span>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-xs font-medium">{question.question}</p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="text-[10px] text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-md">
+                                      {typeIcon[question.type] ?? "?"} {typeLabel[question.type] ?? question.type}
+                                    </span>
+                                    {question.options && (
+                                      <span className="text-[10px] text-muted-foreground/50">{question.options.length} options</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => removeCustomQuestion(question.id)}
+                                  className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1 rounded-md hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
 
-                    {localFormConfig.customQuestions.length < 5 &&
+                    {localFormConfig.customQuestions.length < 10 &&
                       (showAddQ ? (
-                        <div className="space-y-2 rounded-lg border border-border/50 bg-muted/30 p-3">
-                          <Input value={newCustomQ} onChange={(event) => setNewCustomQ(event.target.value)} placeholder={t("Question (English)", "प्रश्न (अंग्रेज़ी)")} className="h-8 text-sm" />
-                          <Input value={newCustomQHi} onChange={(event) => setNewCustomQHi(event.target.value)} placeholder={t("Question (Hindi, optional)", "प्रश्न (हिन्दी, वैकल्पिक)")} className="h-8 text-sm font-devanagari" />
-                          <div className="flex gap-2">
-                            <Select value={newCustomQType} onValueChange={(value: "text" | "yesno") => setNewCustomQType(value)}>
-                              <SelectTrigger className="h-8 flex-1 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="yesno">Yes / No</SelectItem>
-                                <SelectItem value="text">Text Answer</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button size="sm" onClick={addCustomQuestion} className="h-8 text-xs">
-                              {t("Add", "जोड़ें")}
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="space-y-2.5 rounded-xl border border-primary/20 bg-primary/[0.03] p-3.5"
+                        >
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70">{t("New Question", "नया प्रश्न")}</p>
+                          <Input value={newCustomQ} onChange={(event) => setNewCustomQ(event.target.value)} placeholder={t("Question (English)", "प्रश्न (अंग्रेज़ी)")} className="h-9 text-sm rounded-lg" />
+                          <Input value={newCustomQHi} onChange={(event) => setNewCustomQHi(event.target.value)} placeholder={t("Question (Hindi, optional)", "प्रश्न (हिन्दी, वैकल्पिक)")} className="h-9 text-sm font-devanagari rounded-lg" />
+                          <Select value={newCustomQType} onValueChange={(value) => setNewCustomQType(value as import("@/lib/app/contracts").QuestionType)}>
+                            <SelectTrigger className="h-9 text-xs rounded-lg">
+                              <SelectValue placeholder={t("Select type…", "प्रकार चुनें…")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="yesno">◐ Yes / No</SelectItem>
+                              <SelectItem value="text">✎ Short Text</SelectItem>
+                              <SelectItem value="textarea">✐ Long Text</SelectItem>
+                              <SelectItem value="number"># Number</SelectItem>
+                              <SelectItem value="email">@ Email</SelectItem>
+                              <SelectItem value="select">▼ Single Choice (Dropdown)</SelectItem>
+                              <SelectItem value="multiselect">☑ Multiple Choice</SelectItem>
+                              <SelectItem value="checkbox_group">☑ Checkbox Group</SelectItem>
+                              <SelectItem value="radio_group">◉ Radio Group</SelectItem>
+                              <SelectItem value="rating">★ Star Rating (1-5)</SelectItem>
+                              <SelectItem value="date">📅 Date</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {["select", "multiselect", "checkbox_group", "radio_group"].includes(newCustomQType) && (
+                            <div className="space-y-1.5 rounded-lg border border-border/30 bg-background/50 p-2.5">
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("Options", "विकल्प")}</p>
+                              <div className="space-y-1.5">
+                                {newCustomQOptions.map((opt, idx) => (
+                                  <div key={idx} className="flex items-center gap-2">
+                                    <span className="text-[10px] text-muted-foreground w-4">{idx + 1}.</span>
+                                    <Input
+                                      value={opt}
+                                      onChange={(e) => {
+                                        const next = [...newCustomQOptions];
+                                        next[idx] = e.target.value;
+                                        setNewCustomQOptions(next);
+                                      }}
+                                      placeholder={`${t("Option", "विकल्प")} ${idx + 1}`}
+                                      className="h-7 text-xs rounded-md"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                              <Button type="button" variant="ghost" size="sm" className="h-7 text-[10px] rounded-md" onClick={() => setNewCustomQOptions((p) => [...p, ""])}>
+                                <Plus className="w-3 h-3 mr-1" /> {t("Add option", "विकल्प जोड़ें")}
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex gap-2 pt-1">
+                            <Button size="sm" onClick={addCustomQuestion} className="h-8 text-xs rounded-lg">
+                              {t("Add Question", "प्रश्न जोड़ें")}
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setShowAddQ(false)} className="h-8 text-xs">
+                            <Button size="sm" variant="ghost" onClick={() => setShowAddQ(false)} className="h-8 text-xs rounded-lg">
                               {t("Cancel", "रद्द")}
                             </Button>
                           </div>
-                        </div>
+                        </motion.div>
                       ) : (
-                        <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowAddQ(true)}>
-                          <Plus className="mr-1 h-3 w-3" /> {t("Add Custom Question", "कस्टम प्रश्न जोड़ें")}
+                        <Button variant="outline" size="sm" className="w-full text-xs rounded-xl border-dashed hover:border-primary/40 hover:bg-primary/5 transition-all" onClick={() => setShowAddQ(true)}>
+                          <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("Add Custom Question", "कस्टम प्रश्न जोड़ें")}
                         </Button>
                       ))}
 
@@ -539,7 +618,7 @@ export function UnitDashboardView({
                             <button
                               key={suggestion.question}
                               type="button"
-                              disabled={alreadyAdded || localFormConfig.customQuestions.length >= 5}
+                              disabled={alreadyAdded || localFormConfig.customQuestions.length >= 10}
                               onClick={() => addSuggestion(suggestion)}
                               className={`rounded-full border px-2 py-1 text-[11px] font-devanagari transition-colors ${
                                 alreadyAdded

@@ -30,7 +30,7 @@ async function seed() {
   console.log("Seeding Pragya Pravah DB...\n");
 
   // --- 1. Org ---
-  console.log("  [1/5] Org settings...");
+  console.log("  [1/6] Org settings...");
   const [org] = await db
     .insert(schema.orgSettings)
     .values({
@@ -52,7 +52,7 @@ async function seed() {
   console.log(`     org_id = ${orgId}`);
 
   // --- 2. Roles ---
-  console.log("  [2/5] Roles...");
+  console.log("  [2/6] Roles...");
   const roleDefs = [
     { code: "super_admin",        priority: "0", name: "Super Admin",         nameHi: "सुपर व्यवस्थापक" },
     { code: "org_admin",          priority: "1", name: "Org Admin",           nameHi: "संस्था व्यवस्थापक" },
@@ -78,7 +78,7 @@ async function seed() {
   console.log(`     seeded ${allRoles.length} roles`);
 
   // --- 3. Root unit ---
-  console.log("  [3/5] Root unit...");
+  console.log("  [3/6] Root unit...");
   const [unit] = await db
     .insert(schema.units)
     .values({
@@ -241,7 +241,7 @@ async function seed() {
   }
 
   // --- 4. Demo users ---
-  console.log("  [4/5] Demo users...");
+  console.log("  [4/6] Demo users...");
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   const demoUsers = [
@@ -364,12 +364,88 @@ async function seed() {
     }
   }
 
-  // --- 5. Summary ---
+  // --- 5. Named onboarding users ---
+  console.log("  [5/6] Named onboarding users...");
+  const ONBOARDING_PASSWORD = "PP@123";
+  const onboardingHash = await bcrypt.hash(ONBOARDING_PASSWORD, 12);
+
+  const onboardingUsers = [
+    { email: "dheerendrachaturvedi@pragyapravah.in", displayName: "Dheerendra Chaturvedi" },
+    { email: "abhisheksharma@pragyapravah.in", displayName: "Abhishek Sharma" },
+    { email: "vandanamishra@pragyapravah.in", displayName: "Vandana Mishra" },
+    { email: "shashikala@pragyapravah.in", displayName: "Shashikala" },
+    { email: "kokilachaturvedi@pragyapravah.in", displayName: "Kokila Chaturvedi" },
+    { email: "savitabhadoriya@pragyapravah.in", displayName: "Savita Bhadoriya" },
+    { email: "ayushisahu@pragyapravah.in", displayName: "Ayushi Sahu" },
+    { email: "sanchitajain@pragyapravah.in", displayName: "Sanchita Jain" },
+    { email: "gyaneshwarsinghkushwaha@pragyapravah.in", displayName: "Gyaneshwar Singh Kushwaha" },
+    { email: "ambujtiwari@pragyapravah.in", displayName: "Ambuj Tiwari" },
+  ];
+
+  const karyakartaRoleId = roleByCode["karyakarta"];
+
+  for (const u of onboardingUsers) {
+    const existing = await db.query.profiles.findFirst({
+      where: eq(schema.profiles.email, u.email),
+    });
+
+    let userId: string;
+
+    if (existing) {
+      userId = existing.id;
+      // Ensure flag is set for existing users too (idempotent)
+      if (!existing.requiresPasswordChange) {
+        await db
+          .update(schema.profiles)
+          .set({ requiresPasswordChange: true, passwordHash: onboardingHash })
+          .where(eq(schema.profiles.id, existing.id));
+      }
+      console.log(`     ${u.email} already exists (updated onboarding flag)`);
+    } else {
+      const [profile] = await db
+        .insert(schema.profiles)
+        .values({
+          orgId,
+          email: u.email,
+          passwordHash: onboardingHash,
+          displayName: u.displayName,
+          isActive: true,
+          isEmailVerified: true,
+          requiresPasswordChange: true,
+        })
+        .returning();
+      userId = profile.id;
+      console.log(`     created ${u.email} (${userId})`);
+    }
+
+    // Assign karyakarta role if not already assigned
+    const existingAssignment = await db.query.userRoleAssignments.findFirst({
+      where: (t, { and, eq: eq2 }) =>
+        and(eq2(t.userId, userId), eq2(t.roleId, karyakartaRoleId)),
+    });
+
+    if (!existingAssignment) {
+      await db.insert(schema.userRoleAssignments).values({
+        userId,
+        roleId: karyakartaRoleId,
+        scopeType: "org",
+        orgId,
+        unitId: canonicalUnitId,
+        isPrimary: true,
+      });
+    }
+  }
+
+  // --- 6. Summary ---
   console.log("\nSeed complete.\n");
   console.log("  Demo credentials (all share the same password):");
   console.log(`  Password: ${DEMO_PASSWORD}\n`);
   for (const u of demoUsers) {
     console.log(`  ${u.roleCode.padEnd(20)} -> ${u.email}`);
+  }
+  console.log("\n  Onboarding users (initial password: PP@123, must complete profile on first login):");
+  for (const u of onboardingUsers) {
+    console.log(`  ${u.displayName.padEnd(28)} -> ${u.email}`);
   }
   console.log("");
 }

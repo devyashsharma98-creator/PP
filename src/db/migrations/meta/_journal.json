@@ -8,6 +8,20 @@
       "when": 1775554967842,
       "tag": "0000_cultured_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778164588583,
+      "tag": "0001_curvy_supernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778174259216,
+      "tag": "0002_furry_tempest",
+      "breakpoints": true
     }
   ]
 }

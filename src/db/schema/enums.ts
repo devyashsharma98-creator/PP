@@ -81,7 +81,20 @@ export const articleReviewDecision = pgEnum("article_review_decision", [
 export const pollType = pgEnum("poll_type", ["date", "general"]);
 
 // ── Event Form Question Types ─────────────────────────────────────────────────
-export const questionType = pgEnum("question_type", ["text", "yesno"]);
+export const questionType = pgEnum("question_type", [
+  "text",
+  "yesno",
+  "select",
+  "multiselect",
+  "textarea",
+  "number",
+  "email",
+  "rating",
+  "date",
+  "checkbox_group",
+  "radio_group",
+]);
+export type QuestionType = (typeof questionType.enumValues)[number];
 
 // ── Vritt (Event Report) Status ───────────────────────────────────────────────
 // Post-event report lifecycle

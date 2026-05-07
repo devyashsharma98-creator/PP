@@ -32,6 +32,7 @@ export interface NeonAuthContext {
     org_id: string | null;
     display_name: string | null;
     email: string | null;
+    requires_password_change: boolean;
   } | null;
   assignments: Array<{
     id: string;
@@ -75,7 +76,7 @@ export async function requireNeonAuthContext(req: Request): Promise<NeonAuthCont
 
   const [profiles, roles, assignments, units] = await Promise.all([
     conn`
-      select id, org_id, display_name, email
+      select id, org_id, display_name, email, requires_password_change
       from public.profiles
       where id = ${session.userId} and is_active = true
       limit 1
@@ -94,6 +95,7 @@ export async function requireNeonAuthContext(req: Request): Promise<NeonAuthCont
     org_id: string | null;
     display_name: string | null;
     email: string | null;
+    requires_password_change: boolean;
   }>)[0];
 
   if (!profile) {

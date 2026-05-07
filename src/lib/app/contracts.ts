@@ -54,6 +54,19 @@ export interface PracharStatus {
   templateReference?: string | null;
 }
 
+export type QuestionType =
+  | "text"
+  | "yesno"
+  | "select"
+  | "multiselect"
+  | "textarea"
+  | "number"
+  | "email"
+  | "rating"
+  | "date"
+  | "checkbox_group"
+  | "radio_group";
+
 export interface FormConfig {
   fields: {
     phone: boolean;
@@ -65,7 +78,8 @@ export interface FormConfig {
     id: string;
     question: string;
     questionHi: string;
-    type: "text" | "yesno";
+    type: QuestionType;
+    options?: string[];
   }[];
 }
 
@@ -106,6 +120,7 @@ export interface GatividhiEvent {
   dateIso?: string;
   unitId?: string | null;
   departmentId?: string | null;
+  departmentCode?: string | null;
   createdByUserId?: string | null;
   unit: string;
   submittedBy: string;
@@ -301,6 +316,7 @@ export interface AppViewerContext {
   effectiveRoles: CanonicalRoleCode[];
   assignments: AppRoleAssignmentSummary[];
   permissions: AppPermissionSummary;
+  requiresPasswordChange: boolean;
 }
 
 export type AppActionRequest =

@@ -28,7 +28,7 @@ const nextConfig = {
       },
       // API routes and protected pages: no caching
       {
-        source: '/(api|login|dashboard|aalekh|dayitv|prachar|calendar|directory|users|super-admin)',
+        source: '/(api|login|dashboard|aalekh|dayitv|prachar|calendar|directory|users|super-admin|setup-profile)',
         headers: [
           {
             key: 'Cache-Control',

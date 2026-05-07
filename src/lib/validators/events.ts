@@ -71,9 +71,13 @@ export const eventQuestionSchema = z.object({
   questionKey: z.string().min(1).max(64).regex(/^[a-z0-9_]+$/, "Key must be lowercase letters, numbers, underscores."),
   label: z.string().min(1).max(512),
   labelHi: z.string().max(512).optional(),
-  questionType: z.enum(["text", "yesno"]).default("text"),
+  questionType: z.enum([
+    "text", "yesno", "select", "multiselect", "textarea",
+    "number", "email", "rating", "date", "checkbox_group", "radio_group",
+  ]).default("text"),
   isRequired: z.boolean().optional().default(false),
   displayOrder: z.number().int().optional().default(0),
+  options: z.array(z.string().min(1).max(256)).optional(),
 });
 export type EventQuestionInput = z.infer<typeof eventQuestionSchema>;
 

@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { PragyaLogo } from '@/components/PragyaLogo';
 import type { LucideIcon } from 'lucide-react';
@@ -20,7 +21,7 @@ import {
   CheckCircle2, ChevronRight, ChevronLeft,
   Calendar, MapPin, Users, Phone,
   User as UserIcon, Building2, AlertTriangle, ArrowRight,
-  FileText, Shield, Compass
+  FileText, Shield, Compass, Star
 } from 'lucide-react';
 
 interface Props {
@@ -32,6 +33,220 @@ const stepVariants = {
   center: { x: 0, opacity: 1 },
   exit: (dir: number) => ({ x: dir > 0 ? -64 : 64, opacity: 0 }),
 };
+
+function CustomQuestionInput({ question, value, onChange, t }: {
+  question: { id: string; question: string; questionHi: string; type: string; options?: string[] };
+  value: string;
+  onChange: (val: string) => void;
+  t: (en: string, hi: string) => string;
+}) {
+  const opts = question.options ?? [];
+
+  switch (question.type) {
+    case 'yesno':
+      return (
+        <div className="flex gap-3">
+          {['Yes', 'No'].map(opt => (
+            <motion.label
+              key={opt}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 cursor-pointer transition-all text-sm select-none',
+                value === opt
+                  ? 'border-primary bg-primary/5 text-primary font-bold shadow-sm'
+                  : 'border-border/40 hover:border-primary/25 bg-muted/5 text-muted-foreground hover:bg-muted/10'
+              )}>
+              <input
+                type="radio"
+                className="sr-only"
+                name={`custom-${question.id}`}
+                value={opt}
+                checked={value === opt}
+                onChange={() => onChange(opt)}
+              />
+              <span className="font-devanagari">{opt === 'Yes' ? t('Yes', 'हाँ') : t('No', 'नहीं')}</span>
+            </motion.label>
+          ))}
+        </div>
+      );
+
+    case 'textarea':
+      return (
+        <Textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={t('Enter your response here…', 'अपना उत्तर यहाँ लिखें…')}
+          className="min-h-[120px] rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all resize-none text-sm leading-relaxed"
+        />
+      );
+
+    case 'number':
+      return (
+        <div className="relative">
+          <Input
+            type="number"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            placeholder={t('Enter a number…', 'संख्या दर्ज करें…')}
+            className="h-12 rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all pl-4"
+          />
+        </div>
+      );
+
+    case 'email':
+      return (
+        <div className="relative">
+          <Input
+            type="email"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            placeholder={t('your@email.com', 'your@email.com')}
+            className="h-12 rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
+          />
+        </div>
+      );
+
+    case 'date':
+      return (
+        <div className="relative">
+          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+          <Input
+            type="date"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            className="h-12 rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all pl-10"
+          />
+        </div>
+      );
+
+    case 'select':
+      return (
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger className="h-12 rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10">
+            <SelectValue placeholder={t('Choose an option…', 'एक विकल्प चुनें…')} />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            {opts.map(opt => (
+              <SelectItem key={opt} value={opt} className="rounded-lg">{opt}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+
+    case 'multiselect':
+    case 'checkbox_group': {
+      const selected = value ? value.split(',').filter(Boolean) : [];
+      const toggle = (opt: string) => {
+        const next = selected.includes(opt)
+          ? selected.filter(s => s !== opt)
+          : [...selected, opt];
+        onChange(next.join(','));
+      };
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {opts.map(opt => (
+            <motion.button
+              key={opt}
+              type="button"
+              whileTap={{ scale: 0.97 }}
+              onClick={() => toggle(opt)}
+              className={cn(
+                'flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all text-sm',
+                selected.includes(opt)
+                  ? 'border-primary/40 bg-primary/5 text-primary font-medium'
+                  : 'border-border/30 bg-muted/5 text-muted-foreground hover:border-border/60 hover:bg-muted/10'
+              )}
+            >
+              <div className={cn(
+                'w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors',
+                selected.includes(opt) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30'
+              )}>
+                {selected.includes(opt) && <CheckCircle2 className="w-3.5 h-3.5" />}
+              </div>
+              <span className="font-devanagari">{opt}</span>
+            </motion.button>
+          ))}
+        </div>
+      );
+    }
+
+    case 'radio_group':
+      return (
+        <div className="space-y-2">
+          {opts.map(opt => (
+            <motion.label
+              key={opt}
+              whileTap={{ scale: 0.99 }}
+              className={cn(
+                'flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm',
+                value === opt
+                  ? 'border-primary/40 bg-primary/5 text-primary font-medium'
+                  : 'border-border/30 bg-muted/5 text-muted-foreground hover:border-border/60 hover:bg-muted/10'
+              )}
+            >
+              <div className={cn(
+                'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors',
+                value === opt ? 'border-primary' : 'border-muted-foreground/30'
+              )}>
+                {value === opt && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+              </div>
+              <input
+                type="radio"
+                className="sr-only"
+                name={`custom-${question.id}`}
+                value={opt}
+                checked={value === opt}
+                onChange={() => onChange(opt)}
+              />
+              <span className="font-devanagari">{opt}</span>
+            </motion.label>
+          ))}
+        </div>
+      );
+
+    case 'rating': {
+      const rating = parseInt(value, 10) || 0;
+      const [hoverRating, setHoverRating] = useState(0);
+      return (
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map(star => (
+            <motion.button
+              key={star}
+              type="button"
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onChange(String(star))}
+              onMouseEnter={() => setHoverRating(star)}
+              onMouseLeave={() => setHoverRating(0)}
+              className="p-1 transition-colors"
+            >
+              <Star className={cn(
+                "w-8 h-8 transition-colors",
+                star <= (hoverRating || rating) ? "text-warning fill-warning" : "text-muted-foreground/20"
+              )} />
+            </motion.button>
+          ))}
+          {(rating > 0 || hoverRating > 0) && (
+            <span className="ml-2 text-sm font-semibold text-warning">
+              {hoverRating || rating}/5
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    default:
+      return (
+        <Input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={t('Enter response…', 'उत्तर लिखें…')}
+          className="h-12 rounded-xl bg-muted/10 border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
+        />
+      );
+  }
+}
 
 export default function EventForm({ eventId }: Props) {
   const { events, addRegistration } = useAppContext();
@@ -418,35 +633,12 @@ export default function EventForm({ eventId }: Props) {
                           {customQs.map(q => (
                             <div key={q.id} className="space-y-3">
                               <Label className="font-bold text-sm font-devanagari leading-relaxed text-foreground/80">{t(q.question, q.questionHi)}</Label>
-                              {q.type === 'yesno' ? (
-                                <div className="flex gap-3">
-                                  {['Yes', 'No'].map(opt => (
-                                    <label key={opt} className={cn(
-                                      'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all text-sm select-none shadow-sm',
-                                      form.customAnswers[q.id] === opt
-                                        ? 'border-primary bg-primary/5 text-primary font-bold'
-                                        : 'border-border/60 hover:border-primary/30 bg-muted/10 text-muted-foreground'
-                                    )}>
-                                      <input
-                                        type="radio"
-                                        className="sr-only"
-                                        name={`custom-${q.id}`}
-                                        value={opt}
-                                        checked={form.customAnswers[q.id] === opt}
-                                        onChange={() => setForm(p => ({ ...p, customAnswers: { ...p.customAnswers, [q.id]: opt } }))}
-                                      />
-                                      <span className="font-devanagari">{opt === 'Yes' ? t('Yes', 'हाँ') : t('No', 'नहीं')}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                              ) : (
-                                <Input
-                                  value={form.customAnswers[q.id] ?? ''}
-                                  onChange={e => setForm(p => ({ ...p, customAnswers: { ...p.customAnswers, [q.id]: e.target.value } }))}
-                                  placeholder={t('Enter response…', 'उत्तर लिखें…')}
-                                  className="h-11 rounded-xl bg-muted/20 border-border/60 focus:border-primary/40 focus:ring-primary/10 transition-all"
-                                />
-                              )}
+                              <CustomQuestionInput
+                                question={q}
+                                value={form.customAnswers[q.id] ?? ''}
+                                onChange={(val) => setForm(p => ({ ...p, customAnswers: { ...p.customAnswers, [q.id]: val } }))}
+                                t={t}
+                              />
                             </div>
                           ))}
                         </div>

@@ -142,6 +142,7 @@ export const eventFormQuestions = pgTable(
     questionType: questionType("question_type").notNull().default("text"),
     isRequired: boolean("is_required").notNull().default(false),
     displayOrder: integer("display_order").notNull().default(0),
+    optionsJson: jsonb("options_json"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => [index("efq_event_idx").on(t.eventId)]

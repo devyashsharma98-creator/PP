@@ -59,6 +59,7 @@ export const profiles = pgTable(
     phone: varchar("phone", { length: 24 }),
     isActive: boolean("is_active").notNull().default(true),
     isEmailVerified: boolean("is_email_verified").notNull().default(false),
+    requiresPasswordChange: boolean("requires_password_change").notNull().default(false),
     // Timestamps for account management
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),

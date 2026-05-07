@@ -1,0 +1,10 @@
+ALTER TYPE "public"."question_type" ADD VALUE 'select';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'multiselect';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'textarea';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'number';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'email';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'rating';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'date';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'checkbox_group';--> statement-breakpoint
+ALTER TYPE "public"."question_type" ADD VALUE 'radio_group';--> statement-breakpoint
+ALTER TABLE "event_form_questions" ADD COLUMN "options_json" jsonb;
