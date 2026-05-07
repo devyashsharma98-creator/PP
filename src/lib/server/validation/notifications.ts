@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
 export const notificationKindSchema = z.enum([
-  'workflow',
-  'event_review',
-  'article_review',
-  'registration',
-  'poll_result',
-  'reminder',
+  'event_status_change',
+  'article_status_change',
+  'review_assigned',
+  'review_completed',
+  'poll_finalized',
+  'registration_received',
+  'mention',
   'system',
 ]);
 

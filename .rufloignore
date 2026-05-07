@@ -1,0 +1,17 @@
+# Build artifacts
+.next/
+dist/
+out/
+
+# Dependencies
+node_modules/
+
+# Lock files
+package-lock.json
+yarn.lock
+bun.lock
+
+# Generated / cache
+*.log
+.vite/
+.vite-temp/

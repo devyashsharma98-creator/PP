@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PASSWORD = "Password123!";
+const PASSWORD = process.env.APP_DEMO_PASSWORD as string;
+if (!PASSWORD) {
+  throw new Error(
+    "APP_DEMO_PASSWORD environment variable is required for E2E tests. " +
+      "Set it in .env.local or your CI environment.",
+  );
+}
 
 const accounts = {
   superadmin: "demo.superadmin@example.com",

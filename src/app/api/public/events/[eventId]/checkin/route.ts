@@ -7,104 +7,76 @@ const sql = isNeonConfigured ? neon(process.env.NEON_DATABASE_URL!) : null;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+type NeonSql = NonNullable<typeof sql>;
+
 function isMissingDbObjectError(err: unknown, hint: string) {
   const msg = err instanceof Error ? err.message : String(err);
   return msg.includes("does not exist") && msg.includes(hint);
 }
 
-type NeonSql = NonNullable<typeof sql>;
-
 function firstReturnedRow(rows: unknown): unknown {
   return Array.isArray(rows) ? rows[0] : undefined;
 }
 
-/** Increment check-in count across schema variants (phase3 column, Bhopal column, or Drizzle event_vritt). */
-/**
- * Attempt to increment check-in using the `events.vritt_checked_in_count` column.
- * Returns null if the column does not exist (migration not applied yet).
- */
-async function tryIncrementViaEventsColumn(
-  runSql: NeonSql,
-  eventId: string,
-): Promise<{ ok: true; via: string } | null> {
-  try {
-    const rows = await runSql`
-      UPDATE public.events
-      SET vritt_checked_in_count = COALESCE(vritt_checked_in_count, 0) + 1
-      WHERE id = ${eventId}
-      RETURNING id
-    `;
-    if (firstReturnedRow(rows)) return { ok: true, via: "events.vritt_checked_in_count" };
-  } catch (err) {
-    if (!isMissingDbObjectError(err, "vritt_checked_in_count")) throw err;
-  }
-  return null;
+/** Single strategy for incrementing check-in count. */
+interface CheckInStrategy {
+  name: string;
+  hint: string;
+  run: (runSql: NeonSql, eventId: string) => Promise<unknown>;
 }
 
-/**
- * Fallback: attempt to increment using the legacy `events.vritt_attendance_count` column.
- */
-async function tryIncrementViaLegacyColumn(
-  runSql: NeonSql,
-  eventId: string,
-): Promise<{ ok: true; via: string } | null> {
-  try {
-    const rows = await runSql`
-      UPDATE public.events
-      SET vritt_attendance_count = COALESCE(vritt_attendance_count, 0) + 1
-      WHERE id = ${eventId}
-      RETURNING id
-    `;
-    if (firstReturnedRow(rows)) return { ok: true, via: "events.vritt_attendance_count" };
-  } catch (err) {
-    if (!isMissingDbObjectError(err, "vritt_attendance_count")) throw err;
-  }
-  return null;
-}
+const strategies: CheckInStrategy[] = [
+  {
+    name: "events.vritt_checked_in_count",
+    hint: "vritt_checked_in_count",
+    run: async (runSql, eventId) =>
+      runSql`
+        UPDATE public.events
+        SET vritt_checked_in_count = COALESCE(vritt_checked_in_count, 0) + 1
+        WHERE id = ${eventId}
+        RETURNING id
+      `,
+  },
+  {
+    name: "events.vritt_attendance_count",
+    hint: "vritt_attendance_count",
+    run: async (runSql, eventId) =>
+      runSql`
+        UPDATE public.events
+        SET vritt_attendance_count = COALESCE(vritt_attendance_count, 0) + 1
+        WHERE id = ${eventId}
+        RETURNING id
+      `,
+  },
+  {
+    name: "event_vritt.checked_in_count",
+    hint: "event_vritt",
+    run: async (runSql, eventId) =>
+      runSql`
+        INSERT INTO public.event_vritt (event_id, checked_in_count, updated_at)
+        VALUES (${eventId}, 1, now())
+        ON CONFLICT (event_id)
+        DO UPDATE SET
+          checked_in_count = COALESCE(public.event_vritt.checked_in_count, 0) + 1,
+          updated_at = now()
+        RETURNING event_id
+      `,
+  },
+];
 
-/**
- * Fallback: upsert into the `event_vritt` side table.
- */
-async function tryIncrementViaSideTable(
-  runSql: NeonSql,
-  eventId: string,
-): Promise<{ ok: true; via: string } | null> {
-  try {
-    const rows = await runSql`
-      INSERT INTO public.event_vritt (event_id, checked_in_count, updated_at)
-      VALUES (${eventId}, 1, now())
-      ON CONFLICT (event_id)
-      DO UPDATE SET
-        checked_in_count = COALESCE(public.event_vritt.checked_in_count, 0) + 1,
-        updated_at = now()
-      RETURNING event_id
-    `;
-    if (firstReturnedRow(rows)) return { ok: true, via: "event_vritt.checked_in_count" };
-  } catch (err) {
-    if (!isMissingDbObjectError(err, "event_vritt")) throw err;
-  }
-  return null;
-}
-
-/**
- * Increment public check-in count across schema variants (phase3 column, Bhopal column, or Drizzle event_vritt).
- * Each strategy is isolated in its own function to keep cognitive complexity low.
- */
 async function incrementPublicCheckInCount(
   runSql: NeonSql,
   eventId: string,
 ): Promise<{ ok: true; via: string } | { ok: false; error: string }> {
-  try {
-    const r1 = await tryIncrementViaEventsColumn(runSql, eventId);
-    if (r1) return r1;
-
-    const r2 = await tryIncrementViaLegacyColumn(runSql, eventId);
-    if (r2) return r2;
-
-    const r3 = await tryIncrementViaSideTable(runSql, eventId);
-    if (r3) return r3;
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  for (const strategy of strategies) {
+    try {
+      const rows = await strategy.run(runSql, eventId);
+      if (firstReturnedRow(rows)) return { ok: true, via: strategy.name };
+    } catch (err) {
+      if (!isMissingDbObjectError(err, strategy.hint)) {
+        return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    }
   }
 
   return {

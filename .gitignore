@@ -63,3 +63,6 @@ auth-assets-*.json
 *_sync*.txt
 public/recording.*
 public/wa_image.*
+
+# Ruflo scan artifacts
+ruflo-*.json
