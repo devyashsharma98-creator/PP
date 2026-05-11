@@ -28,6 +28,8 @@ export interface UserSummary {
   displayName: string | null;
   displayNameHi: string | null;
   phone: string | null;
+  responsibility: string | null;
+  responsibilityHi: string | null;
   isActive: boolean;
   lastLoginAt: string | null;
   createdAt: string;
@@ -41,6 +43,8 @@ export interface UserDetail {
   displayName: string | null;
   displayNameHi: string | null;
   phone: string | null;
+  responsibility: string | null;
+  responsibilityHi: string | null;
   isActive: boolean;
   isEmailVerified: boolean;
   lastLoginAt: string | null;
@@ -89,6 +93,8 @@ export interface CreateUserInput {
   displayName?: string;
   displayNameHi?: string;
   phone?: string;
+  responsibility?: string;
+  responsibilityHi?: string;
   roleCode: CanonicalRoleCode;
 }
 
@@ -96,6 +102,8 @@ export interface UpdateUserInput {
   displayName?: string;
   displayNameHi?: string;
   phone?: string;
+  responsibility?: string;
+  responsibilityHi?: string;
   isActive?: boolean;
 }
 

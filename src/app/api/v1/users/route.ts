@@ -55,6 +55,8 @@ export const GET = withPermission("canManageUsers", async (req: NextRequest, ctx
         displayName: profiles.displayName,
         displayNameHi: profiles.displayNameHi,
         phone: profiles.phone,
+        responsibility: profiles.responsibility,
+        responsibilityHi: profiles.responsibilityHi,
         isActive: profiles.isActive,
         lastLoginAt: profiles.lastLoginAt,
         createdAt: profiles.createdAt,
@@ -172,6 +174,8 @@ export const POST = withPermission("canManageUsers", async (req: NextRequest, ct
       displayName: input.displayName,
       displayNameHi: input.displayNameHi,
       phone: input.phone,
+      responsibility: input.responsibility,
+      responsibilityHi: input.responsibilityHi,
     })
     .returning({
       id: profiles.id,

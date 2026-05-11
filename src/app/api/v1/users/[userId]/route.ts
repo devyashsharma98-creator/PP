@@ -39,6 +39,8 @@ export const GET = withAuth(async (req: NextRequest, ctx, params) => {
       displayName: true,
       displayNameHi: true,
       phone: true,
+      responsibility: true,
+      responsibilityHi: true,
       isActive: true,
       isEmailVerified: true,
       lastLoginAt: true,
@@ -111,6 +113,8 @@ export const PATCH = withAuth(async (req: NextRequest, ctx, params) => {
       ...(input.displayName !== undefined && { displayName: input.displayName }),
       ...(input.displayNameHi !== undefined && { displayNameHi: input.displayNameHi }),
       ...(input.phone !== undefined && { phone: input.phone }),
+      ...(input.responsibility !== undefined && { responsibility: input.responsibility }),
+      ...(input.responsibilityHi !== undefined && { responsibilityHi: input.responsibilityHi }),
       ...(input.isActive !== undefined && { isActive: input.isActive }),
       updatedAt: new Date(),
     })

@@ -207,12 +207,16 @@ export default function UserManagement() {
     displayName: "",
     displayNameHi: "",
     phone: "",
+    responsibility: "",
+    responsibilityHi: "",
     roleCode: "karyakarta",
   });
   const [profileForm, setProfileForm] = useState<UpdateUserInput>({
     displayName: "",
     displayNameHi: "",
     phone: "",
+    responsibility: "",
+    responsibilityHi: "",
   });
   const [assignRoleCode, setAssignRoleCode] = useState<CanonicalRoleCode | "">("");
   const [assignScopeType, setAssignScopeType] = useState<AssignmentScopeType>("org");
@@ -279,6 +283,8 @@ export default function UserManagement() {
       displayName: selectedUser.displayName ?? "",
       displayNameHi: selectedUser.displayNameHi ?? "",
       phone: selectedUser.phone ?? "",
+      responsibility: selectedUser.responsibility ?? "",
+      responsibilityHi: selectedUser.responsibilityHi ?? "",
       isActive: selectedUser.isActive,
     });
   }, [selectedUser]);
@@ -298,6 +304,8 @@ export default function UserManagement() {
         displayName: "",
         displayNameHi: "",
         phone: "",
+        responsibility: "",
+        responsibilityHi: "",
         roleCode: "karyakarta",
       });
       addToast(t("Account created", "खाता बनाया गया"), "success");
@@ -571,6 +579,31 @@ export default function UserManagement() {
                     </div>
                   </div>
 
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-responsibility">{t("Responsibility", "दायित्व")}</Label>
+                      <Input
+                        id="new-responsibility"
+                        value={createForm.responsibility ?? ""}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({ ...current, responsibility: event.target.value }))
+                        }
+                        placeholder={t("e.g. Coordinator, Yuva Aayam", "उदाहरण: संयोजक, युवा आयाम")}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-responsibility-hi">{t("Responsibility (Hindi)", "दायित्व (हिंदी)")}</Label>
+                      <Input
+                        id="new-responsibility-hi"
+                        value={createForm.responsibilityHi ?? ""}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({ ...current, responsibilityHi: event.target.value }))
+                        }
+                        placeholder={t("Optional Hindi label", "वैकल्पिक हिंदी नाम")}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <Label htmlFor="new-password">{t("Temporary password", "अस्थायी पासवर्ड")}</Label>
@@ -788,6 +821,12 @@ export default function UserManagement() {
                                 {user.phone}
                               </span>
                             ) : null}
+                            {user.responsibility ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <ShieldCheck className="h-3.5 w-3.5" />
+                                {displayBilingualHi(user.responsibility, user.responsibilityHi, lang)}
+                              </span>
+                            ) : null}
                           </div>
                         </div>
 
@@ -970,6 +1009,28 @@ export default function UserManagement() {
                           setProfileForm((current) => ({ ...current, phone: event.target.value }))
                         }
                         placeholder={t("Optional phone number", "वैकल्पिक फोन नंबर")}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-responsibility">{t("Responsibility", "दायित्व")}</Label>
+                      <Input
+                        id="edit-responsibility"
+                        value={profileForm.responsibility ?? ""}
+                        onChange={(event) =>
+                          setProfileForm((current) => ({ ...current, responsibility: event.target.value }))
+                        }
+                        placeholder={t("e.g. Coordinator, Yuva Aayam", "उदाहरण: संयोजक, युवा आयाम")}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-responsibility-hi">{t("Responsibility (Hindi)", "दायित्व (हिंदी)")}</Label>
+                      <Input
+                        id="edit-responsibility-hi"
+                        value={profileForm.responsibilityHi ?? ""}
+                        onChange={(event) =>
+                          setProfileForm((current) => ({ ...current, responsibilityHi: event.target.value }))
+                        }
+                        placeholder={t("Optional Hindi label", "वैकल्पिक हिंदी नाम")}
                       />
                     </div>
                   </div>

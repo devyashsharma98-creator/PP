@@ -7,6 +7,8 @@ export const createUserSchema = z.object({
   displayName: z.string().min(1).max(256).trim().optional(),
   displayNameHi: z.string().max(256).trim().optional(),
   phone: z.string().max(24).optional(),
+  responsibility: z.string().max(512).trim().optional(),
+  responsibilityHi: z.string().max(512).trim().optional(),
   unitId: z.string().uuid().optional(),
   departmentId: z.string().uuid().optional(),
   roleCode: z.enum(ROLE_CODES).optional().default("karyakarta"),
@@ -18,6 +20,8 @@ export const updateUserSchema = z.object({
   displayName: z.string().min(1).max(256).trim().optional(),
   displayNameHi: z.string().max(256).trim().optional(),
   phone: z.string().max(24).optional(),
+  responsibility: z.string().max(512).trim().optional(),
+  responsibilityHi: z.string().max(512).trim().optional(),
   isActive: z.boolean().optional(),
 });
 

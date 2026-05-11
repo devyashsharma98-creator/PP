@@ -370,16 +370,16 @@ async function seed() {
   const onboardingHash = await bcrypt.hash(ONBOARDING_PASSWORD, 12);
 
   const onboardingUsers = [
-    { email: "dheerendrachaturvedi@pragyapravah.in", displayName: "Dheerendra Chaturvedi" },
-    { email: "abhisheksharma@pragyapravah.in", displayName: "Abhishek Sharma" },
-    { email: "vandanamishra@pragyapravah.in", displayName: "Vandana Mishra" },
-    { email: "shashikala@pragyapravah.in", displayName: "Shashikala" },
-    { email: "kokilachaturvedi@pragyapravah.in", displayName: "Kokila Chaturvedi" },
-    { email: "savitabhadoriya@pragyapravah.in", displayName: "Savita Bhadoriya" },
-    { email: "ayushisahu@pragyapravah.in", displayName: "Ayushi Sahu" },
-    { email: "sanchitajain@pragyapravah.in", displayName: "Sanchita Jain" },
-    { email: "gyaneshwarsinghkushwaha@pragyapravah.in", displayName: "Gyaneshwar Singh Kushwaha" },
-    { email: "ambujtiwari@pragyapravah.in", displayName: "Ambuj Tiwari" },
+    { email: "dheerendrachaturvedi@pragyapravah.in", displayName: "Dheerendra Chaturvedi", responsibility: "Coordinator, Vimarsh Aayam", responsibilityHi: "संयोजक, विमर्श आयाम" },
+    { email: "abhisheksharma@pragyapravah.in", displayName: "Abhishek Sharma", responsibility: "Coordinator, Yuva Aayam", responsibilityHi: "संयोजक, युवा आयाम" },
+    { email: "vandanamishra@pragyapravah.in", displayName: "Vandana Mishra", responsibility: "Coordinator, Mahila Aayam", responsibilityHi: "संयोजक, महिला आयाम" },
+    { email: "shashikala@pragyapravah.in", displayName: "Shashikala", responsibility: "Member, Vimarsh Aayam", responsibilityHi: "सदस्य, विमर्श आयाम" },
+    { email: "kokilachaturvedi@pragyapravah.in", displayName: "Kokila Chaturvedi", responsibility: "Member, Mahila Aayam", responsibilityHi: "सदस्य, महिला आयाम" },
+    { email: "savitabhadoriya@pragyapravah.in", displayName: "Savita Bhadoriya", responsibility: "Member, Prachar Aayam", responsibilityHi: "सदस्य, प्रचार आयाम" },
+    { email: "ayushisahu@pragyapravah.in", displayName: "Ayushi Sahu", responsibility: "Member, Yuva Aayam", responsibilityHi: "सदस्य, युवा आयाम" },
+    { email: "sanchitajain@pragyapravah.in", displayName: "Sanchita Jain", responsibility: "Member, Shodh Aayam", responsibilityHi: "सदस्य, शोध आयाम" },
+    { email: "gyaneshwarsinghkushwaha@pragyapravah.in", displayName: "Gyaneshwar Singh Kushwaha", responsibility: "Member, Prachar Aayam", responsibilityHi: "सदस्य, प्रचार आयाम" },
+    { email: "ambujtiwari@pragyapravah.in", displayName: "Ambuj Tiwari", responsibility: "Member, Yuva Aayam", responsibilityHi: "सदस्य, युवा आयाम" },
   ];
 
   const karyakartaRoleId = roleByCode["karyakarta"];
@@ -393,11 +393,14 @@ async function seed() {
 
     if (existing) {
       userId = existing.id;
-      // Ensure flag is set for existing users too (idempotent)
-      if (!existing.requiresPasswordChange) {
+      // Ensure flag is set and responsibility synced for existing users too (idempotent)
+      const updates: Record<string, unknown> = { requiresPasswordChange: true, passwordHash: onboardingHash };
+      if (u.responsibility) updates.responsibility = u.responsibility;
+      if (u.responsibilityHi) updates.responsibilityHi = u.responsibilityHi;
+      if (!existing.requiresPasswordChange || !existing.responsibility) {
         await db
           .update(schema.profiles)
-          .set({ requiresPasswordChange: true, passwordHash: onboardingHash })
+          .set(updates)
           .where(eq(schema.profiles.id, existing.id));
       }
       console.log(`     ${u.email} already exists (updated onboarding flag)`);
@@ -409,6 +412,8 @@ async function seed() {
           email: u.email,
           passwordHash: onboardingHash,
           displayName: u.displayName,
+          responsibility: u.responsibility,
+          responsibilityHi: u.responsibilityHi,
           isActive: true,
           isEmailVerified: true,
           requiresPasswordChange: true,

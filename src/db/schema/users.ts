@@ -57,6 +57,8 @@ export const profiles = pgTable(
     displayName: varchar("display_name", { length: 256 }),
     displayNameHi: varchar("display_name_hi", { length: 256 }),
     phone: varchar("phone", { length: 24 }),
+    responsibility: text("responsibility"),
+    responsibilityHi: text("responsibility_hi"),
     isActive: boolean("is_active").notNull().default(true),
     isEmailVerified: boolean("is_email_verified").notNull().default(false),
     requiresPasswordChange: boolean("requires_password_change").notNull().default(false),
