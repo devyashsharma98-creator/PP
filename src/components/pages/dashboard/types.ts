@@ -27,7 +27,7 @@ export interface AayamDashboardViewProps extends DashboardRoleViewProps {
 }
 
 export interface UnitDashboardViewProps {
-  dashboardKind?: "unit_head" | "karyakarta";
+  dashboardKind?: "unit_head" | "karyakarta" | "super_admin";
   events: GatividhiEvent[];
   isApiConnected: boolean;
   statusBadge: (status: string) => string;
@@ -36,6 +36,9 @@ export interface UnitDashboardViewProps {
   onOpenVrittEditor: (event: GatividhiEvent) => void;
   onOpenQr: (event: GatividhiEvent) => void;
   onSubmitForReview: (eventId: string) => void | Promise<void>;
+  onForwardToVibhag?: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
+  onForwardToPrant?: (eventId: string) => void | Promise<void>;
+  onPublishEvent?: (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
 }
 
 export interface VrittEditorState {

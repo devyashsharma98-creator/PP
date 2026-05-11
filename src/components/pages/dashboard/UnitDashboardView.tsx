@@ -40,6 +40,9 @@ export function UnitDashboardView({
   onOpenVrittEditor,
   onOpenQr,
   onSubmitForReview,
+  onForwardToVibhag,
+  onForwardToPrant,
+  onPublishEvent,
 }: UnitDashboardViewProps) {
   const { permissions, lang } = useAppContext();
   const router = useRouter();
@@ -191,7 +194,7 @@ export function UnitDashboardView({
           title: form.title,
           description: form.description,
           startsAt: selectedDate.toISOString(),
-          // Default unit context could be added here if needed
+          checklist: form.checklist,
         });
         setForm({
           title: "",
@@ -711,6 +714,30 @@ export function UnitDashboardView({
                       <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("Submit", "भेजें")}
+                      </Button>
+                    )}
+                    {event.status === "Submitted by Unit" && onForwardToVibhag && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                        <ArrowRight className="mr-1 h-3 w-3" />
+                        {t("To Aayam", "आयाम को")}
+                      </Button>
+                    )}
+                    {(event.status === "Pending Aayam Review" || event.status === "Pending Vibhag Review") && onForwardToVibhag && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                        <ArrowRight className="mr-1 h-3 w-3" />
+                        {t("Forward", "आगे भेजें")}
+                      </Button>
+                    )}
+                    {event.status === "Pending Prant Authorization" && onForwardToPrant && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-violet-600 hover:text-violet-700" onClick={() => void onForwardToPrant(event.id)}>
+                        <ArrowRight className="mr-1 h-3 w-3" />
+                        {t("To Prant", "प्रांत को")}
+                      </Button>
+                    )}
+                    {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && onPublishEvent && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-600 hover:text-green-700" onClick={() => void onPublishEvent(event.id, event.title, event.status)}>
+                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                        {t("Publish", "प्रकाशित करें")}
                       </Button>
                     )}
                     {permissions.canCreateEvent && (

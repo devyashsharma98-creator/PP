@@ -14,7 +14,7 @@ import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardV
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
-import { PrajnaDashboard } from "@/components/pages/PrajnaDashboard";
+
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
 export default function Dashboard() {
@@ -243,7 +243,25 @@ export default function Dashboard() {
   );
 
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
-    return <PrajnaDashboard />;
+    return (
+      <>
+        <UnitDashboardView
+          dashboardKind="super_admin"
+          events={events}
+          isApiConnected={isApiConnected}
+          statusBadge={dashboardStatusBadgeClass}
+          statusLabel={statusLabel}
+          vrittStatusLabel={vrittStatusLabel}
+          onOpenVrittEditor={openVrittEditor}
+          onOpenQr={setQrEvent}
+          onSubmitForReview={handleSubmitFromUnit}
+          onForwardToVibhag={handleForwardToVibhag}
+          onForwardToPrant={handleForwardToPrant}
+          onPublishEvent={handlePublishFromVibhag}
+        />
+        {reviewOverlays}
+      </>
+    );
   }
 
   if (dashboardLane === "vibhag") {

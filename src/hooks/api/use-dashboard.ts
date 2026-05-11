@@ -83,7 +83,7 @@ export function useCreateDashboardEvent() {
   const queryClient = useQueryClient();
   const { refreshWorkspace } = useAppContext();
   return useMutation({
-    mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string }) => {
+    mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string; checklist?: Record<string, boolean> }) => {
       return fetchApi<Record<string, unknown>>('/events', {
         method: 'POST',
         body: JSON.stringify(input),
