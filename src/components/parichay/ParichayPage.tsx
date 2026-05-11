@@ -8,6 +8,7 @@ import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
 import { ScrollProgress } from "./layout/ScrollProgress";
 import { HeroChapter } from "./chapters/HeroChapter";
+import { IdentityChapter } from "./chapters/IdentityChapter";
 import { WorkstreamsChapter } from "./chapters/WorkstreamsChapter";
 import { PublicOutputChapter } from "./chapters/PublicOutputChapter";
 import { JoinChapter } from "./chapters/JoinChapter";
@@ -17,6 +18,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const CHAPTER_LABELS = [
   { en: "Pragya Pravah", hi: "प्रज्ञा प्रवाह" },
+  { en: "Who We Are", hi: "हम कौन हैं" },
   { en: "Our Work", hi: "हमारा कार्य" },
   { en: "Public Output", hi: "सार्वजनिक सामग्री" },
   { en: "Join", hi: "जुड़ें" },
@@ -108,18 +110,22 @@ export default function ParichayPage() {
         </section>
 
         <section data-chapter="1">
-          <WorkstreamsChapter />
+          <IdentityChapter />
         </section>
 
         <section data-chapter="2">
-          <PublicOutputChapter />
+          <WorkstreamsChapter />
         </section>
 
         <section data-chapter="3">
-          <JoinChapter />
+          <PublicOutputChapter />
         </section>
 
         <section data-chapter="4">
+          <JoinChapter />
+        </section>
+
+        <section data-chapter="5">
           <EnterChapter />
         </section>
       </main>
