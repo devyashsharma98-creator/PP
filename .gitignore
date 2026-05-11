@@ -68,6 +68,10 @@ public/wa_image.*
 .env
 .env.local
 .env.*
+!.env.example
+
+# OpenNext / Cloudflare build artifacts
+.open-next/
 
 # Ruflo scan artifacts
 ruflo-*.json

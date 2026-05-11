@@ -22,7 +22,6 @@
     "@mlc-ai/web-llm": "^0.2.82",
     "@neondatabase/api-client": "^2.7.1",
     "@neondatabase/serverless": "^1.0.2",
-    "@opennextjs/cloudflare": "^1.18.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -103,8 +102,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vitest": "^4.1.2",
-    "wrangler": "^4.79.0"
+    "vitest": "^4.1.2"
   },
   "overrides": {
     "postcss": "^8.5.14",
