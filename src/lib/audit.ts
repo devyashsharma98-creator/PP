@@ -9,6 +9,18 @@ import "server-only";
 import { db } from "../db/client";
 import { auditLogs, activityStream } from "../db/schema/index";
 
+// ── UUID validation ──────────────────────────────────────────────────────────
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Returns the value if it's a valid UUID, otherwise returns undefined.
+ * Prevents type errors when non-UUID strings are passed as entity IDs.
+ */
+function sanitizeUuid(value?: string): string | undefined {
+  if (!value) return undefined;
+  return UUID_REGEX.test(value) ? value : undefined;
+}
+
 export interface AuditEntry {
   orgId: string;
   action: string;           // e.g. "event.status_changed", "article.created"
@@ -30,16 +42,16 @@ export async function writeAuditLog(entry: AuditEntry): Promise<void> {
     await db.insert(auditLogs).values({
       orgId: entry.orgId,
       action: entry.action,
-      actorUserId: entry.actorUserId,
+      actorUserId: sanitizeUuid(entry.actorUserId),
       actorEmail: entry.actorEmail,
       actorIp: entry.actorIp,
       entityType: entry.entityType,
-      entityId: entry.entityId,
+      entityId: sanitizeUuid(entry.entityId),
       payload: entry.payload ?? null,
       changeSummary: entry.changeSummary,
     });
   } catch (err) {
-    console.error("[audit] Failed to write audit log:", err);
+    console.error("[audit] Failed to write audit log:", { action: entry.action, entityType: entry.entityType, entityId: entry.entityId, err });
   }
 }
 
@@ -60,15 +72,15 @@ export async function writeActivity(entry: {
     await db.insert(activityStream).values({
       orgId: entry.orgId,
       action: entry.action,
-      actorUserId: entry.actorUserId,
+      actorUserId: sanitizeUuid(entry.actorUserId),
       actorNameSnapshot: entry.actorNameSnapshot,
       entityType: entry.entityType,
-      entityId: entry.entityId,
+      entityId: sanitizeUuid(entry.entityId),
       payload: entry.payload ?? null,
       summary: entry.summary,
     });
   } catch (err) {
-    console.error("[activity] Failed to write activity:", err);
+    console.error("[activity] Failed to write activity:", { action: entry.action, entityType: entry.entityType, entityId: entry.entityId, err });
   }
 }
 
