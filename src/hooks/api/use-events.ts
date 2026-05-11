@@ -1,4 +1,5 @@
 "use client";
+// Modular hooks for events
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
@@ -85,6 +86,47 @@ export function usePublishEvent() {
     onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
+      await refreshWorkspace();
+    },
+  });
+}
+
+export function useCastVote() {
+  const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
+
+  return useMutation({
+    mutationFn: ({ eventId, pollId, optionId }: { eventId: string; pollId: string; optionId: string }) =>
+      api.castVote(eventId, pollId, optionId),
+    onSuccess: async (_, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
+      await refreshWorkspace();
+    },
+  });
+}
+
+export function useAddRegistration() {
+  const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
+
+  return useMutation({
+    mutationFn: ({ eventId, payload }: { eventId: string; payload: any }) =>
+      fetch(`/api/public/events/${eventId}/registrations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Registration failed');
+        }
+        return res.json();
+      }),
+    onSuccess: async (_, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
       await refreshWorkspace();
     },
   });

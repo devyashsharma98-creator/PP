@@ -15,6 +15,8 @@ import { useMemo } from 'react';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
+import { useDashboardEvents } from '@/hooks/api/use-dashboard';
+import { useDashboardArticles } from '@/hooks/api/use-dashboard-articles';
 
 interface FeedContextItem {
   labelEn: string;
@@ -69,7 +71,10 @@ function ContentFeedMasthead({
 }
 
 export default function ContentFeed() {
-  const { events, articles, lang } = useAppContext();
+  const { lang } = useAppContext();
+  const { data: events = [] } = useDashboardEvents();
+  const { data: articles = [] } = useDashboardArticles();
+  
   const t = useT();
   const isHi = lang === 'hi';
   const publishedEvents = useMemo(() => events.filter(e => e.status === 'Published'), [events]);

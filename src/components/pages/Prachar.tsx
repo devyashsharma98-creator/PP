@@ -14,12 +14,15 @@ import {
   Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
   FileText, Clock3, Send, Sparkles,
 } from 'lucide-react';
-import { useAppContext, type PracharPlatform, type Role } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
+import { useDashboardEvents } from '@/hooks/api/use-dashboard';
+import { usePracharStatuses, useUpdatePracharPlatform } from '@/hooks/api/use-prachar';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { PracharPlatform, Role } from '@/lib/app/contracts';
 
 interface Platform {
   key: PracharPlatform;
@@ -225,9 +228,17 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
 }
 
 export default function Prachar() {
-  const { role, events, permissions, pracharStatuses, updatePracharPlatform } = useAppContext();
+  const { role, permissions } = useAppContext();
+  const { data: apiEvents = [] } = useDashboardEvents();
+  const { data: pracharStatuses = [] } = usePracharStatuses();
+  const updatePracharPlatformMutation = useUpdatePracharPlatform();
+
+  const updatePracharPlatform = async (eventId: string, platform: PracharPlatform, done: boolean, skipReason?: string | null) => {
+    return updatePracharPlatformMutation.mutateAsync({ eventId, platform, done, skipReason });
+  };
+
   const t = useT();
-  const publishedEvents = useMemo(() => events.filter(e => e.status === 'Published'), [events]);
+  const publishedEvents = useMemo(() => apiEvents.filter(e => e.status === 'Published'), [apiEvents]);
 
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);

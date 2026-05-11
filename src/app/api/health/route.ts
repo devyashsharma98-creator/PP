@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server";
-import { getDatabaseUrl } from "@/lib/neon/env";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const dbUrl = getDatabaseUrl();
-  const dbStatus = dbUrl ? "configured" : "MISSING";
-  
-  return NextResponse.json({
-    status: "healthy",
-    deployment: "hostinger-optimized",
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      DATABASE_CONFIG: dbStatus,
-      // Masking the secret
-      DATABASE_PREFIX: dbUrl ? dbUrl.substring(0, 15) + "..." : null,
-      PORT: process.env.PORT || "default-3000",
-    },
+  const health: Record<string, string | number> = {
+    status: "ok",
     timestamp: new Date().toISOString(),
-  });
+    service: "pragya-pravah-app",
+    version: process.env.npm_package_version || "1.0.0",
+    node_env: process.env.NODE_ENV || "unknown",
+  };
+
+  const statusCode = health.status === "ok" ? 200 : 503;
+  return NextResponse.json(health, { status: statusCode });
 }

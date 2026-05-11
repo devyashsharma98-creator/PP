@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useAppContext, GatividhiEvent, VrittStatus } from "@/context/AppContext";
-import { useDashboardEvents, useUpdateEventStatus } from "@/hooks/api/use-dashboard";
+import { useDashboardEvents, useUpdateEventStatus, useUpdateVritt } from "@/hooks/api/use-dashboard";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { checklistItems, dashboardStatusBadgeClass, eventStatusHi } from "@/components/pages/dashboard/config";
@@ -17,12 +17,8 @@ import { uiToDbEventStatus } from "@/lib/app/status-maps";
 import { PrajnaDashboard } from "@/components/pages/PrajnaDashboard";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
-
-
-const demoDataFallbackEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK === "true";
-
 export default function Dashboard() {
-  const { role, lang, permissions, viewer, events: demoEvents, updateEventStatus, updateVritt } = useAppContext();
+  const { role, lang, permissions, viewer } = useAppContext();
   const { addToast } = useToast();
   const t = useT();
   const { status: bonsaiStatus, generate: bonsaiGenerate, initModel: bonsaiInit } = useBonsaiLLM();
@@ -30,12 +26,11 @@ export default function Dashboard() {
   const dashboardLane = getDashboardLane(primaryRoleCode);
   
   // Real data from API with TanStack Query
-  const { data: apiEvents = [], isLoading: eventsLoading, error: eventsError } = useDashboardEvents();
+  const { data: events = [], isLoading: eventsLoading, error: eventsError } = useDashboardEvents();
   const updateEventStatusMutation = useUpdateEventStatus();
+  const updateVrittMutation = useUpdateVritt();
   
-  const usingDemoFallback = demoDataFallbackEnabled && !eventsError && apiEvents.length === 0 && !eventsLoading;
-  const events = usingDemoFallback ? demoEvents : apiEvents;
-  const isApiConnected = !usingDemoFallback && !eventsError && !eventsLoading;
+  const isApiConnected = !eventsError && !eventsLoading;
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
   const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
@@ -64,9 +59,6 @@ export default function Dashboard() {
             {t('Failed to load dashboard data.', 'डैशबोर्ड डेटा लोड करने में विफल।')}
           </p>
           <p className="text-xs text-muted-foreground">{(eventsError as Error).message}</p>
-          <p className="text-xs text-muted-foreground font-devanagari">
-            {t('Showing demo data.', 'डेमो डेटा दिखाया जा रहा है।')}
-          </p>
         </div>
       </div>
     );
@@ -175,19 +167,14 @@ export default function Dashboard() {
   };
 
   const statusLabel = (status: string) => t(status, eventStatusHi[status] ?? status);
+  
   const handleForwardToPrant = async (eventId: string) => {
-    if (isApiConnected) {
-      try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'pending_prant_authorization' });
-        addToast(t('Forwarded to Prant', 'प्रान्त को भेजा'), 'info');
-      } catch {
-        addToast(t('Failed to forward', 'भेजने में विफल'), 'error');
-      }
-      return;
+    try {
+      await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'pending_prant_authorization' });
+      addToast(t('Forwarded to Prant', 'प्रान्त को भेजा'), 'info');
+    } catch {
+      addToast(t('Failed to forward', 'भेजने में विफल'), 'error');
     }
-
-    const ok = await updateEventStatus(eventId, "Pending Prant Authorization");
-    if (ok) addToast(t('Forwarded to Prant', 'प्रान्त को भेजा'), 'info');
   };
 
   const handlePublishFromVibhag = async (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => {
@@ -196,79 +183,50 @@ export default function Dashboard() {
       ? 'pending_prant_dual_authorization'
       : 'authorized_public';
 
-    if (isApiConnected) {
-      try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: nextStatus });
-        setLastPublished(title);
-        addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
-      } catch {
-        addToast(t('Publish failed', 'प्रकाशन विफल'), 'error');
-      }
-      return;
+    try {
+      await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: nextStatus });
+      setLastPublished(title);
+      addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
+    } catch {
+      addToast(t('Publish failed', 'प्रकाशन विफल'), 'error');
     }
-
-    const ok = await updateEventStatus(eventId, "Published");
-    if (!ok) {
-      addToast(t('Publish not allowed', 'प्रकाशन की अनुमति नहीं है'), 'error');
-      return;
-    }
-    setLastPublished(title);
-    addToast(t('Published to Feed!', 'फ़ीड में प्रकाशित!'), 'success', t('Update Prachar now', 'प्रचार अद्यतन करें'));
   };
 
   const handleForwardToVibhag = async (eventId: string, currentStatus: GatividhiEvent["status"]) => {
     const toStatus = currentStatus === "Submitted by Unit" ? 'pending_aayam_review' : 'pending_vibhag_review';
-    if (isApiConnected) {
-      try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus });
-        addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
-      } catch {
-        addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
-      }
-      return;
-    }
-
-    const ok = await updateEventStatus(eventId, currentStatus === "Submitted by Unit" ? "Pending Aayam Review" : "Pending Vibhag Review");
-    if (!ok) {
+    try {
+      await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus });
+      addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
+    } catch {
       addToast(t('Forward not allowed', 'आगे भेजने की अनुमति नहीं है'), 'error');
-      return;
     }
-    addToast(t('Forwarded for vibhag review', 'विभाग समीक्षा के लिए भेजा'), 'info', t('Sent to Vibhag Pramukh', 'विभाग प्रमुख की समीक्षा के लिए भेजा'));
   };
-  const handleSubmitFromUnit = async (eventId: string) => {
-    if (isApiConnected) {
-      try {
-        await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'submitted_by_unit' });
-        addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
-      } catch {
-        addToast(t('Submit not allowed', 'भेजने की अनुमति नहीं है'), 'error');
-      }
-      return;
-    }
 
-    const ok = await updateEventStatus(eventId, "Submitted by Unit");
-    if (!ok) {
+  const handleSubmitFromUnit = async (eventId: string) => {
+    try {
+      await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'submitted_by_unit' });
+      addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
+    } catch {
       addToast(t('Submit not allowed', 'भेजने की अनुमति नहीं है'), 'error');
-      return;
     }
-    addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
   };
 
   const saveVritt = async () => {
     if (!vrittEvent) return;
     const urls = vrittForm.mediaUrls.filter((url) => url.trim());
-    const ok = await updateVritt(vrittEvent.id, {
-      vrittContent: vrittForm.content || undefined,
-      vrittAttendanceCount: vrittForm.attendanceCount || undefined,
-      vrittMediaUrls: urls.length > 0 ? urls : undefined,
-      vrittStatus: vrittForm.status,
-    });
-    if (!ok) {
-      addToast(t("Failed to save vritt", "वृत्त सहेजने में विफल"), "error");
-      return;
+    try {
+      await updateVrittMutation.mutateAsync({
+        eventId: vrittEvent.id,
+        content: vrittForm.content,
+        attendanceCount: vrittForm.attendanceCount,
+        mediaUrls: urls.length > 0 ? urls : [],
+        status: vrittForm.status,
+      });
+      addToast(t("Vritt saved!", "वृत्त सहेजा गया!"), "success");
+      setVrittEvent(null);
+    } catch {
+      addToast(t("Failed to save vritt", "वृत्त सहेजा मरने में विफल"), "error");
     }
-    addToast(t("Vritt saved!", "वृत्त सहेजा गया!"), "success");
-    setVrittEvent(null);
   };
 
   const reviewOverlays = (
@@ -328,12 +286,12 @@ export default function Dashboard() {
     );
   }
   return (
-      <>
-        <UnitDashboardView
-          dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
-          events={events}
-          isApiConnected={isApiConnected}
-          statusBadge={dashboardStatusBadgeClass}
+    <>
+      <UnitDashboardView
+        dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
+        events={events}
+        isApiConnected={isApiConnected}
+        statusBadge={dashboardStatusBadgeClass}
         statusLabel={statusLabel}
         vrittStatusLabel={vrittStatusLabel}
         onOpenVrittEditor={openVrittEditor}
@@ -344,8 +302,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-
-
-
-

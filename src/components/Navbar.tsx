@@ -18,6 +18,8 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadCount } from '@/hooks/api/use-notifications';
 import { useSignOut } from '@/hooks/use-sign-out';
+import { useDashboardEvents } from '@/hooks/api/use-dashboard';
+import { useDashboardArticles } from '@/hooks/api/use-dashboard-articles';
 
 function getShellFrame(pathname: string, role: Role) {
   if (pathname === '/' || pathname === '/overview') {
@@ -134,7 +136,9 @@ function getShellFrame(pathname: string, role: Role) {
 }
 
 export function Navbar() {
-  const { role, setRole, lang, setLang, events, articles, isAuthenticated, authReady, permissions, viewer, availableRoles } = useAppContext();
+  const { role, setRole, lang, setLang, isAuthenticated, authReady, permissions, viewer, availableRoles } = useAppContext();
+  const { data: events = [] } = useDashboardEvents();
+  const { data: articles = [] } = useDashboardArticles();
   const pathname = usePathname();
   const signOut = useSignOut();
   const t = useT();
@@ -441,7 +445,7 @@ export function Navbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
+                className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
               >
                 <div className="sticky top-0 bg-popover border-b border-border/60 px-4 py-3 flex items-center justify-between">
                   <h3 className={cn("text-sm font-semibold", lang === 'hi' && 'font-devanagari')}>{t('Notifications', 'सूचनाएं')}</h3>

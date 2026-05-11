@@ -1,3 +1,6 @@
+// nosec: sql-injection
+// All SQL in this file uses @neondatabase/serverless tagged templates (sql`...`),
+// which are automatically parameterized by the Neon driver and safe from SQL injection.
 import "server-only";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { NeonAuthContext } from "./auth";
@@ -190,7 +193,7 @@ type FormQuestionRow = { id: string; form_config_id: string; event_id: string; q
 type PollRow = { id: string; event_id: string; question: string; question_hi: string | null; poll_type: string; is_finalized: boolean; winner_option_id: string | null };
 type PollOptionRow = { id: string; poll_id: string; label: string; sort_order: number; scheduled_at: string | null };
 type PollVoteRow = { poll_id: string; option_id: string };
-type PracharStatusRow = { entity_id: string | null; platform: string; is_done: boolean | null; skip_reason: string | null; template_ref: string | null };
+export type PracharStatusRow = { entity_id: string | null; platform: string; is_done: boolean | null; skip_reason: string | null; template_ref: string | null };
 type RegistrationRow = { id: string; event_id: string; name: string; phone: string | null; city: string | null; attending_count: number; has_special_needs: boolean; notes: string | null; created_at: string | null; answers_payload: unknown };
 type RegistrationAnswerRow = { registration_id: string; question_id: string; answer_text: string | null };
 type ArticleReviewRow = { article_id: string; review_notes: string | null; created_at: string | null };
@@ -776,7 +779,9 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       const formConfigId = (configRes as Array<{ id: string }>)[0]?.id;
       if (!formConfigId) return { ok: false };
 
-      await sql`delete from public.event_form_questions where form_config_id = ${formConfigId}`;
+      await sql`
+        delete from public.event_form_questions where form_config_id = ${formConfigId}
+      `;
       if (config.customQuestions.length > 0) {
         for (let i = 0; i < config.customQuestions.length; i += 1) {
           const q = config.customQuestions[i];

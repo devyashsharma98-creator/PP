@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import {
   IBM_Plex_Sans,
   IBM_Plex_Sans_Devanagari,
-  IBM_Plex_Serif,
 } from "next/font/google";
+import Script from "next/script";
 import { AppLayoutShell } from "@/components/AppLayoutShell";
 import { ClientProviders } from "@/components/ClientProviders";
 import { ToastProvider } from "@/components/ToastProvider";
@@ -24,12 +24,6 @@ const plexSansDevanagari = IBM_Plex_Sans_Devanagari({
   weight: ["400", "500", "600", "700"],
 });
 
-const plexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
-  variable: "--font-ui-serif",
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pragyapravah.org"),
@@ -37,6 +31,10 @@ export const metadata: Metadata = {
   description: "Pragya Pravah Management System - Bhopal Vibhag",
   applicationName: "Pragya Pravah",
   manifest: "/manifest.json",
+    icons: {
+      icon: "/favicon.svg",
+      apple: "/favicon.svg",
+    },
   keywords: ["Pragya Pravah", "Bhopal", "cultural organization", "India"],
   authors: [{ name: "Pragya Pravah Bhopal Vibhag" }],
   robots: "index, follow",
@@ -79,9 +77,30 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`scroll-smooth ${plexSans.variable} ${plexSansDevanagari.variable} ${plexSerif.variable}`}
+      className={`scroll-smooth ${plexSans.variable} ${plexSansDevanagari.variable}`}
     >
       <body className="font-body antialiased selection:bg-primary/20 selection:text-primary">
+        {/* Unregister stale service workers before hydration to prevent cached HTML mismatches */}
+        <Script
+          id="unregister-sw"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof navigator !== "undefined" && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+                  navigator.serviceWorker.getRegistrations().then(function(regs) {
+                    return Promise.all(regs.map(function(r) { return r.unregister(); }));
+                  }).then(function() {
+                    // Only reload if we actually unregistered something
+                    if (navigator.serviceWorker.controller) {
+                      window.location.reload();
+                    }
+                  });
+                }
+              })();
+            `,
+          }}
+        />
         <ClientProviders>
           <ToastProvider>
             <AppLayoutShell>{children}</AppLayoutShell>

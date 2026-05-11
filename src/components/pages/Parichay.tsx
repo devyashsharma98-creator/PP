@@ -239,7 +239,7 @@ function BrandMark() {
         <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary/80">
           Pragya Pravah
         </span>
-        <span className="font-serif text-lg font-semibold text-parchment-ink" lang="hi">
+        <span className="font-devanagari text-lg font-semibold text-parchment-ink" lang="hi">
           प्रज्ञा प्रवाह
         </span>
       </span>
@@ -285,7 +285,7 @@ function TopAppBar() {
                   <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">
                     {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
                   </p>
-                  <h2 className="mt-1 font-serif text-xl font-bold text-parchment-ink">
+                  <h2 className="mt-1 text-xl font-bold text-parchment-ink">
                     {t("Parichay", "परिचय")}
                   </h2>
                 </div>
@@ -399,7 +399,7 @@ function SectionHeading({
       <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
         {t(eyebrowEn, eyebrowHi)}
       </p>
-      <h2 className="font-serif text-4xl leading-tight text-parchment-ink md:text-5xl">
+      <h2 className="text-4xl leading-tight text-parchment-ink md:text-5xl">
         {t(titleEn, titleHi)}
       </h2>
       <p className="max-w-2xl text-base leading-7 text-foreground/80 md:text-lg">
@@ -425,7 +425,7 @@ function EditorialVisual() {
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 {t("Overview", "संयम")}
               </p>
-              <p className="mt-3 font-serif text-2xl leading-tight text-parchment-ink">
+              <p className="mt-3 text-2xl leading-tight text-parchment-ink">
                 {t("Publication to public interface", "विचार से लोक-कार्य")}
               </p>
             </div>
@@ -445,7 +445,7 @@ function EditorialVisual() {
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground/75">
                   {t("Institutional rhythm", "संस्थागत लय")}
                 </p>
-                <p className="mt-3 max-w-sm font-serif text-3xl leading-tight">
+                <p className="mt-3 max-w-sm text-3xl leading-tight">
                   {t("Serious public work depends on review discipline, publication flow, and operational memory.", "गंभीर लोक-कार्य को संपादकीय स्पष्टता और संस्थागत स्मृति चाहिए।")}
                 </p>
               </div>
@@ -488,7 +488,7 @@ function WorkstreamRail() {
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <div>
-                    <h3 className="font-serif text-2xl text-parchment-ink">
+                    <h3 className="text-2xl text-parchment-ink">
                       {t(stream.titleEn, stream.titleHi)}
                     </h3>
                     <p className="mt-2 max-w-md text-sm leading-6 text-foreground/75">
@@ -570,7 +570,7 @@ function ArticleShowcaseArtifact({
             </div>
 
             <div>
-              <h3 className="font-serif text-2xl leading-tight text-parchment-ink">
+              <h3 className="text-2xl leading-tight text-parchment-ink">
                 {t(activeItem.titleEn, activeItem.titleHi)}
               </h3>
               <p className="mt-3 text-sm leading-7 text-foreground/75">
@@ -583,7 +583,7 @@ function ArticleShowcaseArtifact({
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
                   {t("Contributor", "योगदानकर्ता")}
                 </p>
-                <p className="mt-1 font-serif text-lg text-primary">
+                <p className="mt-1 text-lg text-primary">
                   {t(activeItem.authorEn, activeItem.authorHi)}
                 </p>
               </div>
@@ -634,7 +634,7 @@ function ProofBand({
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
           {t("Featured Output", "प्रमुख प्रकाशन")}
         </p>
-        <h3 className="mt-4 font-serif text-2xl leading-tight text-parchment-ink">
+        <h3 className="mt-4 text-2xl leading-tight text-parchment-ink">
           {t(featuredItem.titleEn, featuredItem.titleHi)}
         </h3>
         <p className="mt-3 text-sm leading-7 text-foreground/75">
@@ -657,7 +657,7 @@ function ProofBand({
         <div className="mt-5 space-y-5">
           {CREDIBILITY_SIGNALS.slice(0, 2).map((signal) => (
             <div key={signal.labelEn} className="border-t border-primary/10 pt-4 first:border-t-0 first:pt-0">
-              <p className="font-serif text-3xl text-parchment-ink">
+              <p className="text-3xl text-parchment-ink">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
@@ -696,7 +696,7 @@ function Hero({
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
                 {t("Institutional overview", "विचार और लोक-कार्य का प्रवाह")}
               </p>
-              <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-parchment-ink md:text-7xl">
+              <h1 className="max-w-4xl text-5xl leading-[0.95] text-parchment-ink md:text-7xl">
                 Institutional overview of Pragya Pravah workstreams.
               </h1>
               <p className="max-w-2xl text-xl leading-8 text-foreground/82" lang="hi">
@@ -775,7 +775,7 @@ function WorkstreamsSection() {
                   <ArrowRight className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-3xl text-parchment-ink">
+                  <h3 className="text-3xl text-parchment-ink">
                     {t(stream.titleEn, stream.titleHi)}
                   </h3>
                   <p className="mt-3 max-w-md text-base leading-7 text-foreground/75">
@@ -813,7 +813,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
               {t("Featured output", "प्रमुख सामग्री")}
             </p>
-            <h3 className="mt-4 font-serif text-3xl leading-tight text-parchment-ink">
+            <h3 className="mt-4 text-3xl leading-tight text-parchment-ink">
               {t(featuredItem.titleEn, featuredItem.titleHi)}
             </h3>
             <p className="mt-4 text-base leading-7 text-foreground/75">
@@ -836,7 +836,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Workstream lane", "संपादकीय प्रवाह")}
               </p>
-              <p className="mt-3 font-serif text-2xl text-parchment-ink">
+              <p className="mt-3 text-2xl text-parchment-ink">
                 {t(featuredItem.laneEn, featuredItem.laneHi)}
               </p>
             </div>
@@ -844,7 +844,7 @@ function FeaturedOutputSection({ featuredItem }: { featuredItem: ArticleShowcase
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
                 {t("Contributor", "योगदानकर्ता")}
               </p>
-              <p className="mt-3 font-serif text-2xl text-parchment-ink">
+              <p className="mt-3 text-2xl text-parchment-ink">
                 {t(featuredItem.authorEn, featuredItem.authorHi)}
               </p>
             </div>
@@ -872,7 +872,7 @@ function CredibilitySection() {
         <div className="grid gap-px bg-primary/15 md:grid-cols-3">
           {CREDIBILITY_SIGNALS.map((signal) => (
             <div key={signal.labelEn} className="bg-background p-7">
-              <p className="font-serif text-4xl text-parchment-ink">
+              <p className="text-4xl text-parchment-ink">
                 {t(signal.valueEn, signal.valueHi)}
               </p>
               <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
@@ -912,7 +912,7 @@ function ParticipationSection() {
           <div className="grid gap-px bg-primary/15">
             {PARTICIPATION_PATHS.map((path) => (
               <div key={path.titleEn} className="bg-background/95 p-6">
-                <h3 className="font-serif text-2xl text-parchment-ink">
+                <h3 className="text-2xl text-parchment-ink">
                   {t(path.titleEn, path.titleHi)}
                 </h3>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/75">
@@ -926,7 +926,7 @@ function ParticipationSection() {
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary-foreground/75">
                 {t("Next step", "अगला कदम")}
               </p>
-              <h3 className="mt-4 font-serif text-3xl leading-tight">
+              <h3 className="mt-4 text-3xl leading-tight">
                 {t("Use the public overview to identify the right workstream, then continue through the appropriate access path.", "पठन से कार्य की ओर एक स्पष्ट और संयत मार्ग से बढ़ें।")}
               </h3>
             </div>
@@ -1043,7 +1043,7 @@ export default function Parichay() {
   return (
     <div
       className="min-h-screen overflow-x-hidden bg-parchment-bg text-parchment-ink"
-      style={{ fontFamily: "Manrope, ui-sans-serif, system-ui, sans-serif" }}
+
     >
       <TopAppBar />
       <main className="pt-20">

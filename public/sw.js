@@ -5,14 +5,11 @@
  * and NetworkFirst for API calls.
  */
 
-const CACHE_NAME = "pragya-pravah-v1";
+const CACHE_NAME = "pragya-pravah-v2";
 
-const SHELL_URLS = [
-  "/",
-  "/parichay",
-  "/login",
-  "/guide",
-];
+// Navigation shells are NOT pre-cached to avoid stale HTML during development.
+// Only static assets and API responses are cached.
+const SHELL_URLS = [];
 
 const STATIC_EXTENSIONS = [
   ".js",
@@ -102,5 +99,9 @@ self.addEventListener("fetch", (event) => {
       })
     );
   }
-  // Allow navigation requests to fall through to the network
+  // Navigation requests: always go to network (never serve cached HTML)
+  if (request.mode === "navigate") {
+    event.respondWith(fetch(request));
+    return;
+  }
 });

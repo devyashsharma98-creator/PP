@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Building2, CalendarDays, CheckCircle2, ClipboardCheck, Lightbulb, Link2, MapPin, Phone, Plus, QrCode, RotateCcw, SlidersHorizontal, Trash2, User, Users, Vote, X, FileText } from "lucide-react";
 
 import { useAppContext } from "@/context/AppContext";
-import { useCreateDashboardEvent } from "@/hooks/api/use-dashboard";
+import { useCreateDashboardEvent, useAddPoll, useFinalizePoll } from "@/hooks/api/use-dashboard";
 import { Masthead } from "@/components/Masthead";
 import { useToast } from "@/components/ToastProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -41,11 +41,13 @@ export function UnitDashboardView({
   onOpenQr,
   onSubmitForReview,
 }: UnitDashboardViewProps) {
-  const { permissions, lang, addEvent, addPoll, finalizePoll } = useAppContext();
+  const { permissions, lang } = useAppContext();
   const router = useRouter();
   const { addToast } = useToast();
   const t = useT();
   const createEventMutation = useCreateDashboardEvent();
+  const addPollMutation = useAddPoll();
+  const finalizePollMutation = useFinalizePoll();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState("pre");
@@ -188,6 +190,7 @@ export function UnitDashboardView({
           title: form.title,
           description: form.description,
           startsAt: selectedDate.toISOString(),
+          // Default unit context could be added here if needed
         });
         setForm({
           title: "",
@@ -221,49 +224,6 @@ export function UnitDashboardView({
         return;
       }
     }
-
-    const ok = await addEvent({
-      title: form.title,
-      description: form.description,
-      date: format(selectedDate, "dd MMM yyyy"),
-      dateIso: selectedDate.toISOString(),
-      unit: form.unit || "Bhopal",
-      submittedBy: "Current User",
-      checklist: form.checklist,
-      report: form.report,
-      imageUrl: "",
-      formConfig: localFormConfig,
-    });
-    if (!ok) {
-      addToast(t("Not authorized to submit event", "कार्यक्रम भेजने की अनुमति नहीं है"), "error");
-      return;
-    }
-    setForm({
-      title: "",
-      description: "",
-      unit: "",
-      checklist: {
-        designing: false,
-        food: false,
-        seating: false,
-        transport: false,
-        accommodation: false,
-        soundMic: false,
-        camera: false,
-        screen: false,
-        lights: false,
-      },
-      report: "",
-      fileName: "",
-      videoUrl: "",
-      posterName: "",
-    });
-    setDateValue("");
-    setFormTab("pre");
-    setDialogOpen(false);
-    setSubmitted(true);
-    addToast(t("Event submitted for review!", "कार्यक्रम समीक्षा के लिए भेजा गया!"), "success", t("Sent for Aayam review", "आयाम समीक्षा के लिए भेजा गया"));
-    router.push("/dashboard");
   };
 
   const handleCreatePoll = async () => {
@@ -271,32 +231,30 @@ export function UnitDashboardView({
     const validOptions = newPollOptions.filter((option) => option.trim());
     if (validOptions.length < 2) return;
 
-    const ok = await addPoll(pollCreateEvent.id, {
-      question: newPollQuestion.trim(),
-      questionHi: newPollQuestionHi.trim() || newPollQuestion.trim(),
-      type: newPollType,
-      options: validOptions.map((label, index) => {
-        const trimmed = label.trim();
-        const parsedMs = newPollType === "date" ? Date.parse(trimmed) : Number.NaN;
-        return {
-          id: `o${index}${Date.now()}`,
-          label: trimmed,
-          votes: 0,
-          scheduledAtIso: Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString(),
-        };
-      }),
-    });
+    try {
+      await addPollMutation.mutateAsync({
+        eventId: pollCreateEvent.id,
+        question: newPollQuestion.trim(),
+        questionHi: newPollQuestionHi.trim() || newPollQuestion.trim(),
+        pollType: newPollType,
+        options: validOptions.map((label) => {
+          const trimmed = label.trim();
+          const parsedMs = newPollType === "date" ? Date.parse(trimmed) : Number.NaN;
+          return {
+            label: trimmed,
+            scheduledAtIso: Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString(),
+          };
+        }),
+      });
 
-    if (!ok) {
-      addToast(t("Not authorized to create poll", "मतदान बनाने की अनुमति नहीं है"), "error");
-      return;
+      setPollCreateEvent(null);
+      setNewPollQuestion("");
+      setNewPollQuestionHi("");
+      setNewPollOptions(["", "", ""]);
+      addToast(t("Poll created!", "मतदान बनाया गया!"), "success", t("Share the vote link with members", "सदस्यों को वोट लिंक भेजें"));
+    } catch {
+      addToast(t("Failed to create poll", "मतदान बनाने में विफल"), "error");
     }
-
-    setPollCreateEvent(null);
-    setNewPollQuestion("");
-    setNewPollQuestionHi("");
-    setNewPollOptions(["", "", ""]);
-    addToast(t("Poll created!", "मतदान बनाया गया!"), "success", t("Share the vote link with members", "सदस्यों को वोट लिंक भेजें"));
   };
 
   return (
@@ -951,21 +909,17 @@ export function UnitDashboardView({
                         })}
                       </div>
                       {!poll.isFinalized && totalVotes > 0 && (
-                        <Button size="sm" className="w-full text-xs" disabled={!permissions.canFinalizePoll} onClick={async () => {
-                          const ok = await finalizePoll(pollResultsEvent.id, poll.id, winner.id);
-                          if (!ok) {
-                            addToast(t("Finalize not allowed", "अंतिम करने की अनुमति नहीं है"), "error");
-                            return;
+                        <Button size="sm" className="w-full text-xs" disabled={!permissions.canFinalizePoll || finalizePollMutation.isPending} onClick={async () => {
+                          try {
+                            await finalizePollMutation.mutateAsync({
+                              eventId: pollResultsEvent.id,
+                              pollId: poll.id,
+                              winnerOptionId: winner.id,
+                            });
+                            addToast(t(`Finalized: ${winner.label}`, `अंतिम: ${winner.label}`), "success", poll.type === "date" ? t("Event date updated!", "कार्यक्रम की तारीख अद्यतन हुई!") : "");
+                          } catch {
+                            addToast(t("Failed to finalize poll", "मतदान अंतिम करने में विफल"), "error");
                           }
-                          setPollResultsEvent((previous) =>
-                            previous
-                              ? {
-                                  ...previous,
-                                  polls: (previous.polls ?? []).map((currentPoll) => (currentPoll.id === poll.id ? { ...currentPoll, isFinalized: true, winnerOptionId: winner.id } : currentPoll)),
-                                }
-                              : null,
-                          );
-                          addToast(t(`Finalized: ${winner.label}`, `अंतिम: ${winner.label}`), "success", poll.type === "date" ? t("Event date updated!", "कार्यक्रम की तारीख अद्यतन हुई!") : "");
                         }}>
                           <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
                           {t(`Finalize with "${winner.label}"`, `"${winner.label}" से अंतिम करें`)}

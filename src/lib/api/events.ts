@@ -96,3 +96,10 @@ export async function publishEvent(id: string) {
     method: 'POST',
   });
 }
+
+export async function castVote(eventId: string, pollId: string, optionId: string) {
+  return fetchApi<{ ok: boolean }>(`/events/${eventId}/polls/${pollId}/votes`, {
+    method: 'POST',
+    body: JSON.stringify({ optionId }),
+  });
+}

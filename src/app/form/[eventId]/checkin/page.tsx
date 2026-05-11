@@ -15,10 +15,8 @@ import { useParams } from 'next/navigation';
 export default function CheckinPage() {
   const params = useParams();
   const eventId = params.eventId as string;
-  const { events, markAttendance } = useAppContext();
   const t = useT();
-  const contextEvent = events.find(e => e.id === eventId);
-  const { event, loading } = usePublicEvent(eventId, contextEvent);
+  const { event, loading } = usePublicEvent(eventId, undefined);
   const [checkedIn, setCheckedIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [checkinError, setCheckinError] = useState<string | null>(null);
@@ -34,7 +32,6 @@ export default function CheckinPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || 'Check-in failed.');
       }
-      markAttendance(eventId, { skipRemote: true });
       setCheckedIn(true);
     } catch (error) {
       setCheckinError(error instanceof Error ? error.message : 'Check-in failed. Please try again.');

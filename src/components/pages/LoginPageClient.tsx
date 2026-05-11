@@ -246,7 +246,7 @@ function LoginForm() {
                       {flip === "en" ? (
                         <motion.h1
                           key="en"
-                          className="block font-serif text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap"
+                          className="block font-sans text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap"
                           initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
                           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                           exit={{ y: -14, opacity: 0, filter: "blur(4px)" }}
@@ -257,7 +257,7 @@ function LoginForm() {
                       ) : (
                         <motion.h1
                           key="hi"
-                          className="block font-serif text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap font-devanagari"
+                          className="block text-4xl md:text-6xl font-bold leading-[1.08] tracking-tight text-foreground whitespace-nowrap font-devanagari"
                           initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
                           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                           exit={{ y: -14, opacity: 0, filter: "blur(4px)" }}

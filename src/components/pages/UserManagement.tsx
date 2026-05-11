@@ -507,7 +507,7 @@ export default function UserManagement() {
                 {t("Create account", "खाता बनाएं")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl bg-popover">
+            <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-2xl bg-popover">
               <DialogHeader>
                 <DialogTitle>{t("Create a new institutional account", "नया संस्थागत खाता बनाएं")}</DialogTitle>
                 <DialogDescription>

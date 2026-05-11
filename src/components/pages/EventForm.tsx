@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
+import { useAddRegistration } from '@/hooks/api/use-events';
 import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ function CustomQuestionInput({ question, value, onChange, t }: {
   t: (en: string, hi: string) => string;
 }) {
   const opts = question.options ?? [];
+  const [hoverRating, setHoverRating] = useState(0);
 
   switch (question.type) {
     case 'yesno':
@@ -207,7 +209,6 @@ function CustomQuestionInput({ question, value, onChange, t }: {
 
     case 'rating': {
       const rating = parseInt(value, 10) || 0;
-      const [hoverRating, setHoverRating] = useState(0);
       return (
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map(star => (
@@ -249,10 +250,9 @@ function CustomQuestionInput({ question, value, onChange, t }: {
 }
 
 export default function EventForm({ eventId }: Props) {
-  const { events, addRegistration } = useAppContext();
+  const addRegistrationMutation = useAddRegistration();
   const t = useT();
-  const contextEvent = events.find(e => e.id === eventId);
-  const { event, loading: publicLoading, error: publicLoadError } = usePublicEvent(eventId, contextEvent);
+  const { event, loading: publicLoading, error: publicLoadError } = usePublicEvent(eventId, undefined);
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -315,28 +315,11 @@ export default function EventForm({ eventId }: Props) {
         customAnswers: form.customAnswers,
       };
 
-      const res = await fetch(`/api/public/events/${eventId}/registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      await addRegistrationMutation.mutateAsync({
+        eventId,
+        payload,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || t('Registration failed. Please try again.', 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'));
-      }
-
-      if (contextEvent) {
-        addRegistration(eventId, {
-          name: payload.name,
-          phone: payload.phone ?? '',
-          city: payload.city ?? '',
-          attendingCount: payload.attendingCount,
-          hasSpecialNeeds: payload.hasSpecialNeeds,
-          notes: payload.notes,
-          customAnswers: payload.customAnswers,
-        }, { skipRemote: true });
-      }
       setSubmitted(true);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : t('Registration failed. Please try again.', 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'));
@@ -567,7 +550,7 @@ export default function EventForm({ eventId }: Props) {
                           <RadioGroup
                             value={String(form.attendingCount)}
                             onValueChange={v => setForm(p => ({ ...p, attendingCount: Number(v) }))}
-                            className="grid grid-cols-4 gap-3"
+                            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
                           >
                             {[1, 2, 3, 4].map(n => (
                               <div key={n} className="flex">

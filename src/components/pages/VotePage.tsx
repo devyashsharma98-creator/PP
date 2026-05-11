@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext, type GatividhiEvent } from '@/context/AppContext';
+import { useDashboardEvents } from '@/hooks/api/use-dashboard';
+import { useCastVote } from '@/hooks/api/use-events';
 import { usePublicEvent } from '@/hooks/usePublicEvent';
 import { useT } from '@/lib/useT';
 import { Button } from '@/components/ui/button';
@@ -20,9 +22,11 @@ interface Props {
 }
 
 export default function VotePage({ eventId }: Props) {
-  const { events, castVote } = useAppContext();
+  const { data: apiEvents = [] } = useDashboardEvents();
+  const castVoteMutation = useCastVote();
+  
   const t = useT();
-  const contextEvent = events.find(e => e.id === eventId);
+  const contextEvent = apiEvents.find(e => e.id === eventId);
   const { event, loading: publicLoading, error: publicLoadError, setEvent: setPublicEvent } = usePublicEvent(eventId, contextEvent);
 
   // Track which option user has selected per poll (before submitting)
@@ -75,7 +79,7 @@ export default function VotePage({ eventId }: Props) {
         throw new Error(data?.error || 'Vote submission failed.');
       }
       if (contextEvent) {
-        castVote(eventId, pollId, optionId, { skipRemote: true });
+        await castVoteMutation.mutateAsync({ eventId, pollId, optionId });
       } else {
         setPublicEvent(prev => {
           if (!prev) return prev;

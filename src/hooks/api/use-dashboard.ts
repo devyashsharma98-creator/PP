@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
-import { useAppContext, type GatividhiEvent, type FormConfig } from '@/context/AppContext';
+import { useAppContext, type GatividhiEvent, type FormConfig, type VrittStatus } from '@/context/AppContext';
 import { dbToUiEventStatus } from '@/lib/app/status-maps';
 import { repairBrokenHindi } from '@/lib/useT';
 
@@ -109,6 +109,63 @@ export function useUpdateEventStatus() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
       await refreshWorkspace();
+    },
+  });
+}
+
+export function useUpdateVritt() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, content, attendanceCount, mediaUrls, status }: {
+      eventId: string;
+      content?: string;
+      attendanceCount?: number;
+      mediaUrls?: string[];
+      status: VrittStatus;
+    }) => {
+      return fetchApi<Record<string, unknown>>(`/events/${eventId}/vritt`, {
+        method: 'POST',
+        body: JSON.stringify({ content, attendanceCount, mediaUrls, status }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+    },
+  });
+}
+
+export function useAddPoll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, question, questionHi, pollType, options }: {
+      eventId: string;
+      question: string;
+      questionHi?: string;
+      pollType: 'date' | 'general';
+      options: Array<{ label: string; labelHi?: string; scheduledAtIso?: string | null }>;
+    }) => {
+      return fetchApi<Record<string, unknown>>(`/events/${eventId}/polls`, {
+        method: 'POST',
+        body: JSON.stringify({ question, questionHi, pollType, options }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+    },
+  });
+}
+
+export function useFinalizePoll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, pollId, winnerOptionId }: { eventId: string; pollId: string; winnerOptionId: string }) => {
+      return fetchApi<Record<string, unknown>>(`/events/${eventId}/polls/${pollId}/finalize`, {
+        method: 'POST',
+        body: JSON.stringify({ winnerOptionId }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
     },
   });
 }

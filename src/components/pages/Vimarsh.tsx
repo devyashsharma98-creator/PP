@@ -97,7 +97,7 @@ function VimarshMasthead({
                 {flip === 'en' ? (
                   <motion.h1
                     key="en"
-                    className="absolute inset-0 font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+                    className="absolute inset-0 font-sans text-3xl md:text-4xl font-bold tracking-tight text-foreground"
                     initial={{ y: 18, opacity: 0, filter: 'blur(4px)' }}
                     animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                     exit={{ y: -18, opacity: 0, filter: 'blur(4px)' }}
@@ -108,7 +108,7 @@ function VimarshMasthead({
                 ) : (
                   <motion.h1
                     key="hi"
-                    className="absolute inset-0 font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground font-devanagari"
+                    className="absolute inset-0 text-3xl md:text-4xl font-bold tracking-tight text-foreground font-devanagari"
                     initial={{ y: 18, opacity: 0, filter: 'blur(4px)' }}
                     animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                     exit={{ y: -18, opacity: 0, filter: 'blur(4px)' }}
@@ -200,8 +200,21 @@ function VimarshBinduSkeleton() {
 
 export default function Vimarsh() {
   const tr = useT();
-  const { vimarshTopics } = useAppContext();
   const { data: topicGroups, isLoading, error } = useVimarshTopics();
+  
+  // Flatten topicGroups for the explorer
+  const vimarshTopics = useMemo(() => {
+    if (topicGroups && topicGroups.length > 0) {
+      return topicGroups.flatMap(g => g.topics).map(t => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        sortOrder: t.sortOrder,
+        resources: t.resources,
+      }));
+    }
+    return [];
+  }, [topicGroups]);
   const { addToast } = useToast();
   const isHi = tr('en', 'hi') === 'hi';
   const [search, setSearch] = useState('');

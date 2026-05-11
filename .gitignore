@@ -64,5 +64,12 @@ auth-assets-*.json
 public/recording.*
 public/wa_image.*
 
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.*
+
 # Ruflo scan artifacts
 ruflo-*.json
+
+.vercel

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
@@ -9,8 +10,8 @@ import { Skeleton } from "@/components/Skeletons";
 import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
 
-const FULL_BLEED_PUBLIC_PATHS = new Set(["/login"]);
-const PADDED_PUBLIC_PATHS = new Set(["/parichay", "/vimarsh", "/library", "/feed", "/history", "/guide"]);
+const FULL_BLEED_PUBLIC_PATHS = new Set(["/login", "/parichay"]);
+const PADDED_PUBLIC_PATHS = new Set(["/vimarsh", "/library", "/feed", "/history", "/guide"]);
 const PADDED_PUBLIC_PREFIXES = ["/form/", "/vote/"];
 
 function isPaddedPublicPath(pathname: string) {
@@ -25,14 +26,21 @@ export function AppLayoutShell({
   const pathname = usePathname();
   const { authReady, isAuthenticated, lang } = useAppContext();
   const t = useT();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isFullBleedPublicRoute = FULL_BLEED_PUBLIC_PATHS.has(pathname);
   const isGuestRootEntry = pathname === "/" && !isAuthenticated;
   const isPaddedPublicRoute = isPaddedPublicPath(pathname);
 
-  if (isFullBleedPublicRoute || isGuestRootEntry) {
+  // During SSR and initial hydration, render full-bleed to avoid any mismatch.
+  // After mount, apply the correct layout based on the actual route.
+  if (!mounted || isFullBleedPublicRoute || isGuestRootEntry) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden">
+      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
         <PageTransition>{children}</PageTransition>
       </main>
     );
@@ -40,7 +48,7 @@ export function AppLayoutShell({
 
   if (isPaddedPublicRoute) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden bg-background">
+      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
         <PageTransition>
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:px-8 md:py-12 pb-32 md:pb-12">
             {children}

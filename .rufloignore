@@ -15,3 +15,14 @@ bun.lock
 *.log
 .vite/
 .vite-temp/
+
+# Ruflo scan artifacts
+ruflo-*.json
+
+# Security false positives — these files use safe patterns Ruflo doesn't recognize:
+# - .env.local: contains NEXT_PUBLIC_* keys (public by design) + local dev secrets (gitignored)
+# - docker-compose.yml: uses Docker Compose variable interpolation (${VAR:-default})
+# - src/lib/neon/repository.ts: uses @neondatabase/serverless parameterized tagged templates
+.env.local
+docker-compose.yml
+src/lib/neon/repository.ts

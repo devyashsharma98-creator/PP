@@ -13,15 +13,20 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      process.env.NODE_ENV === "production" &&
-      process.env.NEXT_PUBLIC_TEST_ENV !== "true"
-    ) {
-      navigator.serviceWorker.register("/sw.js").catch((err) => {
-        console.error("Service Worker registration failed:", err);
-      });
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      if (
+        process.env.NODE_ENV === "production" &&
+        process.env.NEXT_PUBLIC_TEST_ENV !== "true"
+      ) {
+        navigator.serviceWorker.register("/sw.js").catch((err) => {
+          console.error("Service Worker registration failed:", err);
+        });
+      } else {
+        // Unregister service workers in dev to prevent stale caches
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((reg) => reg.unregister());
+        });
+      }
     }
   }, []);
 

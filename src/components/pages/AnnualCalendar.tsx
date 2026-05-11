@@ -21,6 +21,7 @@ import { useT } from "@/lib/useT";
 import { AAYAM_CONFIG as AAYAM, AAYAM_KIND_LABEL } from "@/lib/app/aayam-config";
 import type { LucideIcon } from "lucide-react";
 import type { GatividhiEvent } from "@/lib/app/contracts";
+import { useDashboardEvents } from "@/hooks/api/use-dashboard";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS: Record<string, { label: string; labelHi: string; chip: string; icon: LucideIcon }> = {
@@ -111,7 +112,7 @@ function EventChip({ event, lang, onClick }: { event: CalEvent; lang: string; on
       transition={{ duration: 0.2 }}
       onClick={(e) => { e.stopPropagation(); onClick?.(); }}
       className={cn(
-        "group text-[7px] sm:text-[8px] px-1.5 py-0.5 rounded-md truncate leading-tight font-medium border cursor-pointer transition-all hover:shadow-sm",
+        "group text-[8px] sm:text-[10px] px-1.5 py-0.5 rounded-md truncate leading-tight font-medium border cursor-pointer transition-all hover:shadow-sm",
         aayam.chip,
         isPending && "ring-1 ring-warning/40",
       )}
@@ -131,13 +132,9 @@ function EventDetailModal({ event, open, onClose, lang, role }: {
 }) {
   const router = useRouter();
   const t = useT();
-  if (!event) return null;
-
-  const aayam = AAYAM[event.aayam] ?? AAYAM.Vibhag;
-  const status = STATUS[event.status] ?? STATUS.Draft;
-  const StatusIcon = status.icon;
 
   const action = useMemo(() => {
+    if (!event) return null;
     if (role === "vibhag_pramukh" && (event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization" || event.status === "Pending Vibhag Review")) {
       return { label: t("Review & Forward", "समीक्षा और अग्रेषण"), href: `/dashboard?event=${event.rawId}&action=review` };
     }
@@ -151,7 +148,13 @@ function EventDetailModal({ event, open, onClose, lang, role }: {
       return { label: t("View Details", "विवरण देखें"), href: `/dashboard?event=${event.rawId}&action=view` };
     }
     return null;
-  }, [role, event.status, event.rawId, t]);
+  }, [role, event, t]);
+
+  if (!event) return null;
+
+  const aayam = AAYAM[event.aayam] ?? AAYAM.Vibhag;
+  const status = STATUS[event.status] ?? STATUS.Draft;
+  const StatusIcon = status.icon;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -232,7 +235,9 @@ export default function AnnualCalendar() {
   const [detailEvent, setDetailEvent] = useState<CalEvent | null>(null);
   const [showStatusFilter, setShowStatusFilter] = useState(false);
 
-  const { events, role, lang, permissions } = useAppContext();
+  const { role, lang, permissions } = useAppContext();
+  const { data: events = [], isLoading } = useDashboardEvents();
+
   const t = useT();
   const router = useRouter();
 
@@ -423,6 +428,14 @@ export default function AnnualCalendar() {
   }, []);
 
   const hasFilters = search.trim() || aayamFilter.length > 0 || statusFilter.length > 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
@@ -812,7 +825,7 @@ export default function AnnualCalendar() {
                                   const a = AAYAM[e.aayam] ?? AAYAM.Vibhag;
                                   return <div key={e.id} className={cn("w-1.5 h-1.5 rounded-full", a.dot)} />;
                                 })}
-                                {dayEvts.length > 4 && <span className="text-[7px] text-muted-foreground">+</span>}
+                                {dayEvts.length > 4 && <span className="text-[8px] text-muted-foreground">+</span>}
                               </div>
                             )}
                           </motion.div>

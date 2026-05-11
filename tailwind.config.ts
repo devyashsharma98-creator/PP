@@ -8,14 +8,16 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "2rem",
+      },
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
       fontFamily: {
-        serif: ['var(--font-ui-serif)', 'Georgia', 'serif'],
         sans: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
         display: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
         body: ['var(--font-ui-sans)', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
