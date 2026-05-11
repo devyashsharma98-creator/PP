@@ -72,6 +72,12 @@ export async function createEvent(input: CreateEventInput) {
   });
 }
 
+export async function cloneEvent(id: string) {
+  return fetchApi<Event & { sourceEventId: string }>(`/events/${id}/clone`, {
+    method: 'POST',
+  });
+}
+
 export async function updateEvent(id: string, input: Partial<CreateEventInput>) {
   return fetchApi<Event>(`/events/${id}`, {
     method: 'PATCH',

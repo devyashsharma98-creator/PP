@@ -155,6 +155,22 @@ export function useAddPoll() {
   });
 }
 
+export function useCloneEvent() {
+  const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      return fetchApi<Record<string, unknown>>(`/events/${eventId}/clone`, {
+        method: 'POST',
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard-events'] });
+      await refreshWorkspace();
+    },
+  });
+}
+
 export function useFinalizePoll() {
   const queryClient = useQueryClient();
   return useMutation({

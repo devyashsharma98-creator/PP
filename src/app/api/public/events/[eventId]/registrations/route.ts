@@ -33,10 +33,61 @@ export async function POST(
     }
     const input = parsed.data;
 
+    // Fetch event + form config to enforce constraints
+    const eventRows = await sql`SELECT status FROM public.events WHERE id = ${eventId} LIMIT 1`;
+    const eventStatus = (eventRows as Array<{ status: string }>)[0]?.status;
+    if (!["authorized_public", "published"].includes(eventStatus)) {
+      return NextResponse.json({ error: "Registration is not open for this event." }, { status: 403 });
+    }
+
+    const configRows = await sql`
+      SELECT is_enabled, is_public, allow_multiple_submissions, max_registrations, opens_at, closes_at
+      FROM public.event_form_configs
+      WHERE event_id = ${eventId}
+      LIMIT 1
+    `;
+    const config = (configRows as Array<{
+      is_enabled: boolean;
+      is_public: boolean;
+      allow_multiple_submissions: boolean;
+      max_registrations: number | null;
+      opens_at: string | null;
+      closes_at: string | null;
+    }>)[0];
+
+    if (!config || !config.is_enabled || !config.is_public) {
+      return NextResponse.json({ error: "Registration is not open for this event." }, { status: 403 });
+    }
+
+    const now = new Date();
+    if (config.opens_at && new Date(config.opens_at) > now) {
+      return NextResponse.json({ error: "Registration has not opened yet." }, { status: 403 });
+    }
+    if (config.closes_at && new Date(config.closes_at) < now) {
+      return NextResponse.json({ error: "Registration has closed." }, { status: 403 });
+    }
+
+    // Capacity check
+    if (config.max_registrations != null) {
+      const countRows = await sql`SELECT COUNT(*)::int AS total FROM public.event_registrations WHERE event_id = ${eventId}`;
+      const currentCount = (countRows as Array<{ total: number }>)[0]?.total ?? 0;
+      if (currentCount >= config.max_registrations) {
+        return NextResponse.json({ error: "This event is full. Registration is closed." }, { status: 403 });
+      }
+    }
+
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip = forwardedFor?.split(",")[0]?.trim() ?? null;
     const ua = req.headers.get("user-agent");
     const hash = createHash("sha256").update(`${eventId}:${input.name}:${input.phone ?? ""}:${input.city ?? ""}`).digest("hex");
+
+    // Duplicate check
+    if (!config.allow_multiple_submissions) {
+      const dupRows = await sql`SELECT id FROM public.event_registrations WHERE event_id = ${eventId} AND public_submission_key_hash = ${hash} LIMIT 1`;
+      if ((dupRows as Array<{ id: string }>).length > 0) {
+        return NextResponse.json({ error: "You have already registered for this event." }, { status: 409 });
+      }
+    }
 
     const result = await sql`
       INSERT INTO public.event_registrations (event_id, name, phone, city, attending_count, has_special_needs, notes, public_submission_key_hash, submitted_from_ip, submitted_user_agent)

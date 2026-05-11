@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, isValid, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Building2, CalendarDays, CheckCircle2, ClipboardCheck, Lightbulb, Link2, MapPin, Phone, Plus, QrCode, RotateCcw, SlidersHorizontal, Trash2, User, Users, Vote, X, FileText } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, CheckCircle2, ClipboardCheck, Copy, Lightbulb, Link2, MapPin, Phone, Plus, QrCode, RotateCcw, SlidersHorizontal, Trash2, User, Users, Vote, X, FileText } from "lucide-react";
 
 import { useAppContext } from "@/context/AppContext";
-import { useCreateDashboardEvent, useAddPoll, useFinalizePoll } from "@/hooks/api/use-dashboard";
+import { useCreateDashboardEvent, useAddPoll, useFinalizePoll, useCloneEvent } from "@/hooks/api/use-dashboard";
 import { Masthead } from "@/components/Masthead";
 import { useToast } from "@/components/ToastProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -48,6 +48,7 @@ export function UnitDashboardView({
   const createEventMutation = useCreateDashboardEvent();
   const addPollMutation = useAddPoll();
   const finalizePollMutation = useFinalizePoll();
+  const cloneEventMutation = useCloneEvent();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formTab, setFormTab] = useState("pre");
@@ -710,6 +711,22 @@ export function UnitDashboardView({
                       <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("Submit", "भेजें")}
+                      </Button>
+                    )}
+                    {permissions.canCreateEvent && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                        onClick={() => cloneEventMutation.mutate(event.id)}
+                        disabled={cloneEventMutation.isPending}
+                      >
+                        {cloneEventMutation.isPending && cloneEventMutation.variables === event.id ? (
+                          <CheckCircle2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <Copy className="mr-1 h-3 w-3" />
+                        )}
+                        {t("Clone", "प्रतिरूप")}
                       </Button>
                     )}
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => copyFormLink(event.id)}>
