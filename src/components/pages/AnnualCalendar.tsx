@@ -485,7 +485,7 @@ export default function AnnualCalendar() {
               className="pl-10 h-11 rounded-xl border-border/50 bg-background/80 shadow-sm"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors" aria-label={t("Clear search", "खोज साफ करें")}>
                 <X className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             )}

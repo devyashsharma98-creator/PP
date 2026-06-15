@@ -17,6 +17,7 @@ export function AayamDashboardView({
   t,
   eventStatusHi,
   statusBadge,
+  workflowPending = false,
   onForwardToVibhag,
 }: AayamDashboardViewProps) {
   const isPrantAayamLane = dashboardKind === "prant_aayam_pramukh";
@@ -119,7 +120,7 @@ export function AayamDashboardView({
                   </div>
                   <p className="text-sm text-muted-foreground">{event.description}</p>
                   <div className="space-y-1">
-                    <Button size="sm" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                    <Button size="sm" onClick={() => void onForwardToVibhag(event.id, event.status)} disabled={workflowPending}>
                       {event.status === "Submitted by Unit"
                         ? t("Accept & Begin Review", "स्वीकारें और समीक्षा प्रारम्भ करें")
                         : t("Review & Forward to Vibhag", "समीक्षा करें और विभाग को भेजें")}{" "}

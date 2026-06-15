@@ -13,14 +13,3 @@ export function requireDatabaseUrl() {
 }
 
 export const isDatabaseConfigured = Boolean(getDatabaseUrl());
-
-if (process.env.NODE_ENV === "production") {
-  if (!isDatabaseConfigured) {
-    console.warn("⚠️ DATABASE_URL not set in production. App actions will fail.");
-  } else {
-    // Only log the first few characters for security
-    const url = getDatabaseUrl() || "";
-    console.log(`✅ Database configuration detected (starts with ${url.slice(0, 15)}...)`);
-  }
-}
-

@@ -56,6 +56,7 @@ import { useAppContext } from "@/context/AppContext";
 import {
   assignRole,
   createUser,
+  deleteUser,
   fetchAccessScopes,
   fetchRoles,
   fetchUser,
@@ -66,6 +67,7 @@ import {
   type CreateUserInput,
   type UpdateUserInput,
   type UserDetail,
+  type UserRoleAssignment,
 } from "@/lib/api/users";
 import type { CanonicalRoleCode } from "@/lib/app/contracts";
 import { canonicalRoleLabels, canonicalRoleLabelsHi } from "@/lib/app/constants";
@@ -76,6 +78,7 @@ import { displayBilingualHi, repairBrokenHindi, useT } from "@/lib/useT";
 type StatusFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | CanonicalRoleCode;
 type AssignmentScopeType = NonNullable<AssignRoleInput["scopeType"]>;
+type DisplayScopeType = UserRoleAssignment["scopeType"];
 
 const ADMIN_ROLE_CODES = new Set<CanonicalRoleCode>(["super_admin", "org_admin"]);
 
@@ -179,8 +182,8 @@ function isActiveRole(assignment: UserDetail["roleAssignments"][number]) {
   return true;
 }
 
-function getScopeTypeLabel(scopeType: AssignmentScopeType, lang: "en" | "hi") {
-  const labels: Record<AssignmentScopeType, { en: string; hi: string }> = {
+function getScopeTypeLabel(scopeType: DisplayScopeType, lang: "en" | "hi") {
+  const labels: Record<DisplayScopeType, { en: string; hi: string }> = {
     org: { en: "Whole organisation", hi: "पूरी संस्था" },
     unit: { en: "Specific unit", hi: "विशिष्ट इकाई" },
     department: { en: "Specific aayam", hi: "विशिष्ट आयाम" },
@@ -361,6 +364,18 @@ export default function UserManagement() {
     },
     onError: (error) => {
       addToast(error instanceof Error ? error.message : t("Failed to remove role", "भूमिका हटाई नहीं जा सकी"), "error");
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: () => deleteUser(selectedUserId!),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setSelectedUserId(null);
+      addToast(t("Account deleted permanently", "खाता स्थायी रूप से हटा दिया गया"), "success");
+    },
+    onError: (error) => {
+      addToast(error instanceof Error ? error.message : t("Failed to delete account", "खाता हटा नहीं सका"), "error");
     },
   });
 
@@ -975,6 +990,38 @@ export default function UserManagement() {
                         ? t("Deactivate account", "खाता निष्क्रिय करें")
                         : t("Reactivate account", "खाता पुनः सक्रिय करें")}
                     </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          aria-label={t("Delete account permanently", "खाता स्थायी रूप से हटाएँ")}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-popover">
+                        <DialogHeader>
+                          <DialogTitle>{t("Delete account permanently?", "खाता स्थायी रूप से हटाएँ?")}</DialogTitle>
+                        <DialogDescription>
+                          {t(
+                            "This will permanently erase " + (selectedUser.email || "this account") + " and all their role assignments. This action cannot be undone.",
+                            "यह " + (selectedUser.email || "इस खाते") + " को और उनकी सभी भूमिका आवंटनों को स्थायी रूप से मिटा देगा। यह कार्रवाई पूर्ववत नहीं की जा सकती।",
+                          )}
+                        </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button variant="destructive" onClick={() => deleteUserMutation.mutate()} disabled={deleteUserMutation.isPending}>
+                            {deleteUserMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                            {t("Delete permanently", "स्थायी रूप से हटाएँ")}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardHeader>
 
@@ -1272,7 +1319,5 @@ export default function UserManagement() {
     </motion.div>
   );
 }
-
-
 
 

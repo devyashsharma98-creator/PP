@@ -1,7 +1,7 @@
 param(
-  [string]$BaseUrl = "https://mediumturquoise-dove-917779.hostingersite.com",
-  [string]$Email = "demo.vibhag@example.com",
-  [string]$Password = "Password123!"
+  [string]$BaseUrl = "http://localhost:3000",
+  [string]$Email = "admin@pragyapravah.local",
+  [string]$Password = "Pragya@12345"
 )
 
 $ErrorActionPreference = "Stop"
@@ -78,7 +78,7 @@ function Invoke-Case(
   }
 }
 
-Write-Output "== Pragya Pravah Live First-Half Backend Verification =="
+Write-Output "== Pragya Pravah Local Backend Verification =="
 Write-Output "Base URL: $BaseUrl"
 
 # Auth

@@ -1,8 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-change-in-production'
-);
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET env var is missing or too short (min 32 chars required).");
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export interface JWTPayload {
   userId: string;
@@ -18,12 +22,13 @@ export async function createToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): Pro
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('24h')
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
+  const secret = getJwtSecret();
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
     return payload as unknown as JWTPayload;
   } catch {
     return null;

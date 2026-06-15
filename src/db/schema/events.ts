@@ -23,8 +23,9 @@ import {
   timestamp,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations, sql } from "drizzle-orm";
+import { and, isNull, isNotNull, relations, sql } from "drizzle-orm";
 
 import {
   eventStatusEnum,
@@ -256,7 +257,15 @@ export const eventPollVotes = pgTable(
     submittedUserAgent: text("submitted_user_agent"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [index("epv_poll_idx").on(t.pollId)]
+  (t) => [
+    index("epv_poll_idx").on(t.pollId),
+    uniqueIndex("epv_poll_submitted_by_uidx")
+      .on(t.pollId, t.submittedBy)
+      .where(isNotNull(t.submittedBy) ?? sql`true`),
+    uniqueIndex("epv_poll_public_client_uidx")
+      .on(t.pollId, t.submittedFromIp, t.submittedUserAgent)
+      .where(and(isNull(t.submittedBy), isNotNull(t.submittedFromIp), isNotNull(t.submittedUserAgent)) ?? sql`true`),
+  ]
 );
 
 // ── event_vritt ───────────────────────────────────────────────────────────────

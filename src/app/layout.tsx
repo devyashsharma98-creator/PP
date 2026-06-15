@@ -80,27 +80,14 @@ export default async function RootLayout({
       className={`scroll-smooth ${plexSans.variable} ${plexSansDevanagari.variable}`}
     >
       <body className="font-body antialiased selection:bg-primary/20 selection:text-primary">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 rounded-xl bg-background px-4 py-2 text-sm font-semibold shadow-lg ring-2 ring-primary"
+        >
+          Skip to content
+        </a>
         {/* Unregister stale service workers before hydration to prevent cached HTML mismatches */}
-        <Script
-          id="unregister-sw"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                if (typeof navigator !== "undefined" && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
-                  navigator.serviceWorker.getRegistrations().then(function(regs) {
-                    return Promise.all(regs.map(function(r) { return r.unregister(); }));
-                  }).then(function() {
-                    // Only reload if we actually unregistered something
-                    if (navigator.serviceWorker.controller) {
-                      window.location.reload();
-                    }
-                  });
-                }
-              })();
-            `,
-          }}
-        />
+        <Script id="unregister-sw" strategy="beforeInteractive" src="/sw-unregister.js" />
         <ClientProviders>
           <ToastProvider>
             <AppLayoutShell>{children}</AppLayoutShell>

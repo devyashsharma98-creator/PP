@@ -4,6 +4,17 @@ import { apiSuccess, serverError } from "@/lib/response";
 import { sql } from "@/lib/neon/repository";
 import type { PracharStatusRow } from "@/lib/neon/repository";
 
+type PracharPlatform = "whatsapp" | "facebook" | "instagram" | "telegram";
+
+type PracharStatusPayload = {
+  eventId: string;
+  platforms: Record<PracharPlatform, boolean>;
+  skipReasons: Record<PracharPlatform, string | null>;
+  templateReference: string | null;
+};
+
+const pracharPlatforms = new Set<PracharPlatform>(["whatsapp", "facebook", "instagram", "telegram"]);
+
 export const GET = withAuth(async (req: NextRequest, ctx) => {
   try {
     const rawStatuses = await sql`
@@ -13,7 +24,7 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
     ` as unknown as PracharStatusRow[];
 
     // Group by entity_id to match the UI expectation
-    const statusMap = new Map<string, any>();
+    const statusMap = new Map<string, PracharStatusPayload>();
 
     for (const status of rawStatuses) {
       const eventId = status.entity_id;
@@ -29,8 +40,9 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
       }
 
       const current = statusMap.get(eventId);
-      const platformKey = status.platform as any;
-      if (platformKey in current.platforms) {
+      if (!current) continue;
+      const platformKey = status.platform as PracharPlatform;
+      if (pracharPlatforms.has(platformKey)) {
         current.platforms[platformKey] = status.is_done ?? false;
         current.skipReasons[platformKey] = status.skip_reason ?? null;
       }

@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { queryKeys } from '@/lib/query-client';
 import * as api from '@/lib/api/events';
 import type { EventFilters, CreateEventInput } from '@/lib/api/events';
+import type { PublicRegistrationInput } from '@/lib/validators/events';
 
 export function useEvents(filters?: EventFilters) {
   return useQuery({
@@ -112,7 +113,7 @@ export function useAddRegistration() {
   const { refreshWorkspace } = useAppContext();
 
   return useMutation({
-    mutationFn: ({ eventId, payload }: { eventId: string; payload: any }) =>
+    mutationFn: ({ eventId, payload }: { eventId: string; payload: PublicRegistrationInput }) =>
       fetch(`/api/public/events/${eventId}/registrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

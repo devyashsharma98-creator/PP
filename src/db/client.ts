@@ -10,18 +10,24 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import * as schema from "./schema/index";
-import { getDatabaseUrl } from "@/lib/neon/env";
+import { requireDatabaseUrl } from "@/lib/neon/env";
 
-const databaseUrl = getDatabaseUrl();
-if (!databaseUrl) {
-  throw new Error(
-    "Database URL is not set. Set DATABASE_URL (preferred) or NEON_DATABASE_URL in the server environment.",
-  );
+function createDb() {
+  return drizzle(neon(requireDatabaseUrl()), { schema });
 }
 
-const sql = neon(databaseUrl);
+let dbInstance: ReturnType<typeof createDb> | null = null;
+
+export function getDb() {
+  dbInstance ??= createDb();
+  return dbInstance;
+}
 
 /** Drizzle DB instance. Import this everywhere you need DB access. */
-export const db = drizzle(sql, { schema });
+export const db = new Proxy({} as ReturnType<typeof createDb>, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getDb(), prop, receiver);
+  },
+});
 
 export type DB = typeof db;

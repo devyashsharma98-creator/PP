@@ -17,11 +17,11 @@ import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-aut
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { checklistSchema } from "@/lib/validators/events";
 import { apiSuccess, badRequest, notFound, forbidden } from "@/lib/response";
-import { writeAuditLog } from "@/lib/audit";
+import * as eventService from "@/lib/server/services/event-service";
 
 type Params = { eventId: string };
 
-// ── GET ───────────────────────────────────────────────────────────────────────
+// ── GET ─────────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx, params) => {
   const ip = getClientIp(req);
   const rateRes = withApiRateLimit(ip);
@@ -29,17 +29,13 @@ export const GET = withAuth(async (req: NextRequest, ctx, params) => {
 
   const { eventId } = params as Params;
 
-  const event = await db.query.events.findFirst({
-    where: and(eq(events.id, eventId), eq(events.orgId, ctx.session.orgId)),
-    columns: { id: true, title: true, checklist: true, status: true },
-  });
+  const result = await eventService.getEventChecklist(eventId, ctx.session.orgId);
+  if (!result.ok) return result.response;
 
-  if (!event) return notFound("Event not found.");
-
-  return apiSuccess({ eventId, checklist: event.checklist });
+  return apiSuccess(result.data);
 });
 
-// ── PATCH ─────────────────────────────────────────────────────────────────────
+// ── PATCH ───────────────────────────────────────────────────────────────────────
 export const PATCH = withPermission("canUpdateEvent", async (req: NextRequest, ctx, params) => {
   const ip = getClientIp(req);
   const rateRes = withApiRateLimit(ip);
@@ -49,11 +45,10 @@ export const PATCH = withPermission("canUpdateEvent", async (req: NextRequest, c
 
   const event = await db.query.events.findFirst({
     where: and(eq(events.id, eventId), eq(events.orgId, ctx.session.orgId)),
-    columns: { id: true, checklist: true, status: true, createdBy: true },
+    columns: { id: true, checklist: true, status: true },
   });
   if (!event) return notFound("Event not found.");
 
-  // Cannot edit checklist of cancelled/rejected events
   if (event.status === "cancelled" || event.status === "rejected") {
     return forbidden(`Cannot update checklist for an event with status '${event.status}'.`);
   }
@@ -69,26 +64,14 @@ export const PATCH = withPermission("canUpdateEvent", async (req: NextRequest, c
   if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid checklist.");
   const newChecklist = parsed.data;
 
-  // Merge with existing checklist
-  const existingChecklist = (event.checklist as Record<string, boolean>) ?? {};
-  const mergedChecklist = { ...existingChecklist, ...newChecklist };
+  const result = await eventService.updateEventChecklist(
+    eventId,
+    (event.checklist as Record<string, boolean>) ?? {},
+    newChecklist,
+    ctx,
+    ip
+  );
+  if (!result.ok) return result.response;
 
-  await db
-    .update(events)
-    .set({ checklist: mergedChecklist, updatedAt: new Date(), updatedBy: ctx.session.userId })
-    .where(eq(events.id, eventId));
-
-  await writeAuditLog({
-    orgId: ctx.session.orgId,
-    action: "event.checklist_updated",
-    actorUserId: ctx.session.userId,
-    actorEmail: ctx.session.email,
-    actorIp: ip,
-    entityType: "event",
-    entityId: eventId,
-    payload: { checklist: mergedChecklist },
-    changeSummary: "Logistics checklist updated.",
-  });
-
-  return apiSuccess({ eventId, checklist: mergedChecklist });
+  return apiSuccess(result.data);
 });

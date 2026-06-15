@@ -1,138 +1,58 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAppContext, type Role } from '@/context/AppContext';
-import { canonicalRoleLabels, canonicalRoleLabelsHi, roleLabels, roleLabelsHi } from '@/lib/app/constants';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Bell, Menu, Sun, Moon, CheckCircle2, Clock, PenLine, X, CalendarDays, ArrowRight, LogOut } from 'lucide-react';
-import { PragyaLogo } from '@/components/PragyaLogo';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { getNavGroups } from '@/lib/app/navigation';
-import { cn } from '@/lib/utils';
-import { repairBrokenHindi, useT } from '@/lib/useT';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useTheme } from 'next-themes';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useUnreadCount } from '@/hooks/api/use-notifications';
-import { useSignOut } from '@/hooks/use-sign-out';
-import { useDashboardEvents } from '@/hooks/api/use-dashboard';
-import { useDashboardArticles } from '@/hooks/api/use-dashboard-articles';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAppContext, type Role } from "@/context/AppContext";
+import { canonicalRoleLabels, canonicalRoleLabelsHi, roleLabels, roleLabelsHi } from "@/lib/app/constants";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield, LogOut } from "lucide-react";
+import { PragyaLogo } from "@/components/PragyaLogo";
+import { cn } from "@/lib/utils";
+import { repairBrokenHindi, useT } from "@/lib/useT";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useSignOut } from "@/hooks/use-sign-out";
+import { useDashboardEvents } from "@/hooks/api/use-dashboard";
+import { useDashboardArticles } from "@/hooks/api/use-dashboard-articles";
+import { getNavGroups } from "@/lib/app/navigation";
+import { useShellFrame } from "./navbar/useShellFrame";
+import { useNavbarNotifications } from "./navbar/useNavbarNotifications";
+import { MobileNav } from "./navbar/MobileNav";
+import { NotificationBell } from "./navbar/NotificationBell";
+import { ThemeToggle } from "./navbar/ThemeToggle";
 
-function getShellFrame(pathname: string, role: Role) {
-  if (pathname === '/' || pathname === '/overview') {
-    return {
-      titleEn: 'Overview',
-      titleHi: 'अवलोकन',
-      subtitleEn: 'Start here for system health, hierarchy checks, and cross-workflow visibility.',
-      subtitleHi: 'स्वास्थ्य जाँच, पदानुक्रम समीक्षा और कार्यप्रवाह की दृश्यता यहीं से शुरू करें।',
-    };
-  }
+/**
+ * Time: O(1) — passive scroll listener.
+ * Space: O(1).
+ */
+function useScrollHide(disabled: boolean) {
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
 
-  if (pathname === '/dashboard') {
-    if (role === 'vibhag_pramukh') {
-      return {
-        titleEn: 'Institutional Console',
-        titleHi: 'संस्थागत प्रणाली',
-        subtitleEn: 'Final approvals, publication, and unit coordination in one operational view.',
-        subtitleHi: 'एक ही परिचालन दृश्य में अंतिम अनुमोदन, प्रकाशन और इकाई समन्वय।',
-      };
+  useEffect(() => {
+    if (disabled) {
+      setHidden(false);
+      return;
     }
+    const root = document.getElementById("main-content");
+    const target: HTMLElement | Window = root ?? window;
+    const getY = () => (root ? root.scrollTop : window.scrollY);
+    lastY.current = getY();
 
-    if (role === 'aayam_pramukh') {
-      return {
-        titleEn: 'Aayam Review Desk',
-        titleHi: 'आयाम समीक्षा डेस्क',
-        subtitleEn: 'Review incoming programmes, forward ready work, and keep the organisational lane clear.',
-        subtitleHi: 'आगत कार्यक्रमों की समीक्षा करें, तैयार कार्य आगे भेजें और संगठनात्मक धारा स्पष्ट रखें।',
-      };
-    }
-
-    return {
-      titleEn: 'Events & Approvals',
-      titleHi: 'कार्यक्रम व अनुमोदन',
-      subtitleEn: 'Plan programmes, move them through review, and complete the event workflow here.',
-      subtitleHi: 'कार्यक्रम योजना, समीक्षा प्रवाह और अंतिम आयोजन इसी सतह से चलाएँ।',
+    const onScroll = () => {
+      const y = getY();
+      if (y < 24 || y < lastY.current - 8) {
+        setHidden(false);
+      } else if (y > lastY.current + 8 && y > 96) {
+        setHidden(true);
+      }
+      lastY.current = y;
     };
-  }
 
-  const routeFrames = [
-    {
-      match: '/super-admin',
-      titleEn: 'Access Governance',
-      titleHi: 'प्रवेश संचालन',
-      subtitleEn: 'Account creation, authority boundaries, and role-based system access in one controlled surface.',
-      subtitleHi: 'एक ही नियंत्रित सतह पर खाते बनाना, अधिकार सीमाएँ और भूमिका-आधारित प्रणाली पहुँच।',
-    },
-    {
-      match: '/users',
-      titleEn: 'Access Governance',
-      titleHi: 'प्रवेश संचालन',
-      subtitleEn: 'Account creation, authority boundaries, and role-based system access in one controlled surface.',
-      subtitleHi: 'एक ही नियंत्रित सतह पर खाते बनाना, अधिकार सीमाएँ और भूमिका-आधारित प्रणाली पहुँच।',
-    },
-    {
-      match: '/prachar',
-      titleEn: 'Prachar Desk',
-      titleHi: 'प्रचार डेस्क',
-      subtitleEn: 'Close distribution gaps, confirm channel coverage, and finish outreach follow-through.',
-      subtitleHi: 'वितरण में अंतराल बंद करें, माध्यम कवरेज सुनिश्चित करें और प्रसार अनुवर्तन पूरा करें।',
-    },
-    {
-      match: '/aalekh',
-      titleEn: 'Aalekh Desk',
-      titleHi: 'आलेख डेस्क',
-      subtitleEn: 'Write, review, revise, and prepare institutional content for publication.',
-      subtitleHi: 'लेखन, समीक्षा, संशोधन और प्रकाशन-तैयार सामग्री यहीं तैयार करें।',
-    },
-    {
-      match: '/feed',
-      titleEn: 'Published Work',
-      titleHi: 'प्रकाशित कार्य',
-      subtitleEn: 'The current record of approved and circulated institutional writing.',
-      subtitleHi: 'अनुमोदित और प्रसारित संस्थागत लेखन का वर्तमान अभिलेख।',
-    },
-    {
-      match: '/dayitv',
-      titleEn: 'Dayitva Matrix',
-      titleHi: 'दायित्व संरचना',
-      subtitleEn: 'Organisational roles, reporting lines, and accountability structure.',
-      subtitleHi: 'संगठनात्मक भूमिकाएँ, संपर्क धाराएँ और उत्तरदायित्व की संरचना।',
-    },
-    {
-      match: '/calendar',
-      titleEn: 'Annual Panchang',
-      titleHi: 'वार्षिक पंचांग',
-      subtitleEn: 'Programme rhythm, dates, and shared institutional calendar visibility.',
-      subtitleHi: 'कार्यक्रम लय, तिथियाँ और साझा संस्थागत पंचांग दृश्यता।',
-    },
-    {
-      match: '/directory',
-      titleEn: 'Sampark Directory',
-      titleHi: 'सम्पर्क निर्देशिका',
-      subtitleEn: 'Institutional contacts, roles, and points of coordination.',
-      subtitleHi: 'संस्थागत सम्पर्क, दायित्व और समन्वय बिंदु।',
-    },
-    {
-      match: '/library',
-      titleEn: 'E-Library',
-      titleHi: 'ई-पुस्तकालय',
-      subtitleEn: 'Reference texts, study material, and archived intellectual resources.',
-      subtitleHi: 'सन्दर्भ ग्रंथ, अध्ययन सामग्री और संग्रहित बौद्धिक संसाधन।',
-    },
-  ];
+    target.addEventListener("scroll", onScroll, { passive: true });
+    return () => target.removeEventListener("scroll", onScroll);
+  }, [disabled]);
 
-  const matched = routeFrames.find((frame) => pathname.startsWith(frame.match));
-  if (matched) return matched;
-
-  return {
-    titleEn: 'Pragya Pravah',
-    titleHi: 'प्रज्ञा प्रवाह',
-    subtitleEn: 'Civilisational discourse, organised action.',
-    subtitleHi: 'सभ्यतागत विमर्श, संगठित कार्य।',
-  };
+  return hidden;
 }
 
 export function Navbar() {
@@ -142,418 +62,126 @@ export function Navbar() {
   const pathname = usePathname();
   const signOut = useSignOut();
   const t = useT();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
-  const [bellBounce, setBellBounce] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [hideOnScroll, setHideOnScroll] = useState(false);
-  const prevCountRef = useRef(0);
-  const notifRef = useRef<HTMLDivElement>(null);
-  const lastScrollYRef = useRef(0);
-  const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === 'true';
-  const canUseDemoRoleSwitch = demoRoleSwitchEnabled && availableRoles.length > 1;
-  const shellFrame = useMemo(() => getShellFrame(pathname, role), [pathname, role]);
+
+  const shellFrame = useShellFrame(pathname, role);
+  const notifications = useNavbarNotifications(role, events, articles);
+  const hideOnScroll = useScrollHide(open);
+
   const showAdminControls = permissions.canManageUsers || Boolean(
-    viewer?.effectiveRoles.some((candidate) => candidate === 'super_admin' || candidate === 'org_admin')
+    viewer?.effectiveRoles.some((c) => c === "super_admin" || c === "org_admin")
   );
   const navigationGroups = useMemo(
     () => getNavGroups(showAdminControls, viewer?.primaryRoleCode ? [viewer.primaryRoleCode] : null),
     [showAdminControls, viewer?.primaryRoleCode],
   );
-  const currentRoleLabel =
-    lang === "hi"
-      ? repairBrokenHindi(
-          viewer?.primaryRoleCode
-            ? canonicalRoleLabelsHi[viewer.primaryRoleCode]
-            : roleLabelsHi[role],
-        )
-      : viewer?.primaryRoleCode
-        ? canonicalRoleLabels[viewer.primaryRoleCode]
-        : roleLabels[role];
 
-  // Real unread count from API with 30s polling
-  const { data: unreadCount = 0 } = useUnreadCount(isAuthenticated);
+  const currentRoleLabel = lang === "hi"
+    ? repairBrokenHindi(viewer?.primaryRoleCode ? canonicalRoleLabelsHi[viewer.primaryRoleCode] : roleLabelsHi[role])
+    : viewer?.primaryRoleCode ? canonicalRoleLabels[viewer.primaryRoleCode] : roleLabels[role];
 
-  // Hydration guard for theme
-  useEffect(() => setMounted(true), []);
-
-  // Build notifications list — O(n) single pass, memoized
-  const notifications = useMemo(() => {
-    const items: { id: string; type: 'event' | 'article'; title: string; status: string; date: string; link: string }[] = [];
-
-    if (role === 'aayam_pramukh') {
-      for (const e of events) {
-        if (e.status === 'Pending Aayam Review' || e.status === 'Submitted by Unit') {
-          items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
-        }
-      }
-      for (const a of articles) {
-        if (a.status === 'Pending Aayam Review') items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
-      }
-    } else if (role === 'vibhag_pramukh') {
-      for (const e of events) {
-        if (e.status === 'Pending Vibhag Review' || e.status === 'Pending Prant Authorization') {
-          items.push({ id: e.id, type: 'event', title: e.title, status: e.status, date: e.date, link: '/dashboard' });
-        }
-      }
-      for (const a of articles) {
-        if (a.status === 'Pending Vibhag Review' || a.status === 'Pending Prant Authorization') {
-          items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
-        }
-      }
-    } else if (role === 'unit_head') {
-      for (const a of articles) {
-        if (a.status === 'Pending Unit Head Review') items.push({ id: a.id, type: 'article', title: a.title, status: a.status, date: a.date, link: '/aalekh' });
-      }
-    }
-    return items;
-  }, [role, events, articles]);
-
-  const totalPending = Math.max(unreadCount, notifications.length);
-
-  // Animate bell whenever count increases
-  useEffect(() => {
-    if (totalPending > prevCountRef.current) {
-      setBellBounce(true);
-      const timer = setTimeout(() => setBellBounce(false), 600);
-      return () => clearTimeout(timer);
-    }
-    prevCountRef.current = totalPending;
-  }, [totalPending]);
-
-  // Close notification dropdown on outside click — O(1) handler
-  useEffect(() => {
-    if (!notifOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [notifOpen]);
-
-  const toggleTheme = useCallback(() => setTheme(theme === 'dark' ? 'light' : 'dark'), [theme, setTheme]);
-
-  const showSignOut = authReady;
-
-  useEffect(() => {
-    if (open || notifOpen) {
-      setHideOnScroll(false);
-      return;
-    }
-
-    const scrollRoot = document.getElementById("main-content");
-    const target: HTMLElement | Window = scrollRoot ?? window;
-
-    const getY = () => (scrollRoot ? scrollRoot.scrollTop : window.scrollY);
-    lastScrollYRef.current = getY();
-
-    const handleScroll = () => {
-      const currentY = getY();
-      const scrollingDown = currentY > lastScrollYRef.current + 8;
-      const scrollingUp = currentY < lastScrollYRef.current - 8;
-
-      if (currentY < 24 || scrollingUp) {
-        setHideOnScroll(false);
-      } else if (scrollingDown && currentY > 96) {
-        setHideOnScroll(true);
-      }
-
-      lastScrollYRef.current = currentY;
-    };
-
-    target.addEventListener("scroll", handleScroll, { passive: true });
-    return () => target.removeEventListener("scroll", handleScroll);
-  }, [open, notifOpen]);
+  const demoRoleSwitchEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH === "true";
+  const canUseDemoRoleSwitch = demoRoleSwitchEnabled && availableRoles.length > 1;
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-20 px-3 pt-3 transition-transform duration-300 md:px-6 md:pt-4",
-        hideOnScroll && "-translate-y-[120%]",
-      )}
-    >
+    <header className={cn("sticky top-0 z-20 px-2 pt-2 transition-transform duration-300 sm:px-3 md:px-6 md:pt-4", hideOnScroll && "-translate-y-[120%]")}>
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 rounded-xl bg-background px-4 py-2 text-sm font-semibold shadow-lg ring-2 ring-primary"
       >
         {t("Skip to content", "मुख्य सामग्री पर जाएँ")}
       </a>
-      <div className="institution-panel-muted flex flex-wrap min-h-[78px] items-center justify-between gap-3 px-3 py-3 md:px-5">
-        <div className="flex items-center gap-2 md:gap-3">
-        {/* Mobile Menu Trigger */}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
+      <div className="institution-panel-muted flex flex-wrap items-center justify-between gap-2 px-2 py-2 sm:px-3 md:min-h-[78px] md:gap-3 md:px-5 md:py-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
+          <MobileNav
+            open={open}
+            onOpenChange={setOpen}
+            pathname={pathname}
+            lang={lang}
+            shellFrame={shellFrame}
+            navigationGroups={navigationGroups}
+          />
+          <div className="flex items-center gap-2 min-w-0">
+            <Link
+              href="/parichay"
+              prefetch={false}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden"
+              aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
             >
-              <Menu className="w-5 h-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="institution-ledger-rail w-[300px] border-r border-sidebar-border p-0 text-sidebar-foreground">
-            <SheetTitle className="sr-only">{t("Mobile navigation", "मोबाइल नेविगेशन")}</SheetTitle>
-            <SheetDescription className="sr-only">
-              {t("Primary app navigation links.", "मुख्य ऐप नेविगेशन लिंक।")}
-            </SheetDescription>
-            <div className="border-b border-sidebar-border px-6 py-4">
-              <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">
-                {t('Bhopal Vibhag', 'भोपाल विभाग')}
-              </p>
-              <div className="flex items-center gap-3">
+              <PragyaLogo className="h-6 w-6" />
+            </Link>
+            <div className="min-w-0 space-y-0.5">
+              <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t("Bhopal Vibhag", "भोपाल विभाग")}</p>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="shell-panel-copy hidden lg:block shrink-0">{t("Internal institutional console", "आंतरिक संस्थागत प्रणाली")}</span>
+                <span className="text-muted-foreground/60 hidden lg:block shrink-0">•</span>
                 <Link
                   href="/parichay"
                   prefetch={false}
-                  onClick={() => setOpen(false)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]"
-                  aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+                  className={cn(
+                    "min-w-0 truncate text-left text-sm font-bold tracking-tight transition-colors hover:text-primary md:text-base",
+                    lang === "hi" && "font-devanagari",
+                  )}
+                  title={t("Organisation landing", "संगठन परिचय पृष्ठ")}
                 >
-                  <PragyaLogo className="h-7 w-7" />
+                  {t(shellFrame.titleEn, shellFrame.titleHi)}
                 </Link>
-                <div className="min-w-0 space-y-1">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/60">
-                    {t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}
-                  </p>
-                  <h1 className={cn('text-sm font-bold tracking-tight text-foreground', lang === 'hi' && 'font-devanagari')}>
-                    {t(shellFrame.titleEn, shellFrame.titleHi)}
-                  </h1>
-                  <p className={cn('text-[11px] leading-5 text-sidebar-foreground/72', lang === 'hi' && 'font-devanagari')}>
-                    {t(shellFrame.subtitleEn, shellFrame.subtitleHi)}
-                  </p>
-                </div>
               </div>
             </div>
-            <nav className="flex-1 overflow-y-auto px-3 py-4">
-              {navigationGroups.map((group) => (
-                <div key={group.title} className="mb-4 space-y-1">
-                  <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">
-                    {t(group.title, group.titleHi)}
-                  </p>
-                  {group.items.map((item) => {
-                    const active = pathname === item.path;
-                    return (
-                      <Link
-                        key={item.path}
-                        href={item.path}
-                        prefetch={false}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                          active
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                        )}
-                      >
-                        <item.icon className={cn('w-4 h-4 shrink-0', active && 'text-primary')} />
-                        <span className={cn('block leading-none', lang === 'hi' && 'font-devanagari')}>
-                          {t(item.label, item.sublabel)}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
+          </div>
+        </div>
 
-        <div className="flex items-center gap-2 min-w-0">
-          <Link
-            href="/parichay"
-            prefetch={false}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden"
-            aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5 sm:flex-none md:gap-3">
+          <ThemeToggle />
+          <NotificationBell isAuthenticated={isAuthenticated} notifications={notifications} lang={lang} />
+
+          <button
+            onClick={() => setLang(lang === "en" ? "hi" : "en")}
+            aria-label={lang === "en" ? "Switch to Hindi" : "अंग्रेज़ी में बदलें"}
+            className="relative flex h-8 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:text-xs"
+            title={lang === "en" ? "Switch to Hindi" : "अंग्रेज़ी में बदलें"}
           >
-            <PragyaLogo className="h-6 w-6" />
-          </Link>
-            <div className="space-y-0.5 min-w-0">
-            <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t('Bhopal Vibhag', 'भोपाल विभाग')}</p>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="shell-panel-copy hidden lg:block shrink-0">{t('Internal institutional console', 'आंतरिक संस्थागत प्रणाली')}</span>
-              <span className="text-muted-foreground/60 hidden lg:block shrink-0">•</span>
-              <Link
-                href="/parichay"
-                prefetch={false}
-                className={cn(
-                  "min-w-0 truncate text-left text-sm font-bold tracking-tight transition-colors hover:text-primary md:text-base",
-                  lang === "hi" && "font-devanagari",
-                )}
-                title={t("Organisation landing", "संगठन परिचय पृष्ठ")}
-              >
-                {t(shellFrame.titleEn, shellFrame.titleHi)}
-              </Link>
+            <span className={cn("px-3 py-1 transition-all duration-200", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>EN</span>
+            <span className={cn("px-3 py-1 font-devanagari transition-all duration-200", lang === "hi" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>हि</span>
+          </button>
+
+          <div className="shell-role-chip">
+            <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">{t("Dayitva", "दायित्व")}</p>
+              {canUseDemoRoleSwitch ? (
+                <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+                  <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border shadow-lg z-50">
+                    {availableRoles.map((key) => (
+                      <SelectItem key={key} value={key} className={cn("text-sm", lang === "hi" && "font-devanagari")}>
+                        {lang === "hi" ? roleLabelsHi[key] : roleLabels[key]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <span className={cn("text-xs md:text-sm font-medium", lang === "hi" && "font-devanagari")}>{currentRoleLabel}</span>
+              )}
             </div>
           </div>
+
+          {authReady && (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              aria-label={t("Sign Out", "लॉग आउट")}
+              className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:px-3"
+              title={t("Sign Out", "लॉग आउट")}
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className="hidden text-xs font-semibold md:inline">{t("Sign out", "लॉग आउट")}</span>
+            </button>
+          )}
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-end gap-1.5 md:gap-3 shrink-0">
-        {/* ── Dark/Light Toggle ── */}
-        {mounted && (
-          <button
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? t('Switch to light mode', 'लाइट मोड पर स्विच करें') : t('Switch to dark mode', 'डार्क मोड पर स्विच करें')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
-            title={theme === 'dark' ? t('Light Mode', 'लाइट मोड') : t('Dark Mode', 'डार्क मोड')}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {theme === 'dark' ? (
-                <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <Sun className="w-4 h-4 text-amber-400" />
-                </motion.div>
-              ) : (
-                <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <Moon className="w-4 h-4 text-muted-foreground" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-        )}
-
-        {/* ── Notification Bell + Dropdown ── */}
-        <div className="relative" ref={notifRef}>
-          <button
-            onClick={() => totalPending > 0 && setNotifOpen(o => !o)}
-            aria-label={t("Open notifications", "सूचनाएँ खोलें")}
-            className={cn(
-              'relative rounded-full p-2 transition-colors hover:bg-muted',
-              totalPending > 0 ? 'cursor-pointer' : 'cursor-default',
-              bellBounce && 'animate-badge-bounce'
-            )}
-          >
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            {totalPending > 0 && (
-              <>
-                <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-                </span>
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1 shadow-md shadow-primary/30">
-                  {totalPending}
-                </span>
-              </>
-            )}
-          </button>
-
-          {/* Dropdown Panel */}
-          <AnimatePresence>
-            {notifOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -4, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
-              >
-                <div className="sticky top-0 bg-popover border-b border-border/60 px-4 py-3 flex items-center justify-between">
-                  <h3 className={cn("text-sm font-semibold", lang === 'hi' && 'font-devanagari')}>{t('Notifications', 'सूचनाएं')}</h3>
-                  <Badge variant="outline" className="text-[10px]">{totalPending}</Badge>
-                </div>
-                <div className="p-2 space-y-1">
-                  {notifications.map((n) => (
-                    <Link
-                      key={n.id}
-                      href={n.link}
-                      prefetch={false}
-                      onClick={() => setNotifOpen(false)}
-                      className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group"
-                    >
-                      <div className={cn(
-                        'w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5',
-                        n.type === 'event' ? 'bg-primary/10' : 'bg-blue-500/10'
-                      )}>
-                        {n.type === 'event'
-                          ? <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                          : <PenLine className="w-3.5 h-3.5 text-blue-500" />
-                        }
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate group-hover:text-foreground">{n.title}</p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Clock className="w-2.5 h-2.5" />
-                          {lang === 'hi'
-                            ? (n.type === 'event' ? 'कार्यक्रम — समीक्षा प्रतीक्षित' : 'आलेख — समीक्षा प्रतीक्षित')
-                            : (n.type === 'event' ? 'Event — Review pending' : 'Article — Review pending')
-                          }
-                        </p>
-                      </div>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
-                    </Link>
-                  ))}
-                </div>
-                <div className="border-t border-border/60 px-4 py-2.5">
-                  <Link href="/dashboard" prefetch={false} onClick={() => setNotifOpen(false)} className={cn("text-xs text-primary hover:underline", lang === 'hi' && 'font-devanagari')}>
-                    {t('View all in Dashboard →', 'डैशबोर्ड में सब देखें →')}
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Language Toggle */}
-        <button
-          onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
-          aria-label={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
-          className="relative flex h-9 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-xs font-bold transition-all hover:border-primary/40"
-          title={lang === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
-        >
-          <span className={cn(
-            'px-3 py-1 transition-all duration-200',
-            lang === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
-          )}>EN</span>
-          <span className={cn(
-            'px-3 py-1 font-devanagari transition-all duration-200',
-            lang === 'hi' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
-          )}>हि</span>
-        </button>
-
-        {/* Temporary demo role switcher until auth/profile role binding is implemented */}
-        <div className="shell-role-chip">
-          <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-              {t('Dayitva', 'दायित्व')}
-            </p>
-            {canUseDemoRoleSwitch ? (
-              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-                <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border border-border shadow-lg z-50">
-                  {availableRoles.map((key) => (
-                    <SelectItem key={key} value={key} className={cn('text-sm', lang === 'hi' && 'font-devanagari')}>
-                      {lang === 'hi' ? roleLabelsHi[key] : roleLabels[key]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <span className={cn("text-xs md:text-sm font-medium", lang === 'hi' && 'font-devanagari')}>
-                {currentRoleLabel}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Sign out — always in ERP shell after workspace is ready (covers demo mode without viewer). */}
-        {showSignOut && (
-          <button
-            type="button"
-            onClick={() => void signOut()}
-            aria-label={t('Sign Out', 'लॉग आउट')}
-            className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:px-3"
-            title={t('Sign Out', 'लॉग आउट')}
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span className="hidden text-xs font-semibold md:inline">{t('Sign out', 'लॉग आउट')}</span>
-          </button>
-        )}
-      </div>
       </div>
     </header>
   );
 }
-

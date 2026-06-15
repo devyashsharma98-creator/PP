@@ -40,7 +40,7 @@ export function AppLayoutShell({
   // After mount, apply the correct layout based on the actual route.
   if (!mounted || isFullBleedPublicRoute || isGuestRootEntry) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
+      <main id="main-content" tabIndex={-1} lang={lang} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
         <PageTransition>{children}</PageTransition>
       </main>
     );
@@ -48,7 +48,7 @@ export function AppLayoutShell({
 
   if (isPaddedPublicRoute) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
+      <main id="main-content" tabIndex={-1} lang={lang} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
         <PageTransition>
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:px-8 md:py-12 pb-32 md:pb-12">
             {children}
@@ -60,7 +60,7 @@ export function AppLayoutShell({
 
   if (!authReady) {
     return (
-      <main id="main-content" tabIndex={-1} className="app-main-shell min-h-screen overflow-y-auto px-4 pb-32 pt-8 md:px-6 md:pb-8 md:pt-12">
+      <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell min-h-screen overflow-y-auto px-4 pb-32 pt-8 md:px-6 md:pb-8 md:pt-12">
         <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center">
           <div className="institution-panel w-full max-w-3xl space-y-6 px-6 py-8 md:px-8">
             <div className="space-y-2">
@@ -94,7 +94,7 @@ export function AppLayoutShell({
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main id="main-content" tabIndex={-1} className="app-main-shell flex-1 overflow-y-auto px-4 pb-32 pt-6 md:px-6 md:pb-10 md:pt-8">
+          <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell flex-1 overflow-y-auto px-4 pb-24 pt-4 sm:pt-5 md:px-6 md:pb-10 md:pt-8">
             <PageTransition>{children}</PageTransition>
           </main>
         </div>

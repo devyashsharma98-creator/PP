@@ -5,10 +5,7 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
-import { and, eq, ilike, or, count, desc, inArray, type SQL } from "drizzle-orm";
 
-import { db } from "@/db/client";
-import { articles } from "@/db/schema/index";
 import { withAuth, withPermission, getClientIp } from "@/lib/middleware/with-auth";
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { createArticleSchema, listArticlesQuerySchema } from "@/lib/validators/articles";
@@ -16,70 +13,8 @@ import {
   apiSuccess, apiCreated, badRequest, forbidden, serverError,
   parsePagination, paginationMeta,
 } from "@/lib/response";
-import { auditAndActivity } from "@/lib/audit";
-import type { ArticleStatus } from "@/lib/permissions/article-workflow";
 import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
-
-/**
- * Build the WHERE clause conditions for listing articles.
- * Extracted to reduce cognitive complexity of the GET handler.
- */
-function buildArticleWhereConditions(
-  q: ReturnType<typeof listArticlesQuerySchema.parse>,
-  orgId: string,
-  scopedAccess: ReturnType<typeof resolveScopedAccess>,
-  userId: string,
-): SQL<unknown> | undefined {
-  const conditions: SQL<unknown>[] = [eq(articles.orgId, orgId)];
-
-  if (q.status) conditions.push(eq(articles.status, q.status as ArticleStatus));
-  if (q.category) conditions.push(eq(articles.category, q.category));
-  if (q.authorUserId) conditions.push(eq(articles.authorUserId, q.authorUserId));
-  if (q.unitId) conditions.push(eq(articles.unitId, q.unitId));
-  if (q.departmentId) conditions.push(eq(articles.departmentId, q.departmentId));
-
-  const searchCondition = q.search
-    ? or(ilike(articles.title, `%${q.search}%`), ilike(articles.summary, `%${q.search}%`))
-    : undefined;
-
-  if (!scopedAccess.orgWide) {
-    const scopeConditions: SQL<unknown>[] = [eq(articles.authorUserId, userId)];
-    if (scopedAccess.unitIds.size > 0) scopeConditions.push(inArray(articles.unitId, [...scopedAccess.unitIds]));
-    if (scopedAccess.departmentIds.size > 0) scopeConditions.push(inArray(articles.departmentId, [...scopedAccess.departmentIds]));
-    if (scopedAccess.articleIds.size > 0) scopeConditions.push(inArray(articles.id, [...scopedAccess.articleIds]));
-    const scopeClause = or(...scopeConditions);
-    if (scopeClause) conditions.push(scopeClause);
-  }
-
-  return searchCondition ? and(...conditions, searchCondition) : and(...conditions);
-}
-
-/**
- * Emit audit log and activity feed entry for article creation.
- */
-async function auditArticleCreated(
-  ctx: Parameters<Parameters<typeof withPermission>[1]>[1],
-  article: { id: string; title: string; category: string },
-  ip: string | null,
-) {
-  const actorName = ctx.session.displayName ?? ctx.session.email;
-  await auditAndActivity(
-    {
-      orgId: ctx.session.orgId,
-      action: "article.created",
-      actorUserId: ctx.session.userId,
-      actorEmail: ctx.session.email,
-      actorIp: ip ?? undefined,
-      entityType: "article",
-      entityId: article.id,
-      changeSummary: `Article created: "${article.title}" (category: ${article.category}).`,
-    },
-    {
-      summary: `${actorName} created article: "${article.title}".`,
-      actorNameSnapshot: actorName,
-    }
-  );
-}
+import { listArticles, createArticle } from "@/lib/server/services/article-service";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 export const GET = withAuth(async (req: NextRequest, ctx) => {
@@ -95,37 +30,14 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
 
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
-  const whereClause = buildArticleWhereConditions(q, ctx.session.orgId, scopedAccess, ctx.session.userId);
-
-  const [rows, totalRow] = await Promise.all([
-    db
-      .select({
-        id: articles.id,
-        title: articles.title,
-        summary: articles.summary,
-        category: articles.category,
-        status: articles.status,
-        authorUserId: articles.authorUserId,
-        authorNameSnapshot: articles.authorNameSnapshot,
-        unitId: articles.unitId,
-        departmentId: articles.departmentId,
-        valuesChecklist: articles.valuesChecklist,
-        documentUrl: articles.documentUrl,
-        socialUrl: articles.socialUrl,
-        publishedAt: articles.publishedAt,
-        createdAt: articles.createdAt,
-        updatedAt: articles.updatedAt,
-      })
-      .from(articles)
-      .where(whereClause)
-      .orderBy(desc(articles.createdAt))
-      .limit(limit)
-      .offset(offset),
-
-    db.select({ value: count() }).from(articles).where(whereClause),
-  ]);
-
-  const total = Number(totalRow[0]?.value ?? 0);
+  const { rows, total } = await listArticles(
+    ctx.session.orgId,
+    ctx.session.userId,
+    q,
+    limit,
+    offset,
+    scopedAccess,
+  );
 
   return apiSuccess(rows, { meta: paginationMeta(page, limit, total) });
 });
@@ -146,45 +58,38 @@ export const POST = withPermission("canCreateArticle", async (req: NextRequest, 
   const parsed = createArticleSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid input.");
   const input = parsed.data;
+
   const unitId = input.unitId ?? ctx.session.unitId ?? null;
   const departmentId = input.departmentId ?? ctx.session.departmentId ?? null;
+
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
-  if (!rowMatchesScope(scopedAccess, { unitId, departmentId, authorUserId: ctx.session.userId, createdBy: ctx.session.userId }, ctx.session.userId)) {
+  if (
+    !rowMatchesScope(
+      scopedAccess,
+      {
+        unitId,
+        departmentId,
+        authorUserId: ctx.session.userId,
+        createdBy: ctx.session.userId,
+      },
+      ctx.session.userId,
+    )
+  ) {
     return forbidden("You cannot create an article outside your assigned scope.");
   }
 
-  const [newArticle] = await db
-    .insert(articles)
-    .values({
-      orgId: ctx.session.orgId,
-      unitId,
-      departmentId,
-      title: input.title,
-      content: input.content ?? null,
-      summary: input.summary ?? null,
-      category: input.category,
-      authorUserId: ctx.session.userId,
-      authorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-      status: "draft",
-      documentUrl: input.documentUrl ?? null,
-      socialUrl: input.socialUrl ?? null,
-      valuesChecklist: input.valuesChecklist,
-      createdBy: ctx.session.userId,
-      updatedBy: ctx.session.userId,
-    })
-    .returning({
-      id: articles.id,
-      title: articles.title,
-      status: articles.status,
-      category: articles.category,
-      valuesChecklist: articles.valuesChecklist,
-      authorUserId: articles.authorUserId,
-      createdAt: articles.createdAt,
-    });
+  const newArticle = await createArticle(
+    ctx.session.orgId,
+    ctx.session.userId,
+    ctx.session.displayName,
+    ctx.session.email,
+    unitId,
+    departmentId,
+    input,
+    ip,
+  );
 
   if (!newArticle) return serverError("Failed to create article.");
-
-  await auditArticleCreated(ctx, newArticle, ip);
 
   return apiCreated(newArticle);
 });

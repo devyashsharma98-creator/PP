@@ -7,7 +7,7 @@ Phase 1 hardening focused on real auth/session enforcement and permission checks
 Changing workflow enums now would require coordinated updates across:
 
 - DB enum definitions and data migration
-- RLS helper logic that branches on `published` vs non-published states
+- access helper logic that branches on `published` vs non-published states
 - server permission transition logic
 - UI status unions and badges
 - page-specific workflow action branches
@@ -47,8 +47,8 @@ This is better handled as a dedicated migration + application rollout.
 
 Database / migrations
 
-- `supabase/migrations/20260226131926_core_foundation_schema.sql` (current enum definitions)
-- `supabase/migrations/20260226160158_phase1_access_hardening_rls.sql` (helper functions that treat `published` as final public state)
+- `scripts/neon-consolidated-migration.sql` (current enum definitions)
+- `scripts/neon-consolidated-migration.sql` (helper functions that treat `published` as final public state)
 
 Generated types
 

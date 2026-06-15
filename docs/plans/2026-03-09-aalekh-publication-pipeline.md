@@ -18,9 +18,9 @@
 **Step 1: Write the failing test**
 
 Add focused Aalekh smoke coverage for the publication-pipeline framing:
-- `demo.karyakarta@example.com` on `/aalekh` shows a writing-led masthead and a primary draft/submission action
-- `demo.unithead@example.com` on `/aalekh` shows a review-led masthead and a pending-review lane
-- `demo.aayam@example.com` on `/aalekh` shows a final-approval masthead and published/archive context
+- a karyakarta session on `/aalekh` shows a writing-led masthead and a primary draft/submission action
+- a unit-head session on `/aalekh` shows a review-led masthead and a pending-review lane
+- an aayam-pramukh session on `/aalekh` shows a final-approval masthead and published/archive context
 
 Prefer three small tests over one overloaded test. Reuse the existing `loginAs()` helper.
 

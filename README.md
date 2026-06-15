@@ -1,6 +1,6 @@
-# Pragya Pravah UI (Next.js + Supabase)
+# Pragya Pravah UI (Next.js + Neon Postgres)
 
-Next.js App Router frontend for Pragya Pravah workflow operations, now wired to a Supabase backend foundation (schema, RLS, storage policies, server routes, and generated DB types).
+Next.js App Router frontend for Pragya Pravah workflow operations, wired to a Neon Postgres backend foundation, server routes, and generated DB types.
 
 ## Stack
 
@@ -8,7 +8,6 @@ Next.js App Router frontend for Pragya Pravah workflow operations, now wired to 
 - React
 - Tailwind CSS + shadcn/ui
 - Neon Serverless Postgres (primary database)
-- Supabase (migrations, CLI, storage policies scaffold)
 
 ## Project Structure
 
@@ -22,26 +21,16 @@ Next.js App Router frontend for Pragya Pravah workflow operations, now wired to 
 - `src/lib/` - Shared utilities and domain logic
   - `app/` - Core contracts, types, and constants
   - `server/` - Server-side repositories, permissions, and business logic
-  - `supabase/` - Supabase client configurations (browser/server)
 - `src/types/` - Shared TypeScript definitions (including generated DB types)
-
-### Supabase (Backend)
-
-- `supabase/config.toml` - local Supabase CLI config
-- `supabase/migrations/` - SQL source of truth (schema + RLS + storage policies)
-- `supabase/seed.sql` - idempotent local/dev seed
-- `supabase/functions/` - Edge Function scaffolds
 
 ## Documentation
 
 Detailed architectural plans and design documents are available in the `docs/plans/` directory:
 
-- [Demo Role Collapse Design](./docs/plans/2026-03-08-demo-role-collapse-design.md)
 - [Aalekh Publication Pipeline](./docs/plans/2026-03-09-aalekh-publication-pipeline.md)
 - [Prachar Campaign Control Room](./docs/plans/2026-03-09-prachar-campaign-control-room.md)
 - [Institutional Planning Calendar](./docs/plans/2026-03-12-calendar-institutional-planning-panchang.md)
 - [Phase 2 Expansion Plan](./docs/plans/2026-03-16-access-workflow-phase2-status-expansion.md)
-- [Client Mobile Guide](./CLIENT_MOBILE_GUIDE.md)
 
 ## Environment
 
@@ -51,16 +40,13 @@ Required keys:
 
 - `DATABASE_URL` (Neon Postgres connection string)
 - `JWT_SECRET` (min 32 chars; used for session signing)
+- `APP_LOCAL_ADMIN_EMAIL` (default local admin seed email)
+- `APP_LOCAL_ADMIN_PASSWORD` (default local admin seed password)
+- `APP_LOCAL_ADMIN_NAME` (default local admin seed display name)
 - `APP_ORG_CODE` (e.g., `bhopal_vibhag`)
-
-For Supabase CLI workflows:
-
-- `SUPABASE_PROJECT_REF`
-- `SUPABASE_DB_PASSWORD` (for CLI `db push` / `link`)
 
 Optional:
 
-- `NEXT_PUBLIC_ENABLE_DEMO_ROLE_SWITCH=true` for prototype role switching in the navbar (only shows when user has multiple roles)
 - `NEXT_PUBLIC_ENABLE_DEMO_DATA_FALLBACK=true` to show empty-state messages when APIs return no data
 - `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` for file uploads
 
@@ -73,59 +59,24 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Supabase CLI Workflow
-
-### 1. Login
-
-```bash
-supabase login
-```
-
-### 2. Link this repo to a project
-
-```bash
-supabase link --project-ref <project-ref>
-```
-
-If prompted, provide the remote DB password (or use `-p`).
-
-### 3. Push migrations
-
-```bash
-npm run supabase:db:push
-```
-
-### 4. Generate database types
-
-```bash
-npm run supabase:types
-```
-
-This updates `src/types/database.ts` from the linked project.
-
 ## Scripts
 
 - `npm run dev` - start Next.js dev server
 - `npm run build` - production build
 - `npm run lint` - ESLint
 - `npm run typecheck` - TypeScript check
-- `npm run supabase:login` - Supabase CLI login
-- `npm run supabase:link` - link local repo to a Supabase project
-- `npm run supabase:db:push` - push local SQL migrations to linked project
-- `npm run supabase:types` - generate TS DB types from linked project
+
 
 ## Current Backend Foundation Status
 
 - Core workflow tables implemented (events, registrations, polls/votes, articles, prachar, notifications, attachments, audit logs)
 - Future-ready foundation tables implemented (org settings, roles, units, departments/aayams, tags, workflow templates/steps, comments, activity stream, locations)
-- RLS enabled across public workflow tables with helper-role functions and public registration/vote policies
-- Storage buckets created private by default with restrictive object policies
 - Next.js API routes added for bootstrap/app actions and secure public registration/vote submission
 
 ## Notes / TODOs
 
-- App action routes now use authenticated session context instead of server-side service role.
-- Real JWT auth is implemented; demo role switch is restricted to multi-role users and remains env-gated.
+- App action routes use authenticated session context.
+- Real JWT auth is implemented.
 - Presigned upload endpoint is implemented and UI hooks are available; full attachment integration remains in progress.
 
 ## Recently Fixed
@@ -139,8 +90,7 @@ This updates `src/types/database.ts` from the linked project.
 - **AppContext** mock fallback data (`initialEvents`, `initialArticles`, `initialPracharStatuses`) has been removed. Empty states are shown when no data exists.
 
 ### Auth & Security
-- Auth/session architecture moved from prototype service-role calls to authenticated session-aware server actions and route guards.
-- Demo role switch is now restricted to users who actually have multiple effective roles.
+- Auth/session architecture uses authenticated session-aware server actions and route guards.
 - `availableRoles` derived state exposed from `AppContext` so UI only shows switchable roles.
 
 ### Performance & Infra

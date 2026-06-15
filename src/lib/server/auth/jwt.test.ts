@@ -1,13 +1,33 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { createToken, verifyToken, refreshToken } from './jwt';
 
 describe('JWT', () => {
+  const originalSecret = process.env.JWT_SECRET;
   const payload = {
     userId: 'user-123',
     email: 'test@example.com',
     roles: ['karyakarta'],
     permissions: ['event:read', 'event:create'],
   };
+
+  beforeEach(() => {
+    process.env.JWT_SECRET = 'test-secret-with-at-least-32-characters';
+  });
+
+  afterEach(() => {
+    if (originalSecret === undefined) {
+      delete process.env.JWT_SECRET;
+    } else {
+      process.env.JWT_SECRET = originalSecret;
+    }
+  });
+
+  it('should fail closed when JWT_SECRET is missing', async () => {
+    delete process.env.JWT_SECRET;
+
+    await expect(createToken(payload)).rejects.toThrow(/JWT_SECRET/);
+    await expect(verifyToken('invalid-token')).rejects.toThrow(/JWT_SECRET/);
+  });
 
   it('should create and verify token', async () => {
     const token = await createToken(payload);

@@ -27,16 +27,33 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
-export const assignRoleSchema = z.object({
-  roleCode: z.enum(ROLE_CODES),
-  scopeType: z.enum(["org", "unit", "department", "event", "article"]).default("org"),
-  unitId: z.string().uuid().optional(),
-  departmentId: z.string().uuid().optional(),
-  scopeEntityId: z.string().uuid().optional(),
-  startsAt: z.string().datetime().optional(),
-  endsAt: z.string().datetime().optional(),
-  isPrimary: z.boolean().optional().default(false),
-});
+export const assignRoleSchema = z
+  .object({
+    roleCode: z.enum(ROLE_CODES),
+    scopeType: z.enum(["org", "unit", "department"]).default("org"),
+    unitId: z.string().uuid().optional(),
+    departmentId: z.string().uuid().optional(),
+    startsAt: z.string().datetime().optional(),
+    endsAt: z.string().datetime().optional(),
+    isPrimary: z.boolean().optional().default(false),
+  })
+  .superRefine((value, ctx) => {
+    if (value.scopeType === "unit" && !value.unitId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["unitId"],
+        message: "unitId is required when scopeType is unit.",
+      });
+    }
+
+    if (value.scopeType === "department" && !value.departmentId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["departmentId"],
+        message: "departmentId is required when scopeType is department.",
+      });
+    }
+  });
 
 export type AssignRoleInput = z.infer<typeof assignRoleSchema>;
 

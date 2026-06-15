@@ -18,7 +18,7 @@
 **Step 1: Write the failing test**
 
 Add focused Prachar smoke coverage for the new framing:
-- `demo.vibhag@example.com` on `/prachar` shows a Prachar command-room masthead and command-center language
+- a vibhag-pramukh session on `/prachar` shows a Prachar command-room masthead and command-center language
 - the page shows a dissemination queue / accountability message instead of only generic publication wording
 - the page shows a creative-studio section for templates
 

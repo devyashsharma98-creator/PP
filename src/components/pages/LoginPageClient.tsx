@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, ArrowRight, BookOpenText, Loader2, LogIn, ShieldCheck } from "lucide-react";
+import { AlertCircle, KeyRound, Loader2, LogIn, ShieldCheck } from "lucide-react";
 
 import { PragyaLogo } from "@/components/PragyaLogo";
 import { Button } from "@/components/ui/button";
@@ -13,19 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppContext } from "@/context/AppContext";
 import { canAccessPathForPrimaryRole, getRoleLandingPath } from "@/lib/app/role-routing";
+import { LOCAL_ADMIN_QUICK_FILL } from "@/lib/auth/dev-quick-fill";
 import type { RoleCode } from "@/lib/permissions/types";
 import { cn } from "@/lib/utils";
-
-const DEMO_ACCOUNTS = [
-  { labelEn: "Super Admin", labelHi: "सुपर एडमिन", email: "demo.superadmin@example.com" },
-  { labelEn: "Kshetra Reviewer", labelHi: "क्षेत्र समीक्षक", email: "demo.kshetra@example.com" },
-  { labelEn: "Prant Sanyojak", labelHi: "प्रान्त संयोजक", email: "demo.prant@example.com" },
-  { labelEn: "Prant Aayam Pramukh", labelHi: "प्रान्त आयाम प्रमुख", email: "demo.prant.aayam@example.com" },
-  { labelEn: "Vibhag Pramukh", labelHi: "विभाग प्रमुख", email: "demo.vibhag@example.com" },
-  { labelEn: "Aayam Pramukh", labelHi: "आयाम प्रमुख", email: "demo.aayam@example.com" },
-  { labelEn: "Unit Head", labelHi: "यूनिट प्रमुख", email: "demo.unithead@example.com" },
-  { labelEn: "Karyakarta", labelHi: "कार्यकर्ता", email: "demo.karyakarta@example.com" },
-] as const;
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -63,9 +53,7 @@ function LoginForm() {
         genericError: "कुछ गड़बड़ हुई। कृपया फिर प्रयास करें।",
         signIn: "लॉगिन करें",
         signingIn: "लॉगिन हो रहा है...",
-        demoSeal: "आंतरिक परीक्षण हेतु डेमो खाते",
-        demoDescription: "आंतरिक परीक्षण हेतु त्वरित भराव।",
-        demoAction: "भरें",
+        quickFill: "Fill local admin",
         internalOnly: "परीक्षण",
         guideTitle: "मोबाइल उपयोग मार्गदर्शिका",
         guideDescription: "क्लाइंट हेतु द्विभाषी गाइड।",
@@ -90,9 +78,7 @@ function LoginForm() {
         genericError: "Something went wrong. Please try again.",
         signIn: "Sign In",
         signingIn: "Signing in...",
-        demoSeal: "Demo accounts for internal testing",
-        demoDescription: "Quick-fill for internal testing.",
-        demoAction: "Load",
+        quickFill: "लोकल एडमिन भरें",
         internalOnly: "Testing",
         guideTitle: "Mobile user guide",
         guideDescription: "Share the bilingual guide with the client.",
@@ -164,14 +150,8 @@ function LoginForm() {
     }
   }
 
-  function fillDemoAccount(demoEmail: string) {
-    setEmail(demoEmail);
-    setPassword("Password123!");
-    setError("");
-  }
-
   return (
-    <div className="login-editorial-bg min-h-screen px-4 py-5 sm:px-6 md:py-8">
+    <div lang={isHi ? "hi" : "en"} className="login-editorial-bg min-h-screen px-4 py-5 sm:px-6 md:py-8">
       <div className="mx-auto max-w-6xl">
         <div className="login-editorial-rail">
           <p className="section-seal">{copy.scope}</p>
@@ -349,6 +329,22 @@ function LoginForm() {
                   />
                 </div>
 
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-8 rounded-full px-3 text-xs"
+                    disabled={loading}
+                    onClick={() => {
+                      setEmail(LOCAL_ADMIN_QUICK_FILL.email);
+                      setPassword(LOCAL_ADMIN_QUICK_FILL.password);
+                    }}
+                  >
+                    <KeyRound className="h-3.5 w-3.5" />
+                    {copy.quickFill}
+                  </Button>
+                </div>
+
                 {error ? (
                   <div className="flex items-start gap-2 rounded-2xl border border-destructive/20 bg-destructive/8 px-3 py-3 text-sm text-destructive">
                     <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -361,52 +357,6 @@ function LoginForm() {
                   {loading ? copy.signingIn : copy.signIn}
                 </Button>
               </form>
-
-              <div className="space-y-4 border-t border-border/60 pt-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="shell-copy">{copy.demoSeal}</p>
-                    <p className="text-sm leading-6 text-muted-foreground">{copy.demoDescription}</p>
-                  </div>
-                  <span className="login-editorial-demo-tag">{copy.internalOnly}</span>
-                </div>
-
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {DEMO_ACCOUNTS.map((account) => (
-                    <button
-                      key={account.email}
-                      type="button"
-                      onClick={() => fillDemoAccount(account.email)}
-                      disabled={loading}
-                      className="demo-account-chip"
-                      aria-label={`${isHi ? account.labelHi : account.labelEn} ${copy.demoAction}`}
-                    >
-                      <span className="text-sm font-medium text-foreground">
-                        {isHi ? account.labelHi : account.labelEn}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-                        {copy.demoAction}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">{copy.guideTitle}</p>
-                      <p className="text-xs leading-5 text-muted-foreground">{copy.guideDescription}</p>
-                    </div>
-                    <Button asChild variant="outline" size="sm" className="rounded-full">
-                      <Link href="/guide" prefetch={false}>
-                        <BookOpenText className="h-4 w-4" />
-                        {copy.guideCta}
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -422,3 +372,4 @@ export default function LoginPageClient() {
     </Suspense>
   );
 }
+

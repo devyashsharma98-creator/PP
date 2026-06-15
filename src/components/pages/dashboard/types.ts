@@ -16,6 +16,7 @@ export interface DashboardRoleViewProps {
 
 export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
   lastPublished: string | null;
+  workflowPending?: boolean;
   onDismissPublished: () => void;
   onForwardToPrant: (eventId: string) => void | Promise<void>;
   onPublishEvent: (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
@@ -23,6 +24,7 @@ export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
 
 export interface AayamDashboardViewProps extends DashboardRoleViewProps {
   dashboardKind?: "aayam_pramukh" | "prant_aayam_pramukh";
+  workflowPending?: boolean;
   onForwardToVibhag: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
 }
 
@@ -35,6 +37,7 @@ export interface UnitDashboardViewProps {
   vrittStatusLabel: (status: "draft" | "submitted" | "reviewed") => string;
   onOpenVrittEditor: (event: GatividhiEvent) => void;
   onOpenQr: (event: GatividhiEvent) => void;
+  workflowPending?: boolean;
   onSubmitForReview: (eventId: string) => void | Promise<void>;
   onForwardToVibhag?: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
   onForwardToPrant?: (eventId: string) => void | Promise<void>;

@@ -86,7 +86,7 @@ export function Masthead({
           <div className="space-y-4">
             {seal && (
               sealHi && sealHi !== seal ? (
-                <p className="home-editorial-eyebrow">
+                <p className="home-editorial-eyebrow max-w-full flex-wrap whitespace-normal">
                   <span>{seal}</span>
                   <span className="font-devanagari tracking-[0.12em]">{sealHi}</span>
                 </p>
@@ -143,9 +143,9 @@ export function Masthead({
                   </div>
                 )}
                 <div className="min-w-0 flex-1 space-y-1.5">
-                  <p className="home-editorial-eyebrow !px-2.5 !py-1 !text-[10px] !tracking-[0.16em]">
+                  <p className="dashboard-context-label">
                     <span>{ctx.labelEn}</span>
-                    <span className="font-devanagari tracking-[0.1em]">{ctx.labelHi}</span>
+                    <span className="font-devanagari tracking-[0.08em]">{ctx.labelHi}</span>
                   </p>
                   <p className="text-sm font-semibold leading-snug text-foreground">
                     {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}

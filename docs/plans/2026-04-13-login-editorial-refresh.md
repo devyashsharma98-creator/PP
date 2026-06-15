@@ -109,6 +109,6 @@ Check:
 
 **Step 3: Deploy and verify live**
 
-- Push to `main`
-- Wait for Hostinger deploy completion
+- Push to the deployment branch
+- Wait for deployment completion
 - Verify the refreshed login page live in both English and Hindi

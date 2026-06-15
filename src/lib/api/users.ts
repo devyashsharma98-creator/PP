@@ -109,10 +109,9 @@ export interface UpdateUserInput {
 
 export interface AssignRoleInput {
   roleCode: CanonicalRoleCode;
-  scopeType?: "org" | "unit" | "department" | "event" | "article";
+  scopeType?: "org" | "unit" | "department";
   unitId?: string;
   departmentId?: string;
-  scopeEntityId?: string;
   startsAt?: string;
   endsAt?: string;
   isPrimary?: boolean;
@@ -172,8 +171,13 @@ export async function assignRole(userId: string, input: AssignRoleInput) {
 }
 
 export async function removeRole(userId: string, assignmentId: string) {
-  return fetchApi<{ assignmentId: string; removed: boolean }>(`/users/${userId}/roles`, {
+  return fetchApi<{ assignmentId: string; removed: boolean }>(`/users/${userId}/roles/${assignmentId}`, {
     method: "DELETE",
-    body: JSON.stringify({ assignmentId }),
+  });
+}
+
+export async function deleteUser(id: string) {
+  return fetchApi<{ id: string; email: string; displayName: string | null }>(`/users/${id}`, {
+    method: "DELETE",
   });
 }

@@ -78,7 +78,7 @@ export function VibhagView({ articles, permissions, updateArticleStatus, lastPub
                     {t('View in Feed', 'फ़ीड में देखें')} <ArrowRight className="w-3 h-3 ml-1" />
                   </Button>
                 </Link>
-                <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground">
+                <button onClick={() => setLastPublished(null)} className="text-muted-foreground hover:text-foreground" aria-label={t("Dismiss notification", "सूचना हटाएं")}>
                   <X className="w-4 h-4" />
                 </button>
               </div>

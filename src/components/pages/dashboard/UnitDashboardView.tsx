@@ -39,6 +39,7 @@ export function UnitDashboardView({
   vrittStatusLabel,
   onOpenVrittEditor,
   onOpenQr,
+  workflowPending = false,
   onSubmitForReview,
   onForwardToVibhag,
   onForwardToPrant,
@@ -185,6 +186,7 @@ export function UnitDashboardView({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (createEventMutation.isPending) return;
     const selectedDate = parseISO(dateValue);
     if (!form.title || !isValid(selectedDate)) return;
 
@@ -231,6 +233,7 @@ export function UnitDashboardView({
   };
 
   const handleCreatePoll = async () => {
+    if (addPollMutation.isPending) return;
     if (!pollCreateEvent || !newPollQuestion.trim()) return;
     const validOptions = newPollOptions.filter((option) => option.trim());
     if (validOptions.length < 2) return;
@@ -628,7 +631,7 @@ export function UnitDashboardView({
                   </div>
                 )}
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={createEventMutation.isPending}>
                   {t("Submit for Review", "समीक्षा के लिए भेजें")}
                 </Button>
               </form>
@@ -711,31 +714,31 @@ export function UnitDashboardView({
                   </div>
                   <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
                     {event.status === "Draft" && permissions.canCreateEvent && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary/80" onClick={() => void onSubmitForReview(event.id)} disabled={workflowPending}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("Submit", "भेजें")}
                       </Button>
                     )}
                     {event.status === "Submitted by Unit" && onForwardToVibhag && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)} disabled={workflowPending}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("To Aayam", "आयाम को")}
                       </Button>
                     )}
                     {(event.status === "Pending Aayam Review" || event.status === "Pending Vibhag Review") && onForwardToVibhag && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => void onForwardToVibhag(event.id, event.status)} disabled={workflowPending}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("Forward", "आगे भेजें")}
                       </Button>
                     )}
                     {event.status === "Pending Prant Authorization" && onForwardToPrant && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-violet-600 hover:text-violet-700" onClick={() => void onForwardToPrant(event.id)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-violet-600 hover:text-violet-700" onClick={() => void onForwardToPrant(event.id)} disabled={workflowPending}>
                         <ArrowRight className="mr-1 h-3 w-3" />
                         {t("To Prant", "प्रांत को")}
                       </Button>
                     )}
                     {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && onPublishEvent && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-600 hover:text-green-700" onClick={() => void onPublishEvent(event.id, event.title, event.status)}>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-green-600 hover:text-green-700" onClick={() => void onPublishEvent(event.id, event.title, event.status)} disabled={workflowPending}>
                         <CheckCircle2 className="mr-1 h-3 w-3" />
                         {t("Publish", "प्रकाशित करें")}
                       </Button>
@@ -807,7 +810,7 @@ export function UnitDashboardView({
                     )}
                   </div>
                   {event.vrittStatus && (
-                    <button onClick={() => onOpenVrittEditor(event)} className="w-full space-y-1 border-t border-border/30 pt-2 text-left">
+                    <button onClick={() => onOpenVrittEditor(event)} className="w-full space-y-1 border-t border-border/30 pt-2 text-left" aria-label={t("Open Vritt editor", "वृत्त संपादक खोलें")}>
                       <div className="flex items-center gap-2 text-xs">
                         <Badge variant="outline" className={`text-[10px] ${event.vrittStatus === "reviewed" ? "border-green-500/40 text-green-600" : event.vrittStatus === "submitted" ? "border-blue-500/40 text-blue-600" : ""}`}>
                           <FileText className="mr-0.5 h-2.5 w-2.5" /> {vrittStatusLabel(event.vrittStatus)}
@@ -870,7 +873,7 @@ export function UnitDashboardView({
                 <div key={index} className="flex gap-2">
                   <Input value={option} onChange={(event) => setNewPollOptions((previous) => previous.map((currentOption, optionIndex) => (optionIndex === index ? event.target.value : currentOption)))} placeholder={newPollType === "date" ? `${t("Date", "तारीख")} ${index + 1}` : `${t("Option", "विकल्प")} ${index + 1}`} className="text-sm" />
                   {newPollOptions.length > 2 && (
-                    <button onClick={() => setNewPollOptions((previous) => previous.filter((_, optionIndex) => optionIndex !== index))} className="shrink-0 text-muted-foreground hover:text-destructive">
+                    <button onClick={() => setNewPollOptions((previous) => previous.filter((_, optionIndex) => optionIndex !== index))} className="shrink-0 text-muted-foreground hover:text-destructive" aria-label={t("Remove poll option", "मतदान विकल्प हटाएं")}>
                       <X className="h-4 w-4" />
                     </button>
                   )}
@@ -883,7 +886,7 @@ export function UnitDashboardView({
               )}
             </div>
             <div className="flex gap-2 pt-1">
-              <Button onClick={handleCreatePoll} className="flex-1" disabled={!newPollQuestion.trim() || newPollOptions.filter((option) => option.trim()).length < 2}>
+              <Button onClick={handleCreatePoll} className="flex-1" disabled={addPollMutation.isPending || !newPollQuestion.trim() || newPollOptions.filter((option) => option.trim()).length < 2}>
                 <Vote className="mr-2 h-4 w-4" /> {t("Create Poll", "मतदान बनाएं")}
               </Button>
               <Button variant="outline" onClick={() => setPollCreateEvent(null)}>

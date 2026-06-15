@@ -29,7 +29,7 @@ This document provides a comprehensive redesign of the Pragya Pravah ERP system 
 - **Frontend**: Next.js 16, React 19, TypeScript 6
 - **Styling**: Tailwind CSS, Radix UI components, Framer Motion
 - **Database**: Neon Serverless PostgreSQL
-- **Auth**: Supabase Auth (via @supabase/ssr)
+- **Auth**: Custom JWT session auth
 - **State Management**: React Context (AppContext.tsx)
 - **Package Manager**: npm
 
@@ -55,7 +55,7 @@ This document provides a comprehensive redesign of the Pragya Pravah ERP system 
 5. **No proper error handling** - try/catch everywhere but no standardized errors
 6. **State management is fragile** - React Context with no persistence layer
 7. **No caching strategy** - Every page load hits database
-8. **Security gaps** - RLS policies exist but not fully enforced
+8. **Security gaps** - database access policies need a fresh audit
 9. **No proper testing** - Only Playwright e2e, no unit tests
 10. **No monitoring/observability** - No error tracking, performance monitoring
 
@@ -1025,7 +1025,7 @@ export default tseslint.config(
 
 ### Security Hardening
 
-1. **RLS policies review** - Audit all table RLS policies
+1. **Access policy review** - Audit all table access rules
 2. **API rate limiting** - Implement per-user rate limits
 3. **CORS configuration** - Restrict to known origins
 4. **Secret management** - Move secrets to environment, never commit

@@ -23,7 +23,7 @@ const store = new Map<string, BucketEntry>();
 
 // Periodically clean up expired entries (every 5 minutes)
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of store) {
     if (now - entry.windowStart > CLEANUP_INTERVAL_MS) {
@@ -31,6 +31,7 @@ setInterval(() => {
     }
   }
 }, CLEANUP_INTERVAL_MS);
+cleanupTimer.unref?.();
 
 // ── Core ──────────────────────────────────────────────────────────────────────
 
@@ -81,6 +82,8 @@ const API_MAX = Number(process.env.RATE_LIMIT_MAX ?? "60");
 const API_WINDOW = Number(process.env.RATE_LIMIT_WINDOW_MS ?? "60000");
 const PUBLIC_MAX = Number(process.env.PUBLIC_RATE_LIMIT_MAX ?? "10");
 const PUBLIC_WINDOW = Number(process.env.PUBLIC_RATE_LIMIT_WINDOW_MS ?? "60000");
+const LOGIN_MAX = Number(process.env.LOGIN_RATE_LIMIT_MAX ?? "5");
+const LOGIN_WINDOW = Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "900000");
 
 /** Rate-limit middleware for authenticated API routes */
 export function withApiRateLimit(
@@ -94,6 +97,19 @@ export function withPublicRateLimit(
   ip: string
 ): NextResponse | null {
   return checkRateLimit(ip, { max: PUBLIC_MAX, windowMs: PUBLIC_WINDOW, keyPrefix: "pub" });
+}
+
+/** Account-aware login lockout to slow credential stuffing and targeted attacks. */
+export function checkLoginRateLimit(
+  ip: string,
+  accountKey: string
+): NextResponse | null {
+  const normalizedAccount = accountKey.trim().toLowerCase() || "unknown";
+  return checkRateLimit(`${ip}:${normalizedAccount}`, {
+    max: LOGIN_MAX,
+    windowMs: LOGIN_WINDOW,
+    keyPrefix: "login",
+  });
 }
 
 /**

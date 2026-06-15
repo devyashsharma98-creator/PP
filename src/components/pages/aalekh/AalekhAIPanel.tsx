@@ -218,7 +218,7 @@ export function AalekhAIPanel({
         <div className="rounded-lg border border-green-500/30 bg-green-500/8 p-2.5 text-xs text-green-700 dark:text-green-400 flex items-center gap-2 mt-2">
           <span>✓</span>
           <span>{t("No editorial concerns identified.", "कोई संपादकीय आपत्ति नहीं पाई गई।")}</span>
-          <button onClick={handleDiscard} className="ml-auto text-[10px] opacity-60 hover:opacity-100">✕</button>
+          <button onClick={handleDiscard} className="ml-auto text-[10px] opacity-60 hover:opacity-100" aria-label={t("Discard generated draft", "जनरेट किया मसौदा हटाएं")}>✕</button>
         </div>
       )}
 

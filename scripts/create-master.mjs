@@ -7,9 +7,9 @@ if (!DATABASE_URL) { console.error("DATABASE_URL not set"); process.exit(1); }
 const sql = neon(DATABASE_URL);
 
 async function create() {
-  const email = "master@pragyapravah.in";
-  const password = "Master@2025";
-  const displayName = "Master Admin";
+  const email = process.env.APP_LOCAL_ADMIN_EMAIL ?? "admin@pragyapravah.local";
+  const password = process.env.APP_LOCAL_ADMIN_PASSWORD ?? "Pragya@12345";
+  const displayName = process.env.APP_LOCAL_ADMIN_NAME ?? "Local Admin";
 
   // Check if exists
   const existing = await sql`SELECT id FROM profiles WHERE email = ${email}`;

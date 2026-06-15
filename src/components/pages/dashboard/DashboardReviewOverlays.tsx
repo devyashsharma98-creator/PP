@@ -26,6 +26,7 @@ interface DashboardReviewOverlaysProps {
   onCloseQr: () => void;
   onGenerateSmartDraft: () => void;
   onSaveVritt: () => Promise<void>;
+  isSavingVritt?: boolean;
 }
 
 export function DashboardReviewOverlays({
@@ -37,6 +38,7 @@ export function DashboardReviewOverlays({
   onCloseQr,
   onGenerateSmartDraft,
   onSaveVritt,
+  isSavingVritt = false,
 }: DashboardReviewOverlaysProps) {
   const t = useT();
   const { addToast } = useToast();
@@ -141,7 +143,7 @@ export function DashboardReviewOverlays({
                   </div>
                 </div>
 
-                <Button className="w-full" onClick={() => void onSaveVritt()}>
+                <Button className="w-full" onClick={() => void onSaveVritt()} disabled={isSavingVritt}>
                   <CheckCircle2 className="mr-2 h-4 w-4" /> {t("Save Vritt", "वृत्त सहेजें")}
                 </Button>
               </div>

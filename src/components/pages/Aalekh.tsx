@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext, type ArticleStatus } from "@/context/AppContext";
 import { useArticles, useCreateArticle, useUpdateArticleStatus } from "@/hooks/api/use-aalekh";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
@@ -37,7 +37,7 @@ export default function Aalekh() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, status: any) => {
+  const handleUpdateStatus = async (id: string, status: ArticleStatus) => {
     try {
       await updateStatusMutation.mutateAsync({ id, status });
       addToast(t('Article updated!', 'आलेख अद्यतन हुआ!'), 'success');

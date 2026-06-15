@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "clean:next-types": "node scripts/clean-next-types.mjs",
+    "prebuild": "npm run clean:next-types",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
+    "pretypecheck": "npm run clean:next-types",
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",

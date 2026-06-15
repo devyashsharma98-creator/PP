@@ -23,8 +23,6 @@ export default tseslint.config(
       "tmp_chunks/**",
       "tmp_dashboard_chunks",
       "tmp_dashboard_chunks/**",
-      "src/types/database.ts",
-      "supabase/functions/**",
     ],
   },
   {
@@ -40,7 +38,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "react-refresh/only-export-components": "off",
       "@typescript-eslint/no-unused-vars": "off",
     },
   },

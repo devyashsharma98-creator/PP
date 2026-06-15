@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 
-const LIVE_SITE = "https://mediumturquoise-dove-917779.hostingersite.com/";
+const APP_ENTRY_PATH = "/";
 
 const englishSteps = [
   "Open the site link in Chrome, Safari, or your mobile browser.",
@@ -74,12 +74,12 @@ export default function ClientGuidePage() {
       ? "यह page client के साथ सीधे share किया जा सकता है ताकि वह मोबाइल पर Pragya Pravah ERP आसानी से खोल सके।"
       : "This page can be shared directly with the client so they can open the Pragya Pravah ERP easily on mobile.",
     shareLink: isHi ? "शेयर करने वाला लिंक" : "Shareable link",
-    openSite: isHi ? "लाइव साइट खोलें" : "Open live site",
+    openSite: isHi ? "साइट खोलें" : "Open site",
     openLogin: isHi ? "लॉगिन पेज खोलें" : "Open login page",
     whatsAppTitle: isHi ? "WhatsApp के लिए छोटा message" : "Short WhatsApp message",
     whatsAppBody: isHi
-      ? `नमस्ते, Pragya Pravah ERP खोलने के लिए यह लिंक उपयोग करें: ${LIVE_SITE} इसे Chrome/Safari में खोलें, login credentials डालें, और सिस्टम सीधे आपके काम वाले page पर खुल जाएगा।`
-      : `Hello, please use this link to open the Pragya Pravah ERP: ${LIVE_SITE} Open it in Chrome/Safari, enter your login credentials, and the system will directly open your work page.`,
+      ? "नमस्ते, Pragya Pravah ERP खोलने के लिए admin द्वारा share किया गया link Chrome/Safari में खोलें, login credentials डालें, और सिस्टम सीधे आपके काम वाले page पर खुल जाएगा।"
+      : "Hello, please open the Pragya Pravah ERP link shared by the admin in Chrome/Safari, enter your login credentials, and the system will directly open your work page.",
     stepsTitle: isHi ? "मोबाइल पर कैसे चलाएँ" : "How to use on mobile",
     troubleTitle: isHi ? "अगर दिक्कत आए" : "If something goes wrong",
     rolesTitle: isHi ? "सीधी भूमिका समझ" : "Simple role understanding",
@@ -119,17 +119,17 @@ export default function ClientGuidePage() {
               <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80", isHi && "font-devanagari tracking-[0.12em]")}>
                 {copy.shareLink}
               </p>
-              <a href={LIVE_SITE} target="_blank" rel="noreferrer" className="mt-2 block break-all text-sm font-medium hover:text-primary">
-                {LIVE_SITE}
-              </a>
+              <p className={cn("mt-2 text-sm font-medium", isHi && "font-devanagari")}>
+                {isHi ? "Admin द्वारा share किया गया current deployment link उपयोग करें।" : "Use the current deployment link shared by the admin."}
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <Button asChild className="rounded-full px-5">
-                <a href={LIVE_SITE} target="_blank" rel="noreferrer">
+                <Link href={APP_ENTRY_PATH} prefetch={false}>
                   <ExternalLink className="h-4 w-4" />
                   {copy.openSite}
-                </a>
+                </Link>
               </Button>
               <Button asChild variant="outline" className="rounded-full px-5">
                 <Link href="/login" prefetch={false}>

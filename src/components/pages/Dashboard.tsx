@@ -169,6 +169,7 @@ export default function Dashboard() {
   const statusLabel = (status: string) => t(status, eventStatusHi[status] ?? status);
   
   const handleForwardToPrant = async (eventId: string) => {
+    if (updateEventStatusMutation.isPending) return;
     try {
       await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'pending_prant_authorization' });
       addToast(t('Forwarded to Prant', 'प्रान्त को भेजा'), 'info');
@@ -178,6 +179,7 @@ export default function Dashboard() {
   };
 
   const handlePublishFromVibhag = async (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => {
+    if (updateEventStatusMutation.isPending) return;
     const dbStatus = uiToDbEventStatus[currentStatus] ?? currentStatus;
     const nextStatus = dbStatus === 'pending_prant_authorization'
       ? 'pending_prant_dual_authorization'
@@ -193,6 +195,7 @@ export default function Dashboard() {
   };
 
   const handleForwardToVibhag = async (eventId: string, currentStatus: GatividhiEvent["status"]) => {
+    if (updateEventStatusMutation.isPending) return;
     const toStatus = currentStatus === "Submitted by Unit" ? 'pending_aayam_review' : 'pending_vibhag_review';
     try {
       await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus });
@@ -203,6 +206,7 @@ export default function Dashboard() {
   };
 
   const handleSubmitFromUnit = async (eventId: string) => {
+    if (updateEventStatusMutation.isPending) return;
     try {
       await updateEventStatusMutation.mutateAsync({ id: eventId, toStatus: 'submitted_by_unit' });
       addToast(t('Event submitted for review!', 'कार्यक्रम समीक्षा के लिए भेजा गया!'), 'success', t('Sent for Aayam review', 'आयाम समीक्षा के लिए भेजा गया'));
@@ -213,6 +217,7 @@ export default function Dashboard() {
 
   const saveVritt = async () => {
     if (!vrittEvent) return;
+    if (updateVrittMutation.isPending) return;
     const urls = vrittForm.mediaUrls.filter((url) => url.trim());
     try {
       await updateVrittMutation.mutateAsync({
@@ -239,6 +244,7 @@ export default function Dashboard() {
       onCloseQr={() => setQrEvent(null)}
       onGenerateSmartDraft={generateSmartDraft}
       onSaveVritt={saveVritt}
+      isSavingVritt={updateVrittMutation.isPending}
     />
   );
 
@@ -254,6 +260,7 @@ export default function Dashboard() {
           vrittStatusLabel={vrittStatusLabel}
           onOpenVrittEditor={openVrittEditor}
           onOpenQr={setQrEvent}
+          workflowPending={updateEventStatusMutation.isPending}
           onSubmitForReview={handleSubmitFromUnit}
           onForwardToVibhag={handleForwardToVibhag}
           onForwardToPrant={handleForwardToPrant}
@@ -276,6 +283,7 @@ export default function Dashboard() {
           onOpenVrittEditor={openVrittEditor}
           onOpenQr={setQrEvent}
           lastPublished={lastPublished}
+          workflowPending={updateEventStatusMutation.isPending}
           onDismissPublished={() => setLastPublished(null)}
           onForwardToPrant={handleForwardToPrant}
           onPublishEvent={handlePublishFromVibhag}
@@ -297,6 +305,7 @@ export default function Dashboard() {
           statusBadge={dashboardStatusBadgeClass}
           onOpenVrittEditor={openVrittEditor}
           onOpenQr={setQrEvent}
+          workflowPending={updateEventStatusMutation.isPending}
           onForwardToVibhag={(eventId, currentStatus) => handleForwardToVibhag(eventId, currentStatus)}
         />
         {reviewOverlays}
@@ -314,6 +323,7 @@ export default function Dashboard() {
         vrittStatusLabel={vrittStatusLabel}
         onOpenVrittEditor={openVrittEditor}
         onOpenQr={setQrEvent}
+        workflowPending={updateEventStatusMutation.isPending}
         onSubmitForReview={handleSubmitFromUnit}
       />
       {reviewOverlays}

@@ -21,7 +21,7 @@
 - Use `sql` tagged template literals (parameterized)
 - Prepared statements for performance
 - Transaction support for multi-step ops
-- RLS policies for security
+- database access checks for security
 
 ### 3. Form Validation (from research)
 - Client: React Hook Form + Zod + Shadcn
