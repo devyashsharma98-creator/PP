@@ -10,7 +10,7 @@ import type { AppActionRequest } from "@/lib/app/contracts";
 import { appActionSchema } from "@/lib/validators/app-actions";
 
 export async function POST(req: NextRequest) {
-  if (!isDatabaseConfigured) {
+  if (!isDatabaseConfigured()) {
     return NextResponse.json({ error: "Neon database is not configured." }, { status: 503 });
   }
 

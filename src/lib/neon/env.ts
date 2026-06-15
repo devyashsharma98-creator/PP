@@ -12,4 +12,6 @@ export function requireDatabaseUrl() {
   return url;
 }
 
-export const isDatabaseConfigured = Boolean(getDatabaseUrl());
+export function isDatabaseConfigured() {
+  return Boolean(getDatabaseUrl());
+}

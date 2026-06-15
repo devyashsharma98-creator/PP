@@ -13,7 +13,7 @@ const emptyBootstrapPayload = {
 };
 
 export async function GET(req: NextRequest) {
-  if (!isDatabaseConfigured) {
+  if (!isDatabaseConfigured()) {
     return NextResponse.json(
       { error: "Neon database is not configured." },
       { status: 503 },
