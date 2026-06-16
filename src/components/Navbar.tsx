@@ -19,6 +19,7 @@ import { useNavbarNotifications } from "./navbar/useNavbarNotifications";
 import { MobileNav } from "./navbar/MobileNav";
 import { NotificationBell } from "./navbar/NotificationBell";
 import { ThemeToggle } from "./navbar/ThemeToggle";
+import { GlobalSearch } from "./navbar/GlobalSearch";
 
 /**
  * Time: O(1) - passive scroll listener.
@@ -136,6 +137,7 @@ export function Navbar() {
         </div>
 
         <div className="flex min-w-0 items-center justify-between gap-1.5 md:flex-none md:justify-end md:gap-3">
+          <GlobalSearch />
           <ThemeToggle />
           <NotificationBell isAuthenticated={isAuthenticated} notifications={notifications} lang={lang} />
 

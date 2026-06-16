@@ -408,6 +408,25 @@ export async function finalizeEventPoll(
     }
   );
 
+  const [eventRow] = await db
+    .select({ title: events.title, createdBy: events.createdBy })
+    .from(events)
+    .where(eq(events.id, eventId))
+    .limit(1);
+
+  if (eventRow?.createdBy && eventRow.createdBy !== ctx.session.userId) {
+    await db.insert(notifications).values({
+      orgId: ctx.session.orgId,
+      recipientUserId: eventRow.createdBy,
+      kind: "poll_finalized",
+      title: "Poll finalized for your event",
+      body: `A poll for "${eventRow.title}" has been finalized.`,
+      entityType: "event",
+      entityId: eventId,
+      metadata: { pollId, winnerOptionId },
+    });
+  }
+
   return ok({ pollId, finalized: true, winnerOptionId });
 }
 

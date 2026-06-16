@@ -99,9 +99,13 @@ self.addEventListener("fetch", (event) => {
       })
     );
   }
-  // Navigation requests: always go to network (never serve cached HTML)
+  // Navigation requests: network first, fall back to offline page
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request));
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.match("/offline.html").then((cached) => cached || Response.error())
+      )
+    );
     return;
   }
 });

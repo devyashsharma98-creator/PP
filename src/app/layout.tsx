@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
     icons: {
       icon: "/favicon.svg",
-      apple: "/favicon.svg",
+      apple: "/icons/icon-192.png",
     },
   keywords: ["Pragya Pravah", "Bhopal", "cultural organization", "India"],
   authors: [{ name: "Pragya Pravah Bhopal Vibhag" }],
