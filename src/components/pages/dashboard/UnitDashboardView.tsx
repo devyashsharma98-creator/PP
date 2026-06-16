@@ -315,7 +315,7 @@ export function UnitDashboardView({
                 onClick={() => setDialogOpen(true)}
                 className="dashboard-action-button shadow-sm transition-shadow hover:shadow-md"
               >
-                <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "à¤¨à¤¯à¤¾ à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤°à¤® à¤¬à¤¨à¤¾à¤à¤‚")}
+                <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "नया कार्यक्रम बनाएं")}
               </Button>
             </div>
           ) : undefined
