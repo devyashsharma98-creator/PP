@@ -14,6 +14,11 @@ import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardV
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
+import { TaskBoardPanel } from "@/components/pages/dashboard/tasks/TaskBoardPanel";
+import { CircularsPanel } from "@/components/pages/dashboard/circulars/CircularsPanel";
+import { VolunteersPanel } from "@/components/pages/dashboard/volunteers/VolunteersPanel";
+import { MediaLibraryPanel } from "@/components/pages/dashboard/media/MediaLibraryPanel";
+import { ConferencesPanel } from "@/components/pages/dashboard/conferences/ConferencesPanel";
 
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
@@ -267,6 +272,11 @@ export default function Dashboard() {
           onPublishEvent={handlePublishFromVibhag}
         />
         {reviewOverlays}
+        <TaskBoardPanel />
+        <CircularsPanel />
+        <VolunteersPanel />
+        <MediaLibraryPanel />
+        <ConferencesPanel />
       </>
     );
   }
@@ -289,6 +299,11 @@ export default function Dashboard() {
           onPublishEvent={handlePublishFromVibhag}
         />
         {reviewOverlays}
+        <TaskBoardPanel />
+        <CircularsPanel />
+        <VolunteersPanel />
+        <MediaLibraryPanel />
+        <ConferencesPanel />
       </>
     );
   }
@@ -309,6 +324,11 @@ export default function Dashboard() {
           onForwardToVibhag={(eventId, currentStatus) => handleForwardToVibhag(eventId, currentStatus)}
         />
         {reviewOverlays}
+        <TaskBoardPanel />
+        <CircularsPanel />
+        <VolunteersPanel />
+        <MediaLibraryPanel />
+        <ConferencesPanel />
       </>
     );
   }
@@ -327,6 +347,11 @@ export default function Dashboard() {
         onSubmitForReview={handleSubmitFromUnit}
       />
       {reviewOverlays}
+      <TaskBoardPanel />
+      <CircularsPanel />
+      <VolunteersPanel />
+      <MediaLibraryPanel />
+      <ConferencesPanel />
     </>
   );
 }

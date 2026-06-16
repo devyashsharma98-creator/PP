@@ -157,3 +157,47 @@ export const departmentKind = pgEnum("department_kind", [
   "mahila",   // Women
   "other",
 ]);
+
+// ── Task/Project Enums ────────────────────────────────────────────────────────
+export const projectStatusValues = ["planned", "active", "completed", "archived"] as const;
+export type ProjectStatus = (typeof projectStatusValues)[number];
+export const projectStatusEnum = pgEnum("project_status", projectStatusValues);
+
+export const taskStatusValues = ["todo", "in_progress", "done", "blocked"] as const;
+export type TaskStatus = (typeof taskStatusValues)[number];
+export const taskStatusEnum = pgEnum("task_status", taskStatusValues);
+
+export const taskPriorityValues = ["low", "medium", "high", "urgent"] as const;
+export type TaskPriority = (typeof taskPriorityValues)[number];
+export const taskPriorityEnum = pgEnum("task_priority", taskPriorityValues);
+
+// ── Circular Enums ────────────────────────────────────────────────────────────
+export const circularPriorityValues = ["low", "normal", "high", "urgent"] as const;
+export type CircularPriority = (typeof circularPriorityValues)[number];
+export const circularPriorityEnum = pgEnum("circular_priority", circularPriorityValues);
+
+export const circularScopeValues = ["org", "unit", "department"] as const;
+export type CircularScope = (typeof circularScopeValues)[number];
+export const circularScopeEnum = pgEnum("circular_scope", circularScopeValues);
+
+// ── Volunteer Enums ───────────────────────────────────────────────────────────
+export const volunteerActivityTypeValues = ["shakha_attendance", "event_duty", "training", "outreach", "admin", "other"] as const;
+export type VolunteerActivityType = (typeof volunteerActivityTypeValues)[number];
+export const volunteerActivityTypeEnum = pgEnum("volunteer_activity_type", volunteerActivityTypeValues);
+
+// ── Media Category ────────────────────────────────────────────────────────────
+export const mediaCategoryValues = ["image", "document", "video", "audio", "other"] as const;
+export type MediaCategory = (typeof mediaCategoryValues)[number];
+
+// ── Conference Enums ──────────────────────────────────────────────────────────
+export const conferenceStatusValues = ["draft", "planning", "registration_open", "ongoing", "completed", "cancelled"] as const;
+export type ConferenceStatus = (typeof conferenceStatusValues)[number];
+export const conferenceStatus = pgEnum("conference_status", conferenceStatusValues);
+
+export const sessionTypeValues = ["keynote", "panel", "paper_presentation", "workshop", "cultural", "other"] as const;
+export type SessionType = (typeof sessionTypeValues)[number];
+export const sessionType = pgEnum("session_type", sessionTypeValues);
+
+export const registrationCategoryValues = ["delegate", "student", "speaker", "vip", "media", "other"] as const;
+export type RegistrationCategory = (typeof registrationCategoryValues)[number];
+export const registrationCategory = pgEnum("registration_category", registrationCategoryValues);

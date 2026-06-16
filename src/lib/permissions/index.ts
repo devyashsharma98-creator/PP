@@ -58,6 +58,33 @@ export function resolvePermissions(effectiveRoleCodes: RoleCode[]): AppPermissio
     canPublishArticle: is("prant_sanyojak"),
     canArchiveArticle: is("vibhag_pramukh"),
 
+    // ── Circulars ─────────────────────────────────────────────────────────────
+    canCreateCircular: is("aayam_pramukh"),
+    canBroadcastCircular: is("vibhag_pramukh"),
+
+    // ── Volunteers ────────────────────────────────────────────────────────────
+    canManageVolunteers: is("aayam_pramukh"),
+    canLogActivity: is("karyakarta"),
+
+    // ── Media Library ─────────────────────────────────────────────────────────
+    canUploadMedia: is("karyakarta"),
+    canDeleteMedia: is("unit_head"),
+    canManageMediaLibrary: is("aayam_pramukh"),
+
+    // ── Conferences ───────────────────────────────────────────────────────────
+    canCreateConference: is("unit_head"),
+    canManageConference: is("aayam_pramukh"),
+    canManageConferenceSessions: is("unit_head"),
+    canManageConferenceSpeakers: is("karyakarta"),
+    canViewConferenceRegistrations: is("unit_head"),
+
+    // ── Tasks / Projects ──────────────────────────────────────────────────────
+    canCreateProject: is("unit_head"),
+    canUpdateProject: is("unit_head"),
+    canCreateTask: is("karyakarta"),
+    canUpdateTask: is("karyakarta"),
+    canAssignTask: is("unit_head"),
+
     // ── Prachar ──────────────────────────────────────────────────────────────
     canUpdatePrachar: is("aayam_pramukh"),
     canViewPracharReport: is("aayam_pramukh"),

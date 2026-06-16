@@ -298,12 +298,61 @@ export interface AppRoleAssignmentSummary {
 export interface AppPermissionSummary {
   canReadInternalBootstrap: boolean;
   canCreateEvent: boolean;
-  canCreateArticle: boolean;
-  canFinalizePoll: boolean;
+  canUpdateEvent: boolean;
+  canSubmitEvent: boolean;
+  canReviewEvent: boolean;
   canPublishEvent: boolean;
+  canCancelEvent: boolean;
+  canManageEventForm: boolean;
+  canManagePolls: boolean;
+  canFinalizePoll: boolean;
+  canViewRegistrations: boolean;
+  canCreateArticle: boolean;
+  canUpdateArticle: boolean;
+  canSubmitArticle: boolean;
+  canReviewArticle: boolean;
   canPublishArticle: boolean;
+  canArchiveArticle: boolean;
   canUpdatePrachar: boolean;
+  canViewPracharReport: boolean;
   canManageUsers: boolean;
+  canAssignRoles: boolean;
+  canViewDirectory: boolean;
+  canCreateProject: boolean;
+  canUpdateProject: boolean;
+  canCreateTask: boolean;
+  canUpdateTask: boolean;
+  canAssignTask: boolean;
+  canCreateCircular: boolean;
+  canBroadcastCircular: boolean;
+  canManageVolunteers: boolean;
+  canLogActivity: boolean;
+  canUploadMedia: boolean;
+  canDeleteMedia: boolean;
+  canManageMediaLibrary: boolean;
+  canCreateConference: boolean;
+  canManageConference: boolean;
+  canManageConferenceSessions: boolean;
+  canManageConferenceSpeakers: boolean;
+  canViewConferenceRegistrations: boolean;
+  canViewAuditLogs: boolean;
+  canManageOrg: boolean;
+}
+
+// ── Circular Types ───────────────────────────────────────────────────────────
+export interface CircularItem {
+  id: string;
+  title: string;
+  titleHi?: string | null;
+  body: string;
+  bodyHi?: string | null;
+  priority: "low" | "normal" | "high" | "urgent";
+  scope: "org" | "unit" | "department";
+  authorName?: string | null;
+  publishedAt?: string | null;
+  expiresAt?: string | null;
+  readAt?: string | null;
+  createdAt: string;
 }
 
 export interface AppViewerContext {
@@ -394,4 +443,152 @@ export interface PublicRegistrationRequest {
 
 export interface PublicVoteRequest {
   optionId: string;
+}
+
+// ── Task / Project Types ─────────────────────────────────────────────────────
+export type ProjectStatus = "planned" | "active" | "completed" | "archived";
+export type TaskStatus = "todo" | "in_progress" | "done" | "blocked";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
+
+export interface ProjectSummary {
+  id: string;
+  name: string;
+  nameHi?: string | null;
+  description?: string | null;
+  departmentId?: string | null;
+  status: ProjectStatus;
+  ownerUserId?: string | null;
+  deadline?: string | null;
+  taskCount: number;
+  createdAt: string;
+}
+
+export interface TaskItem {
+  id: string;
+  projectId: string;
+  projectName?: string;
+  title: string;
+  titleHi?: string | null;
+  description?: string | null;
+  assigneeUserId?: string | null;
+  assigneeName?: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: string | null;
+  sortOrder: number;
+  completedAt?: string | null;
+  createdAt: string;
+}
+
+// ── Volunteer Types ──────────────────────────────────────────────────────────
+export type VolunteerActivityType = "shakha_attendance" | "event_duty" | "training" | "outreach" | "admin" | "other";
+
+export interface VolunteerProfileSummary {
+  id: string;
+  profileId: string;
+  displayName?: string | null;
+  email?: string | null;
+  skills?: string[];
+  joinedAt?: string | null;
+  serviceSpanMonths?: number | null;
+  totalHours: number;
+  activityCount: number;
+}
+
+export interface VolunteerActivityItem {
+  id: string;
+  volunteerId: string;
+  activityType: VolunteerActivityType;
+  description?: string | null;
+  hoursLogged?: number | null;
+  date: string;
+  eventId?: string | null;
+}
+
+export type MediaCategory = "image" | "document" | "video" | "audio" | "other";
+
+export interface MediaAssetItem {
+  id: string;
+  filename: string;
+  storageKey: string;
+  mimeType: string;
+  sizeBytes: number;
+  bucket: string;
+  category: MediaCategory;
+  altText?: string | null;
+  altTextHi?: string | null;
+  tags?: string[];
+  width?: number | null;
+  height?: number | null;
+  uploadedByName?: string | null;
+  createdAt: string;
+}
+
+export interface MediaLibrarySummary {
+  totalAssets: number;
+  totalSizeBytes: number;
+  categoryCounts: Record<string, number>;
+}
+
+export type ConferenceStatus = "draft" | "planning" | "registration_open" | "ongoing" | "completed" | "cancelled";
+export type SessionType = "keynote" | "panel" | "paper_presentation" | "workshop" | "cultural" | "other";
+export type RegistrationCategory = "delegate" | "student" | "speaker" | "vip" | "media" | "other";
+
+export interface ConferenceSummary {
+  id: string;
+  title: string;
+  titleHi?: string | null;
+  theme?: string | null;
+  venue?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  status: ConferenceStatus;
+  departmentId?: string | null;
+  unitId?: string | null;
+  registrationEnabled: boolean;
+  sessionCount: number;
+  registrationCount: number;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface ConferenceSessionItem {
+  id: string;
+  conferenceId: string;
+  title: string;
+  titleHi?: string | null;
+  description?: string | null;
+  sessionType: SessionType;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  venue?: string | null;
+  chairpersonName?: string | null;
+  sortOrder: number;
+  speakerCount: number;
+}
+
+export interface SessionSpeakerItem {
+  id: string;
+  sessionId: string;
+  profileId?: string | null;
+  name: string;
+  nameHi?: string | null;
+  bio?: string | null;
+  photoUrl?: string | null;
+  topic?: string | null;
+  affiliation?: string | null;
+  sortOrder: number;
+}
+
+export interface ConferenceRegistrationItem {
+  id: string;
+  conferenceId: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  organization?: string | null;
+  category: RegistrationCategory;
+  isAttended: boolean;
+  notes?: string | null;
+  submittedAt: string;
 }

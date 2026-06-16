@@ -60,6 +60,33 @@ export interface AppPermissions {
   canAssignRoles: boolean;
   canViewDirectory: boolean;
 
+  // Tasks / Projects
+  canCreateProject: boolean;
+  canUpdateProject: boolean;
+  canCreateTask: boolean;
+  canUpdateTask: boolean;
+  canAssignTask: boolean;
+
+  // Circulars
+  canCreateCircular: boolean;
+  canBroadcastCircular: boolean;
+
+  // Volunteers
+  canManageVolunteers: boolean;
+  canLogActivity: boolean;
+
+  // Media Library
+  canUploadMedia: boolean;
+  canDeleteMedia: boolean;
+  canManageMediaLibrary: boolean;
+
+  // Conferences
+  canCreateConference: boolean;
+  canManageConference: boolean;
+  canManageConferenceSessions: boolean;
+  canManageConferenceSpeakers: boolean;
+  canViewConferenceRegistrations: boolean;
+
   // System
   canViewAuditLogs: boolean;
   canManageOrg: boolean;
