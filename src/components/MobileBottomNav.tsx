@@ -48,8 +48,8 @@ export function MobileBottomNav() {
   const overflowActive = open || overflowItems.some((item) => isActivePath(item.path));
 
   return (
-    <nav data-mobile-bottom-nav aria-label="Mobile navigation" className="institution-ledger-rail safe-area-bottom fixed bottom-0 left-0 right-0 z-50 border-t border-sidebar-border shadow-[0_-18px_42px_-28px_hsl(var(--navy)/0.45)] md:hidden">
-      <div className="grid h-[64px] grid-cols-5 gap-1 px-2 py-1.5">
+    <nav data-mobile-bottom-nav aria-label="Mobile navigation" className="safe-area-bottom fixed bottom-2 left-2 right-2 z-50 rounded-[1.35rem] border border-border/70 bg-card/96 shadow-[0_18px_44px_-28px_hsl(var(--navy)/0.45)] backdrop-blur-xl md:hidden">
+      <div className="grid h-[76px] grid-cols-5 gap-1.5 px-2 py-2">
         {primaryNav.map((item) => {
           const active = isActivePath(item.path);
           return (
@@ -58,16 +58,16 @@ export function MobileBottomNav() {
               href={item.path}
               prefetch={false}
               className={cn(
-                "flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl text-center transition-all duration-150 active:scale-95",
+                "flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl text-center transition-all duration-150 active:scale-95",
                 active
-                  ? "bg-primary/14 text-primary ring-1 ring-primary/20 shadow-[0_12px_24px_-20px_hsl(27_100%_50%/0.8)]"
-                  : "text-sidebar-foreground/68 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
+                  ? "bg-background text-primary ring-1 ring-primary/30 shadow-[0_12px_28px_-20px_hsl(27_100%_50%/0.75)]"
+                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
               )}
             >
-              <item.icon className={cn("h-4 w-4", active && "text-primary")} />
+              <item.icon className={cn("h-5 w-5", active && "text-primary")} />
               <span
                 className={cn(
-                  "max-w-full truncate text-[9px] leading-none",
+                  "max-w-full truncate text-[10px] leading-none",
                   lang === "hi" && "font-devanagari",
                   active && "font-semibold text-primary",
                 )}
@@ -84,16 +84,16 @@ export function MobileBottomNav() {
               type="button"
               aria-label="Open more navigation"
               className={cn(
-                "flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl text-center transition-all duration-150 active:scale-95",
+                "flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl text-center transition-all duration-150 active:scale-95",
                 overflowActive
-                  ? "bg-primary/14 text-primary ring-1 ring-primary/20 shadow-[0_12px_24px_-20px_hsl(27_100%_50%/0.8)]"
-                  : "text-sidebar-foreground/68 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
+                  ? "bg-background text-primary ring-1 ring-primary/30 shadow-[0_12px_28px_-20px_hsl(27_100%_50%/0.75)]"
+                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
               )}
             >
-              <MoreHorizontal className={cn("h-4 w-4", overflowActive && "text-primary")} />
+              <MoreHorizontal className={cn("h-5 w-5", overflowActive && "text-primary")} />
               <span
                 className={cn(
-                  "max-w-full truncate text-[9px] leading-none",
+                  "max-w-full truncate text-[10px] leading-none",
                   lang === "hi" && "font-devanagari",
                   overflowActive && "font-semibold text-primary",
                 )}
