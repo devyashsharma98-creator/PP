@@ -143,7 +143,7 @@ export function useAddPoll() {
       question: string;
       questionHi?: string;
       pollType: 'date' | 'general';
-      options: Array<{ label: string; labelHi?: string; scheduledAtIso?: string | null }>;
+      options: Array<{ label: string; labelHi?: string; scheduledAt?: string | null }>;
     }) => {
       return fetchApi<Record<string, unknown>>(`/events/${eventId}/polls`, {
         method: 'POST',

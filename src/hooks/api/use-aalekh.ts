@@ -37,6 +37,7 @@ export function useCreateArticle() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-articles'] });
       await refreshWorkspace();
     },
   });
@@ -47,13 +48,14 @@ export function useUpdateArticleStatus() {
   const { refreshWorkspace } = useAppContext();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: AalekhArticle['status'] }) => {
-      return fetchApi<AalekhArticle>(`/articles/${id}/status`, {
+      return fetchApi<AalekhArticle>(`/articles/${id}/workflow`, {
         method: 'POST',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ toStatus: status }),
       });
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-articles'] });
       await refreshWorkspace();
     },
   });

@@ -249,7 +249,7 @@ export function UnitDashboardView({
           const parsedMs = newPollType === "date" ? Date.parse(trimmed) : Number.NaN;
           return {
             label: trimmed,
-            scheduledAtIso: Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString(),
+            scheduledAt: Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString(),
           };
         }),
       });

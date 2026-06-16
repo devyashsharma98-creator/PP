@@ -4,9 +4,9 @@ import { NextRequest } from "next/server";
 
 import { withAuth, getClientIp } from "@/lib/middleware/with-auth";
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
-import { castVoteSchema } from "@/lib/validators/events";
+import { finalizePollSchema } from "@/lib/validators/events";
 import { apiSuccess, badRequest } from "@/lib/response";
-import { castEventPollVote } from "@/lib/server/services/event-service";
+import { finalizeEventPoll } from "@/lib/server/services/event-service";
 
 type Params = { eventId: string; pollId: string };
 
@@ -24,17 +24,10 @@ export const POST = withAuth(async (req: NextRequest, ctx, params) => {
     return badRequest("Invalid JSON.");
   }
 
-  const parsed = castVoteSchema.safeParse(body);
+  const parsed = finalizePollSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.errors[0]?.message ?? "Invalid input.");
 
-  const result = await castEventPollVote(
-    eventId,
-    pollId,
-    parsed.data.optionId,
-    ctx.session.userId,
-    ip,
-    req.headers.get("user-agent") ?? null,
-  );
+  const result = await finalizeEventPoll(eventId, pollId, parsed.data.winnerOptionId, ctx, ip);
   if (!result.ok) return result.response;
 
   return apiSuccess(result.data);

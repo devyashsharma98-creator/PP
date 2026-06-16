@@ -104,7 +104,7 @@ export async function publishEvent(id: string) {
 }
 
 export async function castVote(eventId: string, pollId: string, optionId: string) {
-  return fetchApi<{ ok: boolean }>(`/events/${eventId}/polls/${pollId}/votes`, {
+  return fetchApi<{ ok: boolean }>(`/events/${eventId}/polls/${pollId}`, {
     method: 'POST',
     body: JSON.stringify({ optionId }),
   });
