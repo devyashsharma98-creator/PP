@@ -717,7 +717,7 @@ export default function UserManagement() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.95fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.95fr)]">
         <div className="space-y-6">
           <Card className="institution-panel">
             <CardHeader className="space-y-4 border-b border-border/60">

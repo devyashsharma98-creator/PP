@@ -50,7 +50,7 @@ export function AppLayoutShell({
     return (
       <main id="main-content" tabIndex={-1} lang={lang} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
         <PageTransition>
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:px-8 md:py-12 pb-32 md:pb-12">
+          <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 md:px-8 md:py-12 md:pb-12">
             {children}
           </div>
         </PageTransition>
@@ -68,7 +68,7 @@ export function AppLayoutShell({
                 {t("Internal institutional console", "आंतरिक संस्थागत कंसोल")}
               </p>
               <h1 className={lang === "hi" ? "text-2xl font-semibold tracking-tight font-devanagari" : "text-2xl font-semibold tracking-tight"}>
-                {t("Loading workspace…", "कार्यक्षेत्र लोड हो रहा है…")}
+                {t("Loading workspace...", "कार्यक्षेत्र लोड हो रहा है...")}
               </h1>
               <p className={lang === "hi" ? "text-sm text-muted-foreground font-devanagari leading-relaxed" : "text-sm text-muted-foreground leading-relaxed"}>
                 {t(

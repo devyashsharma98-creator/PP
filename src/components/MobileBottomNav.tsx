@@ -98,7 +98,7 @@ export function MobileBottomNav() {
                   overflowActive && "font-semibold text-primary",
                 )}
               >
-                {t("More", "\u0914\u0930")}
+                {t("More", "और")}
               </span>
             </button>
           </SheetTrigger>
@@ -106,10 +106,10 @@ export function MobileBottomNav() {
             <SheetHeader className="pb-3">
               <SheetTitle className={cn("flex items-center gap-2 text-left", lang === "hi" && "font-devanagari")}>
                 <Grid2x2 className="h-4 w-4 text-primary" />
-                {t("More Navigation", "\u0905\u0927\u093f\u0915 \u0928\u0947\u0935\u093f\u0917\u0947\u0936\u0928")}
+                {t("More Navigation", "अधिक नेविगेशन")}
               </SheetTitle>
               <SheetDescription className={cn("text-left", lang === "hi" && "font-devanagari")}>
-                {t("Secondary coordination and reference pages.", "\u0926\u094d\u0935\u093f\u0924\u0940\u092f\u0915 \u0938\u092e\u0928\u094d\u0935\u092f \u0914\u0930 \u0938\u0902\u0926\u0930\u094d\u092d \u092a\u0943\u0937\u094d\u0920\u0964")}
+                {t("Secondary coordination and reference pages.", "द्वितीयक समन्वय और संदर्भ पृष्ठ।")}
               </SheetDescription>
             </SheetHeader>
 

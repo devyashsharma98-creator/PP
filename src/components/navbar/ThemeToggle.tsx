@@ -22,17 +22,17 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={isDark ? t("Switch to light mode", "लाइट मोड पर स्विच करें") : t("Switch to dark mode", "डार्क मोड पर स्विच करें")}
-      className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
       title={isDark ? t("Light Mode", "लाइट मोड") : t("Dark Mode", "डार्क मोड")}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isDark ? (
           <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-            <Sun className="w-4 h-4 text-amber-400" />
+            <Sun className="h-4 w-4 text-amber-400" />
           </motion.div>
         ) : (
           <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-            <Moon className="w-4 h-4 text-muted-foreground" />
+            <Moon className="h-4 w-4 text-muted-foreground" />
           </motion.div>
         )}
       </AnimatePresence>

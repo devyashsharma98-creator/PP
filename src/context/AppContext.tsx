@@ -136,17 +136,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [applyBootstrap]);
 
   useEffect(() => {
-    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
-    document.documentElement.dataset.appLang = lang;
-    window.localStorage.setItem('pp_lang', lang);
-  }, [lang]);
-
-  useEffect(() => {
     const savedLang = window.localStorage.getItem('pp_lang');
     if (savedLang === 'hi' || savedLang === 'en') {
       setLang(savedLang);
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+    document.documentElement.dataset.appLang = lang;
+    window.localStorage.setItem('pp_lang', lang);
+  }, [lang]);
 
   useEffect(() => {
     if (pathname === '/login') {

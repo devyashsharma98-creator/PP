@@ -21,7 +21,7 @@ import { NotificationBell } from "./navbar/NotificationBell";
 import { ThemeToggle } from "./navbar/ThemeToggle";
 
 /**
- * Time: O(1) — passive scroll listener.
+ * Time: O(1) - passive scroll listener.
  * Space: O(1).
  */
 function useScrollHide(disabled: boolean) {
@@ -89,10 +89,10 @@ export function Navbar() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 rounded-xl bg-background px-4 py-2 text-sm font-semibold shadow-lg ring-2 ring-primary"
       >
-        {t("Skip to content", "मुख्य सामग्री पर जाएँ")}
+        {t("Skip to content", "मुख्य सामग्री पर जाएं")}
       </a>
-      <div className="institution-panel-muted flex flex-wrap items-center justify-between gap-2 px-2 py-2 sm:px-3 md:min-h-[78px] md:gap-3 md:px-5 md:py-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
+      <div className="institution-panel-muted grid gap-2 px-2 py-2 sm:px-3 md:flex md:min-h-[78px] md:items-center md:justify-between md:gap-3 md:px-5 md:py-3">
+        <div className="flex min-w-0 items-center gap-2 md:flex-1 md:gap-3">
           <MobileNav
             open={open}
             onOpenChange={setOpen}
@@ -101,7 +101,7 @@ export function Navbar() {
             shellFrame={shellFrame}
             navigationGroups={navigationGroups}
           />
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex min-w-0 items-center gap-2">
             <Link
               href="/parichay"
               prefetch={false}
@@ -111,10 +111,14 @@ export function Navbar() {
               <PragyaLogo className="h-6 w-6" />
             </Link>
             <div className="min-w-0 space-y-0.5">
-              <p className="shell-copy text-foreground/55 truncate text-[9px] md:text-[10px]">{t("Bhopal Vibhag", "भोपाल विभाग")}</p>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="shell-panel-copy hidden lg:block shrink-0">{t("Internal institutional console", "आंतरिक संस्थागत प्रणाली")}</span>
-                <span className="text-muted-foreground/60 hidden lg:block shrink-0">•</span>
+              <p className="shell-copy truncate text-[9px] text-foreground/55 md:text-[10px]">
+                {t("Bhopal Vibhag", "भोपाल विभाग")}
+              </p>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="shell-panel-copy hidden shrink-0 lg:block">
+                  {t("Internal institutional console", "आंतरिक संस्थागत प्रणाली")}
+                </span>
+                <span className="hidden shrink-0 text-muted-foreground/60 lg:block">•</span>
                 <Link
                   href="/parichay"
                   prefetch={false}
@@ -131,30 +135,32 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5 sm:flex-none md:gap-3">
+        <div className="flex min-w-0 items-center justify-between gap-1.5 md:flex-none md:justify-end md:gap-3">
           <ThemeToggle />
           <NotificationBell isAuthenticated={isAuthenticated} notifications={notifications} lang={lang} />
 
           <button
             onClick={() => setLang(lang === "en" ? "hi" : "en")}
-            aria-label={lang === "en" ? "Switch to Hindi" : "अंग्रेज़ी में बदलें"}
+            aria-label={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
             className="relative flex h-8 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:text-xs"
-            title={lang === "en" ? "Switch to Hindi" : "अंग्रेज़ी में बदलें"}
+            title={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
           >
             <span className={cn("px-3 py-1 transition-all duration-200", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>EN</span>
             <span className={cn("px-3 py-1 font-devanagari transition-all duration-200", lang === "hi" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>हि</span>
           </button>
 
-          <div className="shell-role-chip">
-            <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
+          <div className="shell-role-chip flex-1 md:flex-none">
+            <Shield className="h-3.5 w-3.5 shrink-0 text-primary" />
             <div className="min-w-0">
-              <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">{t("Dayitva", "दायित्व")}</p>
+              <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+                {t("Dayitva", "दायित्व")}
+              </p>
               {canUseDemoRoleSwitch ? (
                 <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                   <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border shadow-lg z-50">
+                  <SelectContent className="z-50 border border-border bg-popover shadow-lg">
                     {availableRoles.map((key) => (
                       <SelectItem key={key} value={key} className={cn("text-sm", lang === "hi" && "font-devanagari")}>
                         {lang === "hi" ? roleLabelsHi[key] : roleLabels[key]}
@@ -163,7 +169,7 @@ export function Navbar() {
                   </SelectContent>
                 </Select>
               ) : (
-                <span className={cn("text-xs md:text-sm font-medium", lang === "hi" && "font-devanagari")}>{currentRoleLabel}</span>
+                <span className={cn("block truncate text-xs font-medium md:text-sm", lang === "hi" && "font-devanagari")}>{currentRoleLabel}</span>
               )}
             </div>
           </div>
