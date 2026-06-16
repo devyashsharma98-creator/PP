@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { ParticleField } from "../effects/ParticleField";
@@ -10,12 +10,12 @@ import { ParticleField } from "../effects/ParticleField";
 export function EnterChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = true;
 
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-[80dvh] items-center justify-center overflow-hidden bg-background"
+      className="relative flex min-h-[64dvh] items-center justify-center overflow-hidden bg-background py-16 md:py-24"
     >
       {/* Particle background */}
       <ParticleField />

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Newspaper } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
@@ -66,7 +66,7 @@ const PLACEHOLDER_ARTICLES: ArticleItem[] = [
 export function PublicOutputChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = true;
   const [articles, setArticles] = useState<ArticleItem[]>(PLACEHOLDER_ARTICLES);
   const [loading, setLoading] = useState(true);
 
@@ -101,7 +101,7 @@ export function PublicOutputChapter() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-accent/20 py-20 md:py-32"
+      className="relative bg-accent/20 py-16 md:py-24"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Section header */}
@@ -109,7 +109,7 @@ export function PublicOutputChapter() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="mb-16 text-center"
+          className="mb-12 text-center md:mb-14"
         >
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
             {t("Publications & Media", "प्रकाशन और मीडिया")}

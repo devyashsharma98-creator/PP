@@ -94,7 +94,7 @@ export function AppLayoutShell({
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell flex-1 overflow-y-auto px-4 pb-24 pt-4 sm:pt-5 md:px-6 md:pb-10 md:pt-8">
+          <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell flex-1 overflow-y-auto px-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-4 sm:pt-5 md:px-6 md:pb-10 md:pt-8">
             <PageTransition>{children}</PageTransition>
           </main>
         </div>

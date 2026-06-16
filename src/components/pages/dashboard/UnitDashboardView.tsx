@@ -692,7 +692,7 @@ export function UnitDashboardView({
         <AnimatePresence>
           {myEvents.map((event, index) => (
             <motion.div key={event.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
-              <Card className="institution-panel h-full hover-lift [content-visibility:auto] [contain-intrinsic-size:auto_300px]">
+              <Card className="institution-panel h-full hover-lift">
                 <CardContent className="flex h-full flex-col space-y-3 pt-5">
                   <div className="flex items-start justify-between">
                     <h3 className="mr-2 flex-1 text-sm font-semibold leading-snug">{event.title}</h3>

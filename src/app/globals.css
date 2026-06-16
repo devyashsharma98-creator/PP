@@ -686,6 +686,10 @@
     @apply space-y-5 md:space-y-6;
   }
 
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .dashboard-kpi-grid {
     @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
   }
@@ -1276,4 +1280,3 @@
     animation: none !important;
   }
 }
-

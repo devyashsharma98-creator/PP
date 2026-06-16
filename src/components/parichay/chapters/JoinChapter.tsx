@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Network, LogIn } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
@@ -42,12 +42,12 @@ const PATHS: Path[] = [
 export function JoinChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = true;
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-background py-20 md:py-32"
+      className="relative bg-background py-16 md:py-24"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Section header */}
@@ -55,7 +55,7 @@ export function JoinChapter() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="mb-16 text-center"
+          className="mb-12 text-center md:mb-14"
         >
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
             {t("Participation", "भागीदारी")}

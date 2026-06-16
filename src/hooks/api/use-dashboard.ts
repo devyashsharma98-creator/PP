@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { useAppContext, type GatividhiEvent, type FormConfig, type VrittStatus } from '@/context/AppContext';
 import { dbToUiEventStatus } from '@/lib/app/status-maps';
+import { filterOperationalEventRecords } from '@/lib/app/operational-record-filter';
 import { repairBrokenHindi } from '@/lib/useT';
 
 const API_BASE = '/api/v1';
@@ -72,7 +73,7 @@ export function useDashboardEvents() {
     queryKey: ['dashboard-events'],
     queryFn: async () => {
       const data = await fetchApi<Record<string, unknown>[]>('/events?limit=100');
-      return data.map(mapApiEventToGatividhi);
+      return filterOperationalEventRecords(data.map(mapApiEventToGatividhi));
     },
     staleTime: 30000,
     refetchInterval: 60000,

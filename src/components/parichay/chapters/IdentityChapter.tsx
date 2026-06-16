@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Lightbulb,
   Eye,
@@ -122,12 +122,12 @@ const AAYAMS = [
 export function IdentityChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
+  const isInView = true;
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[100dvh] overflow-hidden bg-background py-20 md:py-32"
+      className="relative overflow-hidden bg-background py-16 md:py-24"
     >
       {/* Ambient background glows */}
       <div className="pointer-events-none absolute inset-0">
@@ -141,7 +141,7 @@ export function IdentityChapter() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="mb-20 text-center"
+          className="mb-14 text-center md:mb-16"
         >
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
             {t("Introduction", "परिचय")}
@@ -162,7 +162,7 @@ export function IdentityChapter() {
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="mb-16"
+          className="mb-12 md:mb-14"
         >
           <PerspectiveCard intensity={4}>
             <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/50 p-8 backdrop-blur-sm md:p-12">
@@ -199,7 +199,7 @@ export function IdentityChapter() {
         </motion.div>
 
         {/* ────── Vision & Mission ────── */}
-        <div className="mb-16 grid gap-6 md:grid-cols-2">
+        <div className="mb-12 grid gap-6 md:mb-14 md:grid-cols-2">
           {/* Vision */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -262,7 +262,7 @@ export function IdentityChapter() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.45 }}
-          className="mb-20"
+          className="mb-14 md:mb-16"
         >
           <div className="mb-10 text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">

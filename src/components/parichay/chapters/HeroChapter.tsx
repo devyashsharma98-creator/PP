@@ -24,7 +24,7 @@ export function HeroChapter() {
   return (
     <motion.section
       ref={sectionRef}
-      className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background"
+      className="relative flex min-h-[88dvh] items-center justify-center overflow-hidden bg-background py-20"
       style={{ opacity }}
     >
       {/* Animated background gradient */}
