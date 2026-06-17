@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ export function PerspectiveCard({
   intensity = 10,
 }: PerspectiveCardProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
 
@@ -41,6 +42,28 @@ export function PerspectiveCard({
     x.set(0.5);
     y.set(0.5);
   };
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const sync = () => {
+      setEnabled(media.matches && !reducedMotion.matches);
+    };
+
+    sync();
+    media.addEventListener("change", sync);
+    reducedMotion.addEventListener("change", sync);
+
+    return () => {
+      media.removeEventListener("change", sync);
+      reducedMotion.removeEventListener("change", sync);
+    };
+  }, []);
+
+  if (!enabled) {
+    return <div className={cn("relative", className)}>{children}</div>;
+  }
 
   return (
     <motion.div

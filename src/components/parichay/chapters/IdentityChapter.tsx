@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Lightbulb,
@@ -22,6 +23,7 @@ import {
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 import { PerspectiveCard } from "../effects/PerspectiveCard";
+import { STORY_STAGES } from "../story-content";
 
 /* ─────────── Animations ─────────── */
 const fadeUp = {
@@ -196,6 +198,67 @@ export function IdentityChapter() {
               </div>
             </div>
           </PerspectiveCard>
+        </motion.div>
+
+        {/* Story Timeline */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.22 }}
+          className="mb-12 md:mb-16"
+        >
+          <div className="mb-8 max-w-3xl">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
+              {t("Origin to operation", "मूल से संचालन")}
+            </p>
+            <h3 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              {t(
+                "The story behind the system",
+                "व्यवस्था के पीछे की कथा"
+              )}
+            </h3>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+              {t(
+                "The ERP is not presented as software first. It is the continuity layer for study, publication, public discourse, and field accountability.",
+                "ERP को पहले सॉफ्टवेयर के रूप में नहीं, बल्कि अध्ययन, प्रकाशन, सार्वजनिक विमर्श और क्षेत्रीय उत्तरदायित्व की निरंतरता के रूप में रखा गया है।"
+              )}
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-5">
+            {STORY_STAGES.map((stage, index) => (
+              <motion.article
+                key={stage.id}
+                variants={fadeUp}
+                initial="hidden"
+                animate={isInView ? "visible" : "hidden"}
+                custom={index}
+                className="group overflow-hidden rounded-2xl border border-border/50 bg-card shadow-[0_18px_44px_-34px_hsl(var(--navy)/0.35)]"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={stage.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 20vw, 100vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,hsl(var(--navy)/0.72)_100%)]" />
+                  <p className="absolute bottom-3 left-3 right-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/86">
+                    {t(stage.labelEn, stage.labelHi)}
+                  </p>
+                </div>
+                <div className="p-5">
+                  <h4 className="text-base font-bold tracking-tight text-foreground">
+                    {t(stage.titleEn, stage.titleHi)}
+                  </h4>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    {t(stage.summaryEn, stage.summaryHi)}
+                  </p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
         </motion.div>
 
         {/* ────── Vision & Mission ────── */}

@@ -74,8 +74,8 @@ export function JoinChapter() {
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: isEven ? -60 : 60 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
+                initial={{ opacity: 0, y: 44 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: index * 0.15 }}
               >
                 <div
