@@ -76,6 +76,16 @@ export function ArticleCard({
     <Card className="aalekh-article-card overflow-hidden hover:border-primary/30 transition-all duration-300">
       <button className="w-full text-left" onClick={() => setOpen(o => !o)}>
         <CardContent className="py-4 px-5 flex flex-col sm:flex-row sm:items-start gap-4">
+          {article.imageUrl && (
+            <div className="shrink-0 w-full sm:w-24 h-24 rounded-lg overflow-hidden bg-muted">
+              <img
+                src={article.imageUrl}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className={cn("text-[9px] font-bold uppercase tracking-wider", statusColors[article.status])}>

@@ -29,6 +29,7 @@ export const createArticleSchema = z.object({
   category: z.enum(ARTICLE_CATEGORIES).default("other"),
   unitId: z.string().uuid().optional(),
   departmentId: z.string().uuid().optional(),
+  featuredImage: z.string().max(2048).optional().nullable(),
   documentUrl: z.string().url().max(2048).optional().nullable(),
   socialUrl: z.string().url().max(2048).optional().nullable(),
   valuesChecklist: valuesChecklistSchema.optional().default({

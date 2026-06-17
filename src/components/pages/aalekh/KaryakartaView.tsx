@@ -10,6 +10,7 @@ import { ArticleCard, WriteArticleDialog } from "./shared";
 
 interface KaryakartaViewProps {
   articles: AalekhArticle[];
+  viewToggle?: React.ReactNode;
   handleSubmit: (form: {
     title: string;
     content: string;
@@ -21,7 +22,7 @@ interface KaryakartaViewProps {
   }) => Promise<boolean>;
 }
 
-export function KaryakartaView({ articles, handleSubmit }: KaryakartaViewProps) {
+export function KaryakartaView({ articles, handleSubmit, viewToggle }: KaryakartaViewProps) {
   const t = useT();
   const mine = articles.filter(a => a.author === "Current User");
 
@@ -62,6 +63,7 @@ export function KaryakartaView({ articles, handleSubmit }: KaryakartaViewProps) 
           },
         ]}
       />
+      {viewToggle && <div className="flex justify-end">{viewToggle}</div>}
 
       {mine.length === 0 ? (
         <Card className="glass-card">

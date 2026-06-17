@@ -53,6 +53,9 @@ export const articles = pgTable(
 
     status: articleStatusEnum("status").notNull().default("draft"),
 
+    // Featured image (URL from media library or external)
+    featuredImage: varchar("featured_image", { length: 2048 }),
+
     // External URLs
     documentUrl: varchar("document_url", { length: 2048 }),  // Google Doc, PDF, etc.
     socialUrl: varchar("social_url", { length: 2048 }),      // Published social post URL

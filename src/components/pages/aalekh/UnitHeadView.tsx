@@ -11,6 +11,7 @@ import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared"
 
 interface UnitHeadViewProps {
   articles: AalekhArticle[];
+  viewToggle?: React.ReactNode;
   updateArticleStatus: (
     id: string,
     status: ArticleStatus,
@@ -19,7 +20,7 @@ interface UnitHeadViewProps {
   ) => Promise<boolean>;
 }
 
-export function UnitHeadView({ articles, updateArticleStatus }: UnitHeadViewProps) {
+export function UnitHeadView({ articles, updateArticleStatus, viewToggle }: UnitHeadViewProps) {
   const t = useT();
   const { addToast } = useToast();
   const queue = articles.filter(a => a.status === "Pending Unit Head Review");
@@ -61,6 +62,7 @@ export function UnitHeadView({ articles, updateArticleStatus }: UnitHeadViewProp
           },
         ]}
       />
+      {viewToggle && <div className="flex justify-end">{viewToggle}</div>}
 
       <Card className="glass-card">
         <CardHeader>

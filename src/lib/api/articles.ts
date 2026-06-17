@@ -10,6 +10,7 @@ export interface Article {
   author_user_id: string | null;
   author_name_snapshot: string | null;
   unit_id: string | null;
+  featured_image: string | null;
   values_checklist: Record<string, boolean> | null;
   published_at: string | null;
 }
@@ -30,6 +31,7 @@ export interface CreateArticleInput {
   category: string;
   unit_id?: string;
   department_id?: string;
+  featured_image?: string;
 }
 
 export async function fetchArticles(filters?: ArticleFilters) {

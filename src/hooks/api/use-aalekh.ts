@@ -19,7 +19,11 @@ export function useArticles() {
   return useQuery({
     queryKey: ['articles'],
     queryFn: async () => {
-      return fetchApi<AalekhArticle[]>('/articles');
+      const data = await fetchApi<Array<Record<string, unknown>>>('/articles');
+      return data.map((item) => ({
+        ...item,
+        imageUrl: (item as Record<string, unknown>).featuredImage as string | undefined,
+      })) as AalekhArticle[];
     },
     staleTime: 60000,
   });

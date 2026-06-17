@@ -10,6 +10,9 @@ import { KaryakartaView } from "./aalekh/KaryakartaView";
 import { UnitHeadView } from "./aalekh/UnitHeadView";
 import { AayamView } from "./aalekh/AayamView";
 import { VibhagView } from "./aalekh/VibhagView";
+import { GalleryView } from "./aalekh/GalleryView";
+import { LayoutGrid, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Aalekh() {
   const { role, permissions } = useAppContext();
@@ -20,6 +23,7 @@ export default function Aalekh() {
   const { addToast } = useToast();
   const t = useT();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "gallery">("list");
 
   const handleSubmit = async (form: typeof emptyForm) => {
     try {
@@ -56,16 +60,46 @@ export default function Aalekh() {
     );
   }
 
+  const viewToggle = (
+    <div className="flex items-center gap-1 border rounded-lg p-0.5">
+      <Button
+        variant={viewMode === "list" ? "secondary" : "ghost"}
+        size="sm"
+        className="h-7 px-2"
+        onClick={() => setViewMode("list")}
+      >
+        <List className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        variant={viewMode === "gallery" ? "secondary" : "ghost"}
+        size="sm"
+        className="h-7 px-2"
+        onClick={() => setViewMode("gallery")}
+      >
+        <LayoutGrid className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+
+  if (viewMode === "gallery") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-end">{viewToggle}</div>
+        <GalleryView articles={articles} />
+      </div>
+    );
+  }
+
   if (role === "karyakarta") {
-    return <KaryakartaView articles={articles} handleSubmit={handleSubmit} />;
+    return <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} />;
   }
 
   if (role === "unit_head") {
-    return <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} />;
+    return <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />;
   }
 
   if (role === "aayam_pramukh") {
-    return <AayamView articles={articles} updateArticleStatus={handleUpdateStatus} />;
+    return <AayamView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />;
   }
 
   return (
@@ -75,6 +109,7 @@ export default function Aalekh() {
       updateArticleStatus={handleUpdateStatus}
       lastPublished={lastPublished}
       setLastPublished={setLastPublished}
+      viewToggle={viewToggle}
     />
   );
 }

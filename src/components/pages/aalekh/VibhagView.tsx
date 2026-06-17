@@ -20,12 +20,13 @@ import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared"
 interface VibhagViewProps {
   articles: AalekhArticle[];
   permissions: AppPermissionSummary;
+  viewToggle?: React.ReactNode;
   updateArticleStatus: (id: string, status: ArticleStatus, edits?: Partial<Pick<AalekhArticle, "title" | "content" | "summary">>, opts?: { reviewNotes?: string | null }) => Promise<boolean>;
   lastPublished: string | null;
   setLastPublished: (val: string | null) => void;
 }
 
-export function VibhagView({ articles, permissions, updateArticleStatus, lastPublished, setLastPublished }: VibhagViewProps) {
+export function VibhagView({ articles, permissions, updateArticleStatus, lastPublished, setLastPublished, viewToggle }: VibhagViewProps) {
   const t = useT();
   const { addToast } = useToast();
 
@@ -63,6 +64,7 @@ export function VibhagView({ articles, permissions, updateArticleStatus, lastPub
           },
         ]}
       />
+      {viewToggle && <div className="flex justify-end">{viewToggle}</div>}
 
       {lastPublished && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>

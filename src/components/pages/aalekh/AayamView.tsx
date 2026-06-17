@@ -11,6 +11,7 @@ import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared"
 
 interface AayamViewProps {
   articles: AalekhArticle[];
+  viewToggle?: React.ReactNode;
   updateArticleStatus: (
     id: string,
     status: ArticleStatus,
@@ -19,7 +20,7 @@ interface AayamViewProps {
   ) => Promise<boolean>;
 }
 
-export function AayamView({ articles, updateArticleStatus }: AayamViewProps) {
+export function AayamView({ articles, updateArticleStatus, viewToggle }: AayamViewProps) {
   const t = useT();
   const { addToast } = useToast();
   const queue = articles.filter(a => a.status === "Pending Aayam Review");
@@ -65,6 +66,7 @@ export function AayamView({ articles, updateArticleStatus }: AayamViewProps) {
           },
         ]}
       />
+      {viewToggle && <div className="flex justify-end">{viewToggle}</div>}
 
       <Card className="glass-card">
         <CardHeader>
