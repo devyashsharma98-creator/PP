@@ -20,6 +20,7 @@ import { VolunteersPanel } from "@/components/pages/dashboard/volunteers/Volunte
 import { MediaLibraryPanel } from "@/components/pages/dashboard/media/MediaLibraryPanel";
 import { ConferencesPanel } from "@/components/pages/dashboard/conferences/ConferencesPanel";
 import { SurveysPanel } from "@/components/pages/dashboard/surveys/SurveysPanel";
+import { NotificationsPanel } from "@/components/pages/dashboard/notifications/NotificationsPanel";
 
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
@@ -274,6 +275,7 @@ export default function Dashboard() {
         />
         {reviewOverlays}
         <TaskBoardPanel />
+        <NotificationsPanel />
         <CircularsPanel />
         <VolunteersPanel />
         <MediaLibraryPanel />
@@ -302,6 +304,7 @@ export default function Dashboard() {
         />
         {reviewOverlays}
         <TaskBoardPanel />
+        <NotificationsPanel />
         <CircularsPanel />
         <VolunteersPanel />
         <MediaLibraryPanel />
@@ -328,6 +331,7 @@ export default function Dashboard() {
         />
         {reviewOverlays}
         <TaskBoardPanel />
+        <NotificationsPanel />
         <CircularsPanel />
         <VolunteersPanel />
         <MediaLibraryPanel />
@@ -352,6 +356,7 @@ export default function Dashboard() {
       />
       {reviewOverlays}
       <TaskBoardPanel />
+      <NotificationsPanel />
       <CircularsPanel />
       <VolunteersPanel />
       <MediaLibraryPanel />
