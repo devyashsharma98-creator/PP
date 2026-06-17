@@ -34,13 +34,13 @@ describe("prachar campaign service", () => {
     vi.clearAllMocks();
   });
 
-  it("creates a campaign as a published event", async () => {
+  it("creates a campaign as an authorized public event", async () => {
     vi.mocked(sql)
       .mockResolvedValueOnce([
         {
           id: "00000000-0000-0000-0000-000000000003",
           title: "Campus outreach",
-          status: "published",
+          status: "authorized_public",
           starts_at: new Date("2026-06-17T09:00:00.000Z"),
           created_at: new Date("2026-06-17T08:00:00.000Z"),
         },
@@ -59,9 +59,43 @@ describe("prachar campaign service", () => {
     );
 
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.data.status).toBe("published");
+    if (result.ok) expect(result.data.status).toBe("authorized_public");
     const firstSqlCall = vi.mocked(sql).mock.calls[0]?.[0] as TemplateStringsArray;
     expect(Array.from(firstSqlCall).join("")).toContain("insert into public.events");
+    expect(Array.from(firstSqlCall).join("")).toContain("'authorized_public'");
+  });
+
+  it("updates authorized public campaigns", async () => {
+    vi.mocked(sql)
+      .mockResolvedValueOnce([
+        {
+          id: "00000000-0000-0000-0000-000000000003",
+          status: "authorized_public",
+          title: "Campus outreach",
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: "00000000-0000-0000-0000-000000000003",
+          title: "Updated outreach",
+          status: "authorized_public",
+          starts_at: new Date("2026-06-17T09:00:00.000Z"),
+          updated_at: new Date("2026-06-17T10:00:00.000Z"),
+        },
+      ])
+      .mockResolvedValue([]);
+
+    const result = await updatePracharCampaign(
+      "00000000-0000-0000-0000-000000000003",
+      { title: "Updated outreach" },
+      ctx,
+      "127.0.0.1",
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.data.status).toBe("authorized_public");
+    const updateSqlCall = vi.mocked(sql).mock.calls[1]?.[0] as TemplateStringsArray;
+    expect(Array.from(updateSqlCall).join("")).toContain("status = 'authorized_public'");
   });
 
   it("rejects updates for non-published events", async () => {

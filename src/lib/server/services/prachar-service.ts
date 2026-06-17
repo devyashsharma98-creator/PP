@@ -107,7 +107,7 @@ export async function createPracharCampaign(
       ${input.title},
       ${input.description ?? null},
       ${input.startsAt},
-      'published',
+      'authorized_public',
       ${actorName},
       '{}'::jsonb,
       ${ctx.session.userId},
@@ -131,7 +131,7 @@ export async function createPracharCampaign(
     values (
       ${newEvent.id},
       null,
-      'published',
+      'authorized_public',
       ${ctx.session.userId},
       ${actorName},
       'Prachar campaign created directly from outreach desk.'
@@ -182,7 +182,7 @@ export async function updatePracharCampaign(
   `;
   const existing = (existingRows as CampaignLookupRow[])[0];
 
-  if (!existing || existing.status !== "published") {
+  if (!existing || existing.status !== "authorized_public") {
     return err(notFound("Prachar campaign not found."));
   }
 
@@ -198,7 +198,7 @@ export async function updatePracharCampaign(
       updated_at = now()
     where id = ${eventId}
       and org_id = ${ctx.session.orgId}
-      and status = 'published'
+      and status = 'authorized_public'
     returning id, title, status, starts_at, updated_at
   `;
   const updated = (rows as CampaignEventRow[])[0];
