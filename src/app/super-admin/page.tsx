@@ -1,5 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import UserManagement from "@/components/pages/UserManagement";
+import SuperAdminDashboard from "@/components/pages/super-admin/SuperAdminDashboard";
 import { requirePageSession } from "@/lib/server/require-page-session";
 
 export default async function SuperAdminPage() {
@@ -7,7 +7,7 @@ export default async function SuperAdminPage() {
 
   return (
     <ErrorBoundary>
-      <UserManagement />
+      <SuperAdminDashboard />
     </ErrorBoundary>
   );
 }

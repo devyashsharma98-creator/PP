@@ -52,4 +52,6 @@ export const queryKeys = {
   survey: (id: string) => ['survey', id] as const,
   surveyResponses: (surveyId: string) => ['surveyResponses', surveyId] as const,
   surveySummary: () => ['surveys', 'summary'] as const,
+  auditLogs: (filters?: Record<string, unknown>) => ['auditLogs', filters] as const,
+  org: () => ['org'] as const,
 };

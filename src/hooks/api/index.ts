@@ -15,3 +15,5 @@ export * from './use-media';
 export * from './use-conferences';
 export * from './use-surveys';
 export * from './use-calendar';
+export * from './use-audit-logs';
+export * from './use-org';
