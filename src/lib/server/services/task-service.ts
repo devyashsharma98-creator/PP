@@ -1,7 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { and, eq, ilike, count, desc, inArray, or, type SQL } from "drizzle-orm";
+import { and, eq, ilike, count, desc, inArray, or, isNull, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { projects, projectTasks, taskDependencies } from "@/db/schema/index";
@@ -411,5 +411,33 @@ export async function getTaskboardData(
     taskCounts: countMap[p.id] ?? { todo: 0, in_progress: 0, done: 0, blocked: 0 },
   }));
 
-  return ok({ projects: projectsWithCounts, unassignedTasks: [] });
+  const unassignedTasks = projectIds.length > 0
+    ? await db
+        .select({
+          id: projectTasks.id,
+          projectId: projectTasks.projectId,
+          title: projectTasks.title,
+          titleHi: projectTasks.titleHi,
+          description: projectTasks.description,
+          assigneeUserId: projectTasks.assigneeUserId,
+          assigneeName: profiles.displayName,
+          status: projectTasks.status,
+          priority: projectTasks.priority,
+          dueDate: projectTasks.dueDate,
+          sortOrder: projectTasks.sortOrder,
+          completedAt: projectTasks.completedAt,
+          createdAt: projectTasks.createdAt,
+        })
+        .from(projectTasks)
+        .leftJoin(profiles, eq(projectTasks.assigneeUserId, profiles.id))
+        .where(
+          and(
+            inArray(projectTasks.projectId, projectIds),
+            isNull(projectTasks.assigneeUserId),
+          ),
+        )
+        .orderBy(projectTasks.sortOrder, desc(projectTasks.createdAt))
+    : [];
+
+  return ok({ projects: projectsWithCounts, unassignedTasks });
 }
