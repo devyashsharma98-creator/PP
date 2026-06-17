@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { ArrowRight, BookOpen, Network, LogIn } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
@@ -42,14 +42,14 @@ const PATHS: Path[] = [
 export function JoinChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = true;
+  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
 
   return (
     <section
       ref={sectionRef}
       className="relative bg-background py-16 md:py-24"
     >
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
+      <div className="mx-auto max-w-7xl px-6 md:px-10 relative">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -65,11 +65,20 @@ export function JoinChapter() {
           </h2>
         </motion.div>
 
+        {/* Vertical path timeline line behind cards */}
+        <div className="absolute left-14 md:left-[5.5rem] top-44 bottom-32 w-[2px] bg-gradient-to-b from-primary/10 via-primary/30 to-accent/10 pointer-events-none hidden md:block">
+          {/* Flowing dot on the path */}
+          <motion.div 
+            className="absolute left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]"
+            animate={{ y: ["0px", "420px", "0px"] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+
         {/* Path cards */}
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
           {PATHS.map((path, index) => {
             const Icon = path.icon;
-            const isEven = index % 2 === 0;
 
             return (
               <motion.div
@@ -80,25 +89,27 @@ export function JoinChapter() {
               >
                 <div
                   className={cn(
-                    "group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-8 md:p-10 transition-all duration-500",
-                    "hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                    "group relative overflow-hidden rounded-2xl border border-border/40 bg-card/80 p-8 backdrop-blur-md md:p-10 transition-all duration-500",
+                    "hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1"
                   )}
                 >
-                  {/* Background glass effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  {/* Left border accent line on hover */}
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary scale-y-0 origin-bottom transition-transform duration-300 group-hover:scale-y-100" />
+                  
+                  {/* Background glass gradient effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
 
                   <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:gap-10">
                     <div
                       className={cn(
-                        "flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary transition-transform duration-500 group-hover:scale-110",
-                        !isEven && "md:order-2"
+                        "flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-background/90 text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/10 group-hover:border-primary/40 z-10"
                       )}
                     >
-                      <Icon className="h-7 w-7" />
+                      <Icon className="h-7 w-7 transition-transform duration-500 group-hover:rotate-12" />
                     </div>
 
-                    <div className={cn(!isEven && "md:order-1 md:text-right")}>
-                      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                    <div className="flex-1">
+                      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl transition-colors group-hover:text-primary">
                         {t(path.titleEn, path.titleHi)}
                       </h3>
                       <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
@@ -106,7 +117,7 @@ export function JoinChapter() {
                       </p>
                     </div>
 
-                    <div className={cn("ml-auto shrink-0", !isEven && "md:order-3")}>
+                    <div className="shrink-0 ml-auto md:ml-0">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/40 text-muted-foreground transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary group-hover:text-primary-foreground">
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                       </div>

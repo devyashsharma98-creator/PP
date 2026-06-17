@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
+import { cn } from "@/lib/utils";
+import { PragyaLogo } from "@/components/PragyaLogo";
 import { ScrollProgress } from "./layout/ScrollProgress";
 import { HeroChapter } from "./chapters/HeroChapter";
 import { IdentityChapter } from "./chapters/IdentityChapter";
@@ -26,7 +29,7 @@ const CHAPTER_LABELS = [
 ];
 
 export default function ParichayPage() {
-  const { lang } = useAppContext();
+  const { lang, setLang } = useAppContext();
   const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
@@ -37,7 +40,6 @@ export default function ParichayPage() {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    const isMobile = window.innerWidth < 768;
 
     const lenis = new Lenis({
       duration: prefersReducedMotion ? 0 : 1.2,
@@ -89,14 +91,64 @@ export default function ParichayPage() {
     const chapters = containerRef.current?.querySelectorAll("[data-chapter]");
     if (chapters && chapters[index]) {
       lenisRef.current?.scrollTo(chapters[index] as HTMLElement, {
-        offset: 0,
+        offset: -60, // offset for fixed top bar
         duration: 1.5,
       });
     }
   };
 
   return (
-    <div ref={containerRef} className="relative" suppressHydrationWarning>
+    <div ref={containerRef} className="relative bg-background" suppressHydrationWarning>
+      {/* Top Bar Navigation */}
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 md:px-10">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded border border-primary/20 bg-primary/5 text-primary">
+              <PragyaLogo className="h-5 w-5" />
+            </span>
+            <span className="text-sm font-bold uppercase tracking-[0.16em] text-foreground">
+              {t("Pragya Pravah", "प्रज्ञा प्रवाह")}
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-6">
+            <nav className="hidden items-center gap-5 md:flex">
+              {CHAPTER_LABELS.map((label, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToChapter(index)}
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-[0.14em] transition-colors focus:outline-none",
+                    index === activeChapter
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t(label.en, label.hi)}
+                </button>
+              ))}
+            </nav>
+
+            <div className="h-4 w-px bg-border/40 hidden md:block" />
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLang(lang === "en" ? "hi" : "en")}
+                className="rounded border border-primary/30 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary transition-all hover:bg-primary hover:text-primary-foreground"
+              >
+                {lang === "en" ? "हिन्दी" : "EN"}
+              </button>
+              <Link
+                href="/login"
+                className="rounded bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                {t("Console", "कंसोल")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <ScrollProgress
         progress={progress}
         activeChapter={activeChapter}
@@ -109,21 +161,31 @@ export default function ParichayPage() {
           <HeroChapter />
         </section>
 
+        <div className="sutra-divider" />
+
         <section data-chapter="1">
           <IdentityChapter />
         </section>
+
+        <div className="sutra-divider" />
 
         <section data-chapter="2">
           <WorkstreamsChapter />
         </section>
 
+        <div className="sutra-divider" />
+
         <section data-chapter="3">
           <PublicOutputChapter />
         </section>
 
+        <div className="sutra-divider" />
+
         <section data-chapter="4">
           <JoinChapter />
         </section>
+
+        <div className="sutra-divider" />
 
         <section data-chapter="5">
           <EnterChapter />

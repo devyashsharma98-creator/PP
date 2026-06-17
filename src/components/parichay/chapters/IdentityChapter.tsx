@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
@@ -149,7 +149,7 @@ function StorySeal({ visual, index }: { visual: StoryVisual; index: number }) {
         visualTone[visual.tone]
       )}
     >
-      <svg viewBox="0 0 160 160" className="absolute inset-0 h-full w-full">
+      <svg viewBox="0 0 160 160" className="absolute inset-0 h-full w-full transition-transform duration-700 ease-out group-hover:rotate-12">
         <circle cx="80" cy="80" r="64" fill="none" stroke="currentColor" strokeOpacity="0.18" strokeWidth="1.2" />
         <circle cx="80" cy="80" r="44" fill="none" stroke="currentColor" strokeOpacity="0.28" strokeWidth="1.4" />
         <path
@@ -186,7 +186,7 @@ function StorySeal({ visual, index }: { visual: StoryVisual; index: number }) {
 
 export function IdentityChapter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = true;
+  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
 
   return (
     <section
@@ -225,11 +225,11 @@ export function IdentityChapter() {
           initial={{ opacity: 0, y: 34 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.65, delay: 0.08 }}
-          className="mb-16 grid gap-6 rounded-lg border border-border/70 bg-card/75 p-6 shadow-[0_22px_70px_-52px_hsl(var(--navy)/0.36)] md:grid-cols-[0.42fr_1fr] md:p-8"
+          className="group mb-16 grid gap-6 rounded-lg border border-border/70 bg-card/75 p-6 shadow-[0_22px_70px_-52px_hsl(var(--navy)/0.36)] transition-all duration-300 hover:border-primary/30 hover:shadow-[0_22px_60px_-40px_hsl(var(--primary)/0.12)] md:grid-cols-[0.42fr_1fr] md:p-8"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-              <Eye className="h-6 w-6" />
+            <span className="flex h-14 w-14 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-105 group-hover:border-primary/30 group-hover:bg-primary/15">
+              <Eye className="h-6 w-6 transition-transform duration-500 group-hover:rotate-12" />
             </span>
             <div>
               <p className="font-devanagari text-3xl font-semibold leading-tight tracking-normal text-foreground">
@@ -264,7 +264,7 @@ export function IdentityChapter() {
               eyebrowEn="Origin to operation"
               eyebrowHi="मूल से संचालन"
               titleEn="The story behind the system"
-              titleHi="व्यवस्था के पीछे की कथा"
+              titleHi=" व्यवस्था के पीछे की कथा"
             />
             <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
               The ERP is the continuity layer for study, publication, public
@@ -284,7 +284,7 @@ export function IdentityChapter() {
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
                 custom={index}
-                className="group grid gap-4 rounded-lg border border-border/70 bg-card/90 p-4 shadow-[0_18px_52px_-44px_hsl(var(--navy)/0.36)] transition-colors hover:border-primary/30"
+                className="group grid gap-4 rounded-lg border border-border/70 bg-card/90 p-4 shadow-[0_18px_52px_-44px_hsl(var(--navy)/0.36)] transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.15)]"
               >
                 <StorySeal visual={stage.visual} index={index} />
                 <div>
@@ -317,10 +317,18 @@ export function IdentityChapter() {
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.18 }}
-            className="rounded-lg border border-border/70 bg-card/90 p-6 md:p-8"
+            className="group relative overflow-hidden rounded-lg border border-border/70 bg-card/90 p-6 shadow-[0_18px_50px_-40px_hsl(var(--navy)/0.3)] transition-all duration-300 hover:border-primary/30 md:p-8"
           >
-            <span className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-              <Eye className="h-5 w-5" />
+            {/* Scholar Mandala Watermark */}
+            <svg viewBox="0 0 100 100" className="absolute -bottom-6 -right-6 h-28 w-28 opacity-[0.04] text-primary pointer-events-none transition-transform duration-700 group-hover:rotate-45" aria-hidden="true">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
+              <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="16" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 1" />
+              <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="0.3" />
+            </svg>
+
+            <span className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-105 group-hover:bg-primary/15">
+              <Eye className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
             </span>
             <h3 className="text-2xl font-bold tracking-normal text-foreground md:text-3xl">
               Vision
@@ -341,10 +349,18 @@ export function IdentityChapter() {
             initial={{ opacity: 0, x: 30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.24 }}
-            className="rounded-lg border border-border/70 bg-card/90 p-6 md:p-8"
+            className="group relative overflow-hidden rounded-lg border border-border/70 bg-card/90 p-6 shadow-[0_18px_50px_-40px_hsl(var(--navy)/0.3)] transition-all duration-300 hover:border-primary/30 md:p-8"
           >
-            <span className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-              <Target className="h-5 w-5" />
+            {/* Scholar Mandala Watermark */}
+            <svg viewBox="0 0 100 100" className="absolute -bottom-6 -right-6 h-28 w-28 opacity-[0.04] text-primary pointer-events-none transition-transform duration-700 group-hover:rotate-45" aria-hidden="true">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
+              <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="16" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 1" />
+              <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="0.3" />
+            </svg>
+
+            <span className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-105 group-hover:bg-primary/15">
+              <Target className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
             </span>
             <h3 className="text-2xl font-bold tracking-normal text-foreground md:text-3xl">
               Mission
@@ -355,7 +371,7 @@ export function IdentityChapter() {
             <div className="mt-5 grid gap-4">
               {MISSION_POINTS.map((point) => (
                 <div key={point.en} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-3">
-                  <ArrowRight className="mt-1 h-4 w-4 text-primary" />
+                  <ArrowRight className="mt-1 h-4 w-4 text-primary transition-transform duration-300 group-hover:translate-x-0.5" />
                   <p className="text-sm leading-6 text-muted-foreground md:text-base">
                     {point.en}
                     <span className="mt-1 block font-devanagari text-sm leading-7 tracking-normal text-foreground/80 md:text-base">
@@ -389,6 +405,11 @@ export function IdentityChapter() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {PANCH_PARIVARTAN.map((item, i) => {
               const Icon = item.icon;
+              const bgAccent = item.accent.includes("text-rose-700") ? "bg-rose-700" :
+                               item.accent.includes("text-emerald-800") ? "bg-emerald-800" :
+                               item.accent.includes("text-sky-800") ? "bg-sky-800" :
+                               item.accent.includes("text-amber-800") ? "bg-amber-800" :
+                               item.accent.includes("text-violet-800") ? "bg-violet-800" : "bg-primary";
               return (
                 <motion.article
                   key={item.titleEn}
@@ -396,10 +417,13 @@ export function IdentityChapter() {
                   initial="hidden"
                   animate={isInView ? "visible" : "hidden"}
                   custom={i}
-                  className="rounded-lg border border-border/70 bg-card/90 p-4"
+                  className="group relative overflow-hidden rounded-lg border border-border/70 bg-card/90 p-5 shadow-[0_18px_50px_-40px_hsl(var(--navy)/0.3)] transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_15px_30px_-15px_hsl(var(--primary)/0.12)]"
                 >
-                  <span className={cn("mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg border", item.accent)}>
-                    <Icon className="h-5 w-5" />
+                  {/* Left border accent line on hover */}
+                  <span className={cn("absolute left-0 top-0 bottom-0 w-[3px] scale-y-0 origin-bottom transition-transform duration-300 group-hover:scale-y-100", bgAccent)} />
+
+                  <span className={cn("mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg border transition-all duration-300 group-hover:scale-105", item.accent)}>
+                    <Icon className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
                   </span>
                   <h4 className="text-base font-bold leading-6 tracking-normal text-foreground">
                     {item.titleEn}
@@ -445,10 +469,10 @@ export function IdentityChapter() {
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.45, delay: 0.4 + i * 0.06 }}
-                  className="rounded-lg border border-border/70 bg-card/90 p-5 text-center"
+                  className="group rounded-lg border border-border/70 bg-card/90 p-6 text-center shadow-[0_12px_30px_-15px_hsl(var(--navy)/0.15)] transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_18px_40px_-20px_hsl(var(--primary)/0.15)]"
                 >
-                  <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" />
+                  <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15 group-hover:border-primary/30">
+                    <Icon className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
                   </span>
                   <p className="font-devanagari text-xl font-semibold leading-8 tracking-normal text-foreground">
                     {aayam.hi}

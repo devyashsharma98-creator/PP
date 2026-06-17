@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import {
   ArrowRight,
   BookOpenText,
@@ -112,7 +112,7 @@ function BilingualTitle({
 
 export function WorkstreamsChapter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = true;
+  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
 
   return (
     <section
@@ -122,14 +122,7 @@ export function WorkstreamsChapter() {
     >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--primary)/0.34),transparent)]" />
-        <div
-          className="absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, hsl(var(--parchment-ink)) 1px, transparent 1px)",
-            backgroundSize: "30px 30px",
-          }}
-        />
+        <div className="absolute inset-0 pravah-lattice-bg opacity-60" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-5 md:px-10">
@@ -190,23 +183,32 @@ export function WorkstreamsChapter() {
                 className="pointer-events-none absolute left-8 right-8 top-16 hidden h-24 w-[calc(100%-4rem)] md:block"
                 aria-hidden="true"
               >
-                <path
+                <defs>
+                  <linearGradient id="flow-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" />
+                    <stop offset="100%" stopColor="hsl(var(--parchment-accent))" />
+                  </linearGradient>
+                </defs>
+                <motion.path
                   d="M36 56 C170 10 250 102 380 56 C514 10 596 102 730 56 C790 34 836 36 864 56"
                   fill="none"
-                  stroke="hsl(var(--primary))"
-                  strokeOpacity="0.38"
+                  stroke="url(#flow-gradient)"
                   strokeWidth="3"
                   strokeLinecap="round"
+                  initial={{ pathLength: 0 }}
+                  animate={isInView ? { pathLength: 1 } : {}}
+                  transition={{ duration: 2.2, ease: "easeInOut", delay: 0.2 }}
                 />
               </svg>
               <div className="relative grid gap-3 md:grid-cols-5">
                 {ERP_FLOW_STEPS.map((step, index) => (
-                  <article
+                  <motion.article
                     key={step.id}
-                    className="rounded-lg border border-border/70 bg-background/90 p-4"
+                    whileHover={{ y: -3, borderColor: "hsl(var(--primary) / 0.4)" }}
+                    className="group relative rounded-lg border border-border/70 bg-background/90 p-4 shadow-[0_8px_20px_-10px_hsl(var(--navy)/0.15)] transition-all duration-300 hover:shadow-[0_12px_24px_-10px_hsl(var(--primary)/0.15)]"
                   >
                     <div className="mb-4 flex items-start justify-between gap-2">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-xs font-bold text-primary">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-xs font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20">
                         {index + 1}
                       </span>
                       <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
@@ -228,7 +230,7 @@ export function WorkstreamsChapter() {
                     <p className="mt-1 font-devanagari text-xs leading-6 tracking-normal text-foreground/75">
                       {step.summaryHi}
                     </p>
-                  </article>
+                  </motion.article>
                 ))}
               </div>
             </div>
@@ -249,11 +251,14 @@ export function WorkstreamsChapter() {
                 <Link
                   href={stream.href}
                   className={cn(
-                    "group grid h-full gap-5 rounded-lg border border-border/70 bg-card/90 p-5 transition-colors hover:border-primary/40 md:grid-cols-[4.5rem_minmax(0,1fr)] md:p-6"
+                    "group relative overflow-hidden grid h-full gap-5 rounded-lg border border-border/70 bg-card/90 p-5 shadow-[0_18px_50px_-40px_hsl(var(--navy)/0.3)] transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.15)] md:grid-cols-[4.5rem_minmax(0,1fr)] md:p-6"
                   )}
                 >
-                  <span className="flex h-16 w-16 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-transform group-hover:scale-105">
-                    <Icon className="h-7 w-7" />
+                  {/* Left border accent line on hover */}
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary scale-y-0 origin-bottom transition-transform duration-300 group-hover:scale-y-100" />
+
+                  <span className="flex h-16 w-16 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-105 group-hover:bg-primary/15 group-hover:border-primary/30">
+                    <Icon className="h-7 w-7 transition-transform duration-300 group-hover:rotate-12" />
                   </span>
 
                   <span className="min-w-0">

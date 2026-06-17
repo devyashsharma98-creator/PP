@@ -27,6 +27,10 @@ export function HeroChapter() {
   const scale = useTransform(scrollYProgress, [0, 0.52], [1, 0.97]);
   const y = useTransform(scrollYProgress, [0, 0.52], [0, -56]);
 
+  const bgY1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const bgY2 = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+
   return (
     <motion.section
       ref={sectionRef}
@@ -44,8 +48,14 @@ export function HeroChapter() {
               "linear-gradient(90deg, black 0%, black 70%, transparent 100%)",
           }}
         />
-        <div className="absolute -right-28 top-6 h-[34rem] w-[34rem] rounded-full border border-[hsl(var(--parchment-rule)/0.72)]" />
-        <div className="absolute -right-10 top-24 h-[22rem] w-[22rem] rounded-full border border-[hsl(var(--primary)/0.18)]" />
+        <motion.div 
+          className="absolute -right-28 top-6 h-[34rem] w-[34rem] rounded-full border border-[hsl(var(--parchment-rule)/0.72)]" 
+          style={{ y: bgY1 }}
+        />
+        <motion.div 
+          className="absolute -right-10 top-24 h-[22rem] w-[22rem] rounded-full border border-[hsl(var(--primary)/0.18)]" 
+          style={{ y: bgY2, scale: bgScale }}
+        />
         <div className="absolute inset-x-0 bottom-0 h-36 bg-[linear-gradient(180deg,transparent,hsl(var(--background)))]" />
       </div>
 
@@ -73,22 +83,38 @@ export function HeroChapter() {
             </span>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
-            className="space-y-4"
-          >
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[hsl(var(--parchment-accent))]">
+          <div className="space-y-4">
+            <motion.p 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-xs font-bold uppercase tracking-[0.22em] text-[hsl(var(--parchment-accent))]"
+            >
               Story to System
-            </p>
-            <h1 className="text-5xl font-bold leading-none tracking-normal md:text-7xl lg:text-8xl">
-              Pragya Pravah
-              <span className="mt-3 block font-devanagari text-4xl font-semibold leading-tight tracking-normal text-[hsl(var(--parchment-ink-soft))] md:text-6xl">
-                प्रज्ञा प्रवाह
+            </motion.p>
+            <h1 className="text-5xl font-bold leading-none tracking-normal md:text-7xl lg:text-8xl flex flex-col">
+              <span className="overflow-hidden inline-block py-1">
+                <motion.span
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-block"
+                >
+                  Pragya Pravah
+                </motion.span>
+              </span>
+              <span className="overflow-hidden inline-block py-1">
+                <motion.span
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-3 block font-devanagari text-4xl font-semibold leading-tight tracking-normal text-[hsl(var(--parchment-ink-soft))] md:text-6xl"
+                >
+                  प्रज्ञा प्रवाह
+                </motion.span>
               </span>
             </h1>
-          </motion.div>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -142,7 +168,19 @@ export function HeroChapter() {
           transition={{ duration: 0.76, delay: 0.42, ease: "easeOut" }}
           className="relative min-h-[34rem] overflow-hidden rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.7)] p-4 shadow-[0_32px_90px_-60px_hsl(var(--parchment-ink)/0.45)] md:min-h-[40rem] md:p-6"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,hsl(var(--primary)/0.12),transparent_38%)]" />
+          {/* Breathing ambient glow */}
+          <motion.div
+            className="absolute left-1/2 top-[40%] h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_65%)] blur-2xl pointer-events-none"
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
           <div
             className="absolute inset-0 opacity-[0.16]"
             style={{
@@ -178,16 +216,55 @@ export function HeroChapter() {
                   <stop offset="100%" stopColor="hsl(var(--parchment-accent))" stopOpacity="0.62" />
                 </linearGradient>
               </defs>
-              <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--parchment-rule))" strokeWidth="0.35" />
-              <circle cx="50" cy="50" r="30" fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.32" strokeWidth="0.42" />
-              <circle cx="50" cy="50" r="18" fill="none" stroke="hsl(var(--parchment-accent))" strokeOpacity="0.36" strokeWidth="0.3" />
+              
+              {/* Concentric rotating circles */}
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="42" 
+                fill="none" 
+                stroke="hsl(var(--parchment-rule))" 
+                strokeWidth="0.35" 
+                strokeDasharray="4 8"
+                className="animate-mandala-rotate origin-center"
+                style={{ transformOrigin: "50px 50px" }}
+              />
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="30" 
+                fill="none" 
+                stroke="hsl(var(--primary))" 
+                strokeOpacity="0.32" 
+                strokeWidth="0.42" 
+                strokeDasharray="8 4"
+                className="animate-mandala-rotate-reverse origin-center"
+                style={{ transformOrigin: "50px 50px" }}
+              />
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="18" 
+                fill="none" 
+                stroke="hsl(var(--parchment-accent))" 
+                strokeOpacity="0.36" 
+                strokeWidth="0.3" 
+                strokeDasharray="3 3"
+                className="animate-mandala-rotate origin-center"
+                style={{ transformOrigin: "50px 50px" }}
+              />
+              
+              {/* Flow path rotates slowly in reverse */}
               <path
                 d="M50 12 C72 15 88 28 88 41 C88 63 81 78 74 86 C55 92 37 91 26 86 C15 70 10 54 12 41 C15 27 29 15 50 12Z"
                 fill="none"
                 stroke="url(#hero-flow)"
-                strokeWidth="0.6"
+                strokeWidth="0.75"
                 strokeLinecap="round"
+                className="animate-mandala-rotate-reverse origin-center"
+                style={{ transformOrigin: "50px 50px" }}
               />
+
               {orbitPoints.map((point, index) => (
                 <g key={`${point.x}-${point.y}`}>
                   <line
@@ -198,6 +275,20 @@ export function HeroChapter() {
                     stroke="hsl(var(--parchment-ink))"
                     strokeOpacity="0.16"
                     strokeWidth="0.28"
+                  />
+                  {/* Glowing pulse ring around orbit node */}
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={index === 4 ? 4.5 : 4}
+                    fill="none"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="0.3"
+                    className="animate-node-pulse origin-center"
+                    style={{
+                      transformOrigin: `${point.x}px ${point.y}px`,
+                      animationDelay: `${index * 0.4}s`
+                    }}
                   />
                   <circle
                     cx={point.x}
@@ -229,7 +320,7 @@ export function HeroChapter() {
               return (
                 <div
                   key={step.id}
-                  className="absolute w-32 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.9)] px-3 py-2 shadow-[0_18px_46px_-38px_hsl(var(--parchment-ink)/0.45)] md:w-40"
+                  className="absolute w-32 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.9)] px-3 py-2 shadow-[0_18px_46px_-38px_hsl(var(--parchment-ink)/0.45)] transition-all duration-300 hover:border-primary/50 hover:shadow-[0_15px_30px_-15px_hsl(var(--primary)/0.3)] md:w-40"
                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
@@ -248,6 +339,7 @@ export function HeroChapter() {
         </motion.div>
       </motion.div>
 
+      {/* Prominent Scroll indicator with pulsing ring */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -257,12 +349,19 @@ export function HeroChapter() {
         <span className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--parchment-ink-soft))]">
           Scroll
         </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ChevronDown className="h-5 w-5 text-primary/70" />
-        </motion.div>
+        <div className="relative flex h-8 w-8 items-center justify-center">
+          <motion.div
+            className="absolute inset-0 rounded-full border border-primary/30"
+            animate={{ scale: [1, 1.45, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+          />
+          <motion.div
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="h-5 w-5 text-primary" />
+          </motion.div>
+        </div>
       </motion.div>
     </motion.section>
   );
