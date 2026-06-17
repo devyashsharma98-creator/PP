@@ -92,6 +92,9 @@ const defaultPermissions: AppPermissionSummary = {
   canManageConferenceSessions: false,
   canManageConferenceSpeakers: false,
   canViewConferenceRegistrations: false,
+  canCreateSurvey: false,
+  canManageSurvey: false,
+  canViewSurveyResponses: false,
   canViewAuditLogs: false,
   canManageOrg: false,
 };

@@ -185,6 +185,11 @@ export const volunteerActivityTypeValues = ["shakha_attendance", "event_duty", "
 export type VolunteerActivityType = (typeof volunteerActivityTypeValues)[number];
 export const volunteerActivityTypeEnum = pgEnum("volunteer_activity_type", volunteerActivityTypeValues);
 
+// ── Survey Status ─────────────────────────────────────────────────────────────
+export const surveyStatusValues = ["draft", "published", "closed", "archived"] as const;
+export type SurveyStatus = (typeof surveyStatusValues)[number];
+export const surveyStatusEnum = pgEnum("survey_status", surveyStatusValues);
+
 // ── Media Category ────────────────────────────────────────────────────────────
 export const mediaCategoryValues = ["image", "document", "video", "audio", "other"] as const;
 export type MediaCategory = (typeof mediaCategoryValues)[number];

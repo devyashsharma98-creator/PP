@@ -78,6 +78,11 @@ export function resolvePermissions(effectiveRoleCodes: RoleCode[]): AppPermissio
     canManageConferenceSpeakers: is("karyakarta"),
     canViewConferenceRegistrations: is("unit_head"),
 
+    // ── Surveys ───────────────────────────────────────────────────────────────
+    canCreateSurvey: is("unit_head"),
+    canManageSurvey: is("aayam_pramukh"),
+    canViewSurveyResponses: is("unit_head"),
+
     // ── Tasks / Projects ──────────────────────────────────────────────────────
     canCreateProject: is("unit_head"),
     canUpdateProject: is("unit_head"),

@@ -335,6 +335,9 @@ export interface AppPermissionSummary {
   canManageConferenceSessions: boolean;
   canManageConferenceSpeakers: boolean;
   canViewConferenceRegistrations: boolean;
+  canCreateSurvey: boolean;
+  canManageSurvey: boolean;
+  canViewSurveyResponses: boolean;
   canViewAuditLogs: boolean;
   canManageOrg: boolean;
 }
@@ -591,4 +594,65 @@ export interface ConferenceRegistrationItem {
   isAttended: boolean;
   notes?: string | null;
   submittedAt: string;
+}
+
+// ── Survey Types ─────────────────────────────────────────────────────────────
+export type SurveyStatus = "draft" | "published" | "closed" | "archived";
+
+export interface SurveySummary {
+  id: string;
+  title: string;
+  titleHi?: string | null;
+  description?: string | null;
+  status: SurveyStatus;
+  questionCount: number;
+  responseCount: number;
+  isPublic: boolean;
+  createdAt: string;
+}
+
+export interface SurveyDetail {
+  id: string;
+  title: string;
+  titleHi?: string | null;
+  description?: string | null;
+  descriptionHi?: string | null;
+  status: SurveyStatus;
+  scope: string;
+  scopeEntityId?: string | null;
+  allowMultipleSubmissions: boolean;
+  maxSubmissions?: number | null;
+  opensAt?: string | null;
+  closesAt?: string | null;
+  isPublic: boolean;
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  questions: SurveyQuestionItem[];
+}
+
+export interface SurveyQuestionItem {
+  id: string;
+  questionKey: string;
+  label: string;
+  labelHi?: string | null;
+  questionType: QuestionType;
+  isRequired: boolean;
+  displayOrder: number;
+  options?: string[];
+}
+
+export interface SurveyResponseItem {
+  id: string;
+  respondentName?: string | null;
+  respondentEmail?: string | null;
+  respondentPhone?: string | null;
+  submittedAt: string;
+  answers: SurveyAnswerItem[];
+}
+
+export interface SurveyAnswerItem {
+  id: string;
+  questionKey: string;
+  value?: string | null;
 }

@@ -14,3 +14,4 @@ export * from "./circulars";
 export * from "./volunteers";
 export * from "./media";
 export * from "./conferences";
+export * from "./surveys";

@@ -87,6 +87,11 @@ export interface AppPermissions {
   canManageConferenceSpeakers: boolean;
   canViewConferenceRegistrations: boolean;
 
+  // Surveys
+  canCreateSurvey: boolean;
+  canManageSurvey: boolean;
+  canViewSurveyResponses: boolean;
+
   // System
   canViewAuditLogs: boolean;
   canManageOrg: boolean;

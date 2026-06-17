@@ -19,6 +19,7 @@ import { CircularsPanel } from "@/components/pages/dashboard/circulars/Circulars
 import { VolunteersPanel } from "@/components/pages/dashboard/volunteers/VolunteersPanel";
 import { MediaLibraryPanel } from "@/components/pages/dashboard/media/MediaLibraryPanel";
 import { ConferencesPanel } from "@/components/pages/dashboard/conferences/ConferencesPanel";
+import { SurveysPanel } from "@/components/pages/dashboard/surveys/SurveysPanel";
 
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
 
@@ -277,6 +278,7 @@ export default function Dashboard() {
         <VolunteersPanel />
         <MediaLibraryPanel />
         <ConferencesPanel />
+        <SurveysPanel />
       </>
     );
   }
@@ -304,6 +306,7 @@ export default function Dashboard() {
         <VolunteersPanel />
         <MediaLibraryPanel />
         <ConferencesPanel />
+        <SurveysPanel />
       </>
     );
   }
@@ -329,6 +332,7 @@ export default function Dashboard() {
         <VolunteersPanel />
         <MediaLibraryPanel />
         <ConferencesPanel />
+        <SurveysPanel />
       </>
     );
   }
@@ -352,6 +356,7 @@ export default function Dashboard() {
       <VolunteersPanel />
       <MediaLibraryPanel />
       <ConferencesPanel />
+      <SurveysPanel />
     </>
   );
 }

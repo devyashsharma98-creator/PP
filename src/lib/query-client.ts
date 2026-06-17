@@ -46,4 +46,8 @@ export const queryKeys = {
   conferenceSessions: (conferenceId: string) => ['conferenceSessions', conferenceId] as const,
   sessionSpeakers: (sessionId: string) => ['sessionSpeakers', sessionId] as const,
   conferenceRegistrations: (conferenceId: string) => ['conferenceRegistrations', conferenceId] as const,
+  surveys: (filters?: Record<string, unknown>) => ['surveys', filters] as const,
+  survey: (id: string) => ['survey', id] as const,
+  surveyResponses: (surveyId: string) => ['surveyResponses', surveyId] as const,
+  surveySummary: () => ['surveys', 'summary'] as const,
 };
