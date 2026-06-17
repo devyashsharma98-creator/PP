@@ -9,14 +9,38 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Megaphone, CheckCircle2, AlertCircle, MessageCircle,
   Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
-  FileText, Clock3, Send, Sparkles,
+  FileText, Clock3, Send, Sparkles, Plus, Pencil,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useDashboardEvents } from '@/hooks/api/use-dashboard';
-import { usePracharStatuses, useUpdatePracharPlatform } from '@/hooks/api/use-prachar';
+import { useOrgStructure } from '@/hooks/api/use-org-structure';
+import {
+  useCreatePracharCampaign,
+  usePracharStatuses,
+  useUpdatePracharCampaign,
+  useUpdatePracharPlatform,
+  type PracharCampaignInput,
+} from '@/hooks/api/use-prachar';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
@@ -227,11 +251,114 @@ function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharCon
   ];
 }
 
+function toLocalDateTimeValue(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const offsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function fromLocalDateTimeValue(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+function CampaignFields({
+  t,
+  value,
+  units,
+  departments,
+  onChange,
+}: {
+  t: (en: string, hi: string) => string;
+  value: PracharCampaignInput;
+  units: Array<{ id: string; name: string; nameHi: string | null }>;
+  departments: Array<{ id: string; name: string; nameHi: string | null }>;
+  onChange: (next: PracharCampaignInput) => void;
+}) {
+  const setField = <K extends keyof PracharCampaignInput>(key: K, fieldValue: PracharCampaignInput[K]) => {
+    onChange({ ...value, [key]: fieldValue });
+  };
+
+  return (
+    <div className="grid gap-4">
+      <div className="space-y-2">
+        <Label>{t('Campaign title', 'Abhiyan shirshak')}</Label>
+        <Input value={value.title} onChange={(event) => setField('title', event.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label>{t('Campaign note', 'Abhiyan tippani')}</Label>
+        <Textarea value={value.description ?? ''} onChange={(event) => setField('description', event.target.value)} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>{t('Campaign date', 'Abhiyan dinank')}</Label>
+          <Input
+            type="datetime-local"
+            value={toLocalDateTimeValue(value.startsAt)}
+            onChange={(event) => setField('startsAt', fromLocalDateTimeValue(event.target.value))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>{t('Template reference', 'Template sandarbh')}</Label>
+          <Input
+            value={value.templateReference ?? ''}
+            onChange={(event) => setField('templateReference', event.target.value)}
+          />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>{t('Unit', 'Ikai')}</Label>
+          <Select
+            value={value.unitId ?? 'none'}
+            onValueChange={(next) => setField('unitId', next === 'none' ? undefined : next)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('Select unit', 'Ikai chunen')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t('No unit', 'Koi ikai nahi')}</SelectItem>
+              {units.map((unit) => (
+                <SelectItem key={unit.id} value={unit.id}>
+                  {t(unit.name, unit.nameHi ?? unit.name)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>{t('Aayam', 'Aayam')}</Label>
+          <Select
+            value={value.departmentId ?? 'none'}
+            onValueChange={(next) => setField('departmentId', next === 'none' ? undefined : next)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('Select aayam', 'Aayam chunen')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t('No aayam', 'Koi aayam nahi')}</SelectItem>
+              {departments.map((department) => (
+                <SelectItem key={department.id} value={department.id}>
+                  {t(department.name, department.nameHi ?? department.name)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Prachar() {
   const { role, permissions } = useAppContext();
   const { data: apiEvents = [] } = useDashboardEvents();
   const { data: pracharStatuses = [] } = usePracharStatuses();
+  const { data: orgStructure } = useOrgStructure();
   const updatePracharPlatformMutation = useUpdatePracharPlatform();
+  const createCampaignMutation = useCreatePracharCampaign();
+  const updateCampaignMutation = useUpdatePracharCampaign();
 
   const updatePracharPlatform = async (eventId: string, platform: PracharPlatform, done: boolean, skipReason?: string | null) => {
     return updatePracharPlatformMutation.mutateAsync({ eventId, platform, done, skipReason });
@@ -239,6 +366,17 @@ export default function Prachar() {
 
   const t = useT();
   const publishedEvents = useMemo(() => apiEvents.filter(e => e.status === 'Published'), [apiEvents]);
+  const defaultCampaignForm = useCallback((): PracharCampaignInput => ({
+    title: '',
+    description: '',
+    startsAt: new Date().toISOString(),
+    unitId: undefined,
+    departmentId: undefined,
+    templateReference: '',
+  }), []);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [campaignForm, setCampaignForm] = useState<PracharCampaignInput>(() => defaultCampaignForm());
 
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
@@ -248,7 +386,41 @@ export default function Prachar() {
     eventId,
     platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
     skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null },
+    templateReference: null,
   }, [pracharStatuses]);
+
+  const canManageCampaigns = permissions.canUpdatePrachar;
+  const editingEvent = publishedEvents.find((event) => event.id === editingEventId) ?? null;
+
+  const resetCampaignForm = useCallback(() => {
+    setCampaignForm(defaultCampaignForm());
+  }, [defaultCampaignForm]);
+
+  const openEditCampaign = (event: typeof publishedEvents[number]) => {
+    const status = getStatus(event.id);
+    setEditingEventId(event.id);
+    setCampaignForm({
+      title: event.title,
+      description: event.description,
+      startsAt: event.dateIso || new Date().toISOString(),
+      unitId: event.unitId ?? undefined,
+      departmentId: event.departmentId ?? undefined,
+      templateReference: status.templateReference ?? '',
+    });
+  };
+
+  const submitCreateCampaign = async () => {
+    await createCampaignMutation.mutateAsync(campaignForm);
+    setCreateOpen(false);
+    resetCampaignForm();
+  };
+
+  const submitEditCampaign = async () => {
+    if (!editingEventId) return;
+    await updateCampaignMutation.mutateAsync({ eventId: editingEventId, input: campaignForm });
+    setEditingEventId(null);
+    resetCampaignForm();
+  };
 
   const isDone = (eventId: string) => {
     const s = getStatus(eventId);
@@ -312,6 +484,45 @@ export default function Prachar() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
       <PracharMasthead t={t} contexts={mastheadContexts} canAct={permissions.canUpdatePrachar} />
+
+      {canManageCampaigns && (
+        <div className="flex justify-end">
+          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                {t('Create Campaign', 'Abhiyan banayen')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('Create Campaign', 'Abhiyan banayen')}</DialogTitle>
+                <DialogDescription>
+                  {t('Create a published outreach campaign directly from Prachar.', 'Prachar se seedhe prakashit abhiyan banayen.')}
+                </DialogDescription>
+              </DialogHeader>
+              <CampaignFields
+                t={t}
+                value={campaignForm}
+                units={orgStructure?.units ?? []}
+                departments={orgStructure?.departments ?? []}
+                onChange={setCampaignForm}
+              />
+              {createCampaignMutation.error && (
+                <p className="text-sm text-destructive">{createCampaignMutation.error.message}</p>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setCreateOpen(false)}>
+                  {t('Cancel', 'Radd')}
+                </Button>
+                <Button onClick={submitCreateCampaign} disabled={createCampaignMutation.isPending || !campaignForm.title.trim()}>
+                  {createCampaignMutation.isPending ? t('Creating...', 'Ban raha hai...') : t('Create Campaign', 'Abhiyan banayen')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -578,6 +789,12 @@ export default function Prachar() {
                             {t('Attention required', 'ध्यान आवश्यक')}
                           </Badge>
                         )}
+                        {canManageCampaigns && (
+                          <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => openEditCampaign(event)}>
+                            <Pencil className="mr-1 h-3 w-3" />
+                            {t('Edit Campaign', 'Abhiyan sampadit karen')}
+                          </Button>
+                        )}
                         <Link href="/feed">
                           <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto">
                             <CheckCircle2 className="w-3 h-3 mr-1" /> {t('View Published Feed', 'प्रकाशित फीड देखें')}
@@ -700,6 +917,34 @@ export default function Prachar() {
           {t('Need sharper campaign language?', 'क्या अभियान की भाषा और स्पष्ट चाहिए?')} <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">{t('Explore Vimarsh topics', 'विमर्श विषय देखें')}</Link>
         </p>
       </section>
+      <Dialog open={!!editingEvent} onOpenChange={(open) => { if (!open) setEditingEventId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('Edit Campaign', 'Abhiyan sampadit karen')}</DialogTitle>
+            <DialogDescription>
+              {t('Update the published event details used by this Prachar campaign.', 'Is Prachar abhiyan ke prakashit karyakram vivaran update karen.')}
+            </DialogDescription>
+          </DialogHeader>
+          <CampaignFields
+            t={t}
+            value={campaignForm}
+            units={orgStructure?.units ?? []}
+            departments={orgStructure?.departments ?? []}
+            onChange={setCampaignForm}
+          />
+          {updateCampaignMutation.error && (
+            <p className="text-sm text-destructive">{updateCampaignMutation.error.message}</p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingEventId(null)}>
+              {t('Cancel', 'Radd')}
+            </Button>
+            <Button onClick={submitEditCampaign} disabled={updateCampaignMutation.isPending || !campaignForm.title.trim()}>
+              {updateCampaignMutation.isPending ? t('Saving...', 'Saheja ja raha hai...') : t('Save Campaign', 'Abhiyan sahejen')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
