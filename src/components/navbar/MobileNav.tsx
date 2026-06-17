@@ -47,13 +47,25 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           {navigationGroups.map((group) => (
             <div key={group.title} className="mb-4 space-y-1">
-              <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">{t(group.title, group.titleHi)}</p>
+              <div className="flex items-center gap-1.5 px-3 pb-1">
+                {group.icon ? (
+                  <group.icon className="h-3 w-3 text-sidebar-foreground/40" />
+                ) : null}
+                <p className="text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/45">{t(group.title, group.titleHi)}</p>
+              </div>
               {group.items.map((item) => {
                 const active = pathname === item.path;
                 return (
                   <Link key={item.path} href={item.path} prefetch={false} onClick={() => onOpenChange(false)} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
                     <item.icon className={cn("w-4 h-4 shrink-0", active && "text-primary")} />
-                    <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
+                    <div className="min-w-0">
+                      <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
+                      {item.description ? (
+                        <span className={cn("mt-0.5 block truncate text-[10px] leading-tight text-sidebar-foreground/40", lang === "hi" && "font-devanagari")}>
+                          {t(item.description, item.descriptionHi ?? item.sublabel)}
+                        </span>
+                      ) : null}
+                    </div>
                   </Link>
                 );
               })}

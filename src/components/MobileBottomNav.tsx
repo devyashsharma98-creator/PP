@@ -116,9 +116,14 @@ export function MobileBottomNav() {
             <div className="space-y-5">
               {overflowGroups.map((group) => (
                 <div key={group.title} className="space-y-2">
-                  <p className={cn("text-[10px] uppercase tracking-[0.22em] text-muted-foreground", lang === "hi" && "font-devanagari tracking-[0.14em]")}>
-                    {t(group.title, group.titleHi)}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    {group.icon ? (
+                      <group.icon className="h-3 w-3 text-muted-foreground" />
+                    ) : null}
+                    <p className={cn("text-[10px] uppercase tracking-[0.22em] text-muted-foreground", lang === "hi" && "font-devanagari tracking-[0.14em]")}>
+                      {t(group.title, group.titleHi)}
+                    </p>
+                  </div>
                   <div className="grid gap-2">
                     {group.items.map((item) => {
                       const active = isActivePath(item.path);
@@ -141,7 +146,7 @@ export function MobileBottomNav() {
                               {t(item.label, item.sublabel)}
                             </p>
                             <p className={cn("text-xs text-muted-foreground", lang === "hi" && "font-devanagari")}>
-                              {lang === "hi" ? item.label : item.sublabel}
+                              {item.description ? t(item.description, item.descriptionHi ?? item.sublabel) : (lang === "hi" ? item.label : item.sublabel)}
                             </p>
                           </div>
                         </Link>
