@@ -83,4 +83,18 @@ describe("prachar campaign service", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.response.status).toBe(404);
   });
+
+  it("returns not found when updating a campaign outside the published queue", async () => {
+    vi.mocked(sql).mockResolvedValueOnce([]);
+
+    const result = await updatePracharCampaign(
+      "00000000-0000-0000-0000-000000000099",
+      { title: "No campaign" },
+      ctx,
+      "127.0.0.1",
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.response.status).toBe(404);
+  });
 });
