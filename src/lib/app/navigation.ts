@@ -1,17 +1,22 @@
 import {
   Activity,
+  Bell,
   BookOpen,
   Calendar,
+  ClipboardList,
   Cog,
   Hash,
   History,
   Home,
+  Image,
   LayoutDashboard,
+  ListTodo,
   Megaphone,
   MessagesSquare,
   Network,
   Newspaper,
   PenLine,
+  Presentation,
   ShieldCheck,
   Users,
   type LucideIcon,
@@ -49,6 +54,16 @@ const mobilePrimaryNavItems: NavItem[] = [
   { label: "Calendar", sublabel: "कैलेंडर", icon: Calendar, path: "/calendar" },
 ];
 
+const dashboardModuleNavItems: NavItem[] = [
+  { label: "Task Board", sublabel: "कार्य बोर्ड", icon: ListTodo, path: "/dashboard#task-board", description: "Projects and assignments", descriptionHi: "परियोजना और कार्य" },
+  { label: "Notifications", sublabel: "सूचनाएँ", icon: Bell, path: "/dashboard#notifications", description: "Alerts and updates", descriptionHi: "अलर्ट और अद्यतन" },
+  { label: "Circulars", sublabel: "परिपत्र", icon: Megaphone, path: "/dashboard#circulars", description: "Announcements", descriptionHi: "घोषणाएँ" },
+  { label: "Volunteers", sublabel: "स्वयंसेवक", icon: Users, path: "/dashboard#volunteers", description: "Volunteer records", descriptionHi: "स्वयंसेवक अभिलेख" },
+  { label: "Media Library", sublabel: "मीडिया लाइब्रेरी", icon: Image, path: "/dashboard#media-library", description: "Photos and files", descriptionHi: "फोटो और फाइल" },
+  { label: "Conferences", sublabel: "सम्मेलन", icon: Presentation, path: "/dashboard#conferences", description: "Sessions and speakers", descriptionHi: "सत्र और वक्ता" },
+  { label: "Surveys", sublabel: "सर्वे", icon: ClipboardList, path: "/dashboard#surveys", description: "Forms and responses", descriptionHi: "फॉर्म और उत्तर" },
+];
+
 const coordinationNavItems: NavItem[] = [
   { label: "People", sublabel: "सम्पर्क व समन्वय", icon: Users, path: "/directory", description: "Contact directory", descriptionHi: "सम्पर्क सूची" },
   { label: "Dayitv", sublabel: "भूमिका रचना", icon: Network, path: "/dayitv", description: "Role & responsibility matrix", descriptionHi: "भूमिका और उत्तरदायित्व मैट्रिक्स" },
@@ -75,11 +90,16 @@ function filterItemsByRole(items: NavItem[], roleCodes?: readonly RoleCode[] | n
 }
 
 export function getNavGroups(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null): NavGroup[] {
+  const showDashboardModules = showAdminControls && (!roleCodes || roleCodes.some((role) => role === "super_admin" || role === "org_admin"));
   const groups: NavGroup[] = [
     { title: "Workflow", titleHi: "मुख्य कार्य", icon: LayoutDashboard, items: workflowNavItems },
     { title: "Coordination", titleHi: "समन्वय", icon: Users, items: coordinationNavItems },
     { title: "Reference", titleHi: "संदर्भ", icon: BookOpen, items: referenceNavItems },
   ];
+
+  if (showDashboardModules) {
+    groups.splice(1, 0, { title: "Modules", titleHi: "मॉड्यूल", icon: Activity, items: dashboardModuleNavItems });
+  }
 
   if (showAdminControls) {
     groups.push({ title: "Admin", titleHi: "प्रशासन", icon: Cog, items: adminNavItems });
@@ -99,8 +119,9 @@ export function getMobilePrimaryNav(roleCodes?: readonly RoleCode[] | null) {
 }
 
 export function getOverflowNavItems(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null) {
+  const showDashboardModules = showAdminControls && (!roleCodes || roleCodes.some((role) => role === "super_admin" || role === "org_admin"));
   return filterItemsByRole(
-    [...coordinationNavItems, ...referenceNavItems, ...(showAdminControls ? adminNavItems : [])],
+    [...(showDashboardModules ? dashboardModuleNavItems : []), ...coordinationNavItems, ...referenceNavItems, ...(showAdminControls ? adminNavItems : [])],
     roleCodes,
   );
 }

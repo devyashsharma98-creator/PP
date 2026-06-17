@@ -105,7 +105,7 @@ export function CircularsPanel() {
   };
 
   return (
-    <Card className="mt-6">
+    <Card id="circulars" className="mt-6 scroll-mt-24">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
           <Megaphone className="h-5 w-5 text-primary" />

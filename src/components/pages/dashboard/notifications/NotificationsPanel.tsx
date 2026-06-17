@@ -63,7 +63,7 @@ export function NotificationsPanel() {
   };
 
   return (
-    <Card className="mt-6">
+    <Card id="notifications" className="mt-6 scroll-mt-24">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-primary" />

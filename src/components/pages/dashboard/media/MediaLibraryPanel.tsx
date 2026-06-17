@@ -115,7 +115,7 @@ export function MediaLibraryPanel() {
   }, [deleteAssetMutation, addToast, t]);
 
   return (
-    <Card className="mt-6">
+    <Card id="media-library" className="mt-6 scroll-mt-24">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
           <Image className="h-5 w-5 text-primary" />

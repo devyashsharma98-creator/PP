@@ -53,7 +53,10 @@ function LoginForm() {
         genericError: "कुछ गड़बड़ हुई। कृपया फिर प्रयास करें।",
         signIn: "लॉगिन करें",
         signingIn: "लॉगिन हो रहा है...",
-        quickFill: "Fill local admin",
+        quickFill: "सुपर एडमिन भरें",
+        credentialTitle: "सुपर एडमिन टेस्ट खाता",
+        credentialEmailLabel: "ईमेल",
+        credentialPasswordLabel: "पासवर्ड",
         internalOnly: "परीक्षण",
         guideTitle: "मोबाइल उपयोग मार्गदर्शिका",
         guideDescription: "क्लाइंट हेतु द्विभाषी गाइड।",
@@ -78,7 +81,10 @@ function LoginForm() {
         genericError: "Something went wrong. Please try again.",
         signIn: "Sign In",
         signingIn: "Signing in...",
-        quickFill: "लोकल एडमिन भरें",
+        quickFill: "Fill Super Admin",
+        credentialTitle: "Super Admin test account",
+        credentialEmailLabel: "Email",
+        credentialPasswordLabel: "Password",
         internalOnly: "Testing",
         guideTitle: "Mobile user guide",
         guideDescription: "Share the bilingual guide with the client.",
@@ -330,19 +336,32 @@ function LoginForm() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-8 rounded-full px-3 text-xs"
-                    disabled={loading}
-                    onClick={() => {
-                      setEmail(LOCAL_ADMIN_QUICK_FILL.email);
-                      setPassword(LOCAL_ADMIN_QUICK_FILL.password);
-                    }}
-                  >
-                    <KeyRound className="h-3.5 w-3.5" />
-                    {copy.quickFill}
-                  </Button>
+                  <div className="w-full rounded-2xl border border-primary/20 bg-primary/5 p-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 space-y-1 text-xs">
+                        <p className="font-semibold text-foreground">{copy.credentialTitle}</p>
+                        <p className="truncate text-muted-foreground">
+                          {copy.credentialEmailLabel}: <span className="font-mono text-foreground">{LOCAL_ADMIN_QUICK_FILL.email}</span>
+                        </p>
+                        <p className="truncate text-muted-foreground">
+                          {copy.credentialPasswordLabel}: <span className="font-mono text-foreground">{LOCAL_ADMIN_QUICK_FILL.password}</span>
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-8 rounded-full px-3 text-xs"
+                        disabled={loading}
+                        onClick={() => {
+                          setEmail(LOCAL_ADMIN_QUICK_FILL.email);
+                          setPassword(LOCAL_ADMIN_QUICK_FILL.password);
+                        }}
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                        {copy.quickFill}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {error ? (
@@ -372,4 +391,3 @@ export default function LoginPageClient() {
     </Suspense>
   );
 }
-
