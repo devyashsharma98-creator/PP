@@ -67,6 +67,10 @@ vi.mock("@/hooks/api/use-dashboard-articles", () => ({
   useDashboardArticles: () => ({ data: [] }),
 }));
 
+vi.mock("@/hooks/api/use-search", () => ({
+  useSearch: () => ({ data: [], isFetching: false }),
+}));
+
 vi.mock("./navbar/useShellFrame", () => ({
   useShellFrame: () => ({
     titleEn: "Aalekh",
