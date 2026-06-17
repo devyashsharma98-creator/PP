@@ -66,7 +66,7 @@ export function TaskBoardPanel() {
   const deleteProjectMutation = useDeleteProject();
   const updateProjectMutation = useUpdateProject();
 
-  const { data: users = [] } = useUsers({ limit: 200 });
+  const { data: users = [] } = useUsers({ limit: 100 });
 
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showCreateProject, setShowCreateProject] = useState(false);
