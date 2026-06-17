@@ -11,9 +11,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
-import { PerspectiveCard } from "../effects/PerspectiveCard";
 import { ERP_FLOW_STEPS } from "../story-content";
 
 interface Workstream {
@@ -24,6 +22,8 @@ interface Workstream {
   titleHi: string;
   summaryEn: string;
   summaryHi: string;
+  responsibilityEn: string;
+  responsibilityHi: string;
 }
 
 const WORKSTREAMS: Workstream[] = [
@@ -37,6 +37,8 @@ const WORKSTREAMS: Workstream[] = [
       "Publication desk for essays, research notes, draft review, and article readiness.",
     summaryHi:
       "लेख, शोध-टिप्पणी, प्रारूप समीक्षा और प्रकाशन-योग्य सामग्री का कक्ष।",
+    responsibilityEn: "Drafts, review, readiness",
+    responsibilityHi: "प्रारूप, समीक्षा, तैयारी",
   },
   {
     id: "prachar",
@@ -47,7 +49,9 @@ const WORKSTREAMS: Workstream[] = [
     summaryEn:
       "Dissemination desk for campaign circulation, platform discipline, and reach tracking.",
     summaryHi:
-      "अभियान प्रसार, मंच-अनुशासन और पहुँच के अनुशासित अभिलेख का कक्ष।",
+      "अभियान प्रसार, मंच-अनुशासन और पहुंच के अभिलेख का कक्ष।",
+    responsibilityEn: "Circulation, campaign rhythm",
+    responsibilityHi: "प्रसार, अभियान लय",
   },
   {
     id: "vimarsh",
@@ -59,6 +63,8 @@ const WORKSTREAMS: Workstream[] = [
       "Discourse desk for forums, review sessions, study circles, and public discussion.",
     summaryHi:
       "मंच, समीक्षा सत्र, अध्ययन-वृत्त और सार्वजनिक संवाद का कक्ष।",
+    responsibilityEn: "Forums, sessions, dialogue",
+    responsibilityHi: "मंच, सत्र, संवाद",
   },
   {
     id: "vritt",
@@ -70,11 +76,41 @@ const WORKSTREAMS: Workstream[] = [
       "Reporting desk for event records, attendance, media, follow-through, and dashboard review.",
     summaryHi:
       "आयोजन अभिलेख, उपस्थिति, मीडिया, अनुवर्तन और डैशबोर्ड समीक्षा का कक्ष।",
+    responsibilityEn: "Record, evidence, review",
+    responsibilityHi: "अभिलेख, प्रमाण, समीक्षा",
   },
 ];
 
+function BilingualTitle({
+  eyebrowEn,
+  eyebrowHi,
+  titleEn,
+  titleHi,
+}: {
+  eyebrowEn: string;
+  eyebrowHi: string;
+  titleEn: string;
+  titleHi: string;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">
+        {eyebrowEn}
+      </p>
+      <p className="mt-1 font-devanagari text-sm font-semibold leading-6 tracking-normal text-muted-foreground">
+        {eyebrowHi}
+      </p>
+      <h2 className="mt-4 text-4xl font-bold leading-tight tracking-normal text-foreground md:text-6xl">
+        {titleEn}
+        <span className="mt-2 block font-devanagari text-3xl font-semibold leading-snug tracking-normal text-foreground/80 md:text-5xl">
+          {titleHi}
+        </span>
+      </h2>
+    </div>
+  );
+}
+
 export function WorkstreamsChapter() {
-  const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = true;
 
@@ -82,120 +118,177 @@ export function WorkstreamsChapter() {
     <section
       id="our-work"
       ref={sectionRef}
-      className="relative scroll-mt-8 bg-background py-16 md:py-24"
+      className="relative scroll-mt-8 overflow-hidden bg-background py-16 md:py-24"
     >
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-          className="mb-12 text-center md:mb-14"
-        >
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
-            {t("Workstream overview", "कार्य-प्रवाह परिचय")}
-          </p>
-          <h2 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-            {t("Our Work", "हमारा कार्य")}
-          </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            {t(
-              "The ERP connects public intellectual output with the operational record needed to sustain it.",
-              "ERP सार्वजनिक वैचारिक सामग्री को उस संचालन अभिलेख से जोड़ता है जो कार्य की निरंतरता बनाए रखता है।"
-            )}
-          </p>
-        </motion.div>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--primary)/0.34),transparent)]" />
+        <div
+          className="absolute inset-0 opacity-[0.12]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, hsl(var(--parchment-ink)) 1px, transparent 1px)",
+            backgroundSize: "30px 30px",
+          }}
+        />
+      </div>
 
+      <div className="relative mx-auto max-w-7xl px-5 md:px-10">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 32 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.12 }}
-          className="mb-12 overflow-hidden rounded-[1.75rem] border border-border/60 bg-card/90 p-5 shadow-[0_22px_64px_-42px_hsl(var(--navy)/0.38)] md:p-7"
+          transition={{ duration: 0.65 }}
+          className="mb-12 grid gap-6 md:grid-cols-[0.84fr_1fr] md:items-end"
         >
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                {t("Operating sequence", "संचालन क्रम")}
-              </p>
-              <h3 className="mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                {t(
-                  "From idea to accountable record",
-                  "विचार से उत्तरदायी अभिलेख तक"
-                )}
-              </h3>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-              {t(
-                "Each desk has a visible public role and an internal ERP responsibility.",
-                "हर कक्ष की सार्वजनिक भूमिका और आंतरिक ERP जिम्मेदारी दोनों स्पष्ट रहती हैं।"
-              )}
+          <BilingualTitle
+            eyebrowEn="Workstream overview"
+            eyebrowHi="कार्य-प्रवाह परिचय"
+            titleEn="Our Work"
+            titleHi="हमारा कार्य"
+          />
+          <div className="grid gap-4 text-base leading-8 text-muted-foreground md:text-lg">
+            <p>
+              The ERP connects public intellectual output with the operational
+              record needed to sustain it.
+            </p>
+            <p className="font-devanagari text-lg leading-9 tracking-normal text-foreground/90">
+              ERP सार्वजनिक वैचारिक सामग्री को उस संचालन अभिलेख से जोड़ता है
+              जो कार्य की निरंतरता बनाए रखता है।
             </p>
           </div>
+        </motion.div>
 
-          <div className="grid gap-3 md:grid-cols-5">
-            {ERP_FLOW_STEPS.map((step, index) => (
-              <div key={step.id} className="relative">
-                {index < ERP_FLOW_STEPS.length - 1 ? (
-                  <div className="absolute left-[calc(100%-0.25rem)] top-8 z-0 hidden h-px w-4 bg-border md:block" />
-                ) : null}
-                <div className="relative z-10 h-full rounded-2xl border border-border/60 bg-background/78 p-4">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                      {index + 1}
-                    </span>
-                    <span className="rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-                      {t(step.moduleEn, step.moduleHi)}
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-bold tracking-tight text-foreground">
-                    {t(step.titleEn, step.titleHi)}
-                  </h4>
-                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                    {t(step.summaryEn, step.summaryHi)}
-                  </p>
-                </div>
+        <motion.div
+          initial={{ opacity: 0, y: 36 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65, delay: 0.12 }}
+          className="mb-12 overflow-hidden rounded-lg border border-border/70 bg-card/90 shadow-[0_24px_76px_-54px_hsl(var(--navy)/0.42)]"
+        >
+          <div className="grid gap-0 lg:grid-cols-[0.44fr_1fr]">
+            <div className="bg-[hsl(var(--sidebar-background))] p-6 text-sidebar-foreground md:p-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                Operating sequence
+              </p>
+              <h3 className="mt-4 text-3xl font-bold leading-tight tracking-normal text-white md:text-4xl">
+                Idea to accountable record
+                <span className="mt-2 block font-devanagari text-2xl font-semibold leading-snug tracking-normal text-white/80 md:text-3xl">
+                  विचार से उत्तरदायी अभिलेख तक
+                </span>
+              </h3>
+              <p className="mt-5 text-sm leading-7 text-sidebar-foreground/80">
+                Each public desk has a visible role and an internal ERP
+                responsibility.
+              </p>
+              <p className="mt-2 font-devanagari text-base leading-8 tracking-normal text-sidebar-foreground/90">
+                हर कक्ष की सार्वजनिक भूमिका और आंतरिक ERP जिम्मेदारी दोनों
+                स्पष्ट रहती हैं।
+              </p>
+            </div>
+
+            <div className="relative p-5 md:p-7">
+              <svg
+                viewBox="0 0 900 120"
+                className="pointer-events-none absolute left-8 right-8 top-16 hidden h-24 w-[calc(100%-4rem)] md:block"
+                aria-hidden="true"
+              >
+                <path
+                  d="M36 56 C170 10 250 102 380 56 C514 10 596 102 730 56 C790 34 836 36 864 56"
+                  fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity="0.38"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="relative grid gap-3 md:grid-cols-5">
+                {ERP_FLOW_STEPS.map((step, index) => (
+                  <article
+                    key={step.id}
+                    className="rounded-lg border border-border/70 bg-background/90 p-4"
+                  >
+                    <div className="mb-4 flex items-start justify-between gap-2">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-xs font-bold text-primary">
+                        {index + 1}
+                      </span>
+                      <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                        {step.moduleEn}
+                        <span className="block font-devanagari text-xs font-semibold normal-case tracking-normal text-foreground/70">
+                          {step.moduleHi}
+                        </span>
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold leading-6 tracking-normal text-foreground">
+                      {step.titleEn}
+                      <span className="block font-devanagari text-sm font-semibold tracking-normal text-foreground/80">
+                        {step.titleHi}
+                      </span>
+                    </h4>
+                    <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                      {step.summaryEn}
+                    </p>
+                    <p className="mt-1 font-devanagari text-xs leading-6 tracking-normal text-foreground/75">
+                      {step.summaryHi}
+                    </p>
+                  </article>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {WORKSTREAMS.map((stream, index) => {
             const Icon = stream.icon;
+
             return (
               <motion.div
                 key={stream.id}
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 44 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
+                transition={{ duration: 0.56, delay: index * 0.08 }}
               >
-                <PerspectiveCard>
-                  <Link
-                    href={stream.href}
-                    className={cn(
-                      "group relative block h-full overflow-hidden rounded-2xl border border-border/40 bg-card p-8 transition-all duration-500",
-                      "hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5"
-                    )}
-                  >
-                    <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <Link
+                  href={stream.href}
+                  className={cn(
+                    "group grid h-full gap-5 rounded-lg border border-border/70 bg-card/90 p-5 transition-colors hover:border-primary/40 md:grid-cols-[4.5rem_minmax(0,1fr)] md:p-6"
+                  )}
+                >
+                  <span className="flex h-16 w-16 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-transform group-hover:scale-105">
+                    <Icon className="h-7 w-7" />
+                  </span>
 
-                    <div className="relative">
-                      <div className="mb-6 flex items-start justify-between">
-                        <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/5 text-primary transition-transform duration-500 group-hover:scale-110 group-hover:border-primary/40">
-                          <Icon className="h-6 w-6" />
+                  <span className="min-w-0">
+                    <span className="flex items-start justify-between gap-4">
+                      <span>
+                        <span className="block text-2xl font-bold leading-tight tracking-normal text-foreground md:text-3xl">
+                          {stream.titleEn}
                         </span>
-                        <ArrowRight className="h-5 w-5 text-muted-foreground transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
-                      </div>
+                        <span className="mt-1 block font-devanagari text-2xl font-semibold leading-9 tracking-normal text-foreground/80">
+                          {stream.titleHi}
+                        </span>
+                      </span>
+                      <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary" />
+                    </span>
 
-                      <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                        {t(stream.titleEn, stream.titleHi)}
-                      </h3>
+                    <span className="mt-4 grid gap-2 text-sm leading-6 text-muted-foreground md:text-base md:leading-7">
+                      <span>{stream.summaryEn}</span>
+                      <span className="font-devanagari leading-8 tracking-normal text-foreground/80">
+                        {stream.summaryHi}
+                      </span>
+                    </span>
 
-                      <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
-                        {t(stream.summaryEn, stream.summaryHi)}
-                      </p>
-                    </div>
-                  </Link>
-                </PerspectiveCard>
+                    <span className="mt-5 grid gap-2 rounded-lg border border-border/70 bg-background/75 p-3 text-xs leading-5 md:grid-cols-[7.5rem_minmax(0,1fr)]">
+                      <span className="font-bold uppercase tracking-[0.14em] text-primary">
+                        ERP role
+                      </span>
+                      <span>
+                        {stream.responsibilityEn}
+                        <span className="block font-devanagari tracking-normal text-foreground/75">
+                          {stream.responsibilityHi}
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </Link>
               </motion.div>
             );
           })}

@@ -1,3 +1,10 @@
+export interface StoryVisual {
+  glyphEn: string;
+  glyphHi: string;
+  ringLabel: string;
+  tone: "earth" | "saffron" | "ink" | "leaf" | "steel";
+}
+
 export interface StoryStage {
   id: "genesis" | "manthan" | "narrative" | "action" | "future";
   titleEn: string;
@@ -6,7 +13,7 @@ export interface StoryStage {
   labelHi: string;
   summaryEn: string;
   summaryHi: string;
-  image: string;
+  visual: StoryVisual;
 }
 
 export interface ErpFlowStep {
@@ -30,7 +37,12 @@ export const STORY_STAGES: StoryStage[] = [
       "The work begins with study, inheritance, and the discipline of preserving knowledge.",
     summaryHi:
       "कार्य अध्ययन, परंपरा और ज्ञान को सुरक्षित रखने के अनुशासन से आरम्भ होता है।",
-    image: "/assets/story/genesis.png",
+    visual: {
+      glyphEn: "ROOTS",
+      glyphHi: "मूल",
+      ringLabel: "study / स्मृति",
+      tone: "earth",
+    },
   },
   {
     id: "manthan",
@@ -42,7 +54,12 @@ export const STORY_STAGES: StoryStage[] = [
       "Ideas are examined, debated, refined, and prepared for public life.",
     summaryHi:
       "विचारों का परीक्षण, संवाद, परिष्कार और सार्वजनिक जीवन के लिए संयोजन होता है।",
-    image: "/assets/story/manthan.png",
+    visual: {
+      glyphEn: "IDEA",
+      glyphHi: "विचार",
+      ringLabel: "dialogue / संवाद",
+      tone: "saffron",
+    },
   },
   {
     id: "narrative",
@@ -54,7 +71,12 @@ export const STORY_STAGES: StoryStage[] = [
       "Research, writing, and discourse turn scattered insight into a clear public position.",
     summaryHi:
       "शोध, लेखन और विमर्श बिखरे हुए बोध को स्पष्ट सार्वजनिक कथ्य में बदलते हैं।",
-    image: "/assets/story/narrative.png",
+    visual: {
+      glyphEn: "TEXT",
+      glyphHi: "लेख",
+      ringLabel: "writing / लेखन",
+      tone: "ink",
+    },
   },
   {
     id: "action",
@@ -65,8 +87,13 @@ export const STORY_STAGES: StoryStage[] = [
     summaryEn:
       "Publication, outreach, discussion, and field reporting become repeatable institutional work.",
     summaryHi:
-      "प्रकाशन, प्रसार, संवाद और क्षेत्रीय वृतांत नियमित संस्थागत कार्य बनते हैं।",
-    image: "/assets/story/action.png",
+      "प्रकाशन, प्रसार, संवाद और क्षेत्रीय वृत्त नियमित संस्थागत कार्य बनते हैं।",
+    visual: {
+      glyphEn: "WORK",
+      glyphHi: "कार्य",
+      ringLabel: "discipline / अनुशासन",
+      tone: "leaf",
+    },
   },
   {
     id: "future",
@@ -78,7 +105,12 @@ export const STORY_STAGES: StoryStage[] = [
       "The console connects people, workstreams, outputs, reviews, and reports in one operating system.",
     summaryHi:
       "कंसोल लोगों, कार्य-प्रवाहों, प्रकाशनों, समीक्षाओं और रिपोर्टों को एक संचालन-तंत्र में जोड़ता है।",
-    image: "/assets/story/future.png",
+    visual: {
+      glyphEn: "ERP",
+      glyphHi: "तंत्र",
+      ringLabel: "continuity / निरंतरता",
+      tone: "steel",
+    },
   },
 ];
 
@@ -99,14 +131,14 @@ export const ERP_FLOW_STEPS: ErpFlowStep[] = [
     titleEn: "Idea becomes writing",
     titleHi: "विचार लेखन बनता है",
     summaryEn: "Drafts, notes, and essays move through editorial review.",
-    summaryHi: "प्रारूप, टिप्पणियाँ और लेख संपादकीय समीक्षा से गुजरते हैं।",
+    summaryHi: "प्रारूप, टिप्पणियां और लेख संपादकीय समीक्षा से गुजरते हैं।",
   },
   {
     id: "dissemination",
     moduleEn: "Prachar",
     moduleHi: "प्रचार",
     titleEn: "Writing reaches people",
-    titleHi: "लेखन समाज तक पहुँचता है",
+    titleHi: "लेखन समाज तक पहुंचता है",
     summaryEn: "Published material is circulated with campaign discipline.",
     summaryHi: "प्रकाशित सामग्री अभियान अनुशासन के साथ प्रसारित होती है।",
   },
