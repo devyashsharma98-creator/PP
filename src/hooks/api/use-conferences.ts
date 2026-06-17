@@ -23,14 +23,9 @@ export function useConference(id: string) {
 export function useCreateConference() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: {
-      title: string; titleHi?: string; theme?: string; description?: string;
-      venue?: string; startsAt?: string; endsAt?: string;
-      unitId?: string; departmentId?: string; registrationEnabled?: boolean;
-      maxRegistrations?: number;
-    }) => api.createConference(input),
+    mutationFn: (input: Parameters<typeof api.createConference>[0]) => api.createConference(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferences'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferences() });
     },
   });
 }
@@ -41,7 +36,7 @@ export function useUpdateConference() {
     mutationFn: ({ id, input }: { id: string; input: Record<string, unknown> }) =>
       api.updateConference(id, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferences'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferences() });
     },
   });
 }
@@ -51,7 +46,7 @@ export function useDeleteConference() {
   return useMutation({
     mutationFn: (id: string) => api.deleteConference(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferences'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferences() });
     },
   });
 }
@@ -66,7 +61,7 @@ export function useSessions(conferenceId: string) {
 
 export function useSession(conferenceId: string, sessionId: string) {
   return useQuery({
-    queryKey: ['session', conferenceId, sessionId],
+    queryKey: queryKeys.session(conferenceId, sessionId),
     queryFn: () => api.getSession(conferenceId, sessionId),
     enabled: Boolean(sessionId),
   });
@@ -75,13 +70,9 @@ export function useSession(conferenceId: string, sessionId: string) {
 export function useCreateSession(conferenceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: {
-      title: string; titleHi?: string; description?: string; sessionType?: string;
-      startsAt?: string; endsAt?: string; venue?: string; chairpersonName?: string;
-      sortOrder?: number;
-    }) => api.createSession(conferenceId, input),
+    mutationFn: (input: Parameters<typeof api.createSession>[1]) => api.createSession(conferenceId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferenceSessions', conferenceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferenceSessions(conferenceId) });
     },
   });
 }
@@ -92,7 +83,7 @@ export function useUpdateSession(conferenceId: string) {
     mutationFn: ({ sessionId, input }: { sessionId: string; input: Record<string, unknown> }) =>
       api.updateSession(conferenceId, sessionId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferenceSessions', conferenceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferenceSessions(conferenceId) });
     },
   });
 }
@@ -102,7 +93,7 @@ export function useDeleteSession(conferenceId: string) {
   return useMutation({
     mutationFn: (sessionId: string) => api.deleteSession(conferenceId, sessionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferenceSessions', conferenceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferenceSessions(conferenceId) });
     },
   });
 }
@@ -118,12 +109,20 @@ export function useSpeakers(conferenceId: string, sessionId: string) {
 export function useCreateSpeaker(conferenceId: string, sessionId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: {
-      name: string; nameHi?: string; bio?: string; photoUrl?: string;
-      topic?: string; affiliation?: string; profileId?: string | null; sortOrder?: number;
-    }) => api.createSpeaker(conferenceId, sessionId, input),
+    mutationFn: (input: Parameters<typeof api.createSpeaker>[2]) => api.createSpeaker(conferenceId, sessionId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessionSpeakers', sessionId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessionSpeakers(sessionId) });
+    },
+  });
+}
+
+export function useUpdateSpeaker(conferenceId: string, sessionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ speakerId, input }: { speakerId: string; input: Record<string, unknown> }) =>
+      api.updateSpeaker(conferenceId, sessionId, speakerId, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessionSpeakers(sessionId) });
     },
   });
 }
@@ -133,7 +132,7 @@ export function useDeleteSpeaker(conferenceId: string, sessionId: string) {
   return useMutation({
     mutationFn: (speakerId: string) => api.deleteSpeaker(conferenceId, sessionId, speakerId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessionSpeakers', sessionId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessionSpeakers(sessionId) });
     },
   });
 }
@@ -149,12 +148,9 @@ export function useRegistrations(conferenceId: string) {
 export function useCreateRegistration(conferenceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: {
-      name: string; email?: string; phone?: string; organization?: string;
-      category?: string; notes?: string;
-    }) => api.createRegistration(conferenceId, input),
+    mutationFn: (input: Parameters<typeof api.createRegistration>[1]) => api.createRegistration(conferenceId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferenceRegistrations', conferenceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferenceRegistrations(conferenceId) });
     },
   });
 }
@@ -165,7 +161,7 @@ export function useMarkAttendance(conferenceId: string) {
     mutationFn: ({ registrationId, isAttended }: { registrationId: string; isAttended: boolean }) =>
       api.markAttendance(conferenceId, registrationId, isAttended),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conferenceRegistrations', conferenceId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conferenceRegistrations(conferenceId) });
     },
   });
 }

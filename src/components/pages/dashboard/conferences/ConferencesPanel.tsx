@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Calendar, Plus, Trash2, ChevronDown, ChevronRight, Users, Mic, MapPin } from "lucide-react";
+import { Calendar, Plus, Trash2, ChevronDown, ChevronRight, Users, Mic, MapPin, Pencil } from "lucide-react";
 
 import { useAppContext } from "@/context/AppContext";
-import { useConferences, useCreateConference, useDeleteConference, useSessions, useCreateSession, useDeleteSession, useSpeakers, useCreateSpeaker, useDeleteSpeaker, useRegistrations, useCreateRegistration, useMarkAttendance } from "@/hooks/api/use-conferences";
+import { useConferences, useCreateConference, useUpdateConference, useDeleteConference, useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSpeakers, useCreateSpeaker, useUpdateSpeaker, useDeleteSpeaker, useRegistrations, useCreateRegistration, useMarkAttendance } from "@/hooks/api/use-conferences";
 import { useT } from "@/lib/useT";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +31,7 @@ interface Session {
 
 interface Speaker {
   id: string; name: string; nameHi?: string | null; topic?: string | null;
-  affiliation?: string | null; photoUrl?: string | null;
+  affiliation?: string | null; photoUrl?: string | null; bio?: string | null;
 }
 
 interface Registration {
@@ -83,6 +83,7 @@ export function ConferencesPanel() {
   const { data: conferences = [], isLoading, isError } = useConferences();
   const typedConferences = conferences as Conference[];
   const createConferenceMutation = useCreateConference();
+  const updateConferenceMutation = useUpdateConference();
   const deleteConferenceMutation = useDeleteConference();
 
   const [expandedConf, setExpandedConf] = useState<string | null>(null);
@@ -91,7 +92,14 @@ export function ConferencesPanel() {
   const [showCreateSession, setShowCreateSession] = useState(false);
   const [showCreateSpeaker, setShowCreateSpeaker] = useState(false);
   const [showCreateRegistration, setShowCreateRegistration] = useState(false);
+  const [showEditConf, setShowEditConf] = useState(false);
+  const [showEditSession, setShowEditSession] = useState(false);
+  const [showEditSpeaker, setShowEditSpeaker] = useState(false);
 
+  // Edit forms
+  const [editConf, setEditConf] = useState<Conference & { themeHi?: string; description?: string; descriptionHi?: string | null; registrationEnabled?: boolean; maxRegistrations?: number | null; locationId?: string | null }>({ id: "", title: "", titleHi: "", theme: "", themeHi: "", description: "", descriptionHi: "", venue: "", startsAt: "", endsAt: "", status: "draft", registrationEnabled: false, sessionCount: 0, registrationCount: 0 });
+  const [editSession, setEditSession] = useState<Session & { description?: string; descriptionHi?: string | null; chairpersonNameHi?: string | null; venueHi?: string | null }>({ id: "", title: "", titleHi: "", sessionType: "panel", startsAt: "", endsAt: "", venue: "", chairpersonName: "", speakerCount: 0, description: "" });
+  const [editSpeaker, setEditSpeaker] = useState<Speaker & { bio?: string | null; nameHi?: string | null; topicHi?: string | null; affiliationHi?: string | null; photoUrl?: string | null }>({ id: "", name: "", nameHi: "", topic: "", affiliation: "", bio: "" });
 
   // New conference form
   const [newConf, setNewConf] = useState({
@@ -124,8 +132,10 @@ export function ConferencesPanel() {
   const typedRegistrations = registrations as Registration[];
 
   const createSessionMutation = useCreateSession(expandedConf ?? "");
+  const updateSessionMutation = useUpdateSession(expandedConf ?? "");
   const deleteSessionMutation = useDeleteSession(expandedConf ?? "");
   const createSpeakerMutation = useCreateSpeaker(expandedConf ?? "", expandedSession ?? "");
+  const updateSpeakerMutation = useUpdateSpeaker(expandedConf ?? "", expandedSession ?? "");
   const deleteSpeakerMutation = useDeleteSpeaker(expandedConf ?? "", expandedSession ?? "");
   const createRegMutation = useCreateRegistration(expandedConf ?? "");
   const markAttendanceMutation = useMarkAttendance(expandedConf ?? "");
@@ -195,6 +205,58 @@ export function ConferencesPanel() {
     } catch { addToast(t("Failed to update attendance", "उपस्थिति अपडेट करने में विफल"), "error"); }
   }, [markAttendanceMutation, addToast, t]);
 
+  const handleEditConf = useCallback(async () => {
+    if (!editConf.id || updateConferenceMutation.isPending) return;
+    try {
+      await updateConferenceMutation.mutateAsync({
+        id: editConf.id,
+        input: {
+          title: editConf.title, titleHi: editConf.titleHi || undefined,
+          theme: editConf.theme || undefined,
+          venue: editConf.venue || undefined, status: editConf.status,
+          startsAt: editConf.startsAt ? new Date(editConf.startsAt).toISOString() : null,
+          endsAt: editConf.endsAt ? new Date(editConf.endsAt).toISOString() : null,
+        },
+      });
+      setShowEditConf(false);
+      addToast(t("Conference updated!", "सम्मेलन अपडेट किया गया!"), "success");
+    } catch { addToast(t("Failed to update conference", "सम्मेलन अपडेट करने में विफल"), "error"); }
+  }, [editConf, updateConferenceMutation, t, addToast]);
+
+  const handleEditSession = useCallback(async () => {
+    if (!editSession.id || !expandedConf || updateSessionMutation.isPending) return;
+    try {
+      await updateSessionMutation.mutateAsync({
+        sessionId: editSession.id,
+        input: {
+          title: editSession.title, titleHi: editSession.titleHi || undefined,
+          sessionType: editSession.sessionType, venue: editSession.venue || undefined,
+          chairpersonName: editSession.chairpersonName || undefined,
+          startsAt: editSession.startsAt ? new Date(editSession.startsAt).toISOString() : null,
+          endsAt: editSession.endsAt ? new Date(editSession.endsAt).toISOString() : null,
+        },
+      });
+      setShowEditSession(false);
+      addToast(t("Session updated!", "सत्र अपडेट किया गया!"), "success");
+    } catch { addToast(t("Failed to update session", "सत्र अपडेट करने में विफल"), "error"); }
+  }, [editSession, expandedConf, updateSessionMutation, t, addToast]);
+
+  const handleEditSpeaker = useCallback(async () => {
+    if (!editSpeaker.id || !expandedConf || !expandedSession || updateSpeakerMutation.isPending) return;
+    try {
+      await updateSpeakerMutation.mutateAsync({
+        speakerId: editSpeaker.id,
+        input: {
+          name: editSpeaker.name, nameHi: editSpeaker.nameHi || undefined,
+          topic: editSpeaker.topic || undefined,
+          affiliation: editSpeaker.affiliation || undefined,
+        },
+      });
+      setShowEditSpeaker(false);
+      addToast(t("Speaker updated!", "वक्ता अपडेट किया गया!"), "success");
+    } catch { addToast(t("Failed to update speaker", "वक्ता अपडेट करने में विफल"), "error"); }
+  }, [editSpeaker, expandedConf, expandedSession, updateSpeakerMutation, t, addToast]);
+
   return (
     <Card className="mt-6">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -250,9 +312,14 @@ export function ConferencesPanel() {
                     <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" />{conf.registrationCount}</span>
                     <span className="text-xs text-muted-foreground">{conf.sessionCount} {t("sessions", "सत्र")}</span>
                     {permissions.canManageConference && (
-                      <button onClick={(e) => { e.stopPropagation(); deleteConferenceMutation.mutate(conf.id); }} className="text-destructive/60 hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <>
+                        <button onClick={(e) => { e.stopPropagation(); setEditConf({ ...conf, themeHi: "", description: "", descriptionHi: "" }); setShowEditConf(true); }} className="text-muted-foreground/60 hover:text-muted-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); deleteConferenceMutation.mutate(conf.id); }} className="text-destructive/60 hover:text-destructive">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </button>
@@ -292,9 +359,14 @@ export function ConferencesPanel() {
                               <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-[10px] text-muted-foreground"><Mic className="h-3 w-3 inline mr-0.5" />{s.speakerCount}</span>
                                 {permissions.canManageConferenceSessions && (
-                                  <button onClick={(e) => { e.stopPropagation(); deleteSessionMutation.mutate(s.id); }} className="text-destructive/60 hover:text-destructive">
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
+                                  <>
+                                    <button onClick={(e) => { e.stopPropagation(); setEditSession({ ...s, description: "", descriptionHi: "", chairpersonNameHi: "", venueHi: "" }); setShowEditSession(true); }} className="text-muted-foreground/60 hover:text-muted-foreground">
+                                      <Pencil className="h-3 w-3" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); deleteSessionMutation.mutate(s.id); }} className="text-destructive/60 hover:text-destructive">
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </>
                                 )}
                               </div>
                             </button>
@@ -317,9 +389,14 @@ export function ConferencesPanel() {
                                         {sp.affiliation && <span className="text-muted-foreground ml-1">({sp.affiliation})</span>}
                                       </div>
                                       {permissions.canManageConferenceSpeakers && (
-                                        <button onClick={() => deleteSpeakerMutation.mutate(sp.id)} className="text-destructive/60 hover:text-destructive">
-                                          <Trash2 className="h-3 w-3" />
-                                        </button>
+                                        <>
+                                          <button onClick={() => { setEditSpeaker({ ...sp, nameHi: sp.nameHi ?? "", topicHi: "", affiliationHi: "", bio: sp.bio ?? "" }); setShowEditSpeaker(true); }} className="text-muted-foreground/60 hover:text-muted-foreground">
+                                            <Pencil className="h-3 w-3" />
+                                          </button>
+                                          <button onClick={() => deleteSpeakerMutation.mutate(sp.id)} className="text-destructive/60 hover:text-destructive">
+                                            <Trash2 className="h-3 w-3" />
+                                          </button>
+                                        </>
                                       )}
                                     </div>
                                   ))
@@ -553,6 +630,156 @@ export function ConferencesPanel() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreateRegistration(false)}>{t("Cancel", "रद्द करें")}</Button>
                 <Button onClick={handleCreateReg} disabled={createRegMutation.isPending}>{t("Register", "पंजीकरण")}</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Conference Dialog */}
+        <Dialog open={showEditConf} onOpenChange={setShowEditConf}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("Edit Conference", "सम्मेलन संपादित करें")}</DialogTitle>
+              <DialogDescription>{t("Update conference details and status.", "सम्मेलन विवरण और स्थिति अपडेट करें।")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Title (EN)", "शीर्षक (EN)")}</Label>
+                  <Input value={editConf.title} onChange={(e) => setEditConf(p => ({ ...p, title: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("Title (HI)", "शीर्षक (HI)")}</Label>
+                  <Input value={editConf.titleHi ?? ""} onChange={(e) => setEditConf(p => ({ ...p, titleHi: e.target.value }))} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Theme", "विषय")}</Label>
+                <Textarea value={editConf.theme ?? ""} onChange={(e) => setEditConf(p => ({ ...p, theme: e.target.value }))} rows={2} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Venue", "स्थान")}</Label>
+                <Input value={editConf.venue ?? ""} onChange={(e) => setEditConf(p => ({ ...p, venue: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Status", "स्थिति")}</Label>
+                <Select value={editConf.status} onValueChange={(v) => setEditConf(p => ({ ...p, status: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{t(v.en, v.hi)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Start", "आरंभ")}</Label>
+                  <Input type="datetime-local" value={editConf.startsAt?.slice(0, 16) ?? ""} onChange={(e) => setEditConf(p => ({ ...p, startsAt: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("End", "समाप्ति")}</Label>
+                  <Input type="datetime-local" value={editConf.endsAt?.slice(0, 16) ?? ""} onChange={(e) => setEditConf(p => ({ ...p, endsAt: e.target.value }))} />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditConf(false)}>{t("Cancel", "रद्द करें")}</Button>
+                <Button onClick={handleEditConf} disabled={updateConferenceMutation.isPending}>{t("Save", "सहेजें")}</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Session Dialog */}
+        <Dialog open={showEditSession} onOpenChange={setShowEditSession}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("Edit Session", "सत्र संपादित करें")}</DialogTitle>
+              <DialogDescription>{t("Update session details.", "सत्र विवरण अपडेट करें।")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Title (EN)", "शीर्षक (EN)")}</Label>
+                  <Input value={editSession.title} onChange={(e) => setEditSession(p => ({ ...p, title: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("Title (HI)", "शीर्षक (HI)")}</Label>
+                  <Input value={editSession.titleHi ?? ""} onChange={(e) => setEditSession(p => ({ ...p, titleHi: e.target.value }))} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Session Type", "सत्र प्रकार")}</Label>
+                <Select value={editSession.sessionType} onValueChange={(v) => setEditSession(p => ({ ...p, sessionType: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(SESSION_TYPE_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{t(v.en, v.hi)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Venue", "स्थान")}</Label>
+                  <Input value={editSession.venue ?? ""} onChange={(e) => setEditSession(p => ({ ...p, venue: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("Chairperson", "अध्यक्ष")}</Label>
+                  <Input value={editSession.chairpersonName ?? ""} onChange={(e) => setEditSession(p => ({ ...p, chairpersonName: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Start", "आरंभ")}</Label>
+                  <Input type="datetime-local" value={editSession.startsAt?.slice(0, 16) ?? ""} onChange={(e) => setEditSession(p => ({ ...p, startsAt: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("End", "समाप्ति")}</Label>
+                  <Input type="datetime-local" value={editSession.endsAt?.slice(0, 16) ?? ""} onChange={(e) => setEditSession(p => ({ ...p, endsAt: e.target.value }))} />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditSession(false)}>{t("Cancel", "रद्द करें")}</Button>
+                <Button onClick={handleEditSession} disabled={updateSessionMutation.isPending}>{t("Save", "सहेजें")}</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Speaker Dialog */}
+        <Dialog open={showEditSpeaker} onOpenChange={setShowEditSpeaker}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("Edit Speaker", "वक्ता संपादित करें")}</DialogTitle>
+              <DialogDescription>{t("Update speaker details.", "वक्ता विवरण अपडेट करें।")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("Name (EN)", "नाम (EN)")}</Label>
+                  <Input value={editSpeaker.name} onChange={(e) => setEditSpeaker(p => ({ ...p, name: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("Name (HI)", "नाम (HI)")}</Label>
+                  <Input value={editSpeaker.nameHi ?? ""} onChange={(e) => setEditSpeaker(p => ({ ...p, nameHi: e.target.value }))} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Topic", "विषय")}</Label>
+                <Input value={editSpeaker.topic ?? ""} onChange={(e) => setEditSpeaker(p => ({ ...p, topic: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Affiliation", "संबद्धता")}</Label>
+                <Input value={editSpeaker.affiliation ?? ""} onChange={(e) => setEditSpeaker(p => ({ ...p, affiliation: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("Bio", "जीवनी")}</Label>
+                <Textarea value={editSpeaker.bio ?? ""} onChange={(e) => setEditSpeaker(p => ({ ...p, bio: e.target.value }))} rows={2} />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditSpeaker(false)}>{t("Cancel", "रद्द करें")}</Button>
+                <Button onClick={handleEditSpeaker} disabled={updateSpeakerMutation.isPending}>{t("Save", "सहेजें")}</Button>
               </div>
             </div>
           </DialogContent>
