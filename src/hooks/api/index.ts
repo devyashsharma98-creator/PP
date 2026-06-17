@@ -14,3 +14,4 @@ export * from './use-volunteers';
 export * from './use-media';
 export * from './use-conferences';
 export * from './use-surveys';
+export * from './use-calendar';

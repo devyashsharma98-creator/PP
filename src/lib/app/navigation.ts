@@ -33,6 +33,7 @@ const workflowNavItems: NavItem[] = [
   { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Aalekh", sublabel: "लेखन व समीक्षा", icon: PenLine, path: "/aalekh" },
   { label: "Prachar", sublabel: "प्रचार फॉलो-थ्रू", icon: Megaphone, path: "/prachar" },
+  { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar" },
 ];
 
 const mobilePrimaryNavItems: NavItem[] = [
@@ -43,7 +44,6 @@ const mobilePrimaryNavItems: NavItem[] = [
 ];
 
 const coordinationNavItems: NavItem[] = [
-  { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar" },
   { label: "People", sublabel: "सम्पर्क व समन्वय", icon: Users, path: "/directory" },
 ];
 

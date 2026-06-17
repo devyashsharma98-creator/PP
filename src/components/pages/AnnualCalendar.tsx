@@ -21,7 +21,7 @@ import { useT } from "@/lib/useT";
 import { AAYAM_CONFIG as AAYAM, AAYAM_KIND_LABEL } from "@/lib/app/aayam-config";
 import type { LucideIcon } from "lucide-react";
 import type { GatividhiEvent } from "@/lib/app/contracts";
-import { useDashboardEvents } from "@/hooks/api/use-dashboard";
+import { useCalendarEvents } from "@/hooks/api/use-calendar";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS: Record<string, { label: string; labelHi: string; chip: string; icon: LucideIcon }> = {
@@ -236,7 +236,17 @@ export default function AnnualCalendar() {
   const [showStatusFilter, setShowStatusFilter] = useState(false);
 
   const { role, lang, permissions } = useAppContext();
-  const { data: events = [], isLoading } = useDashboardEvents();
+
+  const monthStart = useMemo(() => {
+    const d = new Date(year, month, 1);
+    return d.toISOString();
+  }, [year, month]);
+  const monthEnd = useMemo(() => {
+    const d = new Date(year, month + 1, 0, 23, 59, 59, 999);
+    return d.toISOString();
+  }, [year, month]);
+
+  const { data: events = [], isLoading } = useCalendarEvents(monthStart, monthEnd);
 
   const t = useT();
   const router = useRouter();
@@ -258,7 +268,7 @@ export default function AnnualCalendar() {
         status: e.status,
         location: e.unit,
         unit: e.unit,
-        description: e.description,
+        description: e.description ?? undefined,
       };
     }), [events]);
 

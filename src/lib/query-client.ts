@@ -20,6 +20,7 @@ export { queryClient as default };
 
 export const queryKeys = {
   events: (filters?: Record<string, unknown>) => ['events', filters] as const,
+  calendarEvents: (filters?: Record<string, unknown>) => ['calendar', 'events', filters] as const,
   event: (id: string) => ['event', id] as const,
   articles: (filters?: Record<string, unknown>) => ['articles', filters] as const,
   article: (id: string) => ['article', id] as const,
