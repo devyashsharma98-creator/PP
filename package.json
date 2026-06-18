@@ -10,6 +10,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
+    "test:mobile-ui": "playwright test tests/mobile-ui-regression.spec.ts --project=chromium --reporter=list",
     "pretypecheck": "npm run clean:next-types",
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
