@@ -1,0 +1,30 @@
+UI/UX Audit Report
+Date: 2026-06-18T09:05:22.771Z
+Site: https://pragya-pravah-ui-psi.vercel.app
+Viewports: desktop(1280x800), tablet(768x1024), mobile(375x667)
+
+FINDINGS:
+[MEDIUM] Touch (Mobile): Public Homepage @mobile — 4 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Login @mobile — 4 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Library @mobile — 20 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Feed @mobile — 1 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Parichay (About) @mobile — 4 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Aalekh (auth) @mobile — 4 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Calendar (auth) @mobile — 4 interactive elements smaller than 44x44px
+[MEDIUM] Touch (Mobile): Prachar (auth) @mobile — 4 interactive elements smaller than 44x44px
+[INFO] Interactive: Sign In button — Hover snapshot captured
+[INFO] Interactive: Sign In button — Focus snapshot captured
+[INFO] Interactive: Library filter (Vastu) — Hover snapshot captured
+[INFO] Interactive: Library filter (Vastu) — Active/selected state captured
+[MEDIUM] Interactive: Library cards — View Details button is covered by an overlay div — click/hover intercepted
+[INFO] Interactive: Nav link (/login) — Hover snapshot captured
+[INFO] Typography: body — Uses serif font (editorial/dignified feel)
+[INFO] Bilingual: Login page (HI) — Switch to Hindi works — 314 Devanagari chars
+[INFO] Interactive: Language toggle — Switch back to EN (force click due to overlay)
+[INFO] UX: html — Smooth scrolling enabled
+
+SUMMARY:
+  High: 0
+  Medium: 9
+  Low: 0
+  Info: 9

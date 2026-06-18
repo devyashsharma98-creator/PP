@@ -144,7 +144,7 @@ export default function ContentFeed() {
                       {allItems[0].type === 'event' ? t('Gatividhi', 'गतिविधि') : ((allItems[0] as unknown as Record<string, string>).category || t('Aalekh', 'आलेख'))}
                     </Badge>
                   </div>
-                  <Button variant="outline" size="sm" className="h-9 gap-2 rounded-xl bg-background/50 border-border/60 hover:bg-success/5 hover:text-success hover:border-success/30 transition-all text-xs" onClick={() => handleShare(allItems[0].title)}>
+                  <Button variant="outline" size="sm" className="min-h-[44px] gap-2 rounded-xl bg-background/50 border-border/60 hover:bg-success/5 hover:text-success hover:border-success/30 transition-all text-xs" onClick={() => handleShare(allItems[0].title)}>
                     <Share2 className="w-3.5 h-3.5" /> {t('Share Entry', 'साझा करें')}
                   </Button>
                 </div>
@@ -209,7 +209,7 @@ export default function ContentFeed() {
                         </Badge>
                         <h3 className="font-bold text-lg leading-tight font-devanagari group-hover:text-primary transition-colors tracking-tight">{item.title}</h3>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-success hover:bg-success/10 shrink-0 sm:opacity-0 group-hover:opacity-100 transition-all rounded-xl" onClick={() => handleShare(item.title)}>
+                      <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] text-success hover:bg-success/10 shrink-0 sm:opacity-0 group-hover:opacity-100 transition-all rounded-xl" onClick={() => handleShare(item.title)}>
                         <Share2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -223,7 +223,7 @@ export default function ContentFeed() {
                       {item.type === 'event' && <span className="flex items-center gap-1.5 bg-muted/30 px-2 py-0.5 rounded-md"><MapPin className="w-3.5 h-3.5 opacity-60" />{(item as unknown as Record<string, string>).unit}</span>}
                       {item.type === 'article' && <span className="flex items-center gap-1.5 bg-muted/30 px-2 py-0.5 rounded-md"><BookOpen className="w-3.5 h-3.5 opacity-60" />{(item as unknown as Record<string, string>).author}</span>}
                       {item.type === 'article' && (item as unknown as Record<string, string>).socialUrl && (
-                        <a href={(item as unknown as Record<string, string>).socialUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline font-bold uppercase tracking-widest text-[10px] ml-auto">
+                        <a href={(item as unknown as Record<string, string>).socialUrl} target="_blank" rel="noopener noreferrer" className="min-h-[44px] flex items-center gap-1.5 text-primary hover:underline font-bold uppercase tracking-widest text-[10px] ml-auto">
                           <ExternalLink className="w-3.5 h-3.5" /> {t('Read Source', 'स्रोत पढ़ें')}
                         </a>
                       )}

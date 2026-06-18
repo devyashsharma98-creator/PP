@@ -270,7 +270,7 @@ function TopAppBar() {
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="text-primary transition-colors hover:text-foreground"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary transition-colors hover:text-foreground"
                   aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}
                 >
                   <Menu className="h-6 w-6" />
@@ -346,7 +346,7 @@ function TopAppBar() {
         <div className="ml-auto flex shrink-0 items-center gap-3">
           <button
             onClick={() => setLang(lang === "hi" ? "en" : "hi")}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-primary/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-primary/15 px-3 py-2 min-h-[44px] text-xs font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-accent"
             aria-label={t("Toggle language", "भाषा बदलें")}
           >
             <Languages className="h-3.5 w-3.5" />
@@ -355,7 +355,7 @@ function TopAppBar() {
           {isAuthenticated ? (
             <Link
               href={landingPath}
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 min-h-[44px] text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
               aria-label={t("Enter Console", "कार्यक्षेत्र में प्रवेश")}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -364,7 +364,7 @@ function TopAppBar() {
           ) : (
             <Link
               href="/login"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 min-h-[44px] text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90"
               aria-label={t("Sign In", "प्रवेश")}
             >
               <LogIn className="h-4 w-4" />

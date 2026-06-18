@@ -106,7 +106,7 @@ export function Navbar() {
             <Link
               href="/parichay"
               prefetch={false}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden"
+              className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[0.95rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_14px_24px_-18px_hsl(27_100%_50%/0.8)] md:hidden"
               aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}
             >
               <PragyaLogo className="h-6 w-6" />
@@ -144,7 +144,7 @@ export function Navbar() {
           <button
             onClick={() => setLang(lang === "en" ? "hi" : "en")}
             aria-label={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
-            className="relative flex h-8 items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:text-xs"
+            className="relative flex min-h-[44px] items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:text-xs"
             title={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
           >
             <span className={cn("px-3 py-1 transition-all duration-200", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>EN</span>

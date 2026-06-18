@@ -24,7 +24,7 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}>
+        <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] md:hidden" aria-label={t("Open navigation menu", "नेविगेशन मेनू खोलें")}>
           <Menu className="w-5 h-5" />
         </Button>
       </SheetTrigger>

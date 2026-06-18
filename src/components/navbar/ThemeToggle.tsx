@@ -22,7 +22,7 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={isDark ? t("Switch to light mode", "लाइट मोड पर स्विच करें") : t("Switch to dark mode", "डार्क मोड पर स्विच करें")}
-      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
+      className="relative flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/80 transition-colors hover:border-primary/40"
       title={isDark ? t("Light Mode", "लाइट मोड") : t("Dark Mode", "डार्क मोड")}
     >
       <AnimatePresence mode="wait" initial={false}>

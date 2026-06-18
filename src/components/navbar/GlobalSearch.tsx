@@ -60,7 +60,7 @@ export function GlobalSearch() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={t("Search", "खोजें")}
-        className="rounded-full p-2 transition-colors hover:bg-muted"
+        className="rounded-full p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors hover:bg-muted"
       >
         <Search className="w-4 h-4 text-muted-foreground" />
       </button>

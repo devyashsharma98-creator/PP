@@ -169,7 +169,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => setLang("en")}
                 className={cn(
-                  "rounded-full px-3 py-1.5 transition-colors",
+                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] transition-colors",
                   !isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-pressed={!isHi}
@@ -180,7 +180,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => setLang("hi")}
                 className={cn(
-                  "rounded-full px-3 py-1.5 font-devanagari transition-colors",
+                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] font-devanagari transition-colors",
                   isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-pressed={isHi}
@@ -350,7 +350,7 @@ function LoginForm() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-8 rounded-full px-3 text-xs"
+                        className="min-h-[44px] rounded-full px-4 text-xs"
                         disabled={loading}
                         onClick={() => {
                           setEmail(LOCAL_ADMIN_QUICK_FILL.email);

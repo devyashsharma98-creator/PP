@@ -285,7 +285,7 @@ export default function ELibrary() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "text-[10px] md:text-[11px] font-bold uppercase tracking-[0.18em] px-5 py-2.5 rounded-xl border transition-all font-devanagari shrink-0",
+                "text-[10px] md:text-[11px] font-bold uppercase tracking-[0.18em] px-5 py-2.5 min-h-[44px] rounded-xl border transition-all font-devanagari shrink-0",
                 activeCategory === cat
                   ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
                   : 'bg-background/60 border-border/70 text-muted-foreground hover:border-primary/40 hover:text-foreground'
@@ -328,10 +328,10 @@ export default function ELibrary() {
                   <BookCover book={book} isHi={isHi} />
                   
                   {/* Hover overlay badge */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-[2px]">
-                    <Button variant="secondary" size="sm" className="h-8 rounded-full font-bold text-[10px] uppercase tracking-widest">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-[2px] pointer-events-none">
+                    <span className="h-8 rounded-full bg-secondary text-secondary-foreground px-3 flex items-center justify-center font-bold text-[10px] uppercase tracking-widest pointer-events-none">
                       {t('View Details', 'विवरण देखें')}
-                    </Button>
+                    </span>
                   </div>
                 </div>
                 
@@ -363,7 +363,7 @@ export default function ELibrary() {
             <BookMarked className="w-10 h-10 text-muted-foreground/20" />
           </div>
           <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">{t('No texts found in this discipline.', 'इस विषय में कोई ग्रंथ नहीं मिला।')}</p>
-          <Button variant="link" onClick={() => { setActiveCategory('All'); setSearch(''); }} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+          <Button variant="link" onClick={() => { setActiveCategory('All'); setSearch(''); }} className="mt-2 min-h-[44px] text-primary font-bold uppercase tracking-widest text-[10px]">
             {t('Clear all filters', 'फिल्टर हटाएँ')}
           </Button>
         </div>

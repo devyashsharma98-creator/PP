@@ -48,7 +48,7 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
       <button
         onClick={() => total > 0 && setOpen((o) => !o)}
         aria-label={t("Open notifications", "सूचनाएँ खोलें")}
-        className={cn("relative rounded-full p-2 transition-colors hover:bg-muted", total > 0 ? "cursor-pointer" : "cursor-default", bounce && "animate-badge-bounce")}
+        className={cn("relative rounded-full p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors hover:bg-muted", total > 0 ? "cursor-pointer" : "cursor-default", bounce && "animate-badge-bounce")}
       >
         <Bell className="w-5 h-5 text-muted-foreground" />
         {total > 0 && (
