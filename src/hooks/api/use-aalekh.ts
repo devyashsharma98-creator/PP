@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppContext, type AalekhArticle } from '@/context/AppContext';
+import { dbToUiArticleStatus } from '@/lib/app/status-maps';
 
 const API_BASE = '/api/v1';
 
@@ -15,15 +16,20 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
   return data.data as T;
 }
 
+export function mapApiArticleToAalekh(item: Record<string, unknown>): AalekhArticle {
+  return {
+    ...item,
+    status: (dbToUiArticleStatus[String(item.status ?? '')] ?? 'Draft') as AalekhArticle['status'],
+    imageUrl: item.featuredImage as string | undefined,
+  } as AalekhArticle;
+}
+
 export function useArticles() {
   return useQuery({
     queryKey: ['articles'],
     queryFn: async () => {
       const data = await fetchApi<Array<Record<string, unknown>>>('/articles');
-      return data.map((item) => ({
-        ...item,
-        imageUrl: (item as Record<string, unknown>).featuredImage as string | undefined,
-      })) as AalekhArticle[];
+      return data.map(mapApiArticleToAalekh);
     },
     staleTime: 60000,
   });
