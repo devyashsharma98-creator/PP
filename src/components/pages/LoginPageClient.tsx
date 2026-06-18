@@ -169,7 +169,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => setLang("en")}
                 className={cn(
-                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] transition-colors",
+                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] min-w-[44px] transition-colors",
                   !isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-pressed={!isHi}
@@ -180,7 +180,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => setLang("hi")}
                 className={cn(
-                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] font-devanagari transition-colors",
+                  "rounded-full px-3 py-1.5 sm:py-2 min-h-[44px] min-w-[44px] font-devanagari transition-colors",
                   isHi ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-pressed={isHi}

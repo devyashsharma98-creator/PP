@@ -102,7 +102,7 @@ export default function ParichayPage() {
       {/* Top Bar Navigation */}
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 md:px-10">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 min-h-[44px]">
             <span className="flex h-8 w-8 items-center justify-center rounded border border-primary/20 bg-primary/5 text-primary">
               <PragyaLogo className="h-5 w-5" />
             </span>
@@ -134,13 +134,13 @@ export default function ParichayPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setLang(lang === "en" ? "hi" : "en")}
-                className="rounded border border-primary/30 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary transition-all hover:bg-primary hover:text-primary-foreground"
+                className="rounded border border-primary/30 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary transition-all hover:bg-primary hover:text-primary-foreground min-h-[44px]"
               >
                 {lang === "en" ? "हिन्दी" : "EN"}
               </button>
               <Link
                 href="/login"
-                className="rounded bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary/90"
+                className="rounded bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary/90 min-h-[44px] inline-flex items-center"
               >
                 {t("Console", "कंसोल")}
               </Link>
