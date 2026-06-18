@@ -34,7 +34,8 @@ export function HeroChapter() {
   return (
     <motion.section
       ref={sectionRef}
-      className="relative isolate flex min-h-[92dvh] items-center overflow-hidden bg-[hsl(var(--parchment-bg))] py-16 text-[hsl(var(--parchment-ink))] md:py-20"
+      data-testid="parichay-hero"
+      className="relative isolate flex min-h-[92dvh] items-center overflow-hidden bg-[hsl(var(--parchment-bg))] py-16 text-[hsl(var(--parchment-ink))] max-md:!opacity-100 md:py-20"
       style={{ opacity }}
     >
       <div className="pointer-events-none absolute inset-0">
@@ -60,7 +61,8 @@ export function HeroChapter() {
       </div>
 
       <motion.div
-        className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 px-5 md:grid-cols-[0.86fr_1fr] md:px-10"
+        data-testid="parichay-hero-content"
+        className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 px-5 max-md:!transform-none md:grid-cols-[0.86fr_1fr] md:px-10"
         style={{ scale, y }}
       >
         <div className="max-w-3xl">
