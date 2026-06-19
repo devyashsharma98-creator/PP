@@ -848,8 +848,8 @@ export default function UserManagement() {
                         <div className="space-y-2 text-sm text-muted-foreground sm:text-right">
                           <p>{t("Last login", "अंतिम लॉगिन")}: {formatDateTime(user.lastLoginAt, lang)}</p>
                           <div className="flex flex-wrap gap-2 sm:justify-end">
-                            {user.roles.slice(0, 3).map((role) => (
-                              <Badge key={`${user.id}-${role.code}`} variant="secondary" className="gap-1.5">
+                            {user.roles.slice(0, 3).map((role, idx) => (
+                              <Badge key={`${user.id}-${role.code}-${idx}`} variant="secondary" className="gap-1.5">
                                 <Shield className="h-3 w-3" />
                                 {getRoleLabel(role.code, lang)}
                               </Badge>

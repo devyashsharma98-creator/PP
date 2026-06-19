@@ -128,6 +128,24 @@ export default function VotePage({ eventId }: Props) {
         </div>
       </div>
 
+      <div className="grid gap-3 md:grid-cols-3 max-w-3xl mx-auto px-4">
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Secure</p>
+          <p className="mt-1 text-sm font-semibold">{t("Recorded safely", "सुरक्षित दर्ज")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("Your response goes into the official decision flow.", "आपका उत्तर आधिकारिक निर्णय प्रवाह में जाएगा।")}</p>
+        </div>
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">One response</p>
+          <p className="mt-1 text-sm font-semibold">{t("Submit once", "एक बार जमा")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("Please choose carefully before submitting each poll.", "हर मत जमा करने से पहले ध्यान से चुनें।")}</p>
+        </div>
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">{t(event.date, event.date)}</p>
+          <p className="mt-1 text-sm font-semibold">{t("Event date", "कार्यक्रम तिथि")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("Vote only for the event shown above.", "ऊपर दिखाए गए कार्यक्रम के लिए ही मत दें।")}</p>
+        </div>
+      </div>
+
       <div className="p-4 space-y-6 max-w-xl mx-auto">
         {polls.length === 0 ? (
           <Card className="institution-panel-muted border-dashed border-2">

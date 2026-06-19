@@ -136,22 +136,26 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex min-w-0 items-center justify-between gap-1.5 md:flex-none md:justify-end md:gap-3">
-          <GlobalSearch />
-          <ThemeToggle />
+        <div className="flex min-w-0 items-center justify-between gap-1 md:flex-none md:justify-end md:gap-3">
+          <div className="max-[360px]:hidden">
+            <GlobalSearch />
+          </div>
+          <div className="max-[420px]:hidden">
+            <ThemeToggle />
+          </div>
           <NotificationBell isAuthenticated={isAuthenticated} notifications={notifications} lang={lang} />
 
           <button
             onClick={() => setLang(lang === "en" ? "hi" : "en")}
             aria-label={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
-            className="relative flex min-h-[44px] items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:text-xs"
+            className="relative flex min-h-[44px] items-center gap-0 overflow-hidden rounded-full border border-border/70 bg-background/80 px-2 text-[11px] font-bold transition-all hover:border-primary/40 md:h-9 md:px-3 md:text-xs"
             title={lang === "en" ? "Switch to Hindi" : "अंग्रेजी में बदलें"}
           >
-            <span className={cn("px-3 py-1 transition-all duration-200", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>EN</span>
-            <span className={cn("px-3 py-1 font-devanagari transition-all duration-200", lang === "hi" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>हि</span>
+            <span className={cn("px-2 py-1 transition-all duration-200 md:px-3", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>EN</span>
+            <span className={cn("px-2 py-1 font-devanagari transition-all duration-200 md:px-3", lang === "hi" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>हि</span>
           </button>
 
-          <div className="shell-role-chip flex-1 md:flex-none">
+          <div className="shell-role-chip min-w-0 flex-1 md:w-auto md:flex-none">
             <Shield className="h-3.5 w-3.5 shrink-0 text-primary" />
             <div className="min-w-0">
               <p className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground">

@@ -55,11 +55,11 @@ export function NotificationsPanel() {
   const markAllRead = useMarkAllNotificationsRead();
 
   const handleMarkRead = async (id: string) => {
-    try { await markRead.mutateAsync(id); } catch {}
+    try { await markRead.mutateAsync(id); } catch { return; }
   };
 
   const handleMarkAllRead = async () => {
-    try { await markAllRead.mutateAsync(); } catch {}
+    try { await markAllRead.mutateAsync(); } catch { return; }
   };
 
   return (

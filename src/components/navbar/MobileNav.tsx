@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,10 @@ interface MobileNavProps {
 
 export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navigationGroups }: MobileNavProps) {
   const t = useT();
+
+  useEffect(() => {
+    onOpenChange(false);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -44,7 +49,7 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
             </div>
           </div>
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 pb-24">
           {navigationGroups.map((group) => (
             <div key={group.title} className="mb-4 space-y-1">
               <div className="flex items-center gap-1.5 px-3 pb-1">

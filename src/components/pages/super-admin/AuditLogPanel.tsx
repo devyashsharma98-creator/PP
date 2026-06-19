@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Search, ShieldAlert } from "lucide-react";
+import { AlertTriangle, FileClock, Search, ShieldAlert, UserCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,16 @@ export function AuditLogPanel() {
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const failedLogins = rows.filter((row) => row.action === "auth.login_failed").length;
+  const userChanges = rows.filter((row) => row.action.startsWith("user.")).length;
+  const sensitiveChanges = rows.filter((row) => ["user.role_assigned", "user.role_removed", "user.deleted", "org.updated"].includes(row.action)).length;
+  const recentActivity = rows.slice(0, 3);
+  const summaryCards = [
+    { icon: ShieldAlert, label: t("Recent logs", "हाल के अभिलेख"), value: total, detail: t("Total audit entries in this page.", "इस पृष्ठ में कुल ऑडिट प्रविष्टियाँ।") },
+    { icon: AlertTriangle, label: t("Failed logins", "असफल लॉगिन"), value: failedLogins, detail: t("Watch repeated failed attempts.", "बार-बार असफल प्रयासों पर नज़र रखें।") },
+    { icon: UserCheck, label: t("User changes", "उपयोगकर्ता बदलाव"), value: userChanges, detail: t("Created, updated, deleted, or role changes.", "बने, बदले, हटाए या भूमिका बदलाव।") },
+    { icon: FileClock, label: t("Sensitive actions", "संवेदनशील क्रियाएँ"), value: sensitiveChanges, detail: t("Role, delete, and org-level changes.", "भूमिका, हटाना और संगठन स्तर के बदलाव।") },
+  ];
 
   const columns = useMemo<ColumnDef<AuditLogEntry>[]>(
     () => [
@@ -117,6 +127,38 @@ export function AuditLogPanel() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {summaryCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div key={card.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="text-2xl font-bold tabular-nums">{card.value}</p>
+                </div>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.label}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{card.detail}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {recentActivity.length > 0 && (
+          <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("Recent activity", "हाल की गतिविधि")}</p>
+            <div className="mt-3 space-y-2">
+              {recentActivity.map((row) => (
+                <p key={row.id} className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">{row.actorEmail ?? row.actorIp ?? t("System", "सिस्टम")}</span>{" "}
+                  {ACTION_LABELS[row.action]?.[lang === "hi" ? "hi" : "en"] ?? row.action}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Select

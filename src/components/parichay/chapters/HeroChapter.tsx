@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, ChevronDown, LogIn } from "lucide-react";
+import { ArrowRight, ChevronDown, LogIn, Users } from "lucide-react";
 import { PragyaLogo } from "@/components/PragyaLogo";
 import { ERP_FLOW_STEPS } from "../story-content";
 
@@ -137,26 +137,36 @@ export function HeroChapter() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.5, ease: "easeOut" }}
-            className="mt-9 flex flex-col gap-3 sm:flex-row"
+            className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-3"
           >
             <Link
+              href="#who-we-are"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.76)] px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[hsl(var(--parchment-ink))] transition-colors hover:border-primary/40 hover:bg-background md:text-sm"
+            >
+              <Users className="h-4 w-4" />
+              <span>Understand Vision</span>
+              <span className="font-devanagari normal-case tracking-normal text-[11px] md:text-xs">
+                दृष्टि
+              </span>
+            </Link>
+            <Link
               href="#our-work"
-              className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
+              className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-primary px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary/90 md:text-sm"
             >
               Explore Work
-              <span className="font-devanagari normal-case tracking-normal">
-                कार्य देखें
+              <span className="font-devanagari normal-case tracking-normal text-[11px] md:text-xs">
+                कार्य
               </span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               href="/login"
-              className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.76)] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[hsl(var(--parchment-ink))] transition-colors hover:border-primary/40 hover:bg-background"
+              className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.76)] px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[hsl(var(--parchment-ink))] transition-colors hover:border-primary/40 hover:bg-background md:text-sm"
             >
               <LogIn className="h-4 w-4" />
-              Sign In
-              <span className="font-devanagari normal-case tracking-normal">
-                प्रवेश
+              Enter Console
+              <span className="font-devanagari normal-case tracking-normal text-[11px] md:text-xs">
+                कंसोल
               </span>
             </Link>
           </motion.div>

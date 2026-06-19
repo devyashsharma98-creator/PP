@@ -54,7 +54,7 @@ export function AppSidebar() {
             {isSuperAdmin ? (
               <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary">
                 <Sparkles className="h-3 w-3" />
-                SUPER ADMIN
+                {t("Main Admin", "मुख्य प्रबंधन")}
               </span>
             ) : null}
           </div>
@@ -98,7 +98,7 @@ export function AppSidebar() {
                     lang === "hi" && "font-devanagari",
                   )}
                 >
-                  {t("ERP workflow, approvals, and coordination.", "ईआरपी कार्यप्रवाह, अनुमोदन और समन्वय।")}
+                  {t("ERP workflow, approvals, and coordination.", "कार्यप्रवाह, अनुमोदन और समन्वय।")}
                 </p>
               </motion.div>
             ) : null}

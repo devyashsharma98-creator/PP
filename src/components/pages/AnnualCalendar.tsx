@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   ChevronLeft, ChevronRight, CalendarDays, Bell,
   CheckCircle2, Clock, AlertCircle, TrendingUp,
@@ -25,17 +26,17 @@ import { useCalendarEvents } from "@/hooks/api/use-calendar";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS: Record<string, { label: string; labelHi: string; chip: string; icon: LucideIcon }> = {
-  Draft:                  { label: "Draft",            labelHi: "प्रारूप",            chip: "bg-secondary text-secondary-foreground",  icon: FileText },
-  "Submitted by Unit":    { label: "Submitted",        labelHi: "प्रस्तुत",           chip: "bg-blue-500/15 text-blue-600",             icon: CheckCircle2 },
-  "Pending Aayam Review": { label: "Pending Review",   labelHi: "समीक्षा प्रतीक्षित", chip: "bg-warning/15 text-warning",              icon: Clock },
-  "Pending Vibhag Review":{ label: "Pending Vibhag",   labelHi: "विभाग समीक्षा",      chip: "bg-orange-500/15 text-orange-600",         icon: AlertCircle },
-  "Pending Prant Authorization": { label: "Pending Prant", labelHi: "प्रान्त अनुमोदन", chip: "bg-violet-500/15 text-violet-600",        icon: Clock },
-  "Pending Prant Dual Authorization": { label: "Pending Dual", labelHi: "द्वैत अनुमोदन", chip: "bg-violet-500/15 text-violet-600",        icon: Clock },
-  Published:              { label: "Published",        labelHi: "प्रकाशित",           chip: "bg-success/15 text-success",              icon: CheckCircle2 },
-  "Escalated to Kshetra": { label: "Escalated",        labelHi: "क्षेत्रीय",           chip: "bg-rose-500/15 text-rose-600",            icon: AlertCircle },
-  "Returned for Revision":{ label: "Returned",         labelHi: "पुनर्लेखन",           chip: "bg-muted/50 text-muted-foreground",       icon: RotateCcw },
-  Rejected:               { label: "Rejected",         labelHi: "अस्वीकृत",           chip: "bg-destructive/15 text-destructive",      icon: X },
-  Cancelled:              { label: "Cancelled",        labelHi: "रद्द",               chip: "bg-muted/50 text-muted-foreground",       icon: X },
+  Draft:                  { label: "Draft",            labelHi: "प्रारूप",            chip: "bg-muted text-muted-foreground border-border",  icon: FileText },
+  "Submitted by Unit":    { label: "Submitted",        labelHi: "प्रस्तुत",           chip: "bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-400", icon: CheckCircle2 },
+  "Pending Aayam Review": { label: "Pending Review",   labelHi: "समीक्षा प्रतीक्षित", chip: "bg-blue-500/15 text-blue-700 border-blue-500/30 dark:text-blue-400", icon: Clock },
+  "Pending Vibhag Review":{ label: "Pending Vibhag",   labelHi: "विभाग समीक्षा",      chip: "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 dark:text-indigo-400", icon: AlertCircle },
+  "Pending Prant Authorization": { label: "Pending Prant", labelHi: "प्रांत अनुमोदन", chip: "bg-violet-500/15 text-violet-700 border-violet-500/30 dark:text-violet-400", icon: Clock },
+  "Pending Prant Dual Authorization": { label: "Pending Dual", labelHi: "द्वैत अनुमोदन", chip: "bg-violet-500/15 text-violet-700 border-violet-500/30 dark:text-violet-400", icon: Clock },
+  Published:              { label: "Published",        labelHi: "प्रकाशित",           chip: "bg-green-500/15 text-green-700 border-green-500/30 dark:text-green-400", icon: CheckCircle2 },
+  "Escalated to Kshetra": { label: "Escalated",        labelHi: "क्षेत्र अग्रेषित",    chip: "bg-orange-500/15 text-orange-700 border-orange-500/30 dark:text-orange-400", icon: AlertCircle },
+  "Returned for Revision":{ label: "Returned",         labelHi: "संशोधन हेतु",        chip: "bg-rose-500/15 text-rose-700 border-rose-500/30 dark:text-rose-400", icon: RotateCcw },
+  Rejected:               { label: "Rejected",         labelHi: "अस्वीकृत",           chip: "bg-destructive/15 text-destructive border-destructive/30", icon: X },
+  Cancelled:              { label: "Cancelled",        labelHi: "रद्द",               chip: "bg-muted text-muted-foreground border-border opacity-60", icon: X },
 };
 
 // ── Calendar event type ──────────────────────────────────────────────────────
@@ -557,7 +558,7 @@ export default function AnnualCalendar() {
           })}
 
           {/* Status filter dropdown trigger */}
-          <div className="relative">
+          <div className="relative hidden sm:block">
             <button
               onClick={() => setShowStatusFilter((v) => !v)}
               className={cn(
@@ -601,6 +602,87 @@ export default function AnnualCalendar() {
               )}
             </AnimatePresence>
           </div>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex sm:hidden items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all",
+                  statusFilter.length > 0 || aayamFilter.length > 0
+                    ? "border-primary/30 bg-primary/5 text-primary shadow-sm"
+                    : "border-border/50 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                )}
+              >
+                <Filter className="w-3 h-3" />
+                {t("Filters", "फ़िल्टर")}
+                {(statusFilter.length + aayamFilter.length > 0) && (
+                  <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground px-1">
+                    {statusFilter.length + aayamFilter.length}
+                  </span>
+                )}
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="sm:max-h-[82vh]">
+              <SheetHeader>
+                <SheetTitle>{t("Calendar Filters", "पंचांग फ़िल्टर")}</SheetTitle>
+                <SheetDescription>
+                  {t("Narrow the calendar by aayam and workflow status.", "आयाम और कार्यप्रवाह स्थिति के अनुसार पंचांग सीमित करें।")}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-5 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("Aayam", "आयाम")}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {aayamList.map((key) => {
+                      const cfg = AAYAM[key];
+                      const active = aayamFilter.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => toggleAayam(key)}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all",
+                            active ? cn(cfg.chip, "shadow-sm ring-1 ring-offset-1 ring-offset-background") : "border-border/50 bg-muted/20 text-muted-foreground"
+                          )}
+                        >
+                          <div className={cn("w-1.5 h-1.5 rounded-full", cfg.dot)} />
+                          {lang === "hi" ? cfg.labelHi : cfg.label}
+                          {active && <X className="w-3 h-3 ml-0.5 opacity-60" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("Status", "स्थिति")}</p>
+                  <div className="mt-3 grid gap-2">
+                    {Object.entries(STATUS).map(([key, cfg]) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleStatus(key)}
+                        className={cn(
+                          "flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors",
+                          statusFilter.includes(key) ? "border-primary/30 bg-primary/5 text-primary" : "border-border/60 text-muted-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        <cfg.icon className="w-4 h-4 shrink-0" />
+                        <span className={lang === "hi" ? "font-devanagari" : ""}>{lang === "hi" ? cfg.labelHi : cfg.label}</span>
+                        {statusFilter.includes(key) && <CheckCircle2 className="w-4 h-4 ml-auto" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {hasFilters && (
+                  <Button variant="outline" className="w-full rounded-xl" onClick={clearFilters}>
+                    <X className="w-4 h-4" /> {t("Clear all filters", "सभी फ़िल्टर साफ़ करें")}
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
 
           {hasFilters && (
             <motion.button

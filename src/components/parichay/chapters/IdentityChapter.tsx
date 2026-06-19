@@ -190,6 +190,7 @@ export function IdentityChapter() {
 
   return (
     <section
+      id="who-we-are"
       ref={sectionRef}
       className="relative overflow-hidden bg-background py-16 md:py-24"
     >

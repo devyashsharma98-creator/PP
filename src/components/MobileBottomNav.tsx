@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Grid2x2, LogOut, MoreHorizontal } from "lucide-react";
@@ -18,6 +18,10 @@ export function MobileBottomNav() {
   const [open, setOpen] = useState(false);
   const { lang, permissions, viewer, authReady } = useAppContext();
   const signOut = useSignOut();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   const showAdminControls = permissions.canManageUsers || Boolean(
     viewer?.effectiveRoles.some((role) => role === "super_admin" || role === "org_admin"),

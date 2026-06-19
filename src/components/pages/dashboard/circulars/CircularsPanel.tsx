@@ -255,9 +255,12 @@ export function CircularsPanel() {
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 className={`border rounded-lg transition-colors ${expired ? "opacity-50" : ""} ${!circular.readAt && !expired ? "border-l-2 border-l-primary" : ""}`}
               >
-                <button
+                <div
                   onClick={() => setExpandedId(expanded ? null : circular.id)}
-                  className="w-full text-left p-3 flex items-start justify-between gap-3"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedId(expanded ? null : circular.id); } }}
+                  className="w-full text-left p-3 flex items-start justify-between gap-3 cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -301,7 +304,7 @@ export function CircularsPanel() {
                       </button>
                     )}
                   </div>
-                </button>
+                </div>
                 {expanded && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}

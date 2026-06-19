@@ -156,10 +156,13 @@ export function SurveysPanel() {
           <div className="space-y-2">
             {surveys.map((s) => (
               <div key={s.id}>
-                <button
+                <div
                   onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedId(expandedId === s.id ? null : s.id); } }}
                   aria-expanded={expandedId === s.id}
-                  className="w-full text-left p-3 rounded-lg border hover:border-primary/50 transition-colors flex items-center justify-between"
+                  className="w-full text-left p-3 rounded-lg border hover:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {expandedId === s.id ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
@@ -179,7 +182,7 @@ export function SurveysPanel() {
                       </button>
                     )}
                   </div>
-                </button>
+                    </div>
 
                 {expandedId === s.id && (
                   <div className="pl-6 mt-2 space-y-3">

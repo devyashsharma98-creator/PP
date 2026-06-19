@@ -488,8 +488,8 @@ export default function Dayitv() {
                 {vibhags.map((vibhag, i) => {
                   const isOpen = expanded.has(vibhag.name);
                   return (
-                    <motion.div
-                      key={vibhag.name}
+                      <motion.div
+                        key={`vibhag-${i}`}
                       initial={{ opacity: 0, y: 12 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}

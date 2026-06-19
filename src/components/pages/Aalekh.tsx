@@ -11,11 +11,62 @@ import { UnitHeadView } from "./aalekh/UnitHeadView";
 import { AayamView } from "./aalekh/AayamView";
 import { VibhagView } from "./aalekh/VibhagView";
 import { GalleryView } from "./aalekh/GalleryView";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const pipelineSteps = [
+  { en: "Writer", hi: "लेखक" },
+  { en: "Unit Review", hi: "इकाई समीक्षा" },
+  { en: "Aayam Review", hi: "आयाम समीक्षा" },
+  { en: "Vibhag Review", hi: "विभाग समीक्षा" },
+  { en: "Published", hi: "प्रकाशित" },
+];
+
+function AalekhPipeline({ role, t, lang }: { role: string; t: (en: string, hi: string) => string; lang: string }) {
+  const activeIndex = role === "karyakarta" ? 0 : role === "unit_head" ? 1 : role === "aayam_pramukh" ? 2 : 3;
+
+  return (
+    <section className="institution-panel p-4 md:p-5">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              {t("Publication Pipeline", "प्रकाशन प्रवाह")}
+            </p>
+            <h2 className="text-base font-semibold tracking-tight">
+              {t("Idea to institutional record", "विचार से संस्थागत अभिलेख तक")}
+            </h2>
+          </div>
+          <p className="text-xs leading-5 text-muted-foreground md:text-sm">
+            {t("Your current lane is highlighted below.", "आपकी वर्तमान धारा नीचे चिह्नित है।")}
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-5">
+          {pipelineSteps.map((step, index) => {
+            const active = index <= activeIndex;
+            const current = index === activeIndex;
+
+            return (
+              <div key={step.en} className="relative">
+                <div className={cn("rounded-xl border p-3 text-center transition-colors", current ? "border-primary bg-primary/5 text-primary" : active ? "border-success/30 bg-success/[0.04] text-foreground" : "border-border/70 bg-muted/20 text-muted-foreground")}>
+                  <p className="text-xs font-semibold">{t(step.en, step.hi)}</p>
+                  <p className="mt-1 text-[10px] leading-4">
+                    {index === 0 ? t("Draft", "मसौदा") : index === pipelineSteps.length - 1 ? t("Record", "अभिलेख") : t("Lane", "धारा")}
+                  </p>
+                </div>
+                {index < pipelineSteps.length - 1 && <ArrowRight className="mx-auto my-1 h-3 w-3 text-muted-foreground sm:hidden" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Aalekh() {
-  const { role, permissions } = useAppContext();
+  const { role, lang, permissions } = useAppContext();
   const { data: articles = [], isLoading } = useArticles();
   const createArticleMutation = useCreateArticle();
   const updateStatusMutation = useUpdateArticleStatus();
@@ -81,35 +132,28 @@ export default function Aalekh() {
     </div>
   );
 
-  if (viewMode === "gallery") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-end">{viewToggle}</div>
-        <GalleryView articles={articles} />
-      </div>
-    );
-  }
-
-  if (role === "karyakarta") {
-    return <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} />;
-  }
-
-  if (role === "unit_head") {
-    return <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />;
-  }
-
-  if (role === "aayam_pramukh") {
-    return <AayamView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />;
-  }
-
   return (
-    <VibhagView
-      articles={articles}
-      permissions={permissions}
-      updateArticleStatus={handleUpdateStatus}
-      lastPublished={lastPublished}
-      setLastPublished={setLastPublished}
-      viewToggle={viewToggle}
-    />
+    <div className="space-y-5">
+      <AalekhPipeline role={role} t={t} lang={lang} />
+
+      {viewMode === "gallery" ? (
+        <GalleryView articles={articles} />
+      ) : role === "karyakarta" ? (
+        <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} />
+      ) : role === "unit_head" ? (
+        <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
+      ) : role === "aayam_pramukh" ? (
+        <AayamView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
+      ) : (
+        <VibhagView
+          articles={articles}
+          permissions={permissions}
+          updateArticleStatus={handleUpdateStatus}
+          lastPublished={lastPublished}
+          setLastPublished={setLastPublished}
+          viewToggle={viewToggle}
+        />
+      )}
+    </div>
   );
 }

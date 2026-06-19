@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ElementType } from "react";
 import { useAppContext, GatividhiEvent, VrittStatus } from "@/context/AppContext";
 import { useDashboardEvents, useUpdateEventStatus, useUpdateVritt } from "@/hooks/api/use-dashboard";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { checklistItems, dashboardStatusBadgeClass, eventStatusHi } from "@/components/pages/dashboard/config";
 import { useBonsaiLLM } from "@/hooks/use-bonsai-llm";
+import { ArrowRight, CheckCircle2, Clock, FileText } from "lucide-react";
 import { vrittSystemPrompt, vrittUserMessage } from "@/lib/bonsai/prompts";
 import type { Lang } from "@/lib/app/contracts";
 import { VibhagDashboardView } from "@/components/pages/dashboard/VibhagDashboardView";
@@ -22,7 +26,53 @@ import { ConferencesPanel } from "@/components/pages/dashboard/conferences/Confe
 import { SurveysPanel } from "@/components/pages/dashboard/surveys/SurveysPanel";
 import { NotificationsPanel } from "@/components/pages/dashboard/notifications/NotificationsPanel";
 
+import { cn } from "@/lib/utils";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
+
+type ActionItem = {
+  icon: ElementType;
+  label: string;
+  value: string | number;
+  detail: string;
+  intent: string;
+  tone: "primary" | "warning" | "success";
+};
+
+function DashboardActionQueue({ items, t, lang }: { items: ActionItem[]; t: (en: string, hi: string) => string; lang: string }) {
+  return (
+    <section className="dashboard-panel-grid">
+      {items.map((item) => {
+        const Icon = item.icon;
+        const toneClass =
+          item.tone === "warning"
+            ? "border-warning/20 bg-warning/[0.04]"
+            : item.tone === "success"
+              ? "border-success/20 bg-success/[0.04]"
+              : "border-primary/20 bg-primary/[0.04]";
+
+        return (
+          <Card key={item.label} className="institution-panel-muted border-border/70">
+            <CardContent className="p-4 md:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", toneClass)}>
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <Badge variant="outline" className="text-[10px]">
+                  {item.value}
+                </Badge>
+              </div>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm font-semibold">{item.label}</p>
+                <p className={cn("text-xs leading-5", lang === "hi" && "font-devanagari")}>{item.detail}</p>
+                <p className="text-[11px] font-medium text-primary">{item.intent}</p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </section>
+  );
+}
 
 export default function Dashboard() {
   const { role, lang, permissions, viewer } = useAppContext();
@@ -31,12 +81,151 @@ export default function Dashboard() {
   const { status: bonsaiStatus, generate: bonsaiGenerate, initModel: bonsaiInit } = useBonsaiLLM();
   const primaryRoleCode = viewer?.primaryRoleCode ?? getCanonicalRoleFromUiRole(role);
   const dashboardLane = getDashboardLane(primaryRoleCode);
-  
-  // Real data from API with TanStack Query
   const { data: events = [], isLoading: eventsLoading, error: eventsError } = useDashboardEvents();
+  const actionItems = useMemo<ActionItem[]>(() => {
+    const reviewStatuses = [
+      "Submitted by Unit",
+      "Pending Aayam Review",
+      "Pending Vibhag Review",
+      "Pending Prant Authorization",
+      "Pending Prant Dual Authorization",
+    ];
+    const pendingReview = events.filter((event) => reviewStatuses.includes(event.status));
+    const drafts = events.filter((event) => event.status === "Draft");
+    const published = events.filter((event) => event.status === "Published");
+    const vrittPending = events.filter((event) => event.status === "Published" && (!event.vrittStatus || event.vrittStatus === "draft"));
+
+    if (dashboardLane === "karyakarta") {
+      return [
+        {
+          icon: FileText,
+          label: t("Drafts to write or revise", "लिखे या सुधारे जाने वाले मसौदे"),
+          value: drafts.length,
+          detail: t("These are still in your unit lane.", "ये अभी आपकी इकाई धारा में हैं।"),
+          intent: t("Write clearly, attach proof, then submit.", "स्पष्ट लिखें, प्रमाण जोड़ें, फिर भेजें।"),
+          tone: "primary",
+        },
+        {
+          icon: Clock,
+          label: t("Items in review", "समीक्षा में प्रविष्टियाँ"),
+          value: pendingReview.length,
+          detail: t("Track what is waiting with Unit, Aayam, Vibhag, or Prant.", "यूनिट, आयाम, विभाग या प्रान्त में क्या रुका है, देखें।"),
+          intent: t("Follow up only when the next lane asks for action.", "अगली धारा मांगे तभी आगे बढ़ाएँ।"),
+          tone: "warning",
+        },
+        {
+          icon: CheckCircle2,
+          label: t("Published records", "प्रकाशित अभिलेख"),
+          value: published.length,
+          detail: t("Published events are visible in the institutional record.", "प्रकाशित कार्यक्रम संस्थागत अभिलेख में दिखेंगे।"),
+          intent: t("Update Vritt where evidence is pending.", "जहाँ प्रमाण बाकी है, वृत्त अद्यतन करें।"),
+          tone: "success",
+        },
+      ];
+    }
+
+    if (dashboardLane === "unit") {
+      return [
+        {
+          icon: FileText,
+          label: t("Unit drafts to clear", "इकाई के साफ़ होने वाले मसौदे"),
+          value: drafts.length,
+          detail: t("Drafts that need unit-level correction before review.", "समीक्षा से पहले इकाई स्तर पर सुधार चाहिए।"),
+          intent: t("Correct, complete, and submit for Aayam review.", "सुधारें, पूरा करें, फिर आयाम समीक्षा में भेजें।"),
+          tone: "primary",
+        },
+        {
+          icon: Clock,
+          label: t("Awaiting approval", "अनुमोदन प्रतीक्षित"),
+          value: pendingReview.length,
+          detail: t("Work already sent upward and waiting for the next lane.", "आगे भेजा हुआ कार्य अगली धारा में प्रतीक्षित है।"),
+          intent: t("Keep follow-up gentle and evidence-based.", "सौम्य और प्रमाण आधारित अनुवर्ती रखें।"),
+          tone: "warning",
+        },
+        {
+          icon: CheckCircle2,
+          label: t("Published from this lane", "इस धारा से प्रकाशित"),
+          value: published.length,
+          detail: t("Published output that came through the unit workflow.", "इकाई प्रवाह से निकला प्रकाशित कार्य।"),
+          intent: t("Ensure post-event Vritt is complete.", "कार्यक्रमोत्तर वृत्त पूरा रखें।"),
+          tone: "success",
+        },
+      ];
+    }
+
+    if (dashboardLane === "aayam") {
+      return [
+        {
+          icon: Clock,
+          label: t("Aayam review queue", "आयाम समीक्षा कतार"),
+          value: pendingReview.filter((event) => event.status === "Submitted by Unit" || event.status === "Pending Aayam Review").length,
+          detail: t("Programmes waiting for thematic review.", "विषयगत समीक्षा प्रतीक्षित कार्यक्रम।"),
+          intent: t("Review, edit if needed, then forward to Vibhag.", "समीक्षा करें, जरूरत हो तो संपादित करें, फिर विभाग को भेजें।"),
+          tone: "warning",
+        },
+        {
+          icon: FileText,
+          label: t("Forwarded record", "अग्रेषित अभिलेख"),
+          value: events.filter((event) => event.status !== "Draft" && event.status !== "Submitted by Unit" && event.status !== "Pending Aayam Review").length,
+          detail: t("Items already moved ahead or published.", "आगे भेजे या प्रकाशित किए गए कार्य।"),
+          intent: t("Keep the thematic lane clean.", "विषयगत धारा साफ़ रखें।"),
+          tone: "primary",
+        },
+        {
+          icon: CheckCircle2,
+          label: t("Published output", "प्रकाशित सामग्री"),
+          value: published.length,
+          detail: t("Published programmes available for Prachar and feed use.", "प्रचार और फ़ीड उपयोग हेतु प्रकाशित कार्यक्रम।"),
+          intent: t("Confirm Prachar follow-through after publishing.", "प्रकाशन के बाद प्रचार अनुवर्ती पुष्टि करें।"),
+          tone: "success",
+        },
+      ];
+    }
+
+    if (dashboardLane === "vibhag" || dashboardLane === "super_admin" || dashboardLane === "prant") {
+      return [
+        {
+          icon: Clock,
+          label: t("Approval queue", "अनुमोदन कतार"),
+          value: pendingReview.length,
+          detail: t("Items waiting at Vibhag or Prant level.", "विभाग या प्रान्त स्तर पर रुके कार्य।"),
+          intent: t("Clear approvals before opening secondary panels.", "द्वितीयक पैनल से पहले अनुमोदन साफ़ करें।"),
+          tone: "warning",
+        },
+        {
+          icon: CheckCircle2,
+          label: t("Published records", "प्रकाशित अभिलेख"),
+          value: published.length,
+          detail: t("Published work visible for institutional continuity.", "संस्थागत निरंतरता हेतु प्रकाशित कार्य।"),
+          intent: t("Use these for review, feed, and accountability.", "समीक्षा, फ़ीड और उत्तरदायित्व के लिए उपयोग करें।"),
+          tone: "success",
+        },
+        {
+          icon: FileText,
+          label: t("Vritt pending", "वृत्त बाकी"),
+          value: vrittPending.length,
+          detail: t("Published events where post-event reporting may be incomplete.", "प्रकाशित कार्यक्रम जिनमें कार्यक्रमोत्तर विवरण बाकी हो सकता है।"),
+          intent: t("Complete evidence before closure.", "समापन से पहले प्रमाण पूरा करें।"),
+          tone: "primary",
+        },
+      ];
+    }
+
+    return [
+      {
+        icon: Clock,
+        label: t("Today’s action queue", "आज की कार्य कतार"),
+        value: pendingReview.length || drafts.length,
+        detail: t("Open the relevant lane below and take the next visible action.", "नीचे संबंधित धारा खोलें और अगला स्पष्ट कार्य करें।"),
+        intent: t("Review first, then record.", "पहले समीक्षा, फिर अभिलेख।"),
+        tone: "primary",
+      },
+    ];
+  }, [dashboardLane, events, t]);
+
   const updateEventStatusMutation = useUpdateEventStatus();
   const updateVrittMutation = useUpdateVritt();
-  
+
   const isApiConnected = !eventsError && !eventsLoading;
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
@@ -258,6 +447,7 @@ export default function Dashboard() {
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
     return (
       <>
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
         <UnitDashboardView
           dashboardKind="super_admin"
           events={events}
@@ -288,6 +478,7 @@ export default function Dashboard() {
   if (dashboardLane === "vibhag") {
     return (
       <>
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
         <VibhagDashboardView
           events={events}
           permissions={permissions}
@@ -317,6 +508,7 @@ export default function Dashboard() {
   if (dashboardLane === "aayam") {
     return (
       <>
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
         <AayamDashboardView
           dashboardKind={primaryRoleCode === "prant_aayam_pramukh" ? "prant_aayam_pramukh" : "aayam_pramukh"}
           events={events}
@@ -342,6 +534,7 @@ export default function Dashboard() {
   }
   return (
     <>
+      <DashboardActionQueue items={actionItems} t={t} lang={lang} />
       <UnitDashboardView
         dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
         events={events}

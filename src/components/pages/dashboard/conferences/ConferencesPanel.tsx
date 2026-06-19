@@ -293,10 +293,13 @@ export function ConferencesPanel() {
           <div className="space-y-2">
             {typedConferences.map((conf) => (
               <div key={conf.id}>
-                <button
+                <div
                   onClick={() => setExpandedConf(expandedConf === conf.id ? null : conf.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedConf(expandedConf === conf.id ? null : conf.id); } }}
                   aria-expanded={expandedConf === conf.id}
-                  className="w-full text-left p-3 rounded-lg border hover:border-primary/50 transition-colors flex items-center justify-between"
+                  className="w-full text-left p-3 rounded-lg border hover:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {expandedConf === conf.id ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
@@ -322,7 +325,7 @@ export function ConferencesPanel() {
                       </>
                     )}
                   </div>
-                </button>
+                </div>
 
                 {expandedConf === conf.id && (
                   <div className="pl-6 mt-2 space-y-3">
@@ -344,10 +347,13 @@ export function ConferencesPanel() {
                       <div className="space-y-1">
                         {(sessions as Session[]).map((s) => (
                           <div key={s.id}>
-                            <button
+                            <div
                               onClick={() => setExpandedSession(expandedSession === s.id ? null : s.id)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedSession(expandedSession === s.id ? null : s.id); } }}
                               aria-expanded={expandedSession === s.id}
-                              className="w-full text-left p-2 rounded border border-dashed hover:border-primary/40 transition-colors flex items-center justify-between"
+                              className="w-full text-left p-2 rounded border border-dashed hover:border-primary/40 transition-colors flex items-center justify-between cursor-pointer"
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 {expandedSession === s.id ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
@@ -369,7 +375,7 @@ export function ConferencesPanel() {
                                   </>
                                 )}
                               </div>
-                            </button>
+                            </div>
 
                             {expandedSession === s.id && (
                               <div className="pl-4 mt-1 space-y-1">
