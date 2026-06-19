@@ -10,24 +10,22 @@ export async function fetchApi<T>(url: string, options?: RequestInit): Promise<T
   return data.data as T;
 }
 
-export interface AuditLogEntry {
-  id: string;
-  orgId: string;
-  action: string;
-  actorUserId?: string | null;
-  actorEmail?: string | null;
-  actorIp?: string | null;
-  entityType?: string | null;
-  entityId?: string | null;
-  payload?: Record<string, unknown> | null;
-  changeSummary?: string | null;
-  createdAt: string;
-}
-
 export async function fetchAuditLogs(filters?: Record<string, string>) {
   const params = filters ? `?${new URLSearchParams(filters).toString()}` : '';
   return fetchApi<{
-    rows: AuditLogEntry[];
+    rows: Array<{
+      id: string;
+      orgId: string;
+      action: string;
+      actorUserId?: string | null;
+      actorEmail?: string | null;
+      actorIp?: string | null;
+      entityType?: string | null;
+      entityId?: string | null;
+      payload?: Record<string, unknown> | null;
+      changeSummary?: string | null;
+      createdAt: string;
+    }>;
     total: number;
     page: number;
     limit: number;

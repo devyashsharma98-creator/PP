@@ -1,20 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
-import { AlertTriangle, FileClock, Search, ShieldAlert, UserCheck } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { DataTable } from "@/components/ui/data-table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { AlertTriangle, ChevronLeft, ChevronRight, FileClock, Search, ShieldAlert, UserCheck } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useAuditLogs } from "@/hooks/api/use-audit-logs";
-import type { AuditLogEntry } from "@/lib/api/audit-logs";
 import { useT } from "@/lib/useT";
-
-const PAGE_SIZE = 50;
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ACTION_LABELS: Record<string, { en: string; hi: string }> = {
   "auth.login_success": { en: "Login", hi: "लॉगिन" },
@@ -46,13 +40,10 @@ export function AuditLogPanel() {
   const [page, setPage] = useState(1);
   const [actionFilter, setActionFilter] = useState("");
 
-  const filters: Record<string, string> = actionFilter
-    ? { action: actionFilter, page: String(page), limit: String(PAGE_SIZE) }
-    : { page: String(page), limit: String(PAGE_SIZE) };
-  const { data, isLoading } = useAuditLogs(filters);
+  const { data, isLoading } = useAuditLogs(actionFilter ? { action: actionFilter, page: String(page), limit: "50" } : { page: String(page), limit: "50" });
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / 50);
   const failedLogins = rows.filter((row) => row.action === "auth.login_failed").length;
   const userChanges = rows.filter((row) => row.action.startsWith("user.")).length;
   const sensitiveChanges = rows.filter((row) => ["user.role_assigned", "user.role_removed", "user.deleted", "org.updated"].includes(row.action)).length;
@@ -64,64 +55,11 @@ export function AuditLogPanel() {
     { icon: FileClock, label: t("Sensitive actions", "संवेदनशील क्रियाएँ"), value: sensitiveChanges, detail: t("Role, delete, and org-level changes.", "भूमिका, हटाना और संगठन स्तर के बदलाव।") },
   ];
 
-  const columns = useMemo<ColumnDef<AuditLogEntry>[]>(
-    () => [
-      {
-        accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} title={t("Action", "क्रिया")} />,
-        cell: ({ row }) => {
-          const action = row.original.action;
-          return (
-            <div className="min-w-36 space-y-1.5">
-              <Badge className={`text-[10px] ${ACTION_COLORS[action] ?? "bg-muted text-muted-foreground"}`}>
-                {ACTION_LABELS[action]?.[lang === "hi" ? "hi" : "en"] ?? action}
-              </Badge>
-              {row.original.changeSummary ? (
-                <p className="max-w-64 leading-relaxed text-muted-foreground">{row.original.changeSummary}</p>
-              ) : null}
-            </div>
-          );
-        },
-      },
-      {
-        id: "actor",
-        accessorFn: (row) => row.actorEmail ?? row.actorIp ?? t("System", "सिस्टम"),
-        header: ({ column }) => <DataTableColumnHeader column={column} title={t("Actor", "कर्ता")} />,
-        cell: ({ getValue }) => <span className="whitespace-nowrap text-foreground/80">{getValue<string>()}</span>,
-      },
-      {
-        accessorKey: "entityType",
-        header: ({ column }) => <DataTableColumnHeader column={column} title={t("Record", "अभिलेख")} />,
-        cell: ({ row }) =>
-          row.original.entityType ? (
-            <div className="min-w-28">
-              <p className="font-medium capitalize text-foreground/80">{row.original.entityType}</p>
-              {row.original.entityId ? (
-                <p className="mt-1 font-mono text-[10px] text-muted-foreground">{row.original.entityId.slice(0, 8)}…</p>
-              ) : null}
-            </div>
-          ) : (
-            <span className="text-muted-foreground">—</span>
-          ),
-      },
-      {
-        accessorKey: "createdAt",
-        header: ({ column }) => <DataTableColumnHeader column={column} title={t("Time", "समय")} />,
-        cell: ({ getValue }) => (
-          <time className="block min-w-36 whitespace-nowrap text-muted-foreground" dateTime={getValue<string>()}>
-            {new Date(getValue<string>()).toLocaleString(lang === "hi" ? "hi-IN" : "en-IN")}
-          </time>
-        ),
-      },
-    ],
-    [lang, t],
-  );
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
-          <ShieldAlert className="h-5 w-5 text-primary" aria-hidden="true" />
+          <ShieldAlert className="h-5 w-5 text-primary" />
           <CardTitle className="text-lg font-semibold">{t("Audit Logs", "ऑडिट लॉग")}</CardTitle>
           <Badge variant="outline" className="text-xs">{total}</Badge>
         </div>
@@ -159,49 +97,61 @@ export function AuditLogPanel() {
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <Select
-            value={actionFilter || "all"}
-            onValueChange={(value) => {
-              setActionFilter(value === "all" ? "" : value);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder={t("All actions", "सभी क्रियाएँ")} />
-            </SelectTrigger>
+        <div className="flex items-center gap-2 mb-4">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <Select value={actionFilter} onValueChange={(v) => { setActionFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-56"><SelectValue placeholder={t("All actions", "सभी क्रियाएँ")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("All actions", "सभी क्रियाएँ")}</SelectItem>
-              {Object.entries(ACTION_LABELS).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{t(label.en, label.hi)}</SelectItem>
+              {Object.entries(ACTION_LABELS).map(([k, v]) => (
+                <SelectItem key={k} value={k}>{t(v.en, v.hi)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={rows}
-          isLoading={isLoading}
-          pageIndex={page - 1}
-          pageSize={PAGE_SIZE}
-          pageCount={totalPages}
-          totalRows={total}
-          onPageChange={(pageIndex) => setPage(pageIndex + 1)}
-          labels={{
-            page: t("Page", "पृष्ठ"),
-            of: t("of", "का"),
-            previousPage: t("Previous", "पिछला"),
-            nextPage: t("Next", "अगला"),
-          }}
-          emptyState={(
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <ShieldAlert className="h-8 w-8 opacity-45" aria-hidden="true" />
-              <p className="text-sm">{t("No audit logs found.", "कोई ऑडिट लॉग नहीं मिला।")}</p>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <ShieldAlert className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">{t("No audit logs found.", "कोई ऑडिट लॉग नहीं मिला।")}</p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {rows.map((r) => (
+                <div key={r.id} className="p-2.5 rounded border text-xs space-y-1 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-[9px] ${ACTION_COLORS[r.action] ?? "bg-muted text-muted-foreground"}`}>
+                        {ACTION_LABELS[r.action]?.[lang === "hi" ? "hi" : "en"] ?? r.action}
+                      </Badge>
+                      <span className="text-muted-foreground">{r.actorEmail ?? r.actorIp ?? t("System", "सिस्टम")}</span>
+                    </div>
+                    <span className="text-muted-foreground">{new Date(r.createdAt).toLocaleString()}</span>
+                  </div>
+                  {r.changeSummary && <p className="text-muted-foreground mt-1">{r.changeSummary}</p>}
+                  {r.entityType && <p className="text-muted-foreground">{r.entityType}: {r.entityId?.slice(0, 8)}...</p>}
+                </div>
+              ))}
             </div>
-          )}
-        />
+
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-xs text-muted-foreground">{t("Page", "पृष्ठ")} {page} {t("of", "का")} {totalPages}</p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
