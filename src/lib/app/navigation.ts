@@ -2,9 +2,11 @@ import {
   Activity,
   Bell,
   BookOpen,
+  Building2,
   Calendar,
   ClipboardList,
   Cog,
+  GraduationCap,
   Hash,
   History,
   Home,
@@ -13,11 +15,13 @@ import {
   ListTodo,
   Megaphone,
   MessagesSquare,
+  MessageSquare,
   Network,
   Newspaper,
   PenLine,
   Presentation,
   ShieldCheck,
+  Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -45,6 +49,7 @@ const workflowNavItems: NavItem[] = [
   { label: "Aalekh", sublabel: "लेखन व समीक्षा", icon: PenLine, path: "/aalekh", description: "Write, review, publish", descriptionHi: "लिखें, समीक्षा करें, प्रकाशित करें" },
   { label: "Prachar", sublabel: "प्रचार फॉलो-थ्रू", icon: Megaphone, path: "/prachar", description: "Campaigns & outreach", descriptionHi: "प्रचार अभियान और संपर्क" },
   { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar", description: "Events & planning", descriptionHi: "कार्यक्रम और योजना" },
+  { label: "My Impact", sublabel: "मेरा योगदान", icon: Trophy, path: "/impact", description: "Your contribution & recognition", descriptionHi: "आपका योगदान एवं सम्मान" },
 ];
 
 const mobilePrimaryNavItems: NavItem[] = [
@@ -66,12 +71,15 @@ const dashboardModuleNavItems: NavItem[] = [
 
 const coordinationNavItems: NavItem[] = [
   { label: "People", sublabel: "सम्पर्क व समन्वय", icon: Users, path: "/directory", description: "Contact directory", descriptionHi: "सम्पर्क सूची" },
+  { label: "Scholars", sublabel: "विद्वत मंडल", icon: GraduationCap, path: "/scholars", description: "Scholar & expert registry", descriptionHi: "विद्वान एवं विशेषज्ञ पंजिका" },
+  { label: "Campus Ikai", sublabel: "परिसर इकाई", icon: Building2, path: "/ikai", description: "University & college units", descriptionHi: "विश्वविद्यालय एवं महाविद्यालय इकाइयाँ" },
   { label: "Dayitv", sublabel: "भूमिका रचना", icon: Network, path: "/dayitv", description: "Role & responsibility matrix", descriptionHi: "भूमिका और उत्तरदायित्व मैट्रिक्स" },
 ];
 
 const referenceNavItems: NavItem[] = [
   { label: "Landing", sublabel: "परिचय पृष्ठ", icon: Home, path: "/parichay", description: "Organisation landing page", descriptionHi: "संगठन परिचय पृष्ठ" },
   { label: "Vimarsh", sublabel: "विषय व विमर्श", icon: MessagesSquare, path: "/vimarsh", description: "Discussion topics", descriptionHi: "विषयगत चर्चा" },
+  { label: "Vimarsh Charcha", sublabel: "विमर्श चर्चा", icon: MessageSquare, path: "/charcha", description: "Internal discussion & debate", descriptionHi: "आंतरिक चर्चा एवं विमर्श" },
   { label: "Library", sublabel: "ई-पुस्तकालय", icon: BookOpen, path: "/library", description: "E-library & resources", descriptionHi: "ई-पुस्तकालय और संसाधन" },
   { label: "Published", sublabel: "प्रकाशित कार्य", icon: Newspaper, path: "/feed", description: "Published aalekh feed", descriptionHi: "प्रकाशित आलेख फ़ीड" },
   { label: "History", sublabel: "संदर्भ इतिहास", icon: History, path: "/history", description: "Reference & archives", descriptionHi: "संदर्भ और पुरालेख" },

@@ -48,7 +48,11 @@ const PROTECTED_ROUTE_ROLES: Array<{ prefix: string; roles: RoleCode[] }> = [
   { prefix: "/prachar", roles: PRACHAR_ROLES },
   { prefix: "/calendar", roles: COORDINATION_ROLES },
   { prefix: "/directory", roles: COORDINATION_ROLES },
+  { prefix: "/scholars", roles: COORDINATION_ROLES },
+  { prefix: "/ikai", roles: COORDINATION_ROLES },
   { prefix: "/dayitv", roles: COORDINATION_ROLES },
+  { prefix: "/impact", roles: DASHBOARD_ROLES },
+  { prefix: "/charcha", roles: DASHBOARD_ROLES },
   { prefix: "/aalekh", roles: ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh", "vibhag_pramukh", "aayam_pramukh", "unit_head", "karyakarta"] },
 ];
 

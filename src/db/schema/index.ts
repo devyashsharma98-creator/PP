@@ -16,3 +16,6 @@ export * from "./media";
 export * from "./conferences";
 export * from "./surveys";
 export * from "./library";
+export * from "./scholars";
+export * from "./campus";
+export * from "./vimarsh-charcha";
