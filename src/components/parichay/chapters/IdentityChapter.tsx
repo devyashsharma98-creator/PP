@@ -186,7 +186,10 @@ function StorySeal({ visual, index }: { visual: StoryVisual; index: number }) {
 
 export function IdentityChapter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
+  // amount: "some" — fire when any part enters view. A fractional amount like
+  // 0.12 is unreachable on tall sections (12% can exceed the viewport height),
+  // which left the whole chapter stuck at opacity 0.
+  const isInView = useInView(sectionRef, { once: true, amount: "some" });
 
   return (
     <section

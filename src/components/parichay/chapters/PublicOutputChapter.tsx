@@ -108,7 +108,7 @@ function GenerativePattern({ index }: { index: number }) {
 export function PublicOutputChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+  const isInView = useInView(sectionRef, { once: true, amount: "some" });
   const [articles, setArticles] = useState<ArticleItem[]>(PLACEHOLDER_ARTICLES);
   const [loading, setLoading] = useState(true);
 

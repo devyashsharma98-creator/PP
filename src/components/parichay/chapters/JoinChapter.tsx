@@ -42,7 +42,7 @@ const PATHS: Path[] = [
 export function JoinChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
+  const isInView = useInView(sectionRef, { once: true, amount: "some" });
 
   return (
     <section

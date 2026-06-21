@@ -10,7 +10,7 @@ import { ParticleField } from "../effects/ParticleField";
 export function EnterChapter() {
   const t = useT();
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
+  const isInView = useInView(sectionRef, { once: true, amount: "some" });
 
   return (
     <section

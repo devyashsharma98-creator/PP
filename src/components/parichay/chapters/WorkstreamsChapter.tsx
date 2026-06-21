@@ -112,7 +112,7 @@ function BilingualTitle({
 
 export function WorkstreamsChapter() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
+  const isInView = useInView(sectionRef, { once: true, amount: "some" });
 
   return (
     <section
