@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, ChevronDown, LogIn, Users } from "lucide-react";
@@ -18,6 +18,18 @@ const orbitPoints = [
 export function HeroChapter() {
   const sectionRef = useRef<HTMLElement>(null);
 
+  // Scroll-driven fade/parallax is a desktop-only treatment. On mobile the hero
+  // stacks tall, so fading the whole section to opacity 0 leaves a large blank
+  // stretch — we disable the transforms below the md breakpoint.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -34,8 +46,8 @@ export function HeroChapter() {
   return (
     <motion.section
       ref={sectionRef}
-      className="relative isolate flex min-h-[92dvh] items-center overflow-hidden bg-[hsl(var(--parchment-bg))] py-16 text-[hsl(var(--parchment-ink))] md:py-20"
-      style={{ opacity }}
+      className="relative isolate flex min-h-[88dvh] items-center overflow-hidden bg-[hsl(var(--parchment-bg))] py-14 text-[hsl(var(--parchment-ink))] md:min-h-[92dvh] md:py-20"
+      style={isDesktop ? { opacity } : undefined}
     >
       <div className="pointer-events-none absolute inset-0">
         <div
@@ -61,7 +73,7 @@ export function HeroChapter() {
 
       <motion.div
         className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 px-5 md:grid-cols-[0.86fr_1fr] md:px-10"
-        style={{ scale, y }}
+        style={isDesktop ? { scale, y } : undefined}
       >
         <div className="max-w-3xl">
           <motion.div
@@ -172,11 +184,54 @@ export function HeroChapter() {
           </motion.div>
         </div>
 
+        {/* Mobile-only compact ERP flow — replaces the desktop mandala diagram,
+            which does not lay out cleanly on small screens. */}
+        <div className="md:hidden">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
+                ERP Operating Mandala
+              </p>
+              <p className="mt-1 font-devanagari text-sm font-semibold leading-6 text-[hsl(var(--parchment-ink-soft))]">
+                विचार से अभिलेख तक संचालन-तंत्र
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
+              Live System
+            </span>
+          </div>
+          <ol className="space-y-2">
+            {ERP_FLOW_STEPS.map((step, index) => (
+              <li
+                key={step.id}
+                className="flex items-start gap-3 rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.8)] px-3 py-2.5"
+              >
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-[11px] font-bold text-primary">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <p className="flex items-baseline gap-2">
+                    <span className="font-devanagari text-sm font-semibold leading-5 text-[hsl(var(--parchment-ink))]">
+                      {step.moduleHi}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+                      {step.moduleEn}
+                    </span>
+                  </p>
+                  <p className="mt-0.5 text-xs leading-5 text-[hsl(var(--parchment-ink-soft))]">
+                    {step.titleEn}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.76, delay: 0.42, ease: "easeOut" }}
-          className="relative min-h-[34rem] overflow-hidden rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.7)] p-4 shadow-[0_32px_90px_-60px_hsl(var(--parchment-ink)/0.45)] md:min-h-[40rem] md:p-6"
+          className="relative hidden min-h-[34rem] overflow-hidden rounded-lg border border-[hsl(var(--parchment-rule))] bg-[hsl(var(--background)/0.7)] p-4 shadow-[0_32px_90px_-60px_hsl(var(--parchment-ink)/0.45)] md:block md:min-h-[40rem] md:p-6"
         >
           {/* Breathing ambient glow */}
           <motion.div

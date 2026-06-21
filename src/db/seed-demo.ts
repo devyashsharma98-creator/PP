@@ -77,6 +77,14 @@ async function seedDemo() {
   ];
   const eventIds: string[] = [];
   for (const evt of eventDefs) {
+    const existingEvent = await db.query.events.findFirst({
+      where: and(eq(schema.events.orgId, orgId), eq(schema.events.title, evt.title)),
+    });
+    if (existingEvent) {
+      eventIds.push(existingEvent.id);
+      continue;
+    }
+
     const [event] = await db.insert(schema.events).values({
       orgId, unitId, departmentId: evt.departmentId, locationId: evt.locationId,
       title: evt.title, description: evt.description, status: evt.status,

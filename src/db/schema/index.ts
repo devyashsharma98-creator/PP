@@ -15,3 +15,4 @@ export * from "./volunteers";
 export * from "./media";
 export * from "./conferences";
 export * from "./surveys";
+export * from "./library";

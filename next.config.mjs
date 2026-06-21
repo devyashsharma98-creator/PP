@@ -31,21 +31,28 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
   async headers() {
+    const isProd = process.env.NODE_ENV === 'production';
     return [
       {
         source: '/:path*',
         headers: securityHeaders,
       },
-      // Static assets: allow long-term caching
-      {
-        source: '/:all*(svg|jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|otf|eot)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // Static assets: allow long-term caching. Production only — in dev this
+      // would override Next's own no-cache on /_next chunks and make the browser
+      // serve stale JS for a year after edits.
+      ...(isProd
+        ? [
+            {
+              source: '/:all*(svg|jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|otf|eot)',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=31536000, immutable',
+                },
+              ],
+            },
+          ]
+        : []),
       // Public pages: allow short-term caching (ISR/CDN friendly)
       {
         source: '/(parichay|vimarsh|library|feed|history|guide|form|vote)',

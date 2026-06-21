@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,9 +31,14 @@ interface Book {
   description: string;
   descriptionHi: string;
   color: string; // accent color for cover placeholder
+  readUrl?: string | null;
+  downloadUrl?: string | null;
 }
 
-const books: Book[] = [
+// Built-in curated set, used as a fallback before the API responds or when the
+// library table is not yet provisioned. The live data comes from
+// GET /api/public/library (table: library_texts).
+const FALLBACK_BOOKS: Book[] = [
   {
     id: '1', title: 'Arthashastra', titleHi: 'अर्थशास्त्र', author: 'Kautilya',
     category: 'Rajneeti', pages: 320, year: '~300 BCE', rating: 5,
@@ -220,6 +225,24 @@ export default function ELibrary() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [books, setBooks] = useState<Book[]>(FALLBACK_BOOKS);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/public/library')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (active && json?.success && Array.isArray(json.data) && json.data.length > 0) {
+          setBooks(json.data as Book[]);
+        }
+      })
+      .catch(() => {
+        /* keep fallback set */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filtered = books.filter(b => {
     const matchCategory = activeCategory === 'All' || b.category === activeCategory;
@@ -328,11 +351,19 @@ export default function ELibrary() {
                   <BookCover book={book} isHi={isHi} />
                   
                   {/* Hover overlay badge */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-[2px] pointer-events-none">
-                    <span className="h-8 rounded-full bg-secondary text-secondary-foreground px-3 flex items-center justify-center font-bold text-[10px] uppercase tracking-widest pointer-events-none">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedBook(book);
+                    }}
+                    className="absolute inset-0 flex h-full min-h-[44px] w-full items-center justify-center rounded-xl bg-black/40 p-3 text-center opacity-0 backdrop-blur-[2px] transition-opacity group-hover:opacity-100 focus:opacity-100"
+                    aria-label={t("View Details for book", "ग्रंथ का विवरण देखें")}
+                  >
+                    <span className="h-10 min-h-[44px] rounded-full bg-secondary px-4 text-center text-sm font-bold uppercase tracking-widest text-secondary-foreground shadow-lg">
                       {t('View Details', 'विवरण देखें')}
                     </span>
-                  </div>
+                  </button>
                 </div>
                 
                 <div className="mt-4 space-y-1.5 px-1 text-center sm:text-left">
@@ -445,22 +476,38 @@ export default function ELibrary() {
 
                   <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
                     <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="lg" disabled className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl shadow-xl shadow-primary/20 font-bold uppercase tracking-[0.16em] text-[11px]">
+                      {selectedBook.readUrl ? (
+                        <Button asChild size="lg" className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl shadow-xl shadow-primary/20 font-bold uppercase tracking-[0.16em] text-[11px]">
+                          <a href={selectedBook.readUrl} target="_blank" rel="noopener noreferrer">
                             <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="lg" variant="outline" disabled className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl border-border/70 hover:bg-muted/50 font-bold uppercase tracking-[0.16em] text-[11px]">
+                          </a>
+                        </Button>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button size="lg" disabled className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl shadow-xl shadow-primary/20 font-bold uppercase tracking-[0.16em] text-[11px]">
+                              <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                        </Tooltip>
+                      )}
+                      {selectedBook.downloadUrl ? (
+                        <Button asChild size="lg" variant="outline" className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl border-border/70 hover:bg-muted/50 font-bold uppercase tracking-[0.16em] text-[11px]">
+                          <a href={selectedBook.downloadUrl} target="_blank" rel="noopener noreferrer" download>
                             <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
-                      </Tooltip>
+                          </a>
+                        </Button>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button size="lg" variant="outline" disabled className="w-full sm:w-auto gap-3 h-12 px-10 rounded-2xl border-border/70 hover:bg-muted/50 font-bold uppercase tracking-[0.16em] text-[11px]">
+                              <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                        </Tooltip>
+                      )}
                     </TooltipProvider>
                     <Button variant="ghost" onClick={() => setSelectedBook(null)} className="text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-widest px-6 h-12">
                       {t('Close Archive', 'अभिलेख बंद करें')}

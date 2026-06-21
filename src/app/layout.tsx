@@ -86,8 +86,10 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        {/* Unregister stale service workers before hydration to prevent cached HTML mismatches */}
-        <Script id="unregister-sw" strategy="beforeInteractive" src="/sw-unregister.js" />
+        {/* Unregister stale service workers. afterInteractive (vs beforeInteractive)
+            injects via the Script runtime instead of rendering a raw <script> into the
+            React tree, which React 19 warns about on every client render. */}
+        <Script id="unregister-sw" strategy="afterInteractive" src="/sw-unregister.js" />
         <ClientProviders>
           <ToastProvider>
             <AppLayoutShell>{children}</AppLayoutShell>

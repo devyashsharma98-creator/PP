@@ -163,7 +163,7 @@ export function Navbar() {
               </p>
               {canUseDemoRoleSwitch ? (
                 <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-                  <SelectTrigger className="h-auto w-[112px] border-0 bg-transparent p-0 text-left text-xs font-medium shadow-none focus:ring-0 md:w-[182px] md:text-sm">
+                  <SelectTrigger className="min-h-11 w-[112px] border-0 bg-transparent px-2 py-1 text-left text-xs font-medium shadow-none focus:ring-0 md:min-h-11 md:w-[182px] md:px-3 md:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="z-50 border border-border bg-popover shadow-lg">
@@ -185,7 +185,7 @@ export function Navbar() {
               type="button"
               onClick={() => void signOut()}
               aria-label={t("Sign Out", "लॉग आउट")}
-              className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:px-3"
+              className="flex min-h-[44px] items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:px-3"
               title={t("Sign Out", "लॉग आउट")}
             >
               <LogOut className="h-4 w-4 shrink-0" />

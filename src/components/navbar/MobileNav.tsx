@@ -39,7 +39,7 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
         <div className="border-b border-sidebar-border px-6 py-4">
           <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">{t("Bhopal Vibhag", "भोपाल विभाग")}</p>
           <div className="flex items-center gap-3">
-            <Link href="/parichay" prefetch={false} onClick={() => onOpenChange(false)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]" aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}>
+            <Link href="/parichay" prefetch={false} onClick={() => onOpenChange(false)} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]" aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}>
               <PragyaLogo className="h-7 w-7" />
             </Link>
             <div className="min-w-0 space-y-1">
