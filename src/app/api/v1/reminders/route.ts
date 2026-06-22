@@ -100,7 +100,7 @@ export const GET = withAuth(async (_req: NextRequest, ctx) => {
       titleHi: t.titleHi,
       date: t.dueDate,
       status: t.status,
-      href: "/dashboard#task-board",
+      href: "/task-board",
     });
   }
 
