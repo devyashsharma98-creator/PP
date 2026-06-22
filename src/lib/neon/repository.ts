@@ -150,6 +150,18 @@ function asObject(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+/**
+ * Safely render a DB timestamp as a YYYY-MM-DD string. The driver may return
+ * `created_at` as either a string or a Date, so calling `.slice` directly throws
+ * ("...slice is not a function") when it's a Date.
+ */
+function toDateString(value: unknown): string {
+  if (!value) return "";
+  if (typeof value === "string") return value.slice(0, 10);
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).slice(0, 10);
+}
+
 function toCanonicalRole(role: string): CanonicalRoleCode | null {
   return canonicalRoleSet.has(role as CanonicalRoleCode) ? (role as CanonicalRoleCode) : null;
 }
@@ -512,7 +524,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
         attendingCount: r.attending_count,
         hasSpecialNeeds: r.has_special_needs,
         notes: r.notes ?? undefined,
-        submittedAt: (r.created_at ?? "").slice(0, 10),
+        submittedAt: toDateString(r.created_at),
         customAnswers: Object.keys(customAnswers).length ? customAnswers : undefined,
       };
     });
@@ -637,7 +649,7 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
       authorUserId: a.author_user_id ?? null,
       createdByUserId: a.created_by ?? null,
       author: a.author_name_snapshot ?? "Current User",
-      date: (a.created_at ?? "").slice(0, 10),
+      date: toDateString(a.created_at),
       category: a.category,
       status: dbToUiArticleStatus[a.status] ?? a.status,
       socialUrl: a.social_url ?? undefined,
