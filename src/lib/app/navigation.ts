@@ -1,5 +1,6 @@
 import {
   Activity,
+  BarChart3,
   Bell,
   BellRing,
   BookOpen,
@@ -50,6 +51,7 @@ const workflowNavItems: NavItem[] = [
   { label: "Smaran", sublabel: "स्मरण", icon: BellRing, path: "/smaran", description: "Deadlines & reminders", descriptionHi: "समय-सीमा एवं स्मरण" },
   { label: "Aalekh", sublabel: "लेखन व समीक्षा", icon: PenLine, path: "/aalekh", description: "Write, review, publish", descriptionHi: "लिखें, समीक्षा करें, प्रकाशित करें" },
   { label: "Prachar", sublabel: "प्रचार फॉलो-थ्रू", icon: Megaphone, path: "/prachar", description: "Campaigns & outreach", descriptionHi: "प्रचार अभियान और संपर्क" },
+  { label: "Prachar Vishleshan", sublabel: "प्रचार विश्लेषण", icon: BarChart3, path: "/prachar-vishleshan", description: "Dissemination coverage analytics", descriptionHi: "प्रसार आच्छादन विश्लेषण" },
   { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar", description: "Events & planning", descriptionHi: "कार्यक्रम और योजना" },
   { label: "My Impact", sublabel: "मेरा योगदान", icon: Trophy, path: "/impact", description: "Your contribution & recognition", descriptionHi: "आपका योगदान एवं सम्मान" },
 ];

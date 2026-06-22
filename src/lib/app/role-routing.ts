@@ -46,6 +46,7 @@ const PROTECTED_ROUTE_ROLES: Array<{ prefix: string; roles: RoleCode[] }> = [
   { prefix: "/overview", roles: OVERSIGHT_ROLES },
   { prefix: "/dashboard", roles: DASHBOARD_ROLES },
   { prefix: "/prachar", roles: PRACHAR_ROLES },
+  { prefix: "/prachar-vishleshan", roles: PRACHAR_ROLES },
   { prefix: "/calendar", roles: COORDINATION_ROLES },
   { prefix: "/directory", roles: COORDINATION_ROLES },
   { prefix: "/scholars", roles: COORDINATION_ROLES },
