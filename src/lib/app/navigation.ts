@@ -1,6 +1,7 @@
 import {
   Activity,
   Bell,
+  BellRing,
   BookOpen,
   Building2,
   Calendar,
@@ -46,6 +47,7 @@ export type NavGroup = {
 
 const workflowNavItems: NavItem[] = [
   { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard", description: "Overview, tasks, notifications", descriptionHi: "अवलोकन, कार्य, सूचनाएँ" },
+  { label: "Smaran", sublabel: "स्मरण", icon: BellRing, path: "/smaran", description: "Deadlines & reminders", descriptionHi: "समय-सीमा एवं स्मरण" },
   { label: "Aalekh", sublabel: "लेखन व समीक्षा", icon: PenLine, path: "/aalekh", description: "Write, review, publish", descriptionHi: "लिखें, समीक्षा करें, प्रकाशित करें" },
   { label: "Prachar", sublabel: "प्रचार फॉलो-थ्रू", icon: Megaphone, path: "/prachar", description: "Campaigns & outreach", descriptionHi: "प्रचार अभियान और संपर्क" },
   { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar", description: "Events & planning", descriptionHi: "कार्यक्रम और योजना" },

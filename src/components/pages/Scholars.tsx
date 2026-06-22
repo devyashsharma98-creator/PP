@@ -57,6 +57,25 @@ function getInitials(name: string) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
+function ScholarAvatar({ photoUrl, name, className, textClass }: { photoUrl: string | null; name: string; className?: string; textClass?: string }) {
+  const [imgError, setImgError] = useState(false);
+  if (photoUrl && !imgError) {
+    return (
+      <img
+        src={photoUrl}
+        alt={name}
+        onError={() => setImgError(true)}
+        className={cn("object-cover", className)}
+      />
+    );
+  }
+  return (
+    <div className={cn("flex items-center justify-center shrink-0", textClass ?? "font-bold")}>
+      {getInitials(name)}
+    </div>
+  );
+}
+
 // ── Form Component ─────────────────────────────────────────────────────────
 
 interface ScholarFormProps {
@@ -394,6 +413,7 @@ export default function Scholars() {
       <AnimatePresence>
         {(showForm || editingScholar) && (
           <motion.div
+            id="scholar-form"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -555,10 +575,15 @@ export default function Scholars() {
                     <CardContent className="py-6 px-6">
                       <div className="flex items-start gap-4">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-2 transition-all duration-500 group-hover:scale-105",
-                          "bg-primary/10 border-primary/20 text-primary font-bold text-lg"
+                          "w-14 h-14 rounded-2xl shrink-0 shadow-sm border-2 overflow-hidden transition-all duration-500 group-hover:scale-105",
+                          "bg-primary/10 border-primary/20"
                         )}>
-                          {getInitials(scholar.name)}
+                          <ScholarAvatar
+                            photoUrl={scholar.photoUrl}
+                            name={scholar.name}
+                            className="w-full h-full rounded-2xl"
+                            textClass="w-full h-full flex items-center justify-center text-primary text-lg font-bold"
+                          />
                         </div>
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-start justify-between gap-2">
@@ -640,14 +665,16 @@ export default function Scholars() {
                 <div className="flex flex-col md:flex-row gap-8 md:gap-12">
                   <div className="shrink-0 flex flex-col items-center gap-4">
                     <div className={cn(
-                      "w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-lg border-2",
-                      "bg-primary/10 border-primary/20 text-primary text-3xl font-bold"
+                      "w-24 h-24 rounded-[2rem] overflow-hidden shadow-lg border-2",
+                      "bg-primary/10 border-primary/20"
                     )}>
-                      {getInitials(selectedScholar.name)}
+                      <ScholarAvatar
+                        photoUrl={selectedScholar.photoUrl}
+                        name={selectedScholar.name}
+                        className="w-full h-full rounded-[2rem]"
+                        textClass="w-full h-full flex items-center justify-center text-primary text-3xl font-bold"
+                      />
                     </div>
-                    {selectedScholar.photoUrl && (
-                      <p className="text-[9px] text-muted-foreground break-all max-w-[120px] text-center leading-tight">{selectedScholar.photoUrl}</p>
-                    )}
                   </div>
 
                   <div className="flex-1 space-y-6 min-w-0">
@@ -783,7 +810,24 @@ export default function Scholars() {
                 {t('Know a scholar who should be part of this network? Suggest their inclusion to strengthen our intellectual community.', 'ऐसे विद्वान को जानते हैं जो इस नेटवर्क का हिस्सा होना चाहिए? हमारे बौद्धिक समुदाय को मजबूत करने के लिए उनके नाम सुझाएं।')}
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
+            <Button
+              variant="outline"
+              className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all"
+              onClick={() => {
+                if (canManage) {
+                  setShowForm(true);
+                  setTimeout(() => document.getElementById('scholar-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                } else {
+                  const subject = encodeURIComponent("Scholar suggestion for Vidvat Mandal");
+                  const body = encodeURIComponent(
+                    "I would like to suggest the following scholar for the Vidvat Mandal:\n\n" +
+                    "Name:\nField of expertise:\nAffiliation:\nContact (email/phone):\nBrief bio:\n\n" +
+                    "Submitted by: " + (document.querySelector('[data-user-name]')?.textContent ?? '')
+                  );
+                  window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+                }
+              }}
+            >
               <Users className="w-4 h-4" /> {t('Suggest Scholar', 'विद्वान सुझाएं')}
             </Button>
           </CardContent>
