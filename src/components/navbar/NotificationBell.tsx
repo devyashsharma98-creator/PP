@@ -3,7 +3,9 @@
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, CalendarDays, PenLine, Clock, ArrowRight } from "lucide-react";
+import { Bell, CalendarDays, Clock, ArrowRight } from "lucide-react";
+import { GranthNib } from "@/components/icons/heritage-icons";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/useT";
@@ -80,8 +82,10 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
             <div className="p-2 space-y-1">
               {notifications.map((n) => (
                 <Link key={n.id} href={n.link} prefetch={false} onClick={() => setOpen(false)} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group">
-                  <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5", n.type === "event" ? "bg-primary/10" : "bg-blue-500/10")}>
-                    {n.type === "event" ? <CalendarDays className="w-3.5 h-3.5 text-primary" /> : <PenLine className="w-3.5 h-3.5 text-blue-500" />}
+                  <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5", n.type === "event" ? "bg-icon-info/10" : "bg-icon-primary/10")}>
+                    {n.type === "event"
+                      ? <AppIcon icon={CalendarDays} tone="info" size="sm" className="h-3.5 w-3.5" />
+                      : <AppIcon icon={GranthNib} tone="primary" size="sm" className="h-3.5 w-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate group-hover:text-foreground">{n.title}</p>

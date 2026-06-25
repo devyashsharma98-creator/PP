@@ -42,6 +42,12 @@ deploy*.tar.gz
 .kilo/
 .omx/
 
+# Local video/agent workspaces copied into this repo for experimentation.
+# Keep them off the app's commit surface; move them outside the repo if they
+# need their own version control.
+scripts/openmontage/
+scripts/video-poc/
+
 # QA/test/temp artifacts - never commit these
 *.png
 *.m4a

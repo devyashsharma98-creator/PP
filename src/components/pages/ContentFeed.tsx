@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import {
   Share2, CalendarDays, MapPin, BookOpen, ArrowRight,
   MessagesSquare, ExternalLink, TrendingUp, Newspaper, Flame,
-  Clock, Eye, Sparkles, Compass, Library
+  Clock, Eye, Sparkles, Compass, Library, Megaphone
 } from 'lucide-react';
 import { useMemo } from 'react';
 import { useT } from '@/lib/useT';
@@ -249,6 +249,26 @@ export default function ContentFeed() {
               <p className="text-sm text-muted-foreground/60 max-w-sm mx-auto leading-relaxed">
                 {t('Create events or articles from the dashboard to populate this institutional feed.', 'इस संस्थागत फ़ीड को भरने के लिए डैशबोर्ड से कार्यक्रम या आलेख बनाएं।')}
               </p>
+            </div>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/dashboard" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  {t('Create Event', 'Create Event')}
+                </Button>
+              </Link>
+              <Link href="/aalekh" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {t('Write Aalekh', 'Write Aalekh')}
+                </Button>
+              </Link>
+              <Link href="/prachar" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto gap-2">
+                  <Megaphone className="h-4 w-4" />
+                  {t('Prepare Prachar', 'Prepare Prachar')}
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

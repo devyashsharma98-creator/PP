@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search, ChevronDown, ChevronRight, ExternalLink, Play, BookOpen,
   Swords, Shield, Target, MessagesSquare, AlertTriangle, Globe,
-  TrendingUp, Library, Sparkles, Compass
+  TrendingUp, Library, Sparkles, Compass, Copy, PenLine
 } from 'lucide-react';
 import { useT } from '@/lib/useT';
 import { useAppContext } from '@/context/AppContext';
@@ -219,6 +219,18 @@ export default function Vimarsh() {
   const isHi = tr('en', 'hi') === 'hi';
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  const copyTopicBrief = async (topic: { title: string; description?: string | null; resources: { title: string; url: string }[] }) => {
+    const brief = [
+      `Topic: ${topic.title}`,
+      topic.description,
+      topic.resources.length > 0 ? 'Resources:' : null,
+      ...topic.resources.slice(0, 5).map((resource) => `- ${resource.title}: ${resource.url}`),
+    ].filter(Boolean).join('\n');
+
+    await navigator.clipboard?.writeText(brief);
+    addToast(tr('Topic brief copied', 'Topic brief copied'), 'success');
+  };
 
   useEffect(() => {
     if (error) {
@@ -577,6 +589,24 @@ export default function Vimarsh() {
                                 })}
                               </div>
                             )}
+                          </div>
+                          <div className="flex flex-col gap-2 border-t border-border/50 pt-5 sm:flex-row sm:flex-wrap">
+                            <Link href={`/charcha?topic=${encodeURIComponent(topic.title)}`} className="w-full sm:w-auto">
+                              <Button className="w-full sm:w-auto gap-2" size="sm">
+                                <MessagesSquare className="h-4 w-4" />
+                                {tr('Start Charcha', 'Start Charcha')}
+                              </Button>
+                            </Link>
+                            <Link href={`/aalekh?topic=${encodeURIComponent(topic.title)}`} className="w-full sm:w-auto">
+                              <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
+                                <PenLine className="h-4 w-4" />
+                                {tr('Draft Aalekh', 'Draft Aalekh')}
+                              </Button>
+                            </Link>
+                            <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm" onClick={() => void copyTopicBrief(topic)}>
+                              <Copy className="h-4 w-4" />
+                              {tr('Copy brief', 'Copy brief')}
+                            </Button>
                           </div>
                         </div>
                       </motion.div>

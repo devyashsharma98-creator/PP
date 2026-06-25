@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -362,6 +363,35 @@ export default function Impact() {
               </CardContent>
             </Card>
 
+
+            <Card className="institution-panel-muted border-primary/20 bg-primary/5">
+              <CardContent className="flex flex-col gap-4 py-5 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="shell-copy">{t('Start next contribution', 'Start next contribution')}</p>
+                  <p className="text-sm text-muted-foreground">{t('Add work that directly moves this score: write, organise, or distribute.', 'Add work that directly moves this score: write, organise, or distribute.')}</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Link href="/aalekh" className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto gap-2" size="sm">
+                      <FileText className="h-4 w-4" />
+                      {t('Write Aalekh', 'Write Aalekh')}
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
+                      <Calendar className="h-4 w-4" />
+                      {t('Create Event', 'Create Event')}
+                    </Button>
+                  </Link>
+                  <Link href="/prachar" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
+                      <Megaphone className="h-4 w-4" />
+                      {t('Close Prachar', 'Close Prachar')}
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
             {/* Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <MetricCard
@@ -452,6 +482,20 @@ export default function Impact() {
                 <p className="text-sm text-muted-foreground/40 mt-2">
                   {t('Start writing articles or organising events to appear here.', 'यहाँ दिखने के लिए आलेख लिखना या आयोजन करना शुरू करें।')}
                 </p>
+                <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+                  <Link href="/aalekh" className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto gap-2" size="sm">
+                      <FileText className="h-4 w-4" />
+                      {t('Create first contribution', 'Create first contribution')}
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
+                      <Calendar className="h-4 w-4" />
+                      {t('Plan event', 'Plan event')}
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

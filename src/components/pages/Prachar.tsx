@@ -29,7 +29,7 @@ import {
 import {
   Megaphone, CheckCircle2, AlertCircle, MessageCircle,
   Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
-  FileText, Clock3, Send, Sparkles, Plus, Pencil,
+  FileText, Clock3, Send, Sparkles, Plus, Pencil, Copy,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useDashboardEvents } from '@/hooks/api/use-dashboard';
@@ -43,6 +43,7 @@ import {
 } from '@/hooks/api/use-prachar';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
+import { buildPracharTemplatePreview } from '@/lib/app/prachar-template';
 import type { LucideIcon } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -381,6 +382,7 @@ export default function Prachar() {
   // Track which platform is pending a skip-reason entry: "eventId::platform"
   const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
   const [pendingSkipText, setPendingSkipText] = useState('');
+  const [generatedTemplate, setGeneratedTemplate] = useState<string | null>(null);
   const getStatus = useCallback((eventId: string) =>
   pracharStatuses.find(p => p.eventId === eventId) ?? {
     eventId,
@@ -469,6 +471,20 @@ export default function Prachar() {
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  const previewTemplate = useCallback((templateName: string) => {
+    const sourceEvent = publishedEvents[0] ?? null;
+    const preview = buildPracharTemplatePreview({
+      templateName,
+      campaignTitle: sourceEvent?.title ?? campaignForm.title,
+      description: sourceEvent?.description ?? campaignForm.description,
+      eventDate: sourceEvent?.dateIso ?? campaignForm.startsAt,
+      unit: sourceEvent?.unit,
+      department: (sourceEvent as { department?: string } | null)?.department,
+    });
+    setGeneratedTemplate(preview.whatsappText);
+    void navigator.clipboard?.writeText(preview.whatsappText);
+  }, [campaignForm.description, campaignForm.startsAt, campaignForm.title, publishedEvents]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -889,10 +905,10 @@ export default function Prachar() {
                         variant="outline"
                         size="sm"
                         className="text-xs h-8 w-full"
-                        disabled
-                        title="Template generation flow is not implemented yet"
+                        onClick={() => previewTemplate(tmpl.name)}
                       >
-                        {t('Preview format', 'प्रारूप पूर्वावलोकन')}
+                        <Copy className="mr-1 h-3 w-3" />
+                        {t('Generate copy', 'Generate copy')}
                       </Button>
                     </CardContent>
                   </Card>
@@ -913,6 +929,25 @@ export default function Prachar() {
           </div>
         </div>
 
+        {generatedTemplate && (
+          <Card className="institution-panel-muted border-primary/20 bg-primary/5">
+            <CardContent className="space-y-3 py-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="shell-copy">{t('Generated campaign copy', 'Generated campaign copy')}</p>
+                  <p className="text-sm text-muted-foreground">{t('Copied to clipboard. Edit before sending on the selected channel.', 'Copied to clipboard. Edit before sending on the selected channel.')}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => void navigator.clipboard?.writeText(generatedTemplate)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  {t('Copy again', 'Copy again')}
+                </Button>
+              </div>
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-2xl border border-border/60 bg-background/70 p-4 text-xs leading-6 text-foreground/80">
+                {generatedTemplate}
+              </pre>
+            </CardContent>
+          </Card>
+        )}
         <p className="text-xs text-muted-foreground text-center pt-1">
           {t('Need sharper campaign language?', 'क्या अभियान की भाषा और स्पष्ट चाहिए?')} <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">{t('Explore Vimarsh topics', 'विमर्श विषय देखें')}</Link>
         </p>

@@ -1,29 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, CheckCheck, Eye, EyeOff, CalendarDays, PenLine, MessageSquare, Vote, UserPlus, AlertCircle, RefreshCw, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { Bell, CheckCheck, Eye, EyeOff, RefreshCw, ArrowLeft, ArrowRight, Clock } from "lucide-react";
 
 import { useNotifications, useUnreadCount, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/hooks/api/use-notifications";
 import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
+import { AppIcon } from "@/components/ui/AppIcon";
+import { NOTIFICATION_KINDS, getNotificationKind } from "@/lib/app/icon-map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const KIND_CONFIG: Record<string, { icon: typeof Bell; color: string; label: string; labelHi: string }> = {
-  event_status_change: { icon: CalendarDays, color: "text-primary", label: "Event", labelHi: "कार्यक्रम" },
-  article_status_change: { icon: PenLine, color: "text-blue-500", label: "Article", labelHi: "आलेख" },
-  review_assigned: { icon: UserPlus, color: "text-orange-500", label: "Review", labelHi: "समीक्षा" },
-  review_completed: { icon: CheckCheck, color: "text-green-500", label: "Review Done", labelHi: "समीक्षा पूर्ण" },
-  poll_finalized: { icon: Vote, color: "text-purple-500", label: "Poll", labelHi: "मतदान" },
-  registration_received: { icon: UserPlus, color: "text-teal-500", label: "Registration", labelHi: "पंजीकरण" },
-  mention: { icon: MessageSquare, color: "text-yellow-500", label: "Mention", labelHi: "उल्लेख" },
-  system: { icon: AlertCircle, color: "text-muted-foreground", label: "System", labelHi: "सिस्टम" },
-};
-
-const DEFAULT_KIND = { icon: Bell, color: "text-muted-foreground", label: "Notification", labelHi: "सूचना" };
 
 function timeAgo(dateStr: string, lang: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -113,7 +102,7 @@ export function NotificationsPanel() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("All kinds", "सभी प्रकार")}</SelectItem>
-                {Object.entries(KIND_CONFIG).map(([k, cfg]) => (
+                {Object.entries(NOTIFICATION_KINDS).map(([k, cfg]) => (
                   <SelectItem key={k} value={k}>{t(cfg.label, cfg.labelHi)}</SelectItem>
                 ))}
               </SelectContent>
@@ -146,8 +135,7 @@ export function NotificationsPanel() {
               is_read: boolean; created_at: string; entity_type?: string | null;
               entity_id?: string | null; metadata?: { link_path?: string } | null;
             }) => {
-              const cfg = KIND_CONFIG[n.kind] ?? DEFAULT_KIND;
-              const Icon = cfg.icon;
+              const cfg = getNotificationKind(n.kind);
               return (
                 <button
                   key={n.id}
@@ -157,7 +145,7 @@ export function NotificationsPanel() {
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${n.is_read ? "bg-muted" : "bg-primary/10"}`}>
-                    <Icon className={`w-4 h-4 ${cfg.color}`} />
+                    <AppIcon icon={cfg.icon} tone={cfg.tone} size="sm" label={t(cfg.label, cfg.labelHi)} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">

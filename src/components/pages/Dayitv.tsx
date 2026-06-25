@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -169,6 +170,7 @@ export default function Dayitv() {
   const { addToast } = useToast();
 
   const viewerUnitId = viewer?.assignments?.find((a) => a.isPrimary)?.unitId ?? null;
+  const viewerName = viewer?.displayName ?? viewer?.email ?? 'Current coordinator';
 
   useEffect(() => {
     if (error) {
@@ -190,7 +192,7 @@ export default function Dayitv() {
     const currentVibhag = {
       name: orgName,
       nameHi: orgNameHi,
-      sanyojak: 'Shri [Name]',
+      sanyojak: viewerName,
       isCurrent: true,
       aayams: orgData.departments
         .filter((d) => ['yuva', 'mahila', 'shodh', 'prachar', 'vimarsh'].includes(d.departmentKind))
@@ -205,13 +207,13 @@ export default function Dayitv() {
     const otherVibhags = orgData.units.map((u) => ({
       name: u.name,
       nameHi: u.nameHi ?? u.name,
-      sanyojak: 'Shri [Name]',
+      sanyojak: orgData.heads[u.id] ?? 'Assign coordinator',
       isCurrent: u.id === viewerUnitId,
       aayams: [] as { name: string; pramukh: string; contact: string }[],
     }));
 
     return [currentVibhag, ...otherVibhags];
-  }, [orgData, viewerUnitId]);
+  }, [orgData, viewerName, viewerUnitId]);
 
   const [expanded, setExpanded] = useState<Set<string>>(new Set([orgData?.org.name ?? '']));
 
@@ -265,6 +267,27 @@ export default function Dayitv() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 pb-10">
       <DayitvMasthead t={t} contexts={contexts} />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <Link href="/users" className="w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto gap-2">
+            <Users className="h-4 w-4" />
+            {t('Manage role assignments', 'Manage role assignments')}
+          </Button>
+        </Link>
+        <Link href="/directory" className="w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto gap-2">
+            <Network className="h-4 w-4" />
+            {t('Open contact directory', 'Open contact directory')}
+          </Button>
+        </Link>
+        <Link href="/ikai" className="w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto gap-2">
+            <Building2 className="h-4 w-4" />
+            {t('Manage units', 'Manage units')}
+          </Button>
+        </Link>
+      </div>
 
       {/* ── SECTION: कार्य का स्वरूप ─────────────────────────────────── */}
       <section className="space-y-6">
@@ -422,7 +445,7 @@ export default function Dayitv() {
                     {t('Kshetra Level', 'क्षेत्र स्तर')}
                   </Badge>
                   <h3 className="font-bold text-xl tracking-tight">{t('Kshetriya Pramukh', 'क्षेत्रीय प्रमुख')}</h3>
-                  <p className="text-sm text-muted-foreground font-medium">{t('Shri [Name] · Madhya Kshetra', 'श्री [नाम] · मध्य क्षेत्र')}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{t('Regional leadership record · Madhya Kshetra', 'Regional leadership record · Madhya Kshetra')}</p>
                 </div>
               </CardContent>
             </Card>

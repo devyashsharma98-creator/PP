@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search, Phone, MapPin, User, Mail, Users, Filter,
-  ChevronDown, ChevronRight, Network, Shield, Award, MessageCircle
+  ChevronDown, ChevronRight, Network, Shield, Award, MessageCircle, Copy
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -132,6 +132,20 @@ export default function Directory() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const { data: members = [], isLoading, error } = useDirectory();
   const { addToast } = useToast();
+
+  const copyMemberDetails = async (member: typeof members[number]) => {
+    const details = [
+      member.displayName ?? member.email,
+      member.primaryRoleName,
+      member.departmentName,
+      member.unitName,
+      member.phone ? `Phone: ${member.phone}` : null,
+      `Email: ${member.email}`,
+    ].filter(Boolean).join('\n');
+
+    await navigator.clipboard?.writeText(details);
+    addToast(t('Contact details copied', 'Contact details copied'), 'success');
+  };
 
   useEffect(() => {
     if (error) {
@@ -354,9 +368,12 @@ export default function Directory() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex gap-3 pt-2">
+                                <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                                   <Button size="lg" variant="outline" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl border-border/70 font-bold uppercase tracking-[0.16em] hover:bg-muted/50" asChild>
                                     <a href={`tel:${m.phone ?? ''}`}><Phone className="w-4 h-4" /> {t('Voice Call', 'कॉल करें')}</a>
+                                  </Button>
+                                  <Button size="lg" variant="outline" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl border-border/70 font-bold uppercase tracking-[0.16em] hover:bg-muted/50" onClick={(event) => { event.stopPropagation(); void copyMemberDetails(m); }}>
+                                    <Copy className="w-4 h-4" /> {t('Copy Details', 'Copy Details')}
                                   </Button>
                                   <Button size="lg" className="flex-1 text-[10px] h-12 gap-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-[0.16em] shadow-lg shadow-emerald-500/20 border-0 transition-all hover:-translate-y-0.5 active:translate-y-0" asChild>
                                     <a href={`https://wa.me/91${(m.phone ?? '').replace(/X/g, '0').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
@@ -407,8 +424,12 @@ export default function Directory() {
                 {t('Contact the Vibhag Sanyojak for institutional alignment and regional unit access. Our coordination team ensures that every karyakarta is connected to the right resource and thematic lead.', 'संस्थागत समन्वय और क्षेत्रीय इकाई पहुंच के लिए विभाग संयोजक से संपर्क करें। हमारी समन्वय टीम यह सुनिश्चित करती है कि प्रत्येक कार्यकर्ता सही संसाधन और विषयगत नेतृत्व से जुड़ा हो।')}
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 h-12 px-10 rounded-2xl border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
-              <Shield className="w-4 h-4" /> {t('Vibhag Sanyojak', 'विभाग संयोजक')}
+            <Button
+              variant="outline"
+              className="shrink-0 h-12 px-10 rounded-2xl border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all"
+              onClick={() => { setSearch('Vibhag'); setAayamFilter('All'); }}
+            >
+              <Shield className="w-4 h-4" /> {t('Find Vibhag leads', 'Find Vibhag leads')}
             </Button>
           </CardContent>
         </Card>

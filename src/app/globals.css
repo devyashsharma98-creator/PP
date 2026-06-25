@@ -74,6 +74,26 @@
 
     /* Saffron deep stop — anchors gradients (login crest, hero glow). */
     --saffron-deep: 27 100% 28%;
+
+    /* Info — calm slate-blue (previously referenced in tailwind but undefined). */
+    --info: 210 68% 44%;
+
+    /* ── Icon foundation ──────────────────────────────────────────────────
+       Organisation-aligned icon palette (light mode). Calm Bharatiya
+       institutional tones — saffron-led, muted, never decorative. Tuned for
+       legibility at 16px on the parchment background. */
+    --icon-primary: 27 95% 45%;    /* saffron */
+    --icon-muted: 220 14% 46%;     /* neutral ink */
+    --icon-success: 152 55% 36%;   /* green */
+    --icon-warning: 36 95% 37%;    /* amber — darkened for 3:1 on parchment */
+    --icon-info: 210 68% 44%;      /* muted blue */
+    --icon-research: 222 47% 40%;  /* deep indigo — शोध */
+    --icon-vimarsh: 246 34% 48%;   /* muted indigo-violet — विमर्श */
+    --icon-sanskriti: 5 60% 40%;   /* deep maroon/crimson — संस्कृति */
+    --icon-yuva: 186 52% 36%;      /* peacock teal — युवा */
+    --icon-mahila: 340 42% 47%;    /* dignified lotus-rose — महिला */
+    --icon-prachar: 33 76% 44%;    /* muted gold/ochre — प्रचार */
+    --icon-admin: 220 18% 38%;     /* steel slate — प्रशासन */
     }
 
     .dark {
@@ -122,6 +142,25 @@
     --parchment-accent-soft: 10 35% 22%;
 
     --saffron-deep: 27 90% 38%;
+
+    /* Info — slate-blue, lifted for dark surfaces. */
+    --info: 208 70% 64%;
+
+    /* ── Icon foundation (dark) ───────────────────────────────────────────
+       Same palette, lifted in lightness / eased in saturation for contrast
+       on the deep-navy dark background. */
+    --icon-primary: 27 100% 58%;
+    --icon-muted: 220 15% 66%;
+    --icon-success: 152 50% 55%;
+    --icon-warning: 40 88% 60%;
+    --icon-info: 208 70% 64%;
+    --icon-research: 222 58% 71%;
+    --icon-vimarsh: 246 52% 75%;
+    --icon-sanskriti: 6 68% 64%;
+    --icon-yuva: 186 56% 55%;
+    --icon-mahila: 340 58% 71%;
+    --icon-prachar: 34 80% 61%;
+    --icon-admin: 220 16% 64%;
   }
 }
 

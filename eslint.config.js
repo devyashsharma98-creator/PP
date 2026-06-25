@@ -23,6 +23,10 @@ export default tseslint.config(
       "tmp_chunks/**",
       "tmp_dashboard_chunks",
       "tmp_dashboard_chunks/**",
+      "scripts/openmontage",
+      "scripts/openmontage/**",
+      "scripts/video-poc",
+      "scripts/video-poc/**",
     ],
   },
   {

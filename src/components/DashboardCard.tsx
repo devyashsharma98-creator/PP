@@ -13,10 +13,10 @@ type DashboardCardProps = {
 };
 
 const toneClasses = {
-  saffron: "bg-orange-50 text-orange-700 ring-orange-100",
-  blue: "bg-blue-50 text-blue-700 ring-blue-100",
-  green: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
+  saffron: "bg-icon-primary/10 text-icon-primary ring-icon-primary/15",
+  blue: "bg-icon-info/10 text-icon-info ring-icon-info/15",
+  green: "bg-icon-success/10 text-icon-success ring-icon-success/15",
+  slate: "bg-icon-admin/10 text-icon-admin ring-icon-admin/15",
 };
 
 export function DashboardCard({
