@@ -61,16 +61,9 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
               {group.items.map((item) => {
                 const active = pathname === item.path;
                 return (
-                  <Link key={item.path} href={item.path} prefetch={false} onClick={() => onOpenChange(false)} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                    <item.icon className={cn("w-4 h-4 shrink-0", active && "text-primary")} />
-                    <div className="min-w-0">
-                      <span className={cn("block leading-none", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
-                      {item.description ? (
-                        <span className={cn("mt-0.5 block truncate text-[10px] leading-tight text-sidebar-foreground/40", lang === "hi" && "font-devanagari")}>
-                          {t(item.description, item.descriptionHi ?? item.sublabel)}
-                        </span>
-                      ) : null}
-                    </div>
+                  <Link key={item.path} href={item.path} prefetch={false} onClick={() => onOpenChange(false)} className={cn("flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150", active ? "bg-sidebar-primary/90 text-sidebar-primary-foreground shadow-sm" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground")}>
+                    <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "drop-shadow-sm")} />
+                    <span className={cn("flex-1 truncate text-xs leading-tight", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
                   </Link>
                 );
               })}
