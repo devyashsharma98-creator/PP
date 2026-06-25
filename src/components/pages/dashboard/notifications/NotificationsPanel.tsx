@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, CheckCheck, Eye, EyeOff, RefreshCw, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bell, CheckCheck, Eye, EyeOff, RefreshCw, ArrowLeft, ArrowRight, Clock, ChevronRight } from "lucide-react";
 
 import { useNotifications, useUnreadCount, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/hooks/api/use-notifications";
 import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { NOTIFICATION_KINDS, getNotificationKind } from "@/lib/app/icon-map";
+import { resolveNotificationLink, type Notification } from "@/lib/api/notifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,7 @@ function timeAgo(dateStr: string, lang: string): string {
 export function NotificationsPanel() {
   const { lang } = useAppContext();
   const t = useT();
+  const router = useRouter();
 
   const [tab, setTab] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
@@ -49,6 +52,12 @@ export function NotificationsPanel() {
 
   const handleMarkAllRead = async () => {
     try { await markAllRead.mutateAsync(); } catch { return; }
+  };
+
+  const handleOpen = (n: Notification) => {
+    if (!n.isRead) handleMarkRead(n.id);
+    const link = resolveNotificationLink(n);
+    if (link) router.push(link);
   };
 
   return (
@@ -130,29 +139,26 @@ export function NotificationsPanel() {
           </div>
         ) : (
           <div className="space-y-1">
-            {notifications.map((n: {
-              id: string; kind: string; title: string; body?: string | null;
-              is_read: boolean; created_at: string; entity_type?: string | null;
-              entity_id?: string | null; metadata?: { link_path?: string } | null;
-            }) => {
+            {notifications.map((n: Notification) => {
               const cfg = getNotificationKind(n.kind);
+              const link = resolveNotificationLink(n);
               return (
                 <button
                   key={n.id}
-                  onClick={() => { if (!n.is_read) handleMarkRead(n.id); }}
+                  onClick={() => handleOpen(n)}
                   className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors hover:bg-muted/60 ${
-                    n.is_read ? "opacity-60" : "bg-muted/30"
-                  }`}
+                    n.isRead ? "opacity-60" : "bg-muted/30"
+                  } ${link ? "cursor-pointer" : "cursor-default"}`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${n.is_read ? "bg-muted" : "bg-primary/10"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${n.isRead ? "bg-muted" : "bg-primary/10"}`}>
                     <AppIcon icon={cfg.icon} tone={cfg.tone} size="sm" label={t(cfg.label, cfg.labelHi)} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className={`text-sm leading-snug ${n.is_read ? "" : "font-medium"}`}>
+                      <p className={`text-sm leading-snug ${n.isRead ? "" : "font-medium"}`}>
                         {n.title}
                       </p>
-                      {!n.is_read && (
+                      {!n.isRead && (
                         <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                       )}
                     </div>
@@ -162,14 +168,16 @@ export function NotificationsPanel() {
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5" />
-                        {timeAgo(n.created_at, lang)}
+                        {timeAgo(n.createdAt, lang)}
                       </span>
                       <Badge variant="outline" className="text-[9px] px-1 py-0">
                         {t(cfg.label, cfg.labelHi)}
                       </Badge>
                     </div>
                   </div>
-                  {n.is_read ? (
+                  {link ? (
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/60 shrink-0 mt-1" />
+                  ) : n.isRead ? (
                     <EyeOff className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-1" />
                   ) : (
                     <Eye className="w-3.5 h-3.5 text-primary/60 shrink-0 mt-1" />

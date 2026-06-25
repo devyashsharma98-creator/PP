@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,6 +18,15 @@ import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
+import { useVimarshTopics } from '@/hooks/api/use-vimarsh-topics';
+
+// Map vimarsh topic groups → charcha categories
+const GROUP_TO_CATEGORY: Record<string, string> = {
+  atma_bodh: "Philosophy",
+  forces_of_division: "Governance",
+  targeted_groups: "Social Development",
+  other: "General",
+};
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -111,18 +122,21 @@ function ThreadDetailSkeleton() {
 // ── Create Thread Form ────────────────────────────────────────────────────
 
 function CreateThreadForm({
-  onSave, onCancel, t, isHi,
+  onSave, onCancel, t, isHi, initialTitle, initialBody, initialCategory,
 }: {
   onSave: (data: { title: string; titleHi: string; body: string; bodyHi: string; category: string }) => Promise<void>;
   onCancel: () => void;
   t: (en: string, hi: string) => string;
   isHi: boolean;
+  initialTitle?: string;
+  initialBody?: string;
+  initialCategory?: string;
 }) {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle ?? '');
   const [titleHi, setTitleHi] = useState('');
-  const [body, setBody] = useState('');
+  const [body, setBody] = useState(initialBody ?? '');
   const [bodyHi, setBodyHi] = useState('');
-  const [category, setCategory] = useState('General');
+  const [category, setCategory] = useState(initialCategory ?? 'General');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -253,6 +267,34 @@ export default function VimarshCharcha() {
   const { lang } = useAppContext();
   const t = useT();
   const isHi = lang === 'hi';
+  const searchParams = useSearchParams();
+  const topic = searchParams.get('topic');
+  const topicId = searchParams.get('topicId');
+  const seededRef = useRef(false);
+
+  const { data: topicGroups } = useVimarshTopics();
+
+  const vimarshTopic = useMemo(() => {
+    if (!topicId || !topicGroups) return null;
+    for (const g of topicGroups) {
+      const found = g.topics.find((t) => t.id === topicId);
+      if (found) return found;
+    }
+    return null;
+  }, [topicId, topicGroups]);
+
+  const initialThreadData = useMemo(() => {
+    if (!vimarshTopic) return { title: topic ?? '', body: '', category: 'General' };
+    const desc = vimarshTopic.description ?? '';
+    const resourceList = vimarshTopic.resources.length > 0
+      ? '\n\nResources:\n' + vimarshTopic.resources.map((r) => `- ${r.title}: ${r.url}`).join('\n')
+      : '';
+    return {
+      title: vimarshTopic.title,
+      body: desc + resourceList,
+      category: GROUP_TO_CATEGORY[vimarshTopic.group] ?? 'General',
+    };
+  }, [vimarshTopic, topic]);
 
   const [view, setView] = useState<ViewState>("list");
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
@@ -279,6 +321,13 @@ export default function VimarshCharcha() {
   }, []);
 
   useEffect(() => { fetchThreads(); }, [fetchThreads]);
+
+  useEffect(() => {
+    if ((topic || topicId) && !seededRef.current) {
+      seededRef.current = true;
+      setView("create");
+    }
+  }, [topic, topicId]);
 
   const filteredThreads = useMemo(() => {
     let result = threads;
@@ -589,7 +638,14 @@ export default function VimarshCharcha() {
           >
             {/* New Discussion button */}
             {view !== "create" && (
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between gap-3">
+                <Link
+                  href="/vimarsh"
+                  className="flex items-center gap-2 min-h-[44px] text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {t("Back to Vimarsh", "विमर्श पर वापस")}
+                </Link>
                 <Button onClick={() => setView("create")} className="min-h-[44px] text-[11px] font-bold uppercase tracking-widest">
                   <Plus className="w-4 h-4 mr-2" />
                   {t("New Discussion", "नई चर्चा")}
@@ -604,6 +660,9 @@ export default function VimarshCharcha() {
                 onCancel={() => setView("list")}
                 t={t}
                 isHi={isHi}
+                initialTitle={initialThreadData.title}
+                initialBody={initialThreadData.body}
+                initialCategory={initialThreadData.category}
               />
             )}
 

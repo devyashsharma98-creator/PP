@@ -6,11 +6,14 @@ import { Masthead } from "@/components/Masthead";
 import { Card, CardContent } from "@/components/ui/card";
 import { PenLine } from "lucide-react";
 import type { AalekhArticle } from "@/context/AppContext";
-import { ArticleCard, WriteArticleDialog } from "./shared";
+import { ArticleCard, WriteArticleDialog, ReviseArticleDialog } from "./shared";
 
 interface KaryakartaViewProps {
   articles: AalekhArticle[];
   viewToggle?: React.ReactNode;
+  initialTitle?: string;
+  initialContent?: string;
+  onResubmit: (id: string, form: { title: string; content: string; summary: string; socialUrl: string; documentUrl: string; valuesChecklist: { rashtraPratham: boolean; culturallyGrounded: boolean; balancedTone: boolean; noDivisiveContent: boolean } }) => Promise<boolean>;
   handleSubmit: (form: {
     title: string;
     content: string;
@@ -22,7 +25,7 @@ interface KaryakartaViewProps {
   }) => Promise<boolean>;
 }
 
-export function KaryakartaView({ articles, handleSubmit, viewToggle }: KaryakartaViewProps) {
+export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitle, initialContent, onResubmit }: KaryakartaViewProps) {
   const t = useT();
   const mine = articles.filter(a => a.author === "Current User");
 
@@ -35,7 +38,7 @@ export function KaryakartaView({ articles, handleSubmit, viewToggle }: Karyakart
         titleHi="आलेख लिखें और समीक्षा हेतु भेजें"
         subtitle="Write clearly, revise returned drafts, and send each aalekh into review."
         subtitleHi="स्पष्ट लिखें, लौटे मसौदे सुधारें और हर आलेख समीक्षा में भेजें।"
-        actions={<WriteArticleDialog onSubmit={handleSubmit} />}
+        actions={<WriteArticleDialog onSubmit={handleSubmit} initialTitle={initialTitle} initialContent={initialContent} />}
         contexts={[
           {
             labelEn: "Current lane",
@@ -76,7 +79,12 @@ export function KaryakartaView({ articles, handleSubmit, viewToggle }: Karyakart
         <div className="space-y-3">
           {mine.map((a, i) => (
             <motion.div key={a.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ArticleCard article={a} />
+              <ArticleCard
+                article={a}
+                actions={a.status === "Returned for Revision" ? (
+                  <ReviseArticleDialog article={a} onResubmit={(form) => onResubmit(a.id, form)} />
+                ) : undefined}
+              />
             </motion.div>
           ))}
         </div>

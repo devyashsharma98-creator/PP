@@ -70,3 +70,41 @@ export function useUpdateArticleStatus() {
     },
   });
 }
+
+export interface ResubmitForm {
+  title: string;
+  content: string;
+  summary: string;
+  socialUrl: string;
+  documentUrl: string;
+  valuesChecklist: { rashtraPratham: boolean; culturallyGrounded: boolean; balancedTone: boolean; noDivisiveContent: boolean };
+}
+
+export function useResubmitArticle() {
+  const queryClient = useQueryClient();
+  const { refreshWorkspace } = useAppContext();
+  return useMutation({
+    mutationFn: async ({ id, form }: { id: string; form: ResubmitForm }) => {
+      await fetchApi(`/articles/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          title: form.title,
+          content: form.content,
+          summary: form.summary,
+          socialUrl: form.socialUrl || undefined,
+          documentUrl: form.documentUrl || undefined,
+          valuesChecklist: form.valuesChecklist,
+        }),
+      });
+      return fetchApi<AalekhArticle>(`/articles/${id}/workflow`, {
+        method: 'POST',
+        body: JSON.stringify({ toStatus: 'pending_unit_head_review', valuesChecklist: form.valuesChecklist }),
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-articles'] });
+      await refreshWorkspace();
+    },
+  });
+}

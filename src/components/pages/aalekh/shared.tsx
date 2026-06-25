@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/context/AppContext";
 import { repairBrokenHindi, useT } from '@/lib/useT';
@@ -170,6 +171,16 @@ export function ArticleCard({
                 </div>
               </div>
               {actions && <div className="border-t border-border/50 pt-3">{actions}</div>}
+              {article.status === "Published" && (
+                <div className="border-t border-border/50 pt-3">
+                  <Link
+                    href={`/aalekh/${article.id}`}
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                  >
+                    <ExternalLink className="w-3 h-3" /> {t('View permalink', 'स्थायी लिंक देखें')}
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -179,11 +190,11 @@ export function ArticleCard({
 }
 
 // ─── Write Article Form ───────────────────────────────────────────────────────
-export function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof emptyForm) => Promise<boolean> }) {
+export function WriteArticleDialog({ onSubmit, initialTitle, initialContent }: { onSubmit: (form: typeof emptyForm) => Promise<boolean>; initialTitle?: string; initialContent?: string }) {
   const t = useT();
   const { lang } = useAppContext();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [open, setOpen] = useState(!!initialTitle);
+  const [form, setForm] = useState(initialTitle ? { ...emptyForm, title: initialTitle, ...(initialContent ? { content: initialContent, summary: initialContent.slice(0, 150) } : {}) } : emptyForm);
 
   const allValuesChecked = Object.values(form.valuesChecklist).every(Boolean);
 
@@ -305,6 +316,129 @@ export function WriteArticleDialog({ onSubmit }: { onSubmit: (form: typeof empty
           <Button type="submit" className="w-full" disabled={!allValuesChecked}>
             <Send className="w-4 h-4 mr-2" />
             {allValuesChecked ? t("Send to Unit Head Review", "यूनिट प्रमुख समीक्षा को भेजें") : t("Check all values to send", "भेजने से पहले सभी बिंदु जांचें")}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Revise & Resubmit Dialog (karyakarta revision loop) ───────────────────────
+export function ReviseArticleDialog({ article, onResubmit }: {
+  article: AalekhArticle;
+  onResubmit: (form: { title: string; content: string; summary: string; socialUrl: string; documentUrl: string; valuesChecklist: typeof emptyValues }) => Promise<boolean>;
+}) {
+  const t = useT();
+  const { lang } = useAppContext();
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({
+    title: article.title,
+    content: article.content,
+    summary: article.summary,
+    socialUrl: article.socialUrl ?? '',
+    documentUrl: article.documentUrl ?? '',
+    valuesChecklist: { ...(article.valuesChecklist ?? emptyValues) },
+  });
+
+  const allValuesChecked = Object.values(form.valuesChecklist).every(Boolean);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.title || !form.content || !allValuesChecked) return;
+    setSaving(true);
+    setError('');
+    try {
+      const ok = await onResubmit(form);
+      if (!ok) return;
+      setOpen(false);
+    } catch {
+      setError(t("Failed to resubmit article.", "आलेख पुनः भेजने में विफल।"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleValue = (key: keyof typeof emptyValues) =>
+    setForm(p => ({ ...p, valuesChecklist: { ...p.valuesChecklist, [key]: !p.valuesChecklist[key] } }));
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="h-7 text-xs">
+          <RotateCcw className="w-3 h-3 mr-1" /> {t("Revise & Resubmit", "सुधार कर पुनः भेजें")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg bg-popover max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t("Revise & Resubmit", "सुधार कर पुनः भेजें")}</DialogTitle>
+          <DialogDescription>
+            {t("Address the reviewer notes, then send this aalekh back into review.", "समीक्षक टिप्पणी सुधारें, फिर इस आलेख को पुनः समीक्षा में भेजें।")}
+          </DialogDescription>
+        </DialogHeader>
+        {article.latestReviewNotes && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 font-devanagari">{t('Reviewer Notes', 'समीक्षक टिप्पणी')}</p>
+              <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5 whitespace-pre-wrap">{article.latestReviewNotes}</p>
+            </div>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>{t("Title", "शीर्षक")}</Label>
+            <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required />
+          </div>
+          <div>
+            <Label>{t("Content (Full Article)", "सामग्री (पूर्ण आलेख)")}</Label>
+            <Textarea
+              value={form.content}
+              onChange={e => setForm(p => ({ ...p, content: e.target.value, summary: e.target.value.slice(0, 150) }))}
+              rows={6}
+              required
+            />
+          </div>
+          <div>
+            <Label>{t("Summary", "सारांश")}</Label>
+            <Textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))} rows={2} />
+          </div>
+          <div>
+            <Label>{t("Social Media URL", "सोशल मीडिया लिंक")} <span className="text-muted-foreground text-xs">({t("optional", "वैकल्पिक")})</span></Label>
+            <Input value={form.socialUrl} onChange={e => setForm(p => ({ ...p, socialUrl: e.target.value }))} type="url" />
+          </div>
+          <div>
+            <Label>{t("Document URL", "दस्तावेज़ लिंक")} <span className="text-muted-foreground text-xs">({t("optional", "वैकल्पिक")})</span></Label>
+            <Input value={form.documentUrl} onChange={e => setForm(p => ({ ...p, documentUrl: e.target.value }))} type="url" />
+          </div>
+          <div className="aalekh-values-panel">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-foreground/80 font-devanagari">
+                {t('Editorial Maryada Check', 'संपादकीय मर्यादा जांच')} <span className="text-muted-foreground font-normal">({t('all required to submit', 'सभी अनिवार्य')})</span>
+              </p>
+            </div>
+            {valuesItems.map(v => (
+              <div key={v.key} className="aalekh-values-item">
+                <Checkbox
+                  id={`revise-${v.key}`}
+                  checked={form.valuesChecklist[v.key]}
+                  onCheckedChange={() => toggleValue(v.key)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor={`revise-${v.key}`} className="text-sm cursor-pointer leading-snug">
+                  <span className="font-medium font-devanagari">{lang === 'hi' ? repairBrokenHindi(v.label) : v.sublabel}</span>
+                  <span className="block text-[10px] text-muted-foreground">{t(v.sublabel, v.sublabelHi)}</span>
+                </Label>
+              </div>
+            ))}
+          </div>
+          {error && (
+            <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-[11px] font-bold">{error}</div>
+          )}
+          <Button type="submit" className="w-full" disabled={!allValuesChecked || saving}>
+            <Send className="w-4 h-4 mr-2" />
+            {saving ? t("Sending...", "भेजा जा रहा...") : t("Resubmit for Review", "समीक्षा हेतु पुनः भेजें")}
           </Button>
         </form>
       </DialogContent>

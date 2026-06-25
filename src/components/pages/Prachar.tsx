@@ -29,7 +29,7 @@ import {
 import {
   Megaphone, CheckCircle2, AlertCircle, MessageCircle,
   Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
-  FileText, Clock3, Send, Sparkles, Plus, Pencil, Copy,
+  FileText, Clock3, Send, Sparkles, Plus, Pencil, Copy, BarChart3,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useDashboardEvents } from '@/hooks/api/use-dashboard';
@@ -131,6 +131,15 @@ function PracharMasthead({
             <p className="prachar-context-detail">{t(context.detailEn, context.detailHi)}</p>
           </div>
         ))}
+      </div>
+
+      <div className="flex justify-end pt-1">
+        <Link href="/prachar-vishleshan">
+          <Button variant="outline" size="sm" className="text-xs">
+            <BarChart3 className="w-3.5 h-3.5 mr-1" />
+            {t('View Coverage Analytics', 'आच्छादन विश्लेषण देखें')}
+          </Button>
+        </Link>
       </div>
     </div>
   );

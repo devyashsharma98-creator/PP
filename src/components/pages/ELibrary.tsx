@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Search, BookOpen, Download, FileText, Filter, Star, Eye,
   ChevronRight, Library, BookMarked, Sparkles, Compass, TrendingUp,
-  User
+  User, Upload
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
+import { useToast } from '@/components/ToastProvider';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
 
@@ -218,31 +222,69 @@ function BookCover({ book, isHi, size = "md" }: { book: Book; isHi: boolean; siz
 // ── Main Component ───────────────────────────────────────────────────────────
 
 export default function ELibrary() {
-  const { lang } = useAppContext();
+  const { lang, permissions } = useAppContext();
   const t = useT();
+  const { addToast } = useToast();
   const isHi = lang === 'hi';
 
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [books, setBooks] = useState<Book[]>(FALLBACK_BOOKS);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: '', titleHi: '', author: '', category: 'Darshan', pages: 0, year: '',
+    description: '', descriptionHi: '', readUrl: '', downloadUrl: '',
+  });
 
-  useEffect(() => {
-    let active = true;
+  const loadBooks = useCallback(() => {
     fetch('/api/public/library')
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (active && json?.success && Array.isArray(json.data) && json.data.length > 0) {
+        if (json?.success && Array.isArray(json.data) && json.data.length > 0) {
           setBooks(json.data as Book[]);
         }
       })
       .catch(() => {
         /* keep fallback set */
       });
-    return () => {
-      active = false;
-    };
   }, []);
+
+  useEffect(() => { loadBooks(); }, [loadBooks]);
+
+  const handleUpload = useCallback(async () => {
+    if (!uploadForm.title.trim() || !uploadForm.titleHi.trim() || !uploadForm.author.trim() || uploading) return;
+    setUploading(true);
+    try {
+      const res = await fetch('/api/v1/library', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: uploadForm.title.trim(),
+          titleHi: uploadForm.titleHi.trim(),
+          author: uploadForm.author.trim(),
+          category: uploadForm.category,
+          pages: Number(uploadForm.pages) || 0,
+          year: uploadForm.year.trim(),
+          description: uploadForm.description.trim(),
+          descriptionHi: uploadForm.descriptionHi.trim(),
+          readUrl: uploadForm.readUrl.trim() || undefined,
+          downloadUrl: uploadForm.downloadUrl.trim() || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error?.message ?? 'Upload failed');
+      addToast(t('Text added to library!', 'ग्रंथ पुस्तकालय में जोड़ा गया!'), 'success');
+      setShowUpload(false);
+      setUploadForm({ title: '', titleHi: '', author: '', category: 'Darshan', pages: 0, year: '', description: '', descriptionHi: '', readUrl: '', downloadUrl: '' });
+      loadBooks();
+    } catch (err) {
+      addToast(t('Failed to add text', 'ग्रंथ जोड़ने में विफल'), 'error', err instanceof Error ? err.message : undefined);
+    } finally {
+      setUploading(false);
+    }
+  }, [uploadForm, uploading, addToast, t, loadBooks]);
 
   const filtered = books.filter(b => {
     const matchCategory = activeCategory === 'All' || b.category === activeCategory;
@@ -537,12 +579,89 @@ export default function ELibrary() {
                 {t('Upload digitized PDFs of rare Bharatiya texts to expand our community library. Your contribution helps preserve our collective intellectual legacy.', 'हमारे सामुदायिक पुस्तकालय का विस्तार करने के लिए दुर्लभ ग्रंथों की डिजिटल PDF अपलोड करें। आपका योगदान हमारी सामूहिक बौद्धिक विरासत को संरक्षित करने में मदद करता है।')}
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
-              <BookOpen className="w-4 h-4" /> {t('Upload Text', 'ग्रंथ अपलोड करें')}
-            </Button>
+            {permissions?.canManageUsers ? (
+              <Button
+                variant="outline"
+                className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all"
+                onClick={() => setShowUpload(true)}
+              >
+                <Upload className="w-4 h-4" /> {t('Upload Text', 'ग्रंथ अपलोड करें')}
+              </Button>
+            ) : (
+              <p className="shrink-0 text-xs text-muted-foreground max-w-[16rem] text-center md:text-right font-devanagari">
+                {t('Curated by institutional editors. Contact your unit to contribute.', 'संस्थागत संपादकों द्वारा चयनित। योगदान हेतु अपनी इकाई से संपर्क करें।')}
+              </p>
+            )}
           </CardContent>
         </Card>
       </motion.div>
+
+      <Dialog open={showUpload} onOpenChange={setShowUpload}>
+        <DialogContent className="sm:max-w-lg bg-popover max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('Add Library Text', 'ग्रंथ जोड़ें')}</DialogTitle>
+            <DialogDescription>
+              {t('Add a curated text to the institutional E-Library.', 'संस्थागत ई-पुस्तकालय में एक चयनित ग्रंथ जोड़ें।')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>{t('Title (English)', 'शीर्षक (अंग्रेज़ी)')}</Label>
+              <Input value={uploadForm.title} onChange={(e) => setUploadForm((p) => ({ ...p, title: e.target.value }))} />
+            </div>
+            <div>
+              <Label>{t('Title (Hindi)', 'शीर्षक (हिंदी)')}</Label>
+              <Input value={uploadForm.titleHi} onChange={(e) => setUploadForm((p) => ({ ...p, titleHi: e.target.value }))} dir="auto" className="font-devanagari" />
+            </div>
+            <div>
+              <Label>{t('Author', 'लेखक')}</Label>
+              <Input value={uploadForm.author} onChange={(e) => setUploadForm((p) => ({ ...p, author: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label>{t('Category', 'श्रेणी')}</Label>
+                <select
+                  value={uploadForm.category}
+                  onChange={(e) => setUploadForm((p) => ({ ...p, category: e.target.value }))}
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {categories.filter((c) => c !== 'All').map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>{t('Pages', 'पृष्ठ')}</Label>
+                <Input type="number" value={uploadForm.pages} onChange={(e) => setUploadForm((p) => ({ ...p, pages: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <Label>{t('Year', 'वर्ष')}</Label>
+                <Input value={uploadForm.year} onChange={(e) => setUploadForm((p) => ({ ...p, year: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>{t('Description (English)', 'विवरण (अंग्रेज़ी)')}</Label>
+              <Textarea rows={2} value={uploadForm.description} onChange={(e) => setUploadForm((p) => ({ ...p, description: e.target.value }))} />
+            </div>
+            <div>
+              <Label>{t('Description (Hindi)', 'विवरण (हिंदी)')}</Label>
+              <Textarea rows={2} value={uploadForm.descriptionHi} onChange={(e) => setUploadForm((p) => ({ ...p, descriptionHi: e.target.value }))} dir="auto" className="font-devanagari" />
+            </div>
+            <div>
+              <Label>{t('Read URL', 'पठन लिंक')} <span className="text-muted-foreground text-xs">({t('optional', 'वैकल्पिक')})</span></Label>
+              <Input type="url" value={uploadForm.readUrl} onChange={(e) => setUploadForm((p) => ({ ...p, readUrl: e.target.value }))} placeholder="https://..." />
+            </div>
+            <div>
+              <Label>{t('Download URL', 'डाउनलोड लिंक')} <span className="text-muted-foreground text-xs">({t('optional', 'वैकल्पिक')})</span></Label>
+              <Input type="url" value={uploadForm.downloadUrl} onChange={(e) => setUploadForm((p) => ({ ...p, downloadUrl: e.target.value }))} placeholder="https://..." />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setShowUpload(false)}>{t('Cancel', 'रद्द करें')}</Button>
+              <Button onClick={handleUpload} disabled={!uploadForm.title.trim() || !uploadForm.titleHi.trim() || !uploadForm.author.trim() || uploading}>
+                {uploading ? t('Adding...', 'जोड़ा जा रहा...') : t('Add Text', 'ग्रंथ जोड़ें')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

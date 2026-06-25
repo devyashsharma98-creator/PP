@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAppContext, type ArticleStatus } from "@/context/AppContext";
-import { useArticles, useCreateArticle, useUpdateArticleStatus } from "@/hooks/api/use-aalekh";
+import { useArticles, useCreateArticle, useUpdateArticleStatus, useResubmitArticle, type ResubmitForm } from "@/hooks/api/use-aalekh";
+import { useVimarshTopics } from "@/hooks/api/use-vimarsh-topics";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { emptyForm } from "./aalekh/shared";
@@ -70,6 +72,29 @@ export default function Aalekh() {
   const { data: articles = [], isLoading } = useArticles();
   const createArticleMutation = useCreateArticle();
   const updateStatusMutation = useUpdateArticleStatus();
+  const resubmitMutation = useResubmitArticle();
+  const searchParams = useSearchParams();
+  const topic = searchParams.get("topic");
+  const topicId = searchParams.get("topicId");
+  const { data: topicGroups } = useVimarshTopics();
+
+  const vimarshTopic = useMemo(() => {
+    if (!topicId || !topicGroups) return null;
+    for (const g of topicGroups) {
+      const found = g.topics.find((t) => t.id === topicId);
+      if (found) return found;
+    }
+    return null;
+  }, [topicId, topicGroups]);
+
+  const initialArticleData = useMemo(() => {
+    if (!vimarshTopic) return { title: topic ?? '', content: '' };
+    const desc = vimarshTopic.description ?? '';
+    const resourceList = vimarshTopic.resources.length > 0
+      ? '\n\nReferences:\n' + vimarshTopic.resources.map((r) => `- ${r.title}: ${r.url}`).join('\n')
+      : '';
+    return { title: vimarshTopic.title, content: desc + resourceList };
+  }, [vimarshTopic, topic]);
   
   const { addToast } = useToast();
   const t = useT();
@@ -99,6 +124,17 @@ export default function Aalekh() {
       return true;
     } catch {
       addToast(t('Update failed', 'अद्यतन विफल'), 'error');
+      return false;
+    }
+  };
+
+  const handleResubmit = async (id: string, form: ResubmitForm) => {
+    try {
+      await resubmitMutation.mutateAsync({ id, form });
+      addToast(t('Article resubmitted!', 'आलेख पुनः भेजा गया!'), 'success', t('Sent back for Unit Head review', 'यूनिट प्रमुख समीक्षा को वापस भेजा गया'));
+      return true;
+    } catch {
+      addToast(t('Failed to resubmit article', 'आलेख पुनः भेजने में विफल'), 'error');
       return false;
     }
   };
@@ -139,7 +175,7 @@ export default function Aalekh() {
       {viewMode === "gallery" ? (
         <GalleryView articles={articles} />
       ) : role === "karyakarta" ? (
-        <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} />
+        <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} initialTitle={initialArticleData.title} initialContent={initialArticleData.content} onResubmit={handleResubmit} />
       ) : role === "unit_head" ? (
         <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
       ) : role === "aayam_pramukh" ? (

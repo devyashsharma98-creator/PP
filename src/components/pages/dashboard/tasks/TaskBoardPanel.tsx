@@ -176,10 +176,20 @@ export function TaskBoardPanel() {
   const handleStatusChange = useCallback(async (taskId: string, status: string) => {
     try {
       await updateTaskMutation.mutateAsync({ taskId, input: { status } });
+      if (status === "done") {
+        const remaining = typedTasks.filter((tk) => tk.id !== taskId && tk.status !== "done").length;
+        addToast(
+          t("Task completed!", "कार्य पूर्ण!"),
+          "success",
+          remaining > 0
+            ? t(`${remaining} task(s) still pending in this project`, `${remaining} कार्य इस परियोजना में अब भी लंबित`)
+            : t("All tasks in this project are done.", "इस परियोजना के सभी कार्य पूर्ण।"),
+        );
+      }
     } catch {
       addToast(t("Failed to update task", "कार्य अद्यतन करने में विफल"), "error");
     }
-  }, [updateTaskMutation, addToast, t]);
+  }, [updateTaskMutation, addToast, t, typedTasks]);
 
   const handleDeleteTask = useCallback(async (taskId: string) => {
     try {
@@ -311,6 +321,48 @@ export function TaskBoardPanel() {
               <div className="text-center py-8 text-muted-foreground">
                 <ListTodo className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">{t("No projects yet. Create your first project to get started.", "अभी तक कोई परियोजना नहीं। शुरू करने के लिए अपनी पहली परियोजना बनाएँ।")}</p>
+              </div>
+            )}
+
+            {taskboard && taskboard.unassignedTasks.length > 0 && (
+              <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                    {t(`${taskboard.unassignedTasks.length} task(s) need assignment`, `${taskboard.unassignedTasks.length} कार्य जिम्मेदारी चाहते हैं`)}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  {taskboard.unassignedTasks.slice(0, 6).map((ut) => (
+                    <div key={ut.id} className="flex items-center gap-2 text-xs">
+                      <Badge className={`text-[9px] px-1.5 py-0 font-medium ${PRIORITY_CONFIG[ut.priority as keyof typeof PRIORITY_CONFIG]?.color ?? ""}`}>
+                        {t(
+                          PRIORITY_CONFIG[ut.priority as keyof typeof PRIORITY_CONFIG]?.label ?? ut.priority,
+                          PRIORITY_CONFIG[ut.priority as keyof typeof PRIORITY_CONFIG]?.labelHi ?? ut.priority,
+                        )}
+                      </Badge>
+                      <span className="font-medium text-foreground/80 truncate flex-1">
+                        {lang === "hi" && ut.titleHi ? ut.titleHi : ut.title}
+                      </span>
+                      {ut.projectName && (
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0">{ut.projectName}</Badge>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[10px] shrink-0"
+                        onClick={() => setSelectedProjectId(ut.projectId)}
+                      >
+                        {t("Open", "खोलें")}
+                      </Button>
+                    </div>
+                  ))}
+                  {taskboard.unassignedTasks.length > 6 && (
+                    <p className="text-[10px] text-muted-foreground pl-1">
+                      {t(`+ ${taskboard.unassignedTasks.length - 6} more`, `+ ${taskboard.unassignedTasks.length - 6} और`)}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

@@ -208,7 +208,10 @@ export default function Vimarsh() {
       return topicGroups.flatMap(g => g.topics).map(t => ({
         id: t.id,
         title: t.title,
+        titleHi: t.titleHi,
         description: t.description,
+        descriptionHi: t.descriptionHi,
+        group: t.group,
         sortOrder: t.sortOrder,
         resources: t.resources,
       }));
@@ -591,13 +594,13 @@ export default function Vimarsh() {
                             )}
                           </div>
                           <div className="flex flex-col gap-2 border-t border-border/50 pt-5 sm:flex-row sm:flex-wrap">
-                            <Link href={`/charcha?topic=${encodeURIComponent(topic.title)}`} className="w-full sm:w-auto">
+                            <Link href={`/charcha?topic=${encodeURIComponent(topic.title)}&topicId=${encodeURIComponent(topic.id)}`} className="w-full sm:w-auto">
                               <Button className="w-full sm:w-auto gap-2" size="sm">
                                 <MessagesSquare className="h-4 w-4" />
                                 {tr('Start Charcha', 'Start Charcha')}
                               </Button>
                             </Link>
-                            <Link href={`/aalekh?topic=${encodeURIComponent(topic.title)}`} className="w-full sm:w-auto">
+                            <Link href={`/aalekh?topic=${encodeURIComponent(topic.title)}&topicId=${encodeURIComponent(topic.id)}`} className="w-full sm:w-auto">
                               <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
                                 <PenLine className="h-4 w-4" />
                                 {tr('Draft Aalekh', 'Draft Aalekh')}

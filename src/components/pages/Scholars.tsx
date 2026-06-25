@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Search, GraduationCap, BookOpen, Users, Filter, X, Plus,
   MapPin, Briefcase, Mail, Phone, Star, Globe, ChevronRight,
-  ChevronDown, Award, PenLine, Eye, EyeOff, Save,
+  ChevronDown, Award, PenLine, Eye, EyeOff, Save, ExternalLink,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
@@ -774,6 +775,11 @@ export default function Scholars() {
                       <Button variant="ghost" onClick={() => setSelectedScholar(null)} className="text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-widest px-5 h-11 rounded-xl">
                         {t('Close', 'बंद करें')}
                       </Button>
+                      <Link href={`/scholars/${selectedScholar.slug}`}>
+                        <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-border/70 text-xs font-bold uppercase tracking-widest">
+                          <ExternalLink className="w-4 h-4" /> {t('View Profile', 'प्रोफ़ाइल देखें')}
+                        </Button>
+                      </Link>
                       {canManage && (
                         <>
                           <Button variant="outline" onClick={() => { setEditingScholar(selectedScholar); }} className="gap-2 h-11 px-6 rounded-xl border-border/70 text-xs font-bold uppercase tracking-widest">

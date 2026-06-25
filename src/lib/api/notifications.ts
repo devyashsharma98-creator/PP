@@ -1,18 +1,41 @@
 import { fetchApi } from './events';
 
+export interface NotificationMetadata {
+  link_path?: string;
+  actor_user_id?: string;
+  body?: string;
+  [key: string]: unknown;
+}
+
 export interface Notification {
   id: string;
-  recipient_user_id: string;
-  actor_user_id: string | null;
+  orgId: string;
+  recipientUserId: string;
   kind: string;
   title: string;
   body: string | null;
-  link_path: string | null;
-  entity_type: string | null;
-  entity_id: string | null;
-  is_read: boolean;
-  read_at: string | null;
-  created_at: string;
+  entityType: string | null;
+  entityId: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  metadata: NotificationMetadata | null;
+  createdAt: string;
+}
+
+const NOTIFICATION_ROUTE_BY_KIND: Record<string, string> = {
+  event_status_change: "/calendar",
+  registration_received: "/calendar",
+  article_status_change: "/aalekh",
+  review_assigned: "/aalekh",
+  review_completed: "/aalekh",
+  poll_finalized: "/vimarsh",
+  mention: "/prachar",
+  system: "/dashboard",
+};
+
+export function resolveNotificationLink(n: Notification): string | null {
+  if (n.metadata?.link_path) return n.metadata.link_path;
+  return NOTIFICATION_ROUTE_BY_KIND[n.kind] ?? null;
 }
 
 export interface NotificationFilters {

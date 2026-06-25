@@ -148,7 +148,7 @@ function EventDetailModal({ event, open, onClose, lang, role }: {
     if (event.status === "Published") {
       return { label: t("View Details", "विवरण देखें"), href: `/dashboard?event=${event.rawId}&action=view` };
     }
-    return null;
+    return { label: t("View Details", "विवरण देखें"), href: `/dashboard?event=${event.rawId}&action=view` };
   }, [role, event, t]);
 
   if (!event) return null;

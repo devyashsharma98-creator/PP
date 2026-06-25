@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   BarChart3, MessageCircle, Send, Globe, Camera,
-  CheckCircle2, XCircle, Clock, AlertTriangle, Sparkles,
+  CheckCircle2, XCircle, Clock, AlertTriangle, Sparkles, ArrowRight, Megaphone,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
@@ -287,6 +289,12 @@ export default function PracharVishleshan() {
           <p className="text-sm text-muted-foreground/40 mt-2">
             {t('Data will appear once prachar tasks are created for events and articles.', 'कार्यक्रमों और आलेखों के लिए प्रचार कार्य बनाए जाने पर डेटा दिखाई देगा।')}
           </p>
+          <Link href="/prachar" className="inline-block mt-4">
+            <Button variant="outline" size="sm" className="text-xs">
+              <Megaphone className="w-3.5 h-3.5 mr-1" />
+              {t('Go to Prachar', 'प्रचार पर जाएं')}
+            </Button>
+          </Link>
         </div>
       ) : data ? (
         <div className="space-y-8">
@@ -324,6 +332,30 @@ export default function PracharVishleshan() {
               />
             </div>
           </div>
+
+          {data.overall.pending > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-warning/30 bg-warning/5 px-5 py-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+                  <Megaphone className="w-5 h-5 text-warning" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-foreground/90">
+                    {t(`${data.pendingEntities} entities await dissemination`, `${data.pendingEntities} इकाइयाँ प्रसार की प्रतीक्षा में`)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('Close the remaining coverage gaps from the Prachar command center.', 'शेष आच्छादन कमियाँ प्रचार संचालन कक्ष से पूरी करें।')}
+                  </p>
+                </div>
+              </div>
+              <Link href="/prachar" className="shrink-0">
+                <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto">
+                  {t('Open Prachar', 'प्रचार खोलें')}
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       ) : null}
     </motion.div>
