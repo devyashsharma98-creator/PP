@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { BonsaiProvider } from "@/context/BonsaiContext";
@@ -8,9 +8,11 @@ import { BonsaiProvider } from "@/context/BonsaiContext";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
 import { MotionConfig } from "framer-motion";
+import { WorkflowRoutePrefetcher } from "@/components/WorkflowRoutePrefetcher";
+import { createAppQueryClient } from "@/lib/query-client";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(() => createAppQueryClient());
 
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
@@ -37,6 +39,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           <QueryClientProvider client={queryClient}>
             <TooltipProvider>
               <AppProvider>
+                <WorkflowRoutePrefetcher />
                 {children}
               </AppProvider>
             </TooltipProvider>

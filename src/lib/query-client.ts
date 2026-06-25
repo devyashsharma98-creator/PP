@@ -1,8 +1,6 @@
-"use client";
-
 import { QueryClient } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient({
+const appQueryClientOptions = {
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
@@ -14,9 +12,15 @@ export const queryClient = new QueryClient({
       retry: 0,
     },
   },
-});
+} satisfies ConstructorParameters<typeof QueryClient>[0];
 
-export { queryClient as default }; 
+export function createAppQueryClient() {
+  return new QueryClient(appQueryClientOptions);
+}
+
+export const queryClient = createAppQueryClient();
+
+export { queryClient as default };
 
 export const queryKeys = {
   events: (filters?: Record<string, unknown>) => ['events', filters] as const,
