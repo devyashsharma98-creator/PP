@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -237,6 +237,8 @@ export default function AnnualCalendar() {
   const [showStatusFilter, setShowStatusFilter] = useState(false);
 
   const { role, lang, permissions } = useAppContext();
+  const searchParams = useSearchParams();
+  const deepLinkEventId = searchParams.get("event");
 
   const monthStart = useMemo(() => {
     const d = new Date(year, month, 1);
@@ -272,6 +274,13 @@ export default function AnnualCalendar() {
         description: e.description ?? undefined,
       };
     }), [events]);
+
+  // Auto-open event detail modal when arriving via ?event= deep-link
+  useEffect(() => {
+    if (!deepLinkEventId || detailEvent) return;
+    const target = dynamicEvents.find((e) => e.rawId === deepLinkEventId);
+    if (target) setDetailEvent(target);
+  }, [deepLinkEventId, dynamicEvents, detailEvent]);
 
   // Role-filtered event pool
   const roleFilteredEvents: CalEvent[] = useMemo(() => {

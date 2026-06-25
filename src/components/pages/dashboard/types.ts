@@ -42,6 +42,10 @@ export interface UnitDashboardViewProps {
   onForwardToVibhag?: (eventId: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
   onForwardToPrant?: (eventId: string) => void | Promise<void>;
   onPublishEvent?: (eventId: string, title: string, currentStatus: GatividhiEvent["status"]) => void | Promise<void>;
+  /** Auto-open the create-event dialog (from ?tab=create) */
+  autoOpenCreate?: boolean;
+  /** Event id to scroll to + highlight (from ?event=) */
+  focusEventId?: string | null;
 }
 
 export interface VrittEditorState {

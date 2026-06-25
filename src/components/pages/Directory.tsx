@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search, Phone, MapPin, User, Mail, Users, Filter,
-  ChevronDown, ChevronRight, Network, Shield, Award, MessageCircle, Copy
+  ChevronDown, ChevronRight, Network, Shield, Award, MessageCircle, Copy, ListTodo, Settings
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -380,6 +381,19 @@ export default function Directory() {
                                       <MessageCircle className="w-4 h-4" /> WhatsApp
                                     </a>
                                   </Button>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
+                                  <Link href={`/task-board?assignee=${m.id}&title=Follow+up:+${encodeURIComponent(displayName)}`}>
+                                    <Button variant="ghost" size="sm" className="text-[10px] h-9 gap-1.5 text-muted-foreground hover:text-primary">
+                                      <ListTodo className="w-3.5 h-3.5" /> {t('Assign Task', 'कार्य सौंपें')}
+                                    </Button>
+                                  </Link>
+                                  <Link href={`/users?search=${m.id}`}>
+                                    <Button variant="ghost" size="sm" className="text-[10px] h-9 gap-1.5 text-muted-foreground hover:text-primary">
+                                      <Settings className="w-3.5 h-3.5" /> {t('Manage', 'प्रबंधित करें')}
+                                    </Button>
+                                  </Link>
                                 </div>
                               </div>
                             </motion.div>

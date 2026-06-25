@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ElementType } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAppContext, GatividhiEvent, VrittStatus } from "@/context/AppContext";
 import { useDashboardEvents, useUpdateEventStatus, useUpdateVritt } from "@/hooks/api/use-dashboard";
 import { useToast } from '@/components/ToastProvider';
@@ -223,6 +224,23 @@ export default function Dashboard() {
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
   const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
   const [qrEvent, setQrEvent] = useState<GatividhiEvent | null>(null);
+
+  // ── Consume ?event=&action=&tab= from calendar handoffs ───────────────────
+  const searchParams = useSearchParams();
+  const focusEventId = searchParams.get("event");
+  const focusAction = searchParams.get("action");
+  const autoOpenCreate = searchParams.get("tab") === "create";
+
+  // For action=view on a published event, open the Vritt overlay (the dashboard's
+  // closest equivalent to "view details" for a published event).
+  useEffect(() => {
+    if (!focusEventId || !focusAction || events.length === 0) return;
+    const target = events.find((e) => e.id === focusEventId);
+    if (!target) return;
+    if (focusAction === "view" && target.status === "Published") {
+      openVrittEditor(target);
+    }
+  }, [focusEventId, focusAction, events]);
 
   // Loading state
   if (eventsLoading) {
@@ -454,6 +472,8 @@ export default function Dashboard() {
           onForwardToVibhag={handleForwardToVibhag}
           onForwardToPrant={handleForwardToPrant}
           onPublishEvent={handlePublishFromVibhag}
+          autoOpenCreate={autoOpenCreate}
+          focusEventId={focusEventId}
         />
         {reviewOverlays}
       </>
@@ -517,6 +537,11 @@ export default function Dashboard() {
         onOpenQr={setQrEvent}
         workflowPending={updateEventStatusMutation.isPending}
         onSubmitForReview={handleSubmitFromUnit}
+        onForwardToVibhag={handleForwardToVibhag}
+        onForwardToPrant={handleForwardToPrant}
+        onPublishEvent={handlePublishFromVibhag}
+        autoOpenCreate={autoOpenCreate}
+        focusEventId={focusEventId}
       />
       {reviewOverlays}
     </>

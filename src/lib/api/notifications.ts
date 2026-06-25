@@ -33,8 +33,35 @@ const NOTIFICATION_ROUTE_BY_KIND: Record<string, string> = {
   system: "/dashboard",
 };
 
+/**
+ * Resolve the deepest available route for a notification.
+ * Priority:
+ *   1. metadata.link_path (explicit backend-provided path)
+ *   2. Exact entity route using entityType + entityId
+ *      - article → /aalekh/[entityId]
+ *      - event   → /calendar?event=[entityId]
+ *      - scholar → /scholars/[entityId] (if entityId is a slug)
+ *   3. Kind-based module root fallback
+ *   4. null (no link)
+ */
 export function resolveNotificationLink(n: Notification): string | null {
+  // 1. Explicit backend link
   if (n.metadata?.link_path) return n.metadata.link_path;
+
+  // 2. Exact entity route
+  if (n.entityId) {
+    const et = n.entityType;
+    if (et === "article") return `/aalekh/${encodeURIComponent(n.entityId)}`;
+    if (et === "event") return `/calendar?event=${encodeURIComponent(n.entityId)}`;
+    if (et === "scholar") return `/scholars/${encodeURIComponent(n.entityId)}`;
+  }
+
+  // 3. Kind-based fallback (poll_finalized with an event entityId → calendar)
+  if (n.kind === "poll_finalized" && n.entityId) {
+    return `/calendar?event=${encodeURIComponent(n.entityId)}`;
+  }
+
+  // 4. Generic kind → module root
   return NOTIFICATION_ROUTE_BY_KIND[n.kind] ?? null;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, isValid, parseISO } from "date-fns";
@@ -44,6 +44,8 @@ export function UnitDashboardView({
   onForwardToVibhag,
   onForwardToPrant,
   onPublishEvent,
+  autoOpenCreate = false,
+  focusEventId = null,
 }: UnitDashboardViewProps) {
   const { permissions, lang } = useAppContext();
   const router = useRouter();
@@ -68,6 +70,25 @@ export function UnitDashboardView({
     customQuestions: [],
   });
   const [newCustomQ, setNewCustomQ] = useState("");
+
+  // Auto-open create dialog when arriving via ?tab=create
+  useEffect(() => {
+    if (autoOpenCreate && permissions.canCreateEvent) {
+      setDialogOpen(true);
+    }
+  }, [autoOpenCreate, permissions.canCreateEvent]);
+
+  // Scroll to + highlight the focused event when arriving via ?event=
+  useEffect(() => {
+    if (!focusEventId) return;
+    const el = document.getElementById(`event-card-${focusEventId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-primary");
+      const timer = setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [focusEventId, events]);
   const [newCustomQHi, setNewCustomQHi] = useState("");
   const [newCustomQType, setNewCustomQType] = useState<import("@/lib/app/contracts").QuestionType>("yesno");
   const [newCustomQOptions, setNewCustomQOptions] = useState<string[]>(["", ""]);
@@ -691,8 +712,8 @@ export function UnitDashboardView({
       <div className="dashboard-record-grid">
         <AnimatePresence>
           {myEvents.map((event, index) => (
-            <motion.div key={event.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
-              <Card className="institution-panel h-full hover-lift">
+            <motion.div key={event.id} id={`event-card-${event.id}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
+              <Card className="institution-panel h-full hover-lift transition-shadow">
                 <CardContent className="flex h-full flex-col space-y-3 pt-5">
                   <div className="flex items-start justify-between">
                     <h3 className="mr-2 flex-1 text-sm font-semibold leading-snug">{event.title}</h3>

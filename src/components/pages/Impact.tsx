@@ -56,15 +56,17 @@ function MetricCard({
   labelHi,
   value,
   color,
+  href,
 }: {
   icon: React.ReactNode;
   labelEn: string;
   labelHi: string;
   value: number;
   color: string;
+  href?: string;
 }) {
   const t = useT();
-  return (
+  const inner = (
     <Card className="institution-panel-muted border-border/50 bg-background/40 overflow-hidden group hover:border-primary/30 transition-all">
       <CardContent className="py-5 px-5">
         <div className="flex items-center gap-4">
@@ -79,6 +81,10 @@ function MetricCard({
       </CardContent>
     </Card>
   );
+  if (href) {
+    return <Link href={href} className="block hover:scale-[1.02] transition-transform">{inner}</Link>;
+  }
+  return inner;
 }
 
 function LevelBadge({ level, levelHi, score }: { level: string; levelHi: string; score?: number }) {
@@ -400,6 +406,7 @@ export default function Impact() {
                 labelHi="लेखन"
                 value={myData.metrics.authored}
                 color="bg-blue-500/10 border-blue-500/20 text-blue-500"
+                href="/aalekh"
               />
               <MetricCard
                 icon={<Star className="w-5 h-5 text-amber-500" />}
@@ -407,6 +414,7 @@ export default function Impact() {
                 labelHi="प्रकाशित"
                 value={myData.metrics.published}
                 color="bg-amber-500/10 border-amber-500/20 text-amber-500"
+                href="/feed"
               />
               <MetricCard
                 icon={<Users className="w-5 h-5 text-emerald-500" />}
@@ -414,6 +422,7 @@ export default function Impact() {
                 labelHi="समीक्षाएँ"
                 value={myData.metrics.reviews}
                 color="bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                href="/aalekh"
               />
               <MetricCard
                 icon={<Calendar className="w-5 h-5 text-violet-500" />}
@@ -421,6 +430,7 @@ export default function Impact() {
                 labelHi="आयोजन"
                 value={myData.metrics.events}
                 color="bg-violet-500/10 border-violet-500/20 text-violet-500"
+                href="/dashboard"
               />
               <MetricCard
                 icon={<Megaphone className="w-5 h-5 text-rose-500" />}
@@ -428,6 +438,7 @@ export default function Impact() {
                 labelHi="परिपत्र"
                 value={myData.metrics.circulars}
                 color="bg-rose-500/10 border-rose-500/20 text-rose-500"
+                href="/circulars"
               />
             </div>
 

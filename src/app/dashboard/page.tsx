@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Dashboard from "@/components/pages/Dashboard";
 import { requirePageSession } from "@/lib/server/require-page-session";
@@ -7,7 +8,9 @@ export default async function DashboardPage() {
 
   return (
     <ErrorBoundary>
-      <Dashboard />
+      <Suspense>
+        <Dashboard />
+      </Suspense>
     </ErrorBoundary>
   );
 }

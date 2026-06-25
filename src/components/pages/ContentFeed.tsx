@@ -147,6 +147,19 @@ export default function ContentFeed() {
                   <Button variant="outline" size="sm" className="min-h-[44px] gap-2 rounded-xl bg-background/50 border-border/60 hover:bg-success/5 hover:text-success hover:border-success/30 transition-all text-xs" onClick={() => handleShare(allItems[0].title)}>
                     <Share2 className="w-3.5 h-3.5" /> {t('Share Entry', 'साझा करें')}
                   </Button>
+                  {allItems[0].type === 'article' ? (
+                    <Link href={`/aalekh/${allItems[0].id}`}>
+                      <Button size="sm" className="min-h-[44px] gap-2 rounded-xl text-xs">
+                        <ArrowRight className="w-3.5 h-3.5" /> {t('Open', 'खोलें')}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href={`/calendar?event=${allItems[0].id}`}>
+                      <Button size="sm" className="min-h-[44px] gap-2 rounded-xl text-xs">
+                        <ArrowRight className="w-3.5 h-3.5" /> {t('Open', 'खोलें')}
+                      </Button>
+                    </Link>
+                  )}
                 </div>
                 
                 <div className="space-y-3">
@@ -226,6 +239,28 @@ export default function ContentFeed() {
                         <a href={(item as unknown as Record<string, string>).socialUrl} target="_blank" rel="noopener noreferrer" className="min-h-[44px] flex items-center gap-1.5 text-primary hover:underline font-bold uppercase tracking-widest text-[10px] ml-auto">
                           <ExternalLink className="w-3.5 h-3.5" /> {t('Read Source', 'स्रोत पढ़ें')}
                         </a>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-1">
+                      {item.type === 'article' ? (
+                        <Link href={`/aalekh/${item.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
+                          <ArrowRight className="w-3 h-3" /> {t('Open Article', 'आलेख खोलें')}
+                        </Link>
+                      ) : (
+                        <Link href={`/calendar?event=${item.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
+                          <ArrowRight className="w-3 h-3" /> {t('Open Event', 'कार्यक्रम खोलें')}
+                        </Link>
+                      )}
+                      {item.type === 'article' && (
+                        <Link href={`/charcha?topic=${encodeURIComponent(item.title)}`} className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">
+                          <MessagesSquare className="w-3 h-3" /> {t('Discuss', 'चर्चा')}
+                        </Link>
+                      )}
+                      {item.type === 'event' && (
+                        <Link href={`/prachar?eventId=${item.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">
+                          <Megaphone className="w-3 h-3" /> {t('Prachar', 'प्रचार')}
+                        </Link>
                       )}
                     </div>
                   </div>

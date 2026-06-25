@@ -850,7 +850,7 @@ export default function CampusUnits() {
                 {t('Know a university or college where a new unit should be established? Suggest it to expand our institutional reach among students and faculty.', 'एक नए विश्वविद्यालय या महाविद्यालय के बारे में जानते हैं जहाँ एक नई इकाई स्थापित की जानी चाहिए? छात्रों और संकाय के बीच हमारी संस्थागत पहुँच बढ़ाने के लिए सुझाव दें।')}
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
+            <Button variant="outline" onClick={() => setShowForm(true)} className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all">
               <Building2 className="w-4 h-4" /> {t('Suggest Unit', 'इकाई सुझाएं')}
             </Button>
           </CardContent>

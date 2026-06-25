@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Plus, Megaphone, Trash2, CheckCheck, AlertCircle, ArrowUp } from "lucide-react";
 
@@ -278,7 +279,9 @@ export function CircularsPanel() {
                     </p>
                     {circular.authorName && (
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {circular.authorName}
+                        <Link href={`/directory?search=${encodeURIComponent(circular.authorName)}`} className="hover:text-primary hover:underline">
+                          {circular.authorName}
+                        </Link>
                         {circular.publishedAt && (
                           <> · {new Date(circular.publishedAt).toLocaleDateString()}</>
                         )}

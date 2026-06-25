@@ -220,7 +220,7 @@ export function SurveysPanel() {
                                 </Button>
                               )}
                               <Button size="sm" variant="outline" asChild>
-                                <a href={`/form/${s.id}`} target="_blank">
+                                <a href={`/surveys?s=${s.id}`}>
                                   <Eye className="h-3.5 w-3.5 mr-1" />
                                   {t("Preview", "पूर्वावलोकन")}
                                 </a>
