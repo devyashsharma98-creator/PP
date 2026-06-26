@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { Masthead } from '@/components/Masthead';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +19,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -293,16 +294,16 @@ function CampaignFields({
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
-        <Label>{t('Campaign title', 'Abhiyan shirshak')}</Label>
+        <Label>{t('Campaign title', 'अभियान शीर्षक')}</Label>
         <Input value={value.title} onChange={(event) => setField('title', event.target.value)} />
       </div>
       <div className="space-y-2">
-        <Label>{t('Campaign note', 'Abhiyan tippani')}</Label>
+        <Label>{t('Campaign note', 'अभियान टिप्पणी')}</Label>
         <Textarea value={value.description ?? ''} onChange={(event) => setField('description', event.target.value)} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>{t('Campaign date', 'Abhiyan dinank')}</Label>
+          <Label>{t('Campaign date', 'अभियान दिनांक')}</Label>
           <Input
             type="datetime-local"
             value={toLocalDateTimeValue(value.startsAt)}
@@ -310,7 +311,7 @@ function CampaignFields({
           />
         </div>
         <div className="space-y-2">
-          <Label>{t('Template reference', 'Template sandarbh')}</Label>
+          <Label>{t('Template reference', 'टेम्पलेट संदर्भ')}</Label>
           <Input
             value={value.templateReference ?? ''}
             onChange={(event) => setField('templateReference', event.target.value)}
@@ -319,16 +320,16 @@ function CampaignFields({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>{t('Unit', 'Ikai')}</Label>
+          <Label>{t('Unit', 'इकाई')}</Label>
           <Select
             value={value.unitId ?? 'none'}
             onValueChange={(next) => setField('unitId', next === 'none' ? undefined : next)}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t('Select unit', 'Ikai chunen')} />
+              <SelectValue placeholder={t('Select unit', 'इकाई चुनें')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">{t('No unit', 'Koi ikai nahi')}</SelectItem>
+              <SelectItem value="none">{t('No unit', 'कोई इकाई नहीं')}</SelectItem>
               {units.map((unit) => (
                 <SelectItem key={unit.id} value={unit.id}>
                   {t(unit.name, unit.nameHi ?? unit.name)}
@@ -338,16 +339,16 @@ function CampaignFields({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>{t('Aayam', 'Aayam')}</Label>
+          <Label>{t('Aayam', 'आयाम')}</Label>
           <Select
             value={value.departmentId ?? 'none'}
             onValueChange={(next) => setField('departmentId', next === 'none' ? undefined : next)}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t('Select aayam', 'Aayam chunen')} />
+              <SelectValue placeholder={t('Select aayam', 'आयाम चुनें')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">{t('No aayam', 'Koi aayam nahi')}</SelectItem>
+              <SelectItem value="none">{t('No aayam', 'कोई आयाम नहीं')}</SelectItem>
               {departments.map((department) => (
                 <SelectItem key={department.id} value={department.id}>
                   {t(department.name, department.nameHi ?? department.name)}
@@ -477,6 +478,16 @@ export default function Prachar() {
   // Embla carousel for templates
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start', slidesToScroll: 1, containScroll: 'keepSnaps' });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [pracharTab, setPracharTab] = useState<string>('pending');
+  const [campaignPage, setCampaignPage] = useState(1);
+  const campaignPageSize = 1;
+  const campaignPageCount = Math.max(1, Math.ceil(publishedEvents.length / campaignPageSize));
+  const currentCampaignPage = Math.min(campaignPage, campaignPageCount);
+  const visiblePublishedEvents = publishedEvents.slice((currentCampaignPage - 1) * campaignPageSize, currentCampaignPage * campaignPageSize);
+
+  useEffect(() => {
+    setCampaignPage(1);
+  }, [pracharTab, publishedEvents.length]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -507,23 +518,51 @@ export default function Prachar() {
   }, [emblaApi]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-10">
-      <PracharMasthead t={t} contexts={mastheadContexts} canAct={permissions.canUpdatePrachar} />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 pb-10">
+      <Masthead
+        compact
+        seal="Prachar Command Center"
+        sealHi="प्रचार संचालन कक्ष"
+        title="Distribute and Confirm Reach"
+        titleHi="वितरण करें और पहुँच सुनिश्चित करें"
+        contexts={mastheadContexts.map((c) => ({
+          labelEn: c.labelEn,
+          labelHi: c.labelHi,
+          valueEn: c.valueEn,
+          valueHi: c.valueHi,
+          detailEn: c.detailEn,
+          detailHi: c.detailHi,
+        }))}
+        actions={
+          canManageCampaigns ? (
+            <Button size="sm" className="h-8 px-3 text-xs" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />{t('Create Campaign', 'अभियान बनाएँ')}
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <Tabs value={pracharTab} onValueChange={setPracharTab}>
+        <TabsList className="h-9 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/50 bg-muted/30 p-1">
+          <TabsTrigger value="pending" onClick={() => setPracharTab('pending')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t('Pending', 'लंबित')}
+          </TabsTrigger>
+          <TabsTrigger value="create" onClick={() => setPracharTab('create')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t('Create', 'बनाएँ')}
+          </TabsTrigger>
+          <TabsTrigger value="analytics" onClick={() => setPracharTab('analytics')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t('Analytics', 'विश्लेषण')}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {canManageCampaigns && (
-        <div className="flex justify-end">
-          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('Create Campaign', 'Abhiyan banayen')}
-              </Button>
-            </DialogTrigger>
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t('Create Campaign', 'Abhiyan banayen')}</DialogTitle>
+                <DialogTitle>{t('Create Campaign', 'अभियान बनाएँ')}</DialogTitle>
                 <DialogDescription>
-                  {t('Create a published outreach campaign directly from Prachar.', 'Prachar se seedhe prakashit abhiyan banayen.')}
+                  {t('Create a published outreach campaign directly from Prachar.', 'प्रचार से सीधे प्रकाशित अभियान बनाएँ।')}
                 </DialogDescription>
               </DialogHeader>
               <CampaignFields
@@ -538,17 +577,18 @@ export default function Prachar() {
               )}
               <DialogFooter>
                 <Button variant="outline" onClick={() => setCreateOpen(false)}>
-                  {t('Cancel', 'Radd')}
+                  {t('Cancel', 'रद्द करें')}
                 </Button>
                 <Button onClick={submitCreateCampaign} disabled={createCampaignMutation.isPending || !campaignForm.title.trim()}>
-                  {createCampaignMutation.isPending ? t('Creating...', 'Ban raha hai...') : t('Create Campaign', 'Abhiyan banayen')}
+                  {createCampaignMutation.isPending ? t('Creating...', 'बन रहा है...') : t('Create Campaign', 'अभियान बनाएँ')}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
       )}
 
+      {pracharTab === 'pending' && (
+        <>
       <section className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
@@ -642,7 +682,7 @@ export default function Prachar() {
             </CardContent>
           </Card>
         ) : (
-          publishedEvents.map((event, i) => {
+          visiblePublishedEvents.map((event, i) => {
             const status = getStatus(event.id);
             const done = isDone(event.id);
             const completedCount = Object.values(status.platforms).filter(Boolean).length;
@@ -678,7 +718,9 @@ export default function Prachar() {
                           <h3 className="text-lg font-semibold tracking-tight">{event.title}</h3>
                           <p className="text-sm text-muted-foreground">{event.unit} · {event.date}</p>
                         </div>
-                        <p className="text-sm leading-6 text-muted-foreground">{event.description}</p>
+                        {event.description && (
+                          <p className="line-clamp-2 text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">{event.description}</p>
+                        )}
                       </div>
 
                       <div className="prachar-progress-strip">
@@ -817,7 +859,7 @@ export default function Prachar() {
                         {canManageCampaigns && (
                           <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => openEditCampaign(event)}>
                             <Pencil className="mr-1 h-3 w-3" />
-                            {t('Edit Campaign', 'Abhiyan sampadit karen')}
+                            {t('Edit Campaign', 'अभियान संपादित करें')}
                           </Button>
                         )}
                         <Link href="/feed">
@@ -833,8 +875,40 @@ export default function Prachar() {
             );
           })
         )}
+        {publishedEvents.length > campaignPageSize && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentCampaignPage === 1}
+              onClick={() => setCampaignPage((value) => Math.max(1, value - 1))}
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              {t('Previous', 'पिछला')}
+            </Button>
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              {t(`Campaign ${currentCampaignPage} of ${campaignPageCount}`, `अभियान ${currentCampaignPage}/${campaignPageCount}`)}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentCampaignPage === campaignPageCount}
+              onClick={() => setCampaignPage((value) => Math.min(campaignPageCount, value + 1))}
+            >
+              {t('Next', 'अगला')}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </div>
+        </>
+      )}
 
+      {pracharTab === 'create' && (
       <section className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
@@ -885,10 +959,10 @@ export default function Prachar() {
 
         <div className="relative">
           <div className="flex items-center justify-end gap-1 pb-3">
-            <button onClick={scrollPrev} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label="Previous template">
+            <button onClick={scrollPrev} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label={t('Previous template', 'पिछला टेम्पलेट')}>
               <ChevronLeft className="w-4 h-4 text-muted-foreground" />
             </button>
-            <button onClick={scrollNext} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label="Next template">
+            <button onClick={scrollNext} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label={t('Next template', 'अगला टेम्पलेट')}>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
@@ -917,7 +991,7 @@ export default function Prachar() {
                         onClick={() => previewTemplate(tmpl.name)}
                       >
                         <Copy className="mr-1 h-3 w-3" />
-                        {t('Generate copy', 'Generate copy')}
+                        {t('Generate copy', 'संदेश बनाएं')}
                       </Button>
                     </CardContent>
                   </Card>
@@ -943,12 +1017,12 @@ export default function Prachar() {
             <CardContent className="space-y-3 py-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="shell-copy">{t('Generated campaign copy', 'Generated campaign copy')}</p>
-                  <p className="text-sm text-muted-foreground">{t('Copied to clipboard. Edit before sending on the selected channel.', 'Copied to clipboard. Edit before sending on the selected channel.')}</p>
+                  <p className="shell-copy">{t('Generated campaign copy', 'निर्मित अभियान संदेश')}</p>
+                  <p className="text-sm text-muted-foreground">{t('Copied to clipboard. Edit before sending on the selected channel.', 'क्लिपबोर्ड में कॉपी हुआ। चयनित चैनल पर भेजने से पहले संपादित करें।')}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => void navigator.clipboard?.writeText(generatedTemplate)}>
                   <Copy className="mr-2 h-4 w-4" />
-                  {t('Copy again', 'Copy again')}
+                  {t('Copy again', 'फिर कॉपी करें')}
                 </Button>
               </div>
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-2xl border border-border/60 bg-background/70 p-4 text-xs leading-6 text-foreground/80">
@@ -961,12 +1035,55 @@ export default function Prachar() {
           {t('Need sharper campaign language?', 'क्या अभियान की भाषा और स्पष्ट चाहिए?')} <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">{t('Explore Vimarsh topics', 'विमर्श विषय देखें')}</Link>
         </p>
       </section>
+      )}
+
+      {pracharTab === 'analytics' && (
+        <section className="space-y-4">
+          <div className="institution-panel p-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <p className="section-seal">{t('Coverage Analytics', 'आच्छादन विश्लेषण')}</p>
+                <h2 className="dashboard-section-heading">{t('Review reach before the next campaign', 'अगले अभियान से पहले पहुँच देखें')}</h2>
+                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                  {t(
+                    'Open the analytics desk to compare platform coverage, incomplete channels, and campaign closure patterns.',
+                    'मंच आच्छादन, अपूर्ण चैनल और अभियान पूर्णता के नमूने देखने के लिए विश्लेषण कक्ष खोलें।',
+                  )}
+                </p>
+              </div>
+              <Link href="/prachar-vishleshan">
+                <Button className="w-full gap-2 md:w-auto">
+                  <BarChart3 className="h-4 w-4" />
+                  {t('Open Coverage Analytics', 'आच्छादन विश्लेषण खोलें')}
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="prachar-command-card">
+              <p className="shell-copy">{t('Campaigns in motion', 'गतिमान अभियान')}</p>
+              <p className="prachar-command-value">{campaignStats.totalCampaigns}</p>
+              <p className="prachar-command-detail">{t('Published campaigns tracked by Prachar.', 'प्रचार द्वारा अनुशीलित प्रकाशित अभियान।')}</p>
+            </div>
+            <div className="prachar-command-card">
+              <p className="shell-copy">{t('Open follow-through', 'खुला अनुवर्तन')}</p>
+              <p className="prachar-command-value">{campaignStats.openFollowThrough}</p>
+              <p className="prachar-command-detail">{t('Channels that still need action or a skip note.', 'जिन चैनलों पर अभी कार्रवाई या स्किप नोट चाहिए।')}</p>
+            </div>
+            <div className="prachar-command-card">
+              <p className="shell-copy">{t('Closure readiness', 'पूर्णता तैयारी')}</p>
+              <p className="prachar-command-value">{campaignStats.completionRate}%</p>
+              <p className="prachar-command-detail">{t('Current dissemination completion rate.', 'वर्तमान प्रसार पूर्णता दर।')}</p>
+            </div>
+          </div>
+        </section>
+      )}
       <Dialog open={!!editingEvent} onOpenChange={(open) => { if (!open) setEditingEventId(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('Edit Campaign', 'Abhiyan sampadit karen')}</DialogTitle>
+            <DialogTitle>{t('Edit Campaign', 'अभियान संपादित करें')}</DialogTitle>
             <DialogDescription>
-              {t('Update the published event details used by this Prachar campaign.', 'Is Prachar abhiyan ke prakashit karyakram vivaran update karen.')}
+              {t('Update the published event details used by this Prachar campaign.', 'इस प्रचार अभियान के प्रकाशित कार्यक्रम विवरण अद्यतन करें।')}
             </DialogDescription>
           </DialogHeader>
           <CampaignFields
@@ -981,10 +1098,10 @@ export default function Prachar() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingEventId(null)}>
-              {t('Cancel', 'Radd')}
+              {t('Cancel', 'रद्द करें')}
             </Button>
             <Button onClick={submitEditCampaign} disabled={updateCampaignMutation.isPending || !campaignForm.title.trim()}>
-              {updateCampaignMutation.isPending ? t('Saving...', 'Saheja ja raha hai...') : t('Save Campaign', 'Abhiyan sahejen')}
+              {updateCampaignMutation.isPending ? t('Saving...', 'सहेजा जा रहा है...') : t('Save Campaign', 'अभियान सहेजें')}
             </Button>
           </DialogFooter>
         </DialogContent>

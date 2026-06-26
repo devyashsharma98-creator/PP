@@ -135,38 +135,21 @@ function ELibraryMasthead({
   contexts: LibraryContextItem[];
 }) {
   return (
-    <div className="library-masthead space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Knowledge Preservation', 'ज्ञान परंपरा संरक्षण')}</p>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {t('Institutional E-Library', 'संस्थागत ई-पुस्तकालय')}
-            </h1>
-            <p className="max-w-2xl text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">
-              {t(
-                'A curated repository of foundational Bharatiya Knowledge Systems (IKS) texts, preserved for research and intellectual awakening.',
-                'भारतीय ज्ञान परंपरा (IKS) के आधारभूत ग्रंथों का एक संकलित भंडार, जो शोध और बौद्धिक जागरण हेतु सुरक्षित है।'
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="library-context-grid">
-        {contexts.map((ctx) => (
-          <div key={ctx.labelEn} className="library-context-card">
-            <p className="shell-copy">{t(ctx.labelEn, ctx.labelHi)}</p>
-            <p className="library-context-value">
-              {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}
-            </p>
-            <p className="library-context-detail">
-              {t(ctx.detailEn, ctx.detailHi)}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Masthead
+      compact
+      seal="Knowledge Preservation"
+      sealHi="ज्ञान परंपरा संरक्षण"
+      title="Institutional E-Library"
+      titleHi="संस्थागत ई-पुस्तकालय"
+      contexts={contexts.map((ctx) => ({
+        labelEn: ctx.labelEn,
+        labelHi: ctx.labelHi,
+        valueEn: ctx.valueEn,
+        valueHi: ctx.valueHi ?? ctx.valueEn,
+        detailEn: ctx.detailEn,
+        detailHi: ctx.detailHi,
+      }))}
+    />
   );
 }
 
@@ -231,6 +214,7 @@ export default function ELibrary() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [books, setBooks] = useState<Book[]>(FALLBACK_BOOKS);
+  const [page, setPage] = useState(1);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadForm, setUploadForm] = useState({
@@ -293,6 +277,15 @@ export default function ELibrary() {
       || b.author.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch;
   });
+  const pageSize = 4;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const visibleBooks = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  useEffect(() => {
+    setPage(1);
+    setSelectedBook(null);
+  }, [search, activeCategory]);
 
   const contexts: LibraryContextItem[] = [
     {
@@ -322,7 +315,7 @@ export default function ELibrary() {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 pb-10">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 pb-10">
       <ELibraryMasthead t={t} contexts={contexts} />
 
       {/* Search + Category Filters */}
@@ -375,7 +368,7 @@ export default function ELibrary() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8">
           <AnimatePresence mode="popLayout">
-            {filtered.map((book, i) => (
+            {visibleBooks.map((book, i) => (
               <motion.div
                 key={book.id}
                 layout
@@ -428,10 +421,45 @@ export default function ELibrary() {
             ))}
           </AnimatePresence>
         </div>
+        {filtered.length > pageSize && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentPage === 1}
+              onClick={() => {
+                setPage((value) => Math.max(1, value - 1));
+                setSelectedBook(null);
+              }}
+            >
+              <ChevronRight className="h-3.5 w-3.5 rotate-180" />
+              {t('Previous', 'पिछला')}
+            </Button>
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              {t(`Shelf ${currentPage} of ${pageCount}`, `शेल्फ ${currentPage}/${pageCount}`)}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentPage === pageCount}
+              onClick={() => {
+                setPage((value) => Math.min(pageCount, value + 1));
+                setSelectedBook(null);
+              }}
+            >
+              {t('Next', 'अगला')}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </section>
 
       {filtered.length === 0 && (
-        <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
+        <div className="text-center py-16 md:py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
           <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/40">
             <BookMarked className="w-10 h-10 text-muted-foreground/20" />
           </div>
@@ -567,22 +595,22 @@ export default function ELibrary() {
       {/* Bottom CTA */}
       <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
         <Card className="institution-panel border-primary/15 bg-primary/5 hover:border-primary/30 transition-all shadow-md group">
-          <CardContent className="py-8 flex flex-col md:flex-row items-center gap-8 px-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
-              <Library className="w-8 h-8 text-primary" />
+          <CardContent className="py-4 px-4 flex flex-col md:flex-row items-center gap-4 md:gap-8 md:py-8 md:px-8">
+            <div className="w-10 h-10 md:w-16 md:h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+              <Library className="w-5 h-5 md:w-8 md:h-8 text-primary" />
             </div>
-            <div className="flex-1 text-center md:text-left space-y-2">
-              <p className="font-bold text-lg font-devanagari text-foreground/90">
+            <div className="flex-1 text-center md:text-left space-y-1">
+              <p className="font-bold text-base md:text-lg font-devanagari text-foreground/90">
                 {t('Contribute to the Civilisational Record', 'सभ्यतागत अभिलेख में योगदान दें')}
               </p>
-              <p className="text-sm text-muted-foreground font-devanagari leading-relaxed max-w-2xl">
+              <p className="text-xs text-muted-foreground font-devanagari leading-relaxed max-w-2xl md:text-sm">
                 {t('Upload digitized PDFs of rare Bharatiya texts to expand our community library. Your contribution helps preserve our collective intellectual legacy.', 'हमारे सामुदायिक पुस्तकालय का विस्तार करने के लिए दुर्लभ ग्रंथों की डिजिटल PDF अपलोड करें। आपका योगदान हमारी सामूहिक बौद्धिक विरासत को संरक्षित करने में मदद करता है।')}
               </p>
             </div>
             {permissions?.canManageUsers ? (
               <Button
                 variant="outline"
-                className="shrink-0 h-12 px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all"
+                className="shrink-0 h-9 px-5 md:h-12 md:px-10 rounded-2xl border-primary/30 text-primary hover:bg-primary/5 font-bold uppercase tracking-[0.16em] text-[11px] gap-3 shadow-sm hover:shadow-lg transition-all"
                 onClick={() => setShowUpload(true)}
               >
                 <Upload className="w-4 h-4" /> {t('Upload Text', 'ग्रंथ अपलोड करें')}

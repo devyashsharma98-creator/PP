@@ -2,16 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ElementType } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppContext, GatividhiEvent, VrittStatus } from "@/context/AppContext";
 import { useDashboardEvents, useUpdateEventStatus, useUpdateVritt } from "@/hooks/api/use-dashboard";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { checklistItems, dashboardStatusBadgeClass, eventStatusHi } from "@/components/pages/dashboard/config";
 import { useBonsaiLLM } from "@/hooks/use-bonsai-llm";
-import { ArrowRight, CheckCircle2, Clock, FileText } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileText, Plus, Eye, RotateCcw } from "lucide-react";
 import { vrittSystemPrompt, vrittUserMessage } from "@/lib/bonsai/prompts";
 import type { Lang } from "@/lib/app/contracts";
 import { VibhagDashboardView } from "@/components/pages/dashboard/VibhagDashboardView";
@@ -29,9 +30,10 @@ type ActionItem = {
   detail: string;
   intent: string;
   tone: "primary" | "warning" | "success";
+  tab?: string;
 };
 
-function DashboardActionQueue({ items, t, lang }: { items: ActionItem[]; t: (en: string, hi: string) => string; lang: string }) {
+function DashboardActionQueue({ items, t, lang, onCardClick }: { items: ActionItem[]; t: (en: string, hi: string) => string; lang: string; onCardClick?: (tab: string) => void }) {
   return (
     <section className="dashboard-panel-grid">
       {items.map((item) => {
@@ -42,17 +44,28 @@ function DashboardActionQueue({ items, t, lang }: { items: ActionItem[]; t: (en:
             : item.tone === "success"
               ? "border-success/20 bg-success/[0.04]"
               : "border-primary/20 bg-primary/[0.04]";
+        const isClickable = !!item.tab && !!onCardClick;
 
         return (
-          <Card key={item.label} className="institution-panel-muted border-border/70">
+          <Card
+            key={item.label}
+            className={cn("institution-panel-muted border-border/70 transition-shadow", isClickable && "cursor-pointer hover:shadow-md hover:border-primary/30")}
+            onClick={isClickable ? () => onCardClick!(item.tab!) : undefined}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            onKeyDown={isClickable ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCardClick!(item.tab!); } } : undefined}
+          >
             <CardContent className="p-4 md:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", toneClass)}>
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
-                <Badge variant="outline" className="text-[10px]">
-                  {item.value}
-                </Badge>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="text-[10px]">
+                    {item.value}
+                  </Badge>
+                  {isClickable && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                </div>
               </div>
               <div className="mt-4 space-y-2">
                 <p className="text-sm font-semibold">{item.label}</p>
@@ -97,6 +110,7 @@ export default function Dashboard() {
           detail: t("These are still in your unit lane.", "ये अभी आपकी इकाई धारा में हैं।"),
           intent: t("Write clearly, attach proof, then submit.", "स्पष्ट लिखें, प्रमाण जोड़ें, फिर भेजें।"),
           tone: "primary",
+          tab: "today",
         },
         {
           icon: Clock,
@@ -105,6 +119,7 @@ export default function Dashboard() {
           detail: t("Track what is waiting with Unit, Aayam, Vibhag, or Prant.", "यूनिट, आयाम, विभाग या प्रान्त में क्या रुका है, देखें।"),
           intent: t("Follow up only when the next lane asks for action.", "अगली धारा मांगे तभी आगे बढ़ाएँ।"),
           tone: "warning",
+          tab: "queue",
         },
         {
           icon: CheckCircle2,
@@ -113,6 +128,7 @@ export default function Dashboard() {
           detail: t("Published events are visible in the institutional record.", "प्रकाशित कार्यक्रम संस्थागत अभिलेख में दिखेंगे।"),
           intent: t("Update Vritt where evidence is pending.", "जहाँ प्रमाण बाकी है, वृत्त अद्यतन करें।"),
           tone: "success",
+          tab: "published",
         },
       ];
     }
@@ -126,6 +142,7 @@ export default function Dashboard() {
           detail: t("Drafts that need unit-level correction before review.", "समीक्षा से पहले इकाई स्तर पर सुधार चाहिए।"),
           intent: t("Correct, complete, and submit for Aayam review.", "सुधारें, पूरा करें, फिर आयाम समीक्षा में भेजें।"),
           tone: "primary",
+          tab: "today",
         },
         {
           icon: Clock,
@@ -134,6 +151,7 @@ export default function Dashboard() {
           detail: t("Work already sent upward and waiting for the next lane.", "आगे भेजा हुआ कार्य अगली धारा में प्रतीक्षित है।"),
           intent: t("Keep follow-up gentle and evidence-based.", "सौम्य और प्रमाण आधारित अनुवर्ती रखें।"),
           tone: "warning",
+          tab: "queue",
         },
         {
           icon: CheckCircle2,
@@ -142,6 +160,7 @@ export default function Dashboard() {
           detail: t("Published output that came through the unit workflow.", "इकाई प्रवाह से निकला प्रकाशित कार्य।"),
           intent: t("Ensure post-event Vritt is complete.", "कार्यक्रमोत्तर वृत्त पूरा रखें।"),
           tone: "success",
+          tab: "published",
         },
       ];
     }
@@ -155,6 +174,7 @@ export default function Dashboard() {
           detail: t("Programmes waiting for thematic review.", "विषयगत समीक्षा प्रतीक्षित कार्यक्रम।"),
           intent: t("Review, edit if needed, then forward to Vibhag.", "समीक्षा करें, जरूरत हो तो संपादित करें, फिर विभाग को भेजें।"),
           tone: "warning",
+          tab: "queue",
         },
         {
           icon: FileText,
@@ -163,6 +183,7 @@ export default function Dashboard() {
           detail: t("Items already moved ahead or published.", "आगे भेजे या प्रकाशित किए गए कार्य।"),
           intent: t("Keep the thematic lane clean.", "विषयगत धारा साफ़ रखें।"),
           tone: "primary",
+          tab: "today",
         },
         {
           icon: CheckCircle2,
@@ -171,6 +192,7 @@ export default function Dashboard() {
           detail: t("Published programmes available for Prachar and feed use.", "प्रचार और फ़ीड उपयोग हेतु प्रकाशित कार्यक्रम।"),
           intent: t("Confirm Prachar follow-through after publishing.", "प्रकाशन के बाद प्रचार अनुवर्ती पुष्टि करें।"),
           tone: "success",
+          tab: "published",
         },
       ];
     }
@@ -184,6 +206,7 @@ export default function Dashboard() {
           detail: t("Items waiting at Vibhag or Prant level.", "विभाग या प्रान्त स्तर पर रुके कार्य।"),
           intent: t("Clear approvals before opening secondary panels.", "द्वितीयक पैनल से पहले अनुमोदन साफ़ करें।"),
           tone: "warning",
+          tab: "queue",
         },
         {
           icon: CheckCircle2,
@@ -192,6 +215,7 @@ export default function Dashboard() {
           detail: t("Published work visible for institutional continuity.", "संस्थागत निरंतरता हेतु प्रकाशित कार्य।"),
           intent: t("Use these for review, feed, and accountability.", "समीक्षा, फ़ीड और उत्तरदायित्व के लिए उपयोग करें।"),
           tone: "success",
+          tab: "published",
         },
         {
           icon: FileText,
@@ -200,6 +224,7 @@ export default function Dashboard() {
           detail: t("Published events where post-event reporting may be incomplete.", "प्रकाशित कार्यक्रम जिनमें कार्यक्रमोत्तर विवरण बाकी हो सकता है।"),
           intent: t("Complete evidence before closure.", "समापन से पहले प्रमाण पूरा करें।"),
           tone: "primary",
+          tab: "followup",
         },
       ];
     }
@@ -230,6 +255,11 @@ export default function Dashboard() {
   const focusEventId = searchParams.get("event");
   const focusAction = searchParams.get("action");
   const autoOpenCreate = searchParams.get("tab") === "create";
+  const paramTab = searchParams.get("tab");
+  const router = useRouter();
+  const [dashboardTab, setDashboardTab] = useState<string>(
+    (paramTab && paramTab !== "create") ? paramTab : "today"
+  );
 
   // For action=view on a published event, open the Vritt overlay (the dashboard's
   // closest equivalent to "view details" for a published event).
@@ -454,10 +484,37 @@ export default function Dashboard() {
     />
   );
 
+  const handleTabChange = (tab: string) => {
+    setDashboardTab(tab);
+  };
+
+  const tabBar = (
+    <Tabs value={dashboardTab} onValueChange={handleTabChange} className="mt-4">
+      <TabsList className="mb-4 h-9 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/50 bg-muted/30 p-1">
+        <TabsTrigger value="today" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          {t("Today", "आज")}
+        </TabsTrigger>
+        <TabsTrigger value="queue" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          {t("Queue", "कतार")}
+        </TabsTrigger>
+        <TabsTrigger value="create" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          {t("Create", "बनाएँ")}
+        </TabsTrigger>
+        <TabsTrigger value="published" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          {t("Published", "प्रकाशित")}
+        </TabsTrigger>
+        <TabsTrigger value="followup" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          {t("Follow-up", "अनुवर्ती")}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
     return (
       <>
-        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
+        {tabBar}
         <UnitDashboardView
           dashboardKind="super_admin"
           events={events}
@@ -472,8 +529,9 @@ export default function Dashboard() {
           onForwardToVibhag={handleForwardToVibhag}
           onForwardToPrant={handleForwardToPrant}
           onPublishEvent={handlePublishFromVibhag}
-          autoOpenCreate={autoOpenCreate}
+          autoOpenCreate={autoOpenCreate || dashboardTab === "create"}
           focusEventId={focusEventId}
+          activeTab={dashboardTab}
         />
         {reviewOverlays}
       </>
@@ -483,7 +541,8 @@ export default function Dashboard() {
   if (dashboardLane === "vibhag") {
     return (
       <>
-        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
+        {tabBar}
         <VibhagDashboardView
           events={events}
           permissions={permissions}
@@ -497,6 +556,7 @@ export default function Dashboard() {
           onDismissPublished={() => setLastPublished(null)}
           onForwardToPrant={handleForwardToPrant}
           onPublishEvent={handlePublishFromVibhag}
+          activeTab={dashboardTab}
         />
         {reviewOverlays}
       </>
@@ -506,7 +566,8 @@ export default function Dashboard() {
   if (dashboardLane === "aayam") {
     return (
       <>
-        <DashboardActionQueue items={actionItems} t={t} lang={lang} />
+        <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
+        {tabBar}
         <AayamDashboardView
           dashboardKind={primaryRoleCode === "prant_aayam_pramukh" ? "prant_aayam_pramukh" : "aayam_pramukh"}
           events={events}
@@ -518,6 +579,7 @@ export default function Dashboard() {
           onOpenQr={setQrEvent}
           workflowPending={updateEventStatusMutation.isPending}
           onForwardToVibhag={(eventId, currentStatus) => handleForwardToVibhag(eventId, currentStatus)}
+          activeTab={dashboardTab}
         />
         {reviewOverlays}
       </>
@@ -525,7 +587,8 @@ export default function Dashboard() {
   }
   return (
     <>
-      <DashboardActionQueue items={actionItems} t={t} lang={lang} />
+      <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
+      {tabBar}
       <UnitDashboardView
         dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
         events={events}
@@ -540,8 +603,9 @@ export default function Dashboard() {
         onForwardToVibhag={handleForwardToVibhag}
         onForwardToPrant={handleForwardToPrant}
         onPublishEvent={handlePublishFromVibhag}
-        autoOpenCreate={autoOpenCreate}
+        autoOpenCreate={autoOpenCreate || dashboardTab === "create"}
         focusEventId={focusEventId}
+        activeTab={dashboardTab}
       />
       {reviewOverlays}
     </>

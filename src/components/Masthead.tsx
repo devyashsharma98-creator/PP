@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { ChevronUp, Info } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { useT } from "@/lib/useT";
+import { cn } from "@/lib/utils";
 
 export interface MastheadContextItem {
   labelEn: string;
@@ -26,6 +28,8 @@ interface MastheadProps {
   actions?: React.ReactNode;
   lang?: "en" | "hi";
   className?: string;
+  /** When true, renders a compact single-row header. Context cards are hidden behind an Info toggle. */
+  compact?: boolean;
 }
 
 function MastheadMandala() {
@@ -73,10 +77,79 @@ export function Masthead({
   contexts,
   actions,
   className,
+  compact = false,
 }: MastheadProps) {
   const t = useT();
   const { lang: activeLang } = useAppContext();
   const showAlternateTitle = activeLang !== "hi" && titleHi && titleHi !== title;
+  const [contextOpen, setContextOpen] = useState(false);
+
+  if (compact) {
+    return (
+      <div className={className ?? "mb-4"}>
+        <div className="flex min-h-[3rem] items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/30 px-4 py-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            {icon && <div className="shrink-0 text-primary">{icon}</div>}
+            <div className="min-w-0">
+              {seal && (
+                <p className="truncate text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {t(seal, sealHi ?? seal)}
+                </p>
+              )}
+              <h1 className="truncate text-sm font-bold tracking-tight text-foreground md:text-base">
+                {t(title, titleHi ?? title)}
+              </h1>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {actions}
+            {contexts && contexts.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setContextOpen((v) => !v)}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                  contextOpen
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-border/60 bg-background text-muted-foreground hover:text-foreground",
+                )}
+                aria-label={t("Toggle context info", "संदर्भ जानकारी दिखाएँ")}
+              >
+                <Info className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {contextOpen && contexts && contexts.length > 0 && (
+          <div className="mt-2 rounded-xl border border-border/50 bg-muted/20 p-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {contexts.map((ctx) => (
+                <div key={ctx.labelEn} className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    {t(ctx.labelEn, ctx.labelHi)}
+                  </p>
+                  <p className="text-xs font-semibold text-foreground">
+                    {t(ctx.valueEn, ctx.valueHi ?? ctx.valueEn)}
+                  </p>
+                  <p className="text-[11px] leading-5 text-muted-foreground">
+                    {t(ctx.detailEn, ctx.detailHi)}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setContextOpen(false)}
+              className="mt-3 flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              <ChevronUp className="h-3 w-3" /> {t("Close", "बंद करें")}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={className ?? "mb-6 space-y-5"}>

@@ -106,7 +106,10 @@ export function MobileBottomNav() {
               </span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="rounded-t-3xl border-t border-border bg-background pb-8">
+          <SheetContent
+            side="bottom"
+            className="max-h-[min(88dvh,720px)] overflow-y-auto overscroll-contain rounded-t-3xl border-t border-border bg-background px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-6"
+          >
             <SheetHeader className="pb-3">
               <SheetTitle className={cn("flex items-center gap-2 text-left", lang === "hi" && "font-devanagari")}>
                 <Grid2x2 className="h-4 w-4 text-primary" />

@@ -5,7 +5,7 @@ import { useT } from "@/lib/useT";
 import { useToast } from "@/components/ToastProvider";
 import { Masthead } from "@/components/Masthead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Eye } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { AalekhArticle, ArticleStatus } from "@/context/AppContext";
 import { ArticleCard, EditForwardDialog, ReturnWithNotesDialog } from "./shared";
 
@@ -20,21 +20,19 @@ interface UnitHeadViewProps {
   ) => Promise<boolean>;
 }
 
-export function UnitHeadView({ articles, updateArticleStatus, viewToggle }: UnitHeadViewProps) {
+export function UnitHeadView({ articles, updateArticleStatus }: UnitHeadViewProps) {
   const t = useT();
   const { addToast } = useToast();
   const queue = articles.filter(a => a.status === "Pending Unit Head Review");
-  const rest = articles.filter(a => a.status !== "Pending Unit Head Review");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
+        compact
         seal="First Editorial Review Desk"
         sealHi="प्रथम संपादकीय समीक्षा कक्ष"
         title="Review and Route Aalekh"
         titleHi="आलेख की समीक्षा करें और आगे बढ़ाएँ"
-        subtitle="Review incoming drafts, send back what needs work, and move ready pieces into the aayam lane."
-        subtitleHi="आए हुए मसौदे देखें, जो अधूरे हों उन्हें लौटाएं और तैयार सामग्री को आयाम चरण में भेजें।"
         contexts={[
           {
             labelEn: "Current lane",
@@ -62,7 +60,6 @@ export function UnitHeadView({ articles, updateArticleStatus, viewToggle }: Unit
           },
         ]}
       />
-      {viewToggle && <div className="flex justify-end">{viewToggle}</div>}
 
       <Card className="glass-card">
         <CardHeader>
@@ -111,22 +108,6 @@ export function UnitHeadView({ articles, updateArticleStatus, viewToggle }: Unit
         </CardContent>
       </Card>
 
-      {rest.length > 0 && (
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Eye className="w-4 h-4 text-muted-foreground" /> {t(`All Articles (${rest.length})`, `सभी आलेख (${rest.length})`)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {rest.map((a, i) => (
-              <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                <ArticleCard article={a} />
-              </motion.div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
     </motion.div>
   );
 }

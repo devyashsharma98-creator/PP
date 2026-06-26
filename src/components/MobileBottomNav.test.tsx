@@ -58,4 +58,23 @@ describe("MobileBottomNav", () => {
     expect(activeAalekh?.className).toContain("bg-background");
     expect(activeAalekh?.textContent).toContain("आलेख");
   });
+
+  it("opens the More sheet as a bounded scrollable mobile panel", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+
+    act(() => {
+      createRoot(host).render(<MobileBottomNav />);
+    });
+
+    act(() => {
+      host.querySelector<HTMLButtonElement>('button[aria-label="Open more navigation"]')?.click();
+    });
+
+    const dialog = document.body.querySelector('[role="dialog"]');
+
+    expect(dialog?.className).toContain("max-h-[min(88dvh,720px)]");
+    expect(dialog?.className).toContain("overflow-y-auto");
+    expect(dialog?.textContent).toContain("लॉग आउट");
+  });
 });

@@ -39,12 +39,11 @@ export function VibhagView({ articles, permissions, updateArticleStatus, lastPub
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
+        compact
         seal="Vibhag Editorial Console"
         sealHi="विभाग संपादकीय डेस्क"
         title="Vibhag Review Board"
         titleHi="विभाग समीक्षा मंडल"
-        subtitle="Regional oversight of all aayams. Review, authorize, and publish institutional aalekh."
-        subtitleHi="सभी आयामों की क्षेत्रीय दृष्टि। संस्थागत आलेखों की समीक्षा करें, अधिकृत करें और प्रकाशित करें।"
         contexts={[
           {
             labelEn: "Operational focus",

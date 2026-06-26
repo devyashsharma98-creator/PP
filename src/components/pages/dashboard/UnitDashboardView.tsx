@@ -46,6 +46,7 @@ export function UnitDashboardView({
   onPublishEvent,
   autoOpenCreate = false,
   focusEventId = null,
+  activeTab = "today",
 }: UnitDashboardViewProps) {
   const { permissions, lang } = useAppContext();
   const router = useRouter();
@@ -57,6 +58,7 @@ export function UnitDashboardView({
   const cloneEventMutation = useCloneEvent();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [recordPage, setRecordPage] = useState(1);
   const [formTab, setFormTab] = useState("pre");
   const [dateValue, setDateValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -134,6 +136,21 @@ export function UnitDashboardView({
   const activeWorkflowCount = myEvents.filter((event) => event.status !== "Published").length;
   const publishedUnitEvents = myEvents.filter((event) => event.status === "Published").length;
   const isKaryakartaLane = dashboardKind === "karyakarta" || !permissions.canCreateEvent;
+  const tabbedEvents = myEvents.filter((event) => {
+    if (activeTab === "queue") return event.status !== "Draft" && event.status !== "Published";
+    if (activeTab === "published") return event.status === "Published";
+    if (activeTab === "followup") return event.status === "Published" && event.vrittStatus !== "reviewed";
+    if (activeTab === "create") return false;
+    return true;
+  });
+  const recordPageSize = 4;
+  const recordPageCount = Math.max(1, Math.ceil(tabbedEvents.length / recordPageSize));
+  const currentRecordPage = Math.min(recordPage, recordPageCount);
+  const visibleTabbedEvents = tabbedEvents.slice((currentRecordPage - 1) * recordPageSize, currentRecordPage * recordPageSize);
+
+  useEffect(() => {
+    setRecordPage(1);
+  }, [activeTab]);
 
   const applyTemplate = (type: string) => {
     const template = eventTemplates[type];
@@ -288,16 +305,11 @@ export function UnitDashboardView({
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="dashboard-page">
       <Masthead
+        compact
         seal={isKaryakartaLane ? "Karyakarta Work Desk" : "Unit Activity Desk"}
         sealHi={isKaryakartaLane ? "कार्यकर्ता कार्य डेस्क" : "इकाई गतिविधि डेस्क"}
         title={isKaryakartaLane ? "Karyakarta Dashboard" : "Gatividhi Dashboard"}
         titleHi={isKaryakartaLane ? "कार्यकर्ता डैशबोर्ड" : "गतिविधि डैशबोर्ड"}
-        subtitle={isKaryakartaLane ? "See assigned work, pending contributions, and current activity in one place." : "Programme planning, review movement, and post-event follow-through for your unit in one place."}
-        subtitleHi={
-          isKaryakartaLane
-            ? "सौंपा गया कार्य, लंबित योगदान और वर्तमान गतिविधि — एक ही स्थान पर।"
-            : "इकाई हेतु कार्यक्रम योजना, समीक्षा की गति और कार्यक्रम के बाद की पूर्ति — एक ही दृश्य में।"
-        }
         contexts={[
           {
             labelEn: "Operational scope",
@@ -330,15 +342,14 @@ export function UnitDashboardView({
         ]}
         actions={
           permissions.canCreateEvent ? (
-            <div className="dashboard-action-row">
-              <Button
-                type="button"
-                onClick={() => setDialogOpen(true)}
-                className="dashboard-action-button shadow-sm transition-shadow hover:shadow-md"
-              >
-                <Plus className="mr-2 h-4 w-4" aria-hidden /> {t("Create New Event", "नया कार्यक्रम बनाएं")}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setDialogOpen(true)}
+              className="h-8 px-3 text-xs shadow-sm"
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" aria-hidden /> {t("Create", "बनाएँ")}
+            </Button>
           ) : undefined
         }
       />
@@ -676,7 +687,7 @@ export function UnitDashboardView({
         </motion.div>
       )}
 
-      {myEvents.length === 0 ? (
+      {tabbedEvents.length === 0 ? (
         <div
           className="dashboard-empty-panel"
           role="status"
@@ -711,7 +722,7 @@ export function UnitDashboardView({
       ) : (
       <div className="dashboard-record-grid">
         <AnimatePresence>
-          {myEvents.map((event, index) => (
+          {visibleTabbedEvents.map((event, index) => (
             <motion.div key={event.id} id={`event-card-${event.id}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.05 }}>
               <Card className="institution-panel h-full hover-lift transition-shadow">
                 <CardContent className="flex h-full flex-col space-y-3 pt-5">
@@ -855,6 +866,35 @@ export function UnitDashboardView({
             </motion.div>
           ))}
         </AnimatePresence>
+        {tabbedEvents.length > recordPageSize && (
+          <div className="col-span-full flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentRecordPage === 1}
+              onClick={() => setRecordPage((value) => Math.max(1, value - 1))}
+            >
+              <ArrowRight className="h-3.5 w-3.5 rotate-180" />
+              {t("Previous", "पिछला")}
+            </Button>
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              {t(`Page ${currentRecordPage} of ${recordPageCount}`, `पृष्ठ ${currentRecordPage}/${recordPageCount}`)}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={currentRecordPage === recordPageCount}
+              onClick={() => setRecordPage((value) => Math.min(recordPageCount, value + 1))}
+            >
+              {t("Next", "अगला")}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </div>
       )}
 

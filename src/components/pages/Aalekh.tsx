@@ -13,8 +13,10 @@ import { UnitHeadView } from "./aalekh/UnitHeadView";
 import { AayamView } from "./aalekh/AayamView";
 import { VibhagView } from "./aalekh/VibhagView";
 import { GalleryView } from "./aalekh/GalleryView";
-import { LayoutGrid, List, ArrowRight } from "lucide-react";
+import { LayoutGrid, List, ArrowRight, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Masthead } from "@/components/Masthead";
 import { cn } from "@/lib/utils";
 
 const pipelineSteps = [
@@ -100,6 +102,17 @@ export default function Aalekh() {
   const t = useT();
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "gallery">("list");
+  const [aalekhTab, setAalekhTab] = useState<string>(
+    role === "karyakarta" ? "write" : "review"
+  );
+  const publishedArticles = useMemo(
+    () => articles.filter((article) => article.status === "Published"),
+    [articles],
+  );
+  const reviewArticles = useMemo(
+    () => articles.filter((article) => article.status !== "Published"),
+    [articles],
+  );
 
   const handleSubmit = async (form: typeof emptyForm) => {
     try {
@@ -169,20 +182,62 @@ export default function Aalekh() {
   );
 
   return (
-    <div className="space-y-5">
-      <AalekhPipeline role={role} t={t} lang={lang} />
+    <div className="space-y-4">
+      <Masthead
+        compact
+        seal="Aalekh"
+        sealHi="आलेख"
+        title="Knowledge Writing Desk"
+        titleHi="ज्ञान लेखन डेस्क"
+        actions={
+          <div className="flex items-center gap-2">
+            {viewMode === "gallery" ? (
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setViewMode("list")}>
+                <List className="h-3.5 w-3.5" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setViewMode("gallery")}>
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        }
+      />
 
-      {viewMode === "gallery" ? (
+      <Tabs value={aalekhTab} onValueChange={setAalekhTab}>
+        <TabsList className="h-9 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/50 bg-muted/30 p-1">
+          {role === "karyakarta" && (
+            <TabsTrigger value="write" onClick={() => setAalekhTab("write")} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <PenLine className="mr-1.5 h-3 w-3" />{t("Write", "लिखें")}
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="review" onClick={() => setAalekhTab("review")} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t("Review", "समीक्षा")}
+          </TabsTrigger>
+          <TabsTrigger value="published" onClick={() => setAalekhTab("published")} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t("Published", "प्रकाशित")}
+          </TabsTrigger>
+          <TabsTrigger value="pipeline" onClick={() => setAalekhTab("pipeline")} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            {t("Pipeline", "प्रवाह")}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {aalekhTab === "pipeline" ? (
+        <AalekhPipeline role={role} t={t} lang={lang} />
+      ) : aalekhTab === "published" ? (
+        <GalleryView articles={publishedArticles} />
+      ) : viewMode === "gallery" ? (
         <GalleryView articles={articles} />
       ) : role === "karyakarta" ? (
-        <KaryakartaView articles={articles} handleSubmit={handleSubmit} viewToggle={viewToggle} initialTitle={initialArticleData.title} initialContent={initialArticleData.content} onResubmit={handleResubmit} />
+        <KaryakartaView articles={aalekhTab === "review" ? reviewArticles : articles} handleSubmit={handleSubmit} viewToggle={viewToggle} initialTitle={initialArticleData.title} initialContent={initialArticleData.content} onResubmit={handleResubmit} />
       ) : role === "unit_head" ? (
-        <UnitHeadView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
+        <UnitHeadView articles={reviewArticles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
       ) : role === "aayam_pramukh" ? (
-        <AayamView articles={articles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
+        <AayamView articles={reviewArticles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
       ) : (
         <VibhagView
-          articles={articles}
+          articles={reviewArticles}
           permissions={permissions}
           updateArticleStatus={handleUpdateStatus}
           lastPublished={lastPublished}

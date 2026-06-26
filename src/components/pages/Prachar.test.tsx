@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 import { createRoot } from "react-dom/client";
 import { act } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Prachar from "./Prachar";
+
+const mockState = vi.hoisted(() => ({
+  lang: "en" as "en" | "hi",
+}));
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
@@ -32,12 +36,13 @@ vi.mock("embla-carousel-react", () => ({
 }));
 
 vi.mock("@/lib/useT", () => ({
-  useT: () => (en: string) => en,
+  useT: () => (en: string, hi?: string) => (mockState.lang === "hi" ? hi ?? en : en),
 }));
 
 vi.mock("@/context/AppContext", () => ({
   useAppContext: () => ({
     role: "aayam_pramukh",
+    lang: mockState.lang,
     permissions: { canUpdatePrachar: true },
   }),
 }));
@@ -75,6 +80,10 @@ vi.mock("@/hooks/api/use-prachar", () => ({
 }));
 
 describe("Prachar campaign controls", () => {
+  beforeEach(() => {
+    mockState.lang = "en";
+  });
+
   it("shows create and edit campaign controls for Prachar writers", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
@@ -85,5 +94,65 @@ describe("Prachar campaign controls", () => {
 
     expect(host.textContent).toContain("Create Campaign");
     expect(host.textContent).toContain("Edit Campaign");
+  });
+
+  it("switches tabs into bounded Prachar work areas", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+
+    act(() => {
+      createRoot(host).render(<Prachar />);
+    });
+
+    expect(host.textContent).toContain("Campaign Dissemination Queue");
+    expect(host.textContent).not.toContain("Communication kits, posters, and publicity formats");
+
+    const createTab = Array.from(host.querySelectorAll("button")).find((button) => button.textContent === "Create");
+    expect(createTab).toBeTruthy();
+    act(() => {
+      createTab?.click();
+    });
+
+    expect(host.textContent).toContain("Communication kits, posters, and publicity formats");
+    expect(host.textContent).not.toContain("Campaign Dissemination Queue");
+
+    const analyticsTab = Array.from(host.querySelectorAll("button")).find((button) => button.textContent === "Analytics");
+    expect(analyticsTab).toBeTruthy();
+    act(() => {
+      analyticsTab?.click();
+    });
+
+    expect(host.textContent).toContain("Coverage Analytics");
+    expect(host.textContent).not.toContain("Communication kits, posters, and publicity formats");
+  });
+
+  it("uses Hindi copy for generated campaign output controls", () => {
+    mockState.lang = "hi";
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+
+    act(() => {
+      createRoot(host).render(<Prachar />);
+    });
+
+    const createTab = Array.from(host.querySelectorAll('button[role="tab"]')).find((button) => button.textContent?.includes("बनाएँ"));
+    expect(createTab).toBeTruthy();
+    act(() => {
+      createTab?.click();
+    });
+
+    const generateButton = Array.from(host.querySelectorAll("button")).find((button) => {
+      const text = button.textContent ?? "";
+      return text.includes("संदेश") || text.includes("Generate copy");
+    });
+    expect(generateButton).toBeTruthy();
+    act(() => {
+      generateButton?.click();
+    });
+
+    expect(host.textContent).toContain("निर्मित अभियान संदेश");
+    expect(host.textContent).toContain("फिर कॉपी करें");
+    expect(host.textContent).not.toContain("Generated campaign copy");
+    expect(host.textContent).not.toContain("Copy again");
   });
 });

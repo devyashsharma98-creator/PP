@@ -12,6 +12,8 @@ export interface DashboardRoleViewProps {
   statusBadge: (status: string) => string;
   onOpenVrittEditor: (event: GatividhiEvent) => void;
   onOpenQr: (event: GatividhiEvent) => void;
+  /** Active workbench tab (today | queue | create | published | followup) */
+  activeTab?: string;
 }
 
 export interface VibhagDashboardViewProps extends DashboardRoleViewProps {
@@ -46,6 +48,8 @@ export interface UnitDashboardViewProps {
   autoOpenCreate?: boolean;
   /** Event id to scroll to + highlight (from ?event=) */
   focusEventId?: string | null;
+  /** Active workbench tab (today | queue | create | published | followup) */
+  activeTab?: string;
 }
 
 export interface VrittEditorState {

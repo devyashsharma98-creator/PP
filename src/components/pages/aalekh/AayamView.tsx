@@ -33,12 +33,11 @@ export function AayamView({ articles, updateArticleStatus, viewToggle }: AayamVi
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
+        compact
         seal="Aalekh Thematic Review Desk"
         sealHi="आलेख विषयगत समीक्षा कक्ष"
         title="Review and Route Aalekh"
         titleHi="आलेख की समीक्षा करें और आगे बढ़ाएँ"
-        subtitle="Review the final drafts, make the thematic editorial call, and forward to Vibhag for final review."
-        subtitleHi="अंतिम मसौदे देखें, विषयगत संपादकीय निर्णय लें और अंतिम समीक्षा के लिए विभाग को भेजें।"
         contexts={[
           {
             labelEn: "Current lane",

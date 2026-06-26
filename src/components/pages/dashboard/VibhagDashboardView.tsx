@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import CountUp from "react-countup";
@@ -24,6 +24,7 @@ export function VibhagDashboardView({
   onDismissPublished,
   onForwardToPrant,
   onPublishEvent,
+  activeTab = "today",
 }: VibhagDashboardViewProps) {
   const totalEvents = events.length;
   const published = events.filter((event) => event.status === "Published").length;
@@ -38,12 +39,11 @@ export function VibhagDashboardView({
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="dashboard-page">
       <Masthead
+        compact
         seal="Bhopal Vibhag Activity Console"
         sealHi="भोपाल विभाग गतिविधि डेस्क"
         title="Vibhag Review Board"
         titleHi="विभाग समीक्षा मंडल"
-        subtitle="Vibhag review, Prant forwarding, and unit coordination in one operational view."
-        subtitleHi="विभाग समीक्षा, प्रान्त को अग्रेषण और इकाई समन्वय।"
         contexts={[
           {
             labelEn: "Scope",
@@ -143,134 +143,138 @@ export function VibhagDashboardView({
         ))}
       </div>
 
-      <Card className="institution-panel">
-        <CardHeader>
-          <CardTitle className="dashboard-section-heading">
-            <Eye className="h-5 w-5 text-primary" /> {t("Vibhag & Prant Approval Queue", "विभाग और प्रान्त अनुमोदन कतार")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pending.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {t("No events pending vibhag/prant approval.", "विभाग या प्रान्त अनुमोदन प्रतीक्षित कोई कार्यक्रम नहीं।")}
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {pending.map((event) => (
-                <motion.div
-                  key={event.id}
-                  className="dashboard-list-item flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold md:text-base">{event.title}</p>
-                    <p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground md:text-xs">
-                      <span>{event.unit}</span>
-                      <span className="opacity-40">•</span>
-                      <span>{event.date}</span>
-                      <span className="opacity-40">•</span>
-                      <span className="font-bold text-primary">{t(event.status, eventStatusHi[event.status] ?? event.status)}</span>
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    {event.status === "Pending Vibhag Review" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 flex-1 gap-1.5 text-[11px] sm:flex-none"
-                        onClick={() => void onForwardToPrant(event.id)}
-                        disabled={workflowPending}
-                      >
-                        <ArrowRight className="h-3.5 w-3.5" /> {t("Forward", "भेजें")}
-                      </Button>
-                    )}
-                    {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && (
-                      <Button
-                        size="sm"
-                        className="saffron-gradient h-8 flex-1 gap-1.5 border-0 text-[11px] text-white sm:flex-none"
-                        disabled={!permissions.canPublishEvent || workflowPending}
-                        onClick={() => void onPublishEvent(event.id, event.title, event.status)}
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" /> {t("Publish", "प्रकाशित करें")}
-                      </Button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {lastPublished && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
-              <Card className="border border-green-500/40 bg-green-500/10">
-                <CardContent className="pt-4 pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                      <div className="space-y-2">
-                        <p className="font-devanagari text-sm font-medium text-green-800 dark:text-green-300">
-                          <span className="font-semibold">{lastPublished}</span> {t("published! Update Prachar now.", "प्रकाशित! प्रचार अद्यतन करना न भूलें।")}
-                        </p>
-                        <Link href="/prachar">
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-green-700 hover:text-green-900 dark:text-green-400">
-                            {t("Go to Prachar", "प्रचार पर जाएँ")} <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
-                        </Link>
-                      </div>
+      {(activeTab === "today" || activeTab === "queue") && (
+        <Card className="institution-panel">
+          <CardHeader>
+            <CardTitle className="dashboard-section-heading">
+              <Eye className="h-5 w-5 text-primary" /> {t("Vibhag & Prant Approval Queue", "विभाग और प्रान्त अनुमोदन कतार")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pending.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                {t("No events pending vibhag/prant approval.", "विभाग या प्रान्त अनुमोदन प्रतीक्षित कोई कार्यक्रम नहीं।")}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {pending.map((event) => (
+                  <motion.div
+                    key={event.id}
+                    className="dashboard-list-item flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold md:text-base">{event.title}</p>
+                      <p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground md:text-xs">
+                        <span>{event.unit}</span>
+                        <span className="opacity-40">•</span>
+                        <span>{event.date}</span>
+                        <span className="opacity-40">•</span>
+                        <span className="font-bold text-primary">{t(event.status, eventStatusHi[event.status] ?? event.status)}</span>
+                      </p>
                     </div>
-                    <button
-                      onClick={onDismissPublished}
-                      className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
-                      aria-label="Dismiss"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </CardContent>
-      </Card>
+                    <div className="flex shrink-0 gap-2">
+                      {event.status === "Pending Vibhag Review" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 flex-1 gap-1.5 text-[11px] sm:flex-none"
+                          onClick={() => void onForwardToPrant(event.id)}
+                          disabled={workflowPending}
+                        >
+                          <ArrowRight className="h-3.5 w-3.5" /> {t("Forward", "भेजें")}
+                        </Button>
+                      )}
+                      {(event.status === "Pending Prant Authorization" || event.status === "Pending Prant Dual Authorization") && (
+                        <Button
+                          size="sm"
+                          className="saffron-gradient h-8 flex-1 gap-1.5 border-0 text-[11px] text-white sm:flex-none"
+                          disabled={!permissions.canPublishEvent || workflowPending}
+                          onClick={() => void onPublishEvent(event.id, event.title, event.status)}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {t("Publish", "प्रकाशित करें")}
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
 
-      <Card className="institution-panel">
-        <CardHeader>
-          <CardTitle className="dashboard-section-heading flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-success" /> {t("Published Events Management", "प्रकाशित कार्यक्रम प्रबंधन")}
+            {lastPublished && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                <Card className="border border-green-500/40 bg-green-500/10">
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                        <div className="space-y-2">
+                          <p className="font-devanagari text-sm font-medium text-green-800 dark:text-green-300">
+                            <span className="font-semibold">{lastPublished}</span> {t("published! Update Prachar now.", "प्रकाशित! प्रचार अद्यतन करना न भूलें।")}
+                          </p>
+                          <Link href="/prachar">
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-green-700 hover:text-green-900 dark:text-green-400">
+                              {t("Go to Prachar", "प्रचार पर जाएँ")} <ArrowRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                      <button
+                        onClick={onDismissPublished}
+                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                        aria-label="Dismiss"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {(activeTab === "today" || activeTab === "published" || activeTab === "followup") && (
+        <Card className="institution-panel">
+          <CardHeader>
+            <CardTitle className="dashboard-section-heading flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-success" /> {t("Published Events Management", "प्रकाशित कार्यक्रम प्रबंधन")}
+              </div>
+              <Badge variant="outline" className="text-[10px]">
+                {published} {t("Active", "सक्रिय")}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="dashboard-panel-grid">
+              {events
+                .filter((event) => event.status === "Published")
+                .map((event) => (
+                  <div key={event.id} className="dashboard-list-item space-y-3 bg-muted/20">
+                    <div className="flex items-start justify-between">
+                      <h4 className="text-sm font-bold leading-tight">{event.title}</h4>
+                      <Badge className="border-0 bg-green-500/10 text-[9px] font-bold uppercase tracking-widest text-green-600">
+                        {t("Live", "सक्रिय")}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      {event.unit} · {event.date}
+                    </p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <Button variant="outline" size="sm" className="h-8 flex-1 gap-1.5 text-[10px]" onClick={() => onOpenQr(event)}>
+                        <QrCode className="h-3.5 w-3.5 text-amber-600" /> {t("Venue QR", "क्यूआर")}
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-8 flex-1 gap-1.5 text-[10px]" onClick={() => onOpenVrittEditor(event)}>
+                        <FileText className="h-3.5 w-3.5 text-primary" /> {t("Vritt", "वृत्त")}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
             </div>
-            <Badge variant="outline" className="text-[10px]">
-              {published} {t("Active", "सक्रिय")}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="dashboard-panel-grid">
-            {events
-              .filter((event) => event.status === "Published")
-              .map((event) => (
-                <div key={event.id} className="dashboard-list-item space-y-3 bg-muted/20">
-                  <div className="flex items-start justify-between">
-                    <h4 className="text-sm font-bold leading-tight">{event.title}</h4>
-                    <Badge className="border-0 bg-green-500/10 text-[9px] font-bold uppercase tracking-widest text-green-600">
-                      {t("Live", "सक्रिय")}
-                    </Badge>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    {event.unit} · {event.date}
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <Button variant="outline" size="sm" className="h-8 flex-1 gap-1.5 text-[10px]" onClick={() => onOpenQr(event)}>
-                      <QrCode className="h-3.5 w-3.5 text-amber-600" /> {t("Venue QR", "क्यूआर")}
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8 flex-1 gap-1.5 text-[10px]" onClick={() => onOpenVrittEditor(event)}>
-                      <FileText className="h-3.5 w-3.5 text-primary" /> {t("Vritt", "वृत्त")}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </motion.div>
   );
 }

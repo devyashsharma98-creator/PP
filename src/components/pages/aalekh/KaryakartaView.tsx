@@ -32,12 +32,11 @@ export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitl
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <Masthead
+        compact
         seal="Aalekh Writing Desk"
         sealHi="आलेख लेखन कक्ष"
         title="Draft and Submit Aalekh"
         titleHi="आलेख लिखें और समीक्षा हेतु भेजें"
-        subtitle="Write clearly, revise returned drafts, and send each aalekh into review."
-        subtitleHi="स्पष्ट लिखें, लौटे मसौदे सुधारें और हर आलेख समीक्षा में भेजें।"
         actions={<WriteArticleDialog onSubmit={handleSubmit} initialTitle={initialTitle} initialContent={initialContent} />}
         contexts={[
           {

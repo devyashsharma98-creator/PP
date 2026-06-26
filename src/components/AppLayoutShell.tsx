@@ -48,9 +48,9 @@ export function AppLayoutShell({
 
   if (isPaddedPublicRoute) {
     return (
-      <main id="main-content" tabIndex={-1} lang={lang} className="min-h-screen overflow-x-hidden bg-background" suppressHydrationWarning>
+      <main id="main-content" tabIndex={-1} lang={lang} className="h-dvh overflow-hidden bg-background" suppressHydrationWarning>
         <PageTransition>
-          <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 md:px-8 md:py-12 md:pb-12">
+          <div className="workbench-scroll mx-auto h-full max-w-7xl overflow-y-auto px-4 py-8 pb-32 sm:px-6 md:px-8 md:py-12 md:pb-12">
             {children}
           </div>
         </PageTransition>
@@ -90,11 +90,11 @@ export function AppLayoutShell({
 
   return (
     <>
-      <div className="app-frame flex min-h-screen w-full">
+      <div className="app-frame flex h-dvh w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Navbar />
-          <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell flex-1 overflow-y-auto px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-4 sm:pt-5 md:px-6 md:pb-10 md:pt-8">
+          <main id="main-content" tabIndex={-1} lang={lang} className="app-main-shell workbench-scroll flex-1 overflow-y-auto px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:pt-5 md:px-6 md:pb-6 md:pt-6">
             <PageTransition>{children}</PageTransition>
           </main>
         </div>

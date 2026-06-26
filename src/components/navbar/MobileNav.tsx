@@ -33,10 +33,10 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
           <Menu className="w-5 h-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="institution-ledger-rail w-[300px] border-r border-sidebar-border p-0 text-sidebar-foreground">
+      <SheetContent side="left" className="institution-ledger-rail flex h-dvh w-[min(92vw,360px)] max-w-none flex-col border-r border-sidebar-border p-0 text-sidebar-foreground">
         <SheetTitle className="sr-only">{t("Mobile navigation", "मोबाइल नेविगेशन")}</SheetTitle>
         <SheetDescription className="sr-only">{t("Primary app navigation links.", "मुख्य ऐप नेविगेशन लिंक।")}</SheetDescription>
-        <div className="border-b border-sidebar-border px-6 py-4">
+        <div className="shrink-0 border-b border-sidebar-border px-5 py-4">
           <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-sidebar-foreground/55">{t("Bhopal Vibhag", "भोपाल विभाग")}</p>
           <div className="flex items-center gap-3">
             <Link href="/parichay" prefetch={false} onClick={() => onOpenChange(false)} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] saffron-gradient ring-1 ring-primary/10 shadow-[0_16px_28px_-20px_hsl(27_100%_50%/0.8)]" aria-label={t("Organisation landing", "संगठन परिचय पृष्ठ")}>
@@ -49,7 +49,7 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
             </div>
           </div>
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-4 pb-24">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 pb-24">
           {navigationGroups.map((group) => (
             <div key={group.title} className="mb-4 space-y-1">
               <div className="flex items-center gap-1.5 px-3 pb-1">
@@ -61,9 +61,9 @@ export function MobileNav({ open, onOpenChange, pathname, lang, shellFrame, navi
               {group.items.map((item) => {
                 const active = pathname === item.path;
                 return (
-                  <Link key={item.path} href={item.path} prefetch={false} onClick={() => onOpenChange(false)} className={cn("flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150", active ? "bg-sidebar-primary/90 text-sidebar-primary-foreground shadow-sm" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground")}>
-                    <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "drop-shadow-sm")} />
-                    <span className={cn("flex-1 truncate text-xs leading-tight", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
+                  <Link key={item.path} href={item.path} prefetch={false} onClick={() => onOpenChange(false)} className={cn("flex min-h-[46px] items-start gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150", active ? "bg-sidebar-primary/90 text-sidebar-primary-foreground shadow-sm" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground")}>
+                    <item.icon className={cn("mt-0.5 h-[18px] w-[18px] shrink-0", active && "drop-shadow-sm")} />
+                    <span className={cn("min-w-0 flex-1 whitespace-normal break-words text-xs leading-5", lang === "hi" && "font-devanagari")}>{t(item.label, item.sublabel)}</span>
                   </Link>
                 );
               })}
