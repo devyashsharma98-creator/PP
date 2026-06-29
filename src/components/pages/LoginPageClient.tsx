@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, KeyRound, Loader2, LogIn, ShieldCheck } from "lucide-react";
+import { AlertCircle, KeyRound, Loader2, LogIn, ShieldCheck, Users } from "lucide-react";
 
 import { PragyaLogo } from "@/components/PragyaLogo";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppContext } from "@/context/AppContext";
 import { canAccessPathForPrimaryRole, getRoleLandingPath } from "@/lib/app/role-routing";
-import { LOCAL_ADMIN_QUICK_FILL } from "@/lib/auth/dev-quick-fill";
+import { LOCAL_ADMIN_QUICK_FILL, DEMO_ACCOUNTS, DEMO_PASSWORD, type DemoAccount } from "@/lib/auth/dev-quick-fill";
 import type { RoleCode } from "@/lib/permissions/types";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [flip, setFlip] = useState<"en" | "hi">("en");
   useEffect(() => {
     const id = setInterval(() => setFlip((v) => (v === "en" ? "hi" : "en")), 3800);
@@ -91,68 +92,85 @@ function LoginForm() {
         guideCta: "Open guide",
       };
 
+  // Resolve the post-login destination and navigate. Shared by the form and the
+  // one-click demo logins.
+  function redirectAfterLogin(authPayload: Record<string, unknown>) {
+    if (authPayload?.requiresPasswordChange) {
+      window.location.replace("/setup-profile");
+      return;
+    }
+
+    const roleCodes = (
+      Array.isArray(authPayload?.effectiveRoleCodes)
+        ? (authPayload.effectiveRoleCodes as unknown[])
+        : [authPayload?.primaryRoleCode]
+    ).filter(Boolean) as RoleCode[];
+
+    const primaryRoleCode = authPayload?.primaryRoleCode as RoleCode | undefined;
+    const roleLandingPath = getRoleLandingPath(roleCodes, primaryRoleCode);
+    const rawReturn = requestedReturnTo?.trim() ?? "";
+    const useRoleLanding =
+      !rawReturn || rawReturn === "/" || rawReturn === "/parichay" || rawReturn.startsWith("/parichay?");
+    const destination = new URL(useRoleLanding ? roleLandingPath : rawReturn, window.location.origin);
+
+    if (destination.origin !== window.location.origin) {
+      destination.pathname = roleLandingPath;
+      destination.search = "";
+      destination.hash = "";
+    }
+
+    if (!canAccessPathForPrimaryRole(destination.pathname, primaryRoleCode)) {
+      destination.pathname = roleLandingPath;
+      destination.search = "";
+      destination.hash = "";
+    }
+
+    destination.searchParams.set("loginAt", String(Date.now()));
+    window.location.replace(`${destination.pathname}${destination.search}${destination.hash}`);
+  }
+
+  async function login(emailToUse: string, passwordToUse: string): Promise<string | null> {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailToUse.trim(), password: passwordToUse }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return (typeof data?.error === "string" ? data.error : data?.error?.message) || data?.message || copy.invalidCredentials;
+    }
+    redirectAfterLogin(data?.data ?? data);
+    return null;
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const message =
-          (typeof data?.error === "string" ? data.error : data?.error?.message) ||
-          data?.message ||
-          copy.invalidCredentials;
+      const message = await login(email, password);
+      if (message) {
         setError(message);
         setLoading(false);
-        return;
       }
-
-      const authPayload = data?.data ?? data;
-
-      // If first-time login, force profile setup
-      if (authPayload?.requiresPasswordChange) {
-        window.location.replace("/setup-profile");
-        return;
-      }
-
-      const roleCodes = (
-        Array.isArray(authPayload?.effectiveRoleCodes)
-          ? authPayload.effectiveRoleCodes
-          : [authPayload?.primaryRoleCode]
-      ).filter(Boolean) as RoleCode[];
-
-      const primaryRoleCode = authPayload?.primaryRoleCode as RoleCode | undefined;
-      const roleLandingPath = getRoleLandingPath(roleCodes, primaryRoleCode);
-      const rawReturn = requestedReturnTo?.trim() ?? "";
-      const useRoleLanding =
-        !rawReturn || rawReturn === "/" || rawReturn === "/parichay" || rawReturn.startsWith("/parichay?");
-      const destination = new URL(useRoleLanding ? roleLandingPath : rawReturn, window.location.origin);
-
-      if (destination.origin !== window.location.origin) {
-        destination.pathname = roleLandingPath;
-        destination.search = "";
-        destination.hash = "";
-      }
-
-      if (!canAccessPathForPrimaryRole(destination.pathname, primaryRoleCode)) {
-        destination.pathname = roleLandingPath;
-        destination.search = "";
-        destination.hash = "";
-      }
-
-      destination.searchParams.set("loginAt", String(Date.now()));
-      window.location.replace(`${destination.pathname}${destination.search}${destination.hash}`);
     } catch {
       setError(copy.genericError);
       setLoading(false);
+    }
+  }
+
+  async function handleDemoLogin(acct: DemoAccount) {
+    setError("");
+    setDemoLoading(acct.roleCode);
+    try {
+      const message = await login(acct.email, DEMO_PASSWORD);
+      if (message) {
+        setError(message);
+        setDemoLoading(null);
+      }
+    } catch {
+      setError(copy.genericError);
+      setDemoLoading(null);
     }
   }
 
@@ -376,6 +394,43 @@ function LoginForm() {
                   {loading ? copy.signingIn : copy.signIn}
                 </Button>
               </form>
+
+              {/* ── Demo logins (one per designation) ───────────────────────── */}
+              <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <p className={cn("text-sm font-semibold text-foreground", isHi && "font-devanagari")}>
+                    {isHi ? "डेमो लॉगिन — हर पदनाम" : "Demo logins — every designation"}
+                  </p>
+                </div>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {isHi
+                    ? "किसी भी भूमिका पर एक-क्लिक लॉगिन करें और उसका डैशबोर्ड देखें।"
+                    : "One-click login as any role to preview its dashboard."}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {DEMO_ACCOUNTS.map((acct) => (
+                    <Button
+                      key={acct.roleCode}
+                      type="button"
+                      variant="outline"
+                      disabled={loading || demoLoading !== null}
+                      onClick={() => handleDemoLogin(acct)}
+                      className={cn("h-auto min-h-[44px] justify-center rounded-xl px-2 py-2 text-center text-[11px] font-medium leading-tight", isHi && "font-devanagari")}
+                    >
+                      {demoLoading === acct.roleCode ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        isHi ? acct.labelHi : acct.labelEn
+                      )}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  {isHi ? "सभी डेमो खातों का पासवर्ड" : "Password for all demo accounts"}:{" "}
+                  <span className="font-mono text-foreground">{DEMO_PASSWORD}</span>
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

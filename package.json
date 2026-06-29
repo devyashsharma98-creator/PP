@@ -26,7 +26,8 @@
 "db:seed:outreach": "dotenv -e .env.local -- npx tsx src/db/seed-outreach.ts",
 "db:seed:publications": "dotenv -e .env.local -- npx tsx src/db/seed-publications.ts",
 "db:seed:research": "dotenv -e .env.local -- npx tsx src/db/seed-research.ts",
-"db:seed:campus-workflows": "dotenv -e .env.local -- npx tsx src/db/seed-campus-workflows.ts"
+"db:seed:campus-workflows": "dotenv -e .env.local -- npx tsx src/db/seed-campus-workflows.ts",
+"db:seed:demo-users": "dotenv -e .env.local -- npx tsx src/db/seed-demo-users.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
