@@ -22,6 +22,10 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
   const t = useT();
   const [open, setOpen] = useState(false);
   const [bounce, setBounce] = useState(false);
+  // Y offset for the dropdown, captured from the bell so the panel sits just
+  // below it while staying anchored to the viewport's right edge (avoids the
+  // off-screen overflow that `absolute right-0` caused on narrow layouts).
+  const [panelTop, setPanelTop] = useState(56);
   const ref = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
   const { data: unreadCount = 0 } = useUnreadCount(isAuthenticated);
@@ -48,7 +52,11 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => total > 0 && setOpen((o) => !o)}
+        onClick={() => {
+          if (total <= 0) return;
+          if (!open && ref.current) setPanelTop(ref.current.getBoundingClientRect().bottom + 8);
+          setOpen((o) => !o);
+        }}
         aria-label={t("Open notifications", "सूचनाएँ खोलें")}
         className={cn("relative rounded-full p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors hover:bg-muted", total > 0 ? "cursor-pointer" : "cursor-default", bounce && "animate-badge-bounce")}
       >
@@ -73,13 +81,22 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
+            style={{ top: panelTop }}
+            className="fixed right-3 w-[calc(100vw-1.5rem)] max-w-sm max-h-[70vh] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl z-50"
           >
             <div className="sticky top-0 bg-popover border-b border-border/60 px-4 py-3 flex items-center justify-between">
               <h3 className={cn("text-sm font-semibold", lang === "hi" && "font-devanagari")}>{t("Notifications", "सूचनाएं")}</h3>
               <Badge variant="outline" className="text-[10px]">{total}</Badge>
             </div>
             <div className="p-2 space-y-1">
+              {notifications.length === 0 && (
+                <div className="flex flex-col items-center gap-1.5 px-4 py-8 text-center">
+                  <Bell className="h-6 w-6 text-muted-foreground/30" />
+                  <p className={cn("text-xs text-muted-foreground", lang === "hi" && "font-devanagari")}>
+                    {t("You're all caught up.", "सब कुछ देख लिया गया।")}
+                  </p>
+                </div>
+              )}
               {notifications.map((n) => (
                 <Link key={n.id} href={n.link} prefetch={false} onClick={() => setOpen(false)} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group">
                   <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5", n.type === "event" ? "bg-icon-info/10" : "bg-icon-primary/10")}>
@@ -101,8 +118,8 @@ export function NotificationBell({ isAuthenticated, notifications, lang }: Notif
               ))}
             </div>
             <div className="border-t border-border/60 px-4 py-2.5">
-              <Link href="/dashboard" prefetch={false} onClick={() => setOpen(false)} className={cn("text-xs text-primary hover:underline", lang === "hi" && "font-devanagari")}>
-                {t("View all in Dashboard →", "डैशबोर्ड में सब देखें →")}
+              <Link href="/notifications" prefetch={false} onClick={() => setOpen(false)} className={cn("text-xs text-primary hover:underline", lang === "hi" && "font-devanagari")}>
+                {t("View all notifications →", "सभी सूचनाएँ देखें →")}
               </Link>
             </div>
           </motion.div>
