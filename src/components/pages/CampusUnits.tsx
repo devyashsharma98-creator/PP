@@ -16,6 +16,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
+import { CampusUnitWorkflows } from '@/components/pages/campus/CampusUnitWorkflows';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -808,6 +809,9 @@ export default function CampusUnits() {
                         </p>
                       </div>
                     )}
+
+                    {/* Engagement workflows */}
+                    <CampusUnitWorkflows unitId={selectedUnit.id} canManage={canManage} />
 
                     {/* Admin actions */}
                     <div className="flex flex-wrap items-center gap-3 pt-2">

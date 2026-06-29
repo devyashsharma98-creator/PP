@@ -9,6 +9,9 @@ import { ArrowRight, Building2, CalendarDays, CheckCircle2, ClipboardCheck, Copy
 
 import { useAppContext } from "@/context/AppContext";
 import { useCreateDashboardEvent, useAddPoll, useFinalizePoll, useCloneEvent } from "@/hooks/api/use-dashboard";
+import { useSetVishayLinks } from "@/hooks/api/use-vishayas";
+import { VishaySelect } from "@/components/vishay/VishaySelect";
+import { EVENT_TYPES, EVENT_TYPE_KEYS, type EventTypeKey } from "@/lib/app/event-types";
 import { Masthead } from "@/components/Masthead";
 import { useToast } from "@/components/ToastProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -53,6 +56,7 @@ export function UnitDashboardView({
   const { addToast } = useToast();
   const t = useT();
   const createEventMutation = useCreateDashboardEvent();
+  const setVishayLinks = useSetVishayLinks();
   const addPollMutation = useAddPoll();
   const finalizePollMutation = useFinalizePoll();
   const cloneEventMutation = useCloneEvent();
@@ -103,6 +107,7 @@ export function UnitDashboardView({
     title: "",
     description: "",
     unit: "",
+    eventType: "study_circle",
     checklist: {
       designing: false,
       food: false,
@@ -118,6 +123,7 @@ export function UnitDashboardView({
     fileName: "",
     videoUrl: "",
     posterName: "",
+    vishayIds: [] as string[],
   });
 
   const myEvents = isApiConnected
@@ -230,16 +236,31 @@ export function UnitDashboardView({
 
     if (isApiConnected) {
       try {
-        await createEventMutation.mutateAsync({
+        const createdEvent = await createEventMutation.mutateAsync({
           title: form.title,
           description: form.description,
           startsAt: selectedDate.toISOString(),
           checklist: form.checklist,
+          metadata: { eventType: form.eventType },
         });
+        // Best-effort vishay tagging — a failed link write must not block the event.
+        const createdEventId = createdEvent?.id;
+        if (form.vishayIds.length > 0 && typeof createdEventId === "string") {
+          try {
+            await setVishayLinks.mutateAsync({
+              contentType: "event",
+              contentId: createdEventId,
+              vishayIds: form.vishayIds,
+            });
+          } catch {
+            addToast(t("Event saved, but vishay tags failed", "कार्यक्रम सहेजा गया, पर विषय टैग विफल"), "error");
+          }
+        }
         setForm({
           title: "",
           description: "",
           unit: "",
+          eventType: "study_circle",
           checklist: {
             designing: false,
             food: false,
@@ -255,6 +276,7 @@ export function UnitDashboardView({
           fileName: "",
           videoUrl: "",
           posterName: "",
+          vishayIds: [],
         });
         setDateValue("");
         setFormTab("pre");
@@ -366,7 +388,25 @@ export function UnitDashboardView({
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="col-span-2">
-                    <Label>{t("Event Type (Template)", "कार्यक्रम का प्रकार")}</Label>
+                    <Label>{t("Event Type", "कार्यक्रम का प्रकार")}</Label>
+                    <Select value={form.eventType} onValueChange={(v) => setForm((previous) => ({ ...previous, eventType: v }))}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        {EVENT_TYPE_KEYS.map((key) => (
+                          <SelectItem key={key} value={key}>
+                            {t(EVENT_TYPES[key].labelEn, EVENT_TYPES[key].labelHi)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {t(EVENT_TYPES[form.eventType as EventTypeKey]?.descriptionEn ?? "", EVENT_TYPES[form.eventType as EventTypeKey]?.descriptionHi ?? "")}
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <Label>{t("Checklist Template", "व्यवस्था टेम्पलेट")} <span className="text-[10px] text-muted-foreground">({t("optional — auto-fills arrangements", "वैकल्पिक — व्यवस्था स्वतः भरें")})</span></Label>
                     <Select onValueChange={applyTemplate}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder={t("Select a template to auto-fill checklist", "चेकलिस्ट भरने के लिए टेम्पलेट चुनें")} />
@@ -395,6 +435,10 @@ export function UnitDashboardView({
                   <div className="col-span-2">
                     <Label>{t("Description", "विवरण")}</Label>
                     <Textarea value={form.description} onChange={(event) => setForm((previous) => ({ ...previous, description: event.target.value }))} rows={2} />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>{t("Vishay", "विषय")} <span className="text-muted-foreground text-xs">({t("subject areas, optional", "विषय क्षेत्र, वैकल्पिक")})</span></Label>
+                    <VishaySelect value={form.vishayIds} onChange={(ids) => setForm((previous) => ({ ...previous, vishayIds: ids }))} />
                   </div>
                 </div>
 

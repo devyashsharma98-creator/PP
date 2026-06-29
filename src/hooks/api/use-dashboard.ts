@@ -46,6 +46,7 @@ function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
     ),
     submittedBy: repairBrokenHindi(String(row.submittedByNameSnapshot ?? '') || 'API'),
     status: (dbToUiEventStatus[String(row.status ?? '')] ?? 'Draft') as GatividhiEvent['status'],
+    eventType: ((row.metadata as Record<string, unknown> | undefined)?.eventType as string | undefined) ?? null,
     checklist: {
       designing: Boolean((row.checklist as Record<string, unknown> | undefined)?.designing),
       food: Boolean((row.checklist as Record<string, unknown> | undefined)?.food),
@@ -84,7 +85,7 @@ export function useCreateDashboardEvent() {
   const queryClient = useQueryClient();
   const { refreshWorkspace } = useAppContext();
   return useMutation({
-    mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string; checklist?: Record<string, boolean> }) => {
+    mutationFn: async (input: { title: string; description: string; startsAt: string; unitId?: string; departmentId?: string; checklist?: Record<string, boolean>; metadata?: Record<string, unknown> }) => {
       return fetchApi<Record<string, unknown>>('/events', {
         method: 'POST',
         body: JSON.stringify(input),

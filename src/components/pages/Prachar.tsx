@@ -1,1111 +1,167 @@
 "use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Masthead } from '@/components/Masthead';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Megaphone, CheckCircle2, AlertCircle, MessageCircle,
-  Globe, Camera, Navigation, Layout, Palette, ChevronLeft, ChevronRight,
-  FileText, Clock3, Send, Sparkles, Plus, Pencil, Copy, BarChart3,
-} from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
-import { useDashboardEvents } from '@/hooks/api/use-dashboard';
-import { useOrgStructure } from '@/hooks/api/use-org-structure';
-import {
-  useCreatePracharCampaign,
-  usePracharStatuses,
-  useUpdatePracharCampaign,
-  useUpdatePracharPlatform,
-  type PracharCampaignInput,
-} from '@/hooks/api/use-prachar';
-import { useT } from '@/lib/useT';
-import { cn } from '@/lib/utils';
-import { buildPracharTemplatePreview } from '@/lib/app/prachar-template';
-import type { LucideIcon } from 'lucide-react';
-import useEmblaCarousel from 'embla-carousel-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { PracharPlatform, Role } from '@/lib/app/contracts';
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Plus, Megaphone, Inbox } from "lucide-react";
 
-interface Platform {
-  key: PracharPlatform;
-  label: string;
-  labelHi: string;
-  icon: LucideIcon;
-  color: string;
-}
+import { Masthead } from "@/components/Masthead";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { useT } from "@/lib/useT";
+import { useAppContext } from "@/context/AppContext";
+import { useOutreachItems, useOutreachTypes, useOutreachAnalytics } from "@/hooks/api/use-outreach";
+import { outreachColor, outreachIcon } from "@/lib/app/outreach-style";
+import { OutreachCard } from "@/components/pages/prachar/OutreachCard";
+import { CreateOutreachDialog } from "@/components/pages/prachar/CreateOutreachDialog";
+import { OutreachAnalytics } from "@/components/pages/prachar/OutreachAnalytics";
 
-interface PracharContextItem {
-  labelEn: string;
-  labelHi: string;
-  valueEn: string;
-  valueHi: string;
-  detailEn: string;
-  detailHi: string;
-}
-
-const platforms: Platform[] = [
-  { key: 'whatsapp', label: 'WhatsApp Groups', labelHi: 'WhatsApp ग्रुप', icon: MessageCircle, color: 'text-success' },
-  { key: 'facebook', label: 'Facebook Page', labelHi: 'Facebook पेज', icon: Globe, color: 'text-info' },
-  { key: 'instagram', label: 'Instagram', labelHi: 'Instagram', icon: Camera, color: 'text-destructive' },
-  { key: 'telegram', label: 'Telegram Channel', labelHi: 'Telegram चैनल', icon: Navigation, color: 'text-primary' },
-];
-
-const templates = [
-  { id: 't1', name: 'Event Poster', nameHi: 'कार्यक्रम पोस्टर', desc: 'Standard event announcement', descHi: 'कार्यक्रम की मानक घोषणा', icon: Layout, gradient: 'from-orange-500 to-amber-500' },
-  { id: 't2', name: 'Vimarsh Quote Card', nameHi: 'विमर्श उद्धरण कार्ड', desc: 'Quote card for discourse topics', descHi: 'विमर्श विषयों के लिए उद्धरण कार्ड', icon: Palette, gradient: 'from-violet-500 to-purple-500' },
-  { id: 't3', name: 'Book Discussion', nameHi: 'पुस्तक चर्चा', desc: 'Book review announcement', descHi: 'पुस्तक समीक्षा घोषणा', icon: Layout, gradient: 'from-blue-500 to-cyan-500' },
-  { id: 't4', name: 'Youth Program', nameHi: 'युवा कार्यक्रम', desc: 'Yuva aayam event template', descHi: 'युवा आयाम कार्यक्रम टेम्पलेट', icon: Palette, gradient: 'from-emerald-500 to-green-500' },
-  { id: 't5', name: 'Sammelan Invite', nameHi: 'सम्मेलन आमंत्रण', desc: 'Conference invitation template', descHi: 'सम्मेलन आमंत्रण पत्र', icon: Layout, gradient: 'from-rose-500 to-pink-500' },
-];
-
-function PracharMasthead({
-  t,
-  contexts,
-  canAct,
-}: {
-  t: (en: string, hi: string) => string;
-  contexts: PracharContextItem[];
-  canAct: boolean;
-}) {
-  return (
-    <div className="prachar-masthead space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <p className="section-seal">{t('Prachar Command Center', 'प्रचार संचालन कक्ष')}</p>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {t('Distribute and Confirm Reach', 'वितरण करें और पहुँच सुनिश्चित करें')}
-            </h1>
-            <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              {t(
-                'Move approved work into public reach. Track completion, close gaps, and finish each campaign.',
-                'स्वीकृत कार्य को सार्वजनिक पहुंच तक ले जाएं। पूर्णता देखें, कमी भरें और हर अभियान पूरा करें।',
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="prachar-authority-card">
-          <p className="shell-copy">{t('Action rights', 'कार्य अधिकार')}</p>
-          <p className="prachar-authority-title">
-            {canAct
-              ? t('Campaign closure and follow-through', 'अभियान पूर्णता और अनुवर्तन')
-              : t('Campaign visibility and status awareness', 'अभियान दृश्यता और स्थिति समझ')}
-          </p>
-          <p className="prachar-authority-detail">
-            {canAct
-              ? t('Mark completed channels or note why one was skipped.', 'पूर्ण चैनल दर्ज करें या स्किप का कारण लिखें।')
-              : t('You can review campaign status here. Final closure stays with the responsible desk.', 'यहां अभियान की स्थिति देखें। अंतिम समापन जिम्मेदार कक्ष करेगा।')}
-          </p>
-        </div>
-      </div>
-
-      <div className="prachar-context-grid">
-        {contexts.map((context) => (
-          <div key={context.labelEn} className="prachar-context-card">
-            <p className="shell-copy">{t(context.labelEn, context.labelHi)}</p>
-            <p className="prachar-context-value">{t(context.valueEn, context.valueHi)}</p>
-            <p className="prachar-context-detail">{t(context.detailEn, context.detailHi)}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex justify-end pt-1">
-        <Link href="/prachar-vishleshan">
-          <Button variant="outline" size="sm" className="text-xs">
-            <BarChart3 className="w-3.5 h-3.5 mr-1" />
-            {t('View Coverage Analytics', 'आच्छादन विश्लेषण देखें')}
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function roleCopy(role: Role, canAct: boolean, pendingCount: number): PracharContextItem[] {
-  if (role === 'vibhag_pramukh') {
-    return [
-      {
-        labelEn: 'Current lane',
-        labelHi: 'वर्तमान धारा',
-        valueEn: 'Final dissemination oversight',
-        valueHi: 'अंतिम प्रसार अनुश्रवण',
-        detailEn: 'Track completion across units and keep every published campaign moving.',
-        detailHi: 'इकाइयों में पूर्णता देखें और प्रत्येक प्रकाशित अभियान को आगे बढ़ाते रहें।',
-      },
-      {
-        labelEn: 'Institutional priority',
-        labelHi: 'संस्थागत प्राथमिकता',
-        valueEn: pendingCount === 0 ? 'All campaigns closed' : `${pendingCount} campaigns pending closure`,
-        valueHi: pendingCount === 0 ? 'सभी अभियान पूर्ण' : `${pendingCount} अभियान पूर्णता की प्रतीक्षा में`,
-        detailEn: 'Resolve incomplete platform coverage before the next public cycle.',
-        detailHi: 'अगले सार्वजनिक चक्र से पहले अधूरे मंच-वितरण पूरे करें।',
-      },
-      {
-        labelEn: 'Coordination mode',
-        labelHi: 'समन्वय स्वरूप',
-        valueEn: canAct ? 'Direct platform accountability' : 'Read-only oversight',
-        valueHi: canAct ? 'प्रत्यक्ष मंच उत्तरदायित्व' : 'केवल अनुश्रवण',
-        detailEn: 'Close gaps quickly and keep proof of dissemination visible.',
-        detailHi: 'कमियों को शीघ्र पूरा करें और प्रसार का प्रमाण स्पष्ट रखें।',
-      },
-    ];
-  }
-
-  if (role === 'aayam_pramukh') {
-    return [
-      {
-        labelEn: 'Current lane',
-        labelHi: 'वर्तमान धारा',
-        valueEn: 'Campaign ownership desk',
-        valueHi: 'अभियान स्वामित्व कक्ष',
-        detailEn: 'Carry approved work into organised circulation and follow through platform by platform.',
-        detailHi: 'अनुमोदित कार्य को संगठित प्रसार में ले जाएँ और प्रत्येक मंच पर अनुवर्तन रखें।',
-      },
-      {
-        labelEn: 'Institutional priority',
-        labelHi: 'संस्थागत प्राथमिकता',
-        valueEn: pendingCount === 0 ? 'Campaigns ready for closure' : `${pendingCount} campaigns need channel action`,
-        valueHi: pendingCount === 0 ? 'अभियान पूर्णता हेतु तैयार' : `${pendingCount} अभियानों को चैनल कार्रवाई चाहिए`,
-        detailEn: 'Keep each event visible across the required outreach surfaces.',
-        detailHi: 'प्रत्येक कार्यक्रम को आवश्यक प्रचार माध्यमों पर दृश्य बनाए रखें।',
-      },
-      {
-        labelEn: 'Coordination mode',
-        labelHi: 'समन्वय स्वरूप',
-        valueEn: canAct ? 'Platform execution and documentation' : 'Campaign visibility',
-        valueHi: canAct ? 'मंच क्रियान्वयन और दस्तावेज़ीकरण' : 'अभियान दृश्यता',
-        detailEn: 'Use skip reasons only when a channel is intentionally not used.',
-        detailHi: 'जब किसी मंच का उपयोग जानबूझकर न होने पर ही कारण दर्ज करें।',
-      },
-    ];
-  }
-
-  if (role === 'unit_head') {
-    return [
-      {
-        labelEn: 'Current lane',
-        labelHi: 'वर्तमान धारा',
-        valueEn: 'Unit dissemination visibility',
-        valueHi: 'इकाई प्रसार दृश्यता',
-        detailEn: 'Review how approved work is progressing into outreach after publication.',
-        detailHi: 'प्रकाशन के बाद अनुमोदित कार्य का प्रचार में प्रगति देखें।',
-      },
-      {
-        labelEn: 'Institutional priority',
-        labelHi: 'संस्थागत प्राथमिकता',
-        valueEn: pendingCount === 0 ? 'No open follow-through' : `${pendingCount} campaigns still open`,
-        valueHi: pendingCount === 0 ? 'कोई खुला अनुवर्तन नहीं' : `${pendingCount} अभियान अभी खुले हैं`,
-        detailEn: 'Use this page to understand campaign movement and support pending closures.',
-        detailHi: 'इस पृष्ठ से अभियान की गति समझें और लंबित पूर्णताओं को सहारा दें।',
-      },
-      {
-        labelEn: 'Coordination mode',
-        labelHi: 'समन्वय स्वरूप',
-        valueEn: canAct ? 'Operational support' : 'Observation and support',
-        valueHi: canAct ? 'प्रचालन सहयोग' : 'अवलोकन और सहयोग',
-        detailEn: 'The final dissemination checklist is maintained at the responsible coordination lane.',
-        detailHi: 'अंतिम प्रचार चेकलिस्ट जिम्मेदार समन्वय धारा में रखी जाती है।',
-      },
-    ];
-  }
-
-  return [
-    {
-      labelEn: 'Current lane',
-      labelHi: 'वर्तमान धारा',
-      valueEn: 'Public reach visibility',
-      valueHi: 'सार्वजनिक पहुँच दृश्यता',
-      detailEn: 'See how approved work becomes organised public communication.',
-      detailHi: 'देखें कि अनुमोदित कार्य कैसे संगठित सार्वजनिक संवाद बनता है।',
-    },
-    {
-      labelEn: 'Institutional priority',
-      labelHi: 'संस्थागत प्राथमिकता',
-      valueEn: pendingCount === 0 ? 'Campaigns are closed' : `${pendingCount} campaigns in motion`,
-      valueHi: pendingCount === 0 ? 'अभियान पूर्ण हैं' : `${pendingCount} अभियान गतिमान हैं`,
-      detailEn: 'Understand the dissemination state even when you are not the final coordinator.',
-      detailHi: 'अंतिम समन्वयक न होने पर भी प्रसार स्थिति को समझें।',
-    },
-    {
-      labelEn: 'Coordination mode',
-      labelHi: 'समन्वय स्वरूप',
-      valueEn: canAct ? 'Campaign support' : 'View-only campaign context',
-      valueHi: canAct ? 'अभियान सहयोग' : 'केवल दृश्य अभियान संदर्भ',
-      detailEn: 'Use the command center to see what has moved, what is pending, and what still needs attention.',
-      detailHi: 'कौन सा कार्य आगे बढ़ा, क्या लंबित है और किसे ध्यान चाहिए, यह यहाँ देखें।',
-    },
-  ];
-}
-
-function toLocalDateTimeValue(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  const offsetMs = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
-}
-
-function fromLocalDateTimeValue(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
-}
-
-function CampaignFields({
-  t,
-  value,
-  units,
-  departments,
-  onChange,
-}: {
-  t: (en: string, hi: string) => string;
-  value: PracharCampaignInput;
-  units: Array<{ id: string; name: string; nameHi: string | null }>;
-  departments: Array<{ id: string; name: string; nameHi: string | null }>;
-  onChange: (next: PracharCampaignInput) => void;
-}) {
-  const setField = <K extends keyof PracharCampaignInput>(key: K, fieldValue: PracharCampaignInput[K]) => {
-    onChange({ ...value, [key]: fieldValue });
-  };
-
-  return (
-    <div className="grid gap-4">
-      <div className="space-y-2">
-        <Label>{t('Campaign title', 'अभियान शीर्षक')}</Label>
-        <Input value={value.title} onChange={(event) => setField('title', event.target.value)} />
-      </div>
-      <div className="space-y-2">
-        <Label>{t('Campaign note', 'अभियान टिप्पणी')}</Label>
-        <Textarea value={value.description ?? ''} onChange={(event) => setField('description', event.target.value)} />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>{t('Campaign date', 'अभियान दिनांक')}</Label>
-          <Input
-            type="datetime-local"
-            value={toLocalDateTimeValue(value.startsAt)}
-            onChange={(event) => setField('startsAt', fromLocalDateTimeValue(event.target.value))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t('Template reference', 'टेम्पलेट संदर्भ')}</Label>
-          <Input
-            value={value.templateReference ?? ''}
-            onChange={(event) => setField('templateReference', event.target.value)}
-          />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>{t('Unit', 'इकाई')}</Label>
-          <Select
-            value={value.unitId ?? 'none'}
-            onValueChange={(next) => setField('unitId', next === 'none' ? undefined : next)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('Select unit', 'इकाई चुनें')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t('No unit', 'कोई इकाई नहीं')}</SelectItem>
-              {units.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id}>
-                  {t(unit.name, unit.nameHi ?? unit.name)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>{t('Aayam', 'आयाम')}</Label>
-          <Select
-            value={value.departmentId ?? 'none'}
-            onValueChange={(next) => setField('departmentId', next === 'none' ? undefined : next)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('Select aayam', 'आयाम चुनें')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t('No aayam', 'कोई आयाम नहीं')}</SelectItem>
-              {departments.map((department) => (
-                <SelectItem key={department.id} value={department.id}>
-                  {t(department.name, department.nameHi ?? department.name)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-  );
-}
+type StatusTab = "open" | "completed" | "all" | "analytics";
 
 export default function Prachar() {
-  const { role, permissions } = useAppContext();
-  const { data: apiEvents = [] } = useDashboardEvents();
-  const { data: pracharStatuses = [] } = usePracharStatuses();
-  const { data: orgStructure } = useOrgStructure();
-  const updatePracharPlatformMutation = useUpdatePracharPlatform();
-  const createCampaignMutation = useCreatePracharCampaign();
-  const updateCampaignMutation = useUpdatePracharCampaign();
-
-  const updatePracharPlatform = async (eventId: string, platform: PracharPlatform, done: boolean, skipReason?: string | null) => {
-    return updatePracharPlatformMutation.mutateAsync({ eventId, platform, done, skipReason });
-  };
-
   const t = useT();
-  const publishedEvents = useMemo(() => apiEvents.filter(e => e.status === 'Published'), [apiEvents]);
-  const defaultCampaignForm = useCallback((): PracharCampaignInput => ({
-    title: '',
-    description: '',
-    startsAt: new Date().toISOString(),
-    unitId: undefined,
-    departmentId: undefined,
-    templateReference: '',
-  }), []);
+  const isHi = t("en", "hi") === "hi";
+  const { permissions } = useAppContext();
+  const canAct = permissions.canUpdatePrachar;
+
+  const [tab, setTab] = useState<StatusTab>("open");
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingEventId, setEditingEventId] = useState<string | null>(null);
-  const [campaignForm, setCampaignForm] = useState<PracharCampaignInput>(() => defaultCampaignForm());
 
-  // Track which platform is pending a skip-reason entry: "eventId::platform"
-  const [pendingSkipKey, setPendingSkipKey] = useState<string | null>(null);
-  const [pendingSkipText, setPendingSkipText] = useState('');
-  const [generatedTemplate, setGeneratedTemplate] = useState<string | null>(null);
-  const getStatus = useCallback((eventId: string) =>
-  pracharStatuses.find(p => p.eventId === eventId) ?? {
-    eventId,
-    platforms: { whatsapp: false, facebook: false, instagram: false, telegram: false },
-    skipReasons: { whatsapp: null, facebook: null, instagram: null, telegram: null },
-    templateReference: null,
-  }, [pracharStatuses]);
+  const { data: types = [] } = useOutreachTypes();
+  const { data: items = [], isLoading } = useOutreachItems(typeFilter ? { type: typeFilter } : {});
+  const { data: analytics } = useOutreachAnalytics();
 
-  const canManageCampaigns = permissions.canUpdatePrachar;
-  const editingEvent = publishedEvents.find((event) => event.id === editingEventId) ?? null;
+  const typeByKey = useMemo(() => new Map(types.map((ty) => [ty.type, ty])), [types]);
 
-  const resetCampaignForm = useCallback(() => {
-    setCampaignForm(defaultCampaignForm());
-  }, [defaultCampaignForm]);
+  const visible = useMemo(() => {
+    if (tab === "completed") return items.filter((i) => i.status === "completed");
+    if (tab === "open") return items.filter((i) => i.status === "pending" || i.status === "in_progress");
+    return items; // "all"
+  }, [items, tab]);
 
-  const openEditCampaign = (event: typeof publishedEvents[number]) => {
-    const status = getStatus(event.id);
-    setEditingEventId(event.id);
-    setCampaignForm({
-      title: event.title,
-      description: event.description,
-      startsAt: event.dateIso || new Date().toISOString(),
-      unitId: event.unitId ?? undefined,
-      departmentId: event.departmentId ?? undefined,
-      templateReference: status.templateReference ?? '',
-    });
-  };
-
-  const submitCreateCampaign = async () => {
-    await createCampaignMutation.mutateAsync(campaignForm);
-    setCreateOpen(false);
-    resetCampaignForm();
-  };
-
-  const submitEditCampaign = async () => {
-    if (!editingEventId) return;
-    await updateCampaignMutation.mutateAsync({ eventId: editingEventId, input: campaignForm });
-    setEditingEventId(null);
-    resetCampaignForm();
-  };
-
-  const isDone = (eventId: string) => {
-    const s = getStatus(eventId);
-    return platforms.every((platform) =>
-      s.platforms[platform.key] || Boolean(s.skipReasons?.[platform.key]?.trim()),
-    );
-  };
-
-  const incompleteCount = publishedEvents.filter(e => !isDone(e.id)).length;
-  const campaignStats = useMemo(() => {
-    let confirmedPlatforms = 0;
-    let documentedSkips = 0;
-    let openFollowThrough = 0;
-
-    publishedEvents.forEach((event) => {
-      const status = getStatus(event.id);
-      platforms.forEach((platform) => {
-        if (status.platforms[platform.key]) {
-          confirmedPlatforms += 1;
-        } else if (status.skipReasons?.[platform.key]) {
-          documentedSkips += 1;
-        } else {
-          openFollowThrough += 1;
-        }
-      });
-    });
-
-    return {
-      totalCampaigns: publishedEvents.length,
-      incompleteCampaigns: incompleteCount,
-      completedCampaigns: publishedEvents.length - incompleteCount,
-      confirmedPlatforms,
-      documentedSkips,
-      openFollowThrough,
-      completionRate: publishedEvents.length === 0 ? 0 : Math.round(((publishedEvents.length - incompleteCount) / publishedEvents.length) * 100),
-    };
-  }, [incompleteCount, publishedEvents, getStatus]);
-  const mastheadContexts = useMemo(
-    () => roleCopy(role, permissions.canUpdatePrachar, incompleteCount),
-    [incompleteCount, permissions.canUpdatePrachar, role],
-  );
-
-  // Embla carousel for templates
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start', slidesToScroll: 1, containScroll: 'keepSnaps' });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [pracharTab, setPracharTab] = useState<string>('pending');
-  const [campaignPage, setCampaignPage] = useState(1);
-  const campaignPageSize = 1;
-  const campaignPageCount = Math.max(1, Math.ceil(publishedEvents.length / campaignPageSize));
-  const currentCampaignPage = Math.min(campaignPage, campaignPageCount);
-  const visiblePublishedEvents = publishedEvents.slice((currentCampaignPage - 1) * campaignPageSize, currentCampaignPage * campaignPageSize);
-
-  useEffect(() => {
-    setCampaignPage(1);
-  }, [pracharTab, publishedEvents.length]);
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
-  const previewTemplate = useCallback((templateName: string) => {
-    const sourceEvent = publishedEvents[0] ?? null;
-    const preview = buildPracharTemplatePreview({
-      templateName,
-      campaignTitle: sourceEvent?.title ?? campaignForm.title,
-      description: sourceEvent?.description ?? campaignForm.description,
-      eventDate: sourceEvent?.dateIso ?? campaignForm.startsAt,
-      unit: sourceEvent?.unit,
-      department: (sourceEvent as { department?: string } | null)?.department,
-    });
-    setGeneratedTemplate(preview.whatsappText);
-    void navigator.clipboard?.writeText(preview.whatsappText);
-  }, [campaignForm.description, campaignForm.startsAt, campaignForm.title, publishedEvents]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
-    emblaApi.on('select', onSelect);
-    onSelect();
-
-    // Auto-play
-    const interval = setInterval(() => emblaApi.scrollNext(), 4000);
-    return () => { clearInterval(interval); emblaApi.off('select', onSelect); };
-  }, [emblaApi]);
+  const contexts = [
+    {
+      labelEn: "Outreach in motion", labelHi: "गतिमान प्रसार",
+      valueEn: `${analytics?.pending ?? 0} open items`, valueHi: `${analytics?.pending ?? 0} खुले कार्य`,
+      detailEn: "Journals, conferences, campus programmes, and circulars awaiting action.",
+      detailHi: "पत्रिकाएँ, सम्मेलन, परिसर कार्यक्रम एवं परिपत्र कार्रवाई की प्रतीक्षा में।",
+    },
+    {
+      labelEn: "Completion", labelHi: "पूर्णता",
+      valueEn: `${analytics?.completionRate ?? 0}% completed`, valueHi: `${analytics?.completionRate ?? 0}% पूर्ण`,
+      detailEn: "Share of actionable outreach that has been carried through.",
+      detailHi: "क्रियाशील प्रसार का वह अंश जो पूर्ण किया जा चुका है।",
+    },
+    {
+      labelEn: "Action rights", labelHi: "कार्य अधिकार",
+      valueEn: canAct ? "Create and close outreach" : "View-only oversight",
+      valueHi: canAct ? "प्रसार बनाएँ एवं पूर्ण करें" : "केवल अवलोकन",
+      detailEn: canAct ? "Track each outreach to completion or note why it was skipped." : "Final closure stays with the responsible desk.",
+      detailHi: canAct ? "प्रत्येक प्रसार को पूर्णता तक ले जाएँ या स्किप का कारण दर्ज करें।" : "अंतिम समापन जिम्मेदार कक्ष करेगा।",
+    },
+  ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 pb-10">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5 pb-10">
       <Masthead
         compact
-        seal="Prachar Command Center"
-        sealHi="प्रचार संचालन कक्ष"
-        title="Distribute and Confirm Reach"
-        titleHi="वितरण करें और पहुँच सुनिश्चित करें"
-        contexts={mastheadContexts.map((c) => ({
-          labelEn: c.labelEn,
-          labelHi: c.labelHi,
-          valueEn: c.valueEn,
-          valueHi: c.valueHi,
-          detailEn: c.detailEn,
-          detailHi: c.detailHi,
-        }))}
-        actions={
-          canManageCampaigns ? (
-            <Button size="sm" className="h-8 px-3 text-xs" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-1.5 h-3.5 w-3.5" />{t('Create Campaign', 'अभियान बनाएँ')}
-            </Button>
-          ) : undefined
-        }
+        seal="Prachar — Academic Outreach"
+        sealHi="प्रचार — शैक्षिक प्रसार"
+        title="Carry the Work into the World"
+        titleHi="कार्य को जगत तक पहुँचाएँ"
+        contexts={contexts}
+        actions={canAct ? (
+          <Button size="sm" className="h-8 gap-1.5 px-3 text-xs" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-3.5 w-3.5" /> {t("New Outreach", "नया प्रसार")}
+          </Button>
+        ) : undefined}
       />
 
-      <Tabs value={pracharTab} onValueChange={setPracharTab}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as StatusTab)}>
         <TabsList className="h-9 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/50 bg-muted/30 p-1">
-          <TabsTrigger value="pending" onClick={() => setPracharTab('pending')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            {t('Pending', 'लंबित')}
-          </TabsTrigger>
-          <TabsTrigger value="create" onClick={() => setPracharTab('create')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            {t('Create', 'बनाएँ')}
-          </TabsTrigger>
-          <TabsTrigger value="analytics" onClick={() => setPracharTab('analytics')} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            {t('Analytics', 'विश्लेषण')}
-          </TabsTrigger>
+          {([
+            ["open", t("Open", "खुले")],
+            ["completed", t("Completed", "पूर्ण")],
+            ["all", t("All", "सभी")],
+            ["analytics", t("Analytics", "विश्लेषण")],
+          ] as const).map(([v, label]) => (
+            <TabsTrigger key={v} value={v} className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              {label}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
 
-      {canManageCampaigns && (
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t('Create Campaign', 'अभियान बनाएँ')}</DialogTitle>
-                <DialogDescription>
-                  {t('Create a published outreach campaign directly from Prachar.', 'प्रचार से सीधे प्रकाशित अभियान बनाएँ।')}
-                </DialogDescription>
-              </DialogHeader>
-              <CampaignFields
-                t={t}
-                value={campaignForm}
-                units={orgStructure?.units ?? []}
-                departments={orgStructure?.departments ?? []}
-                onChange={setCampaignForm}
-              />
-              {createCampaignMutation.error && (
-                <p className="text-sm text-destructive">{createCampaignMutation.error.message}</p>
-              )}
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setCreateOpen(false)}>
-                  {t('Cancel', 'रद्द करें')}
-                </Button>
-                <Button onClick={submitCreateCampaign} disabled={createCampaignMutation.isPending || !campaignForm.title.trim()}>
-                  {createCampaignMutation.isPending ? t('Creating...', 'बन रहा है...') : t('Create Campaign', 'अभियान बनाएँ')}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-      )}
-
-      {pracharTab === 'pending' && (
+      {tab === "analytics" ? (
+        <OutreachAnalytics />
+      ) : (
         <>
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <p className="section-seal">{t('Live Distribution Command Center', 'सजीव वितरण नियंत्रण कक्ष')}</p>
-            <div className="space-y-1">
-              <h2 className="dashboard-section-heading">{t('Campaign Dissemination Queue', 'अभियान प्रसार कतार')}</h2>
-              <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                {t(
-                  'See what is complete, what was skipped with reason, and what still needs follow-through.',
-                  'यहां देखें क्या पूरा हुआ, क्या कारण सहित छोड़ा गया और कहां अभी अनुवर्तन बाकी है।',
+          {/* Type filter row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setTypeFilter(null)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                !typeFilter ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground hover:bg-muted",
+              )}
+            >
+              {t("All types", "सभी प्रकार")}
+            </button>
+            {types.map((ty) => {
+              const c = outreachColor(ty.color);
+              const Icon = outreachIcon(ty.icon);
+              const active = typeFilter === ty.type;
+              return (
+                <button
+                  key={ty.type}
+                  onClick={() => setTypeFilter(active ? null : ty.type)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    active ? cn(c.bg, c.border, c.text) : "border-border/60 text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" /> {isHi ? ty.labelHi : ty.labelEn}
+                </button>
+              );
+            })}
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}
+            </div>
+          ) : visible.length > 0 ? (
+            <div className="space-y-3">
+              {visible.map((item) => (
+                <OutreachCard key={item.id} item={item} typeDef={typeByKey.get(item.outreachType)} canAct={canAct} />
+              ))}
+            </div>
+          ) : (
+            <Card className="institution-panel-muted">
+              <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50">
+                  {tab === "completed" ? <Megaphone className="h-7 w-7 text-muted-foreground/40" /> : <Inbox className="h-7 w-7 text-muted-foreground/40" />}
+                </span>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {tab === "completed"
+                    ? t("No completed outreach yet.", "अभी कोई पूर्ण प्रसार नहीं।")
+                    : t("No outreach in this view.", "इस दृश्य में कोई प्रसार नहीं।")}
+                </p>
+                {canAct && tab !== "completed" && (
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setCreateOpen(true)}>
+                    <Plus className="h-3.5 w-3.5" /> {t("Create the first outreach", "पहला प्रसार बनाएँ")}
+                  </Button>
                 )}
-              </p>
-            </div>
-          </div>
-          <div className="home-sequence-strip">
-            <span>{t('Publish', 'प्रकाशित करें')}</span>
-            <span>•</span>
-            <span>{t('Distribute', 'वितरित करें')}</span>
-            <span>•</span>
-            <span>{t('Confirm Reach', 'पहुंच सुनिश्चित करें')}</span>
-          </div>
-        </div>
-
-        <div className="prachar-command-grid">
-          <div className="prachar-command-card">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="shell-copy">{t('Campaigns in motion', 'गतिमान अभियान')}</p>
-                <p className="prachar-command-value">{campaignStats.totalCampaigns}</p>
-              </div>
-              <Megaphone className="h-5 w-5 text-primary" />
-            </div>
-            <p className="prachar-command-detail">
-              {campaignStats.incompleteCampaigns === 0
-                ? t('All published campaigns are closed.', 'सभी प्रकाशित अभियान पूरे हो चुके हैं।')
-                : t(`${campaignStats.incompleteCampaigns} campaigns still need closure.`, `${campaignStats.incompleteCampaigns} अभियान अभी पूरे होने बाकी हैं।`)}
-            </p>
-          </div>
-
-          <div className="prachar-command-card">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="shell-copy">{t('Channels confirmed', 'पुष्ट चैनल')}</p>
-                <p className="prachar-command-value">{campaignStats.confirmedPlatforms}</p>
-              </div>
-              <Send className="h-5 w-5 text-primary" />
-            </div>
-            <p className="prachar-command-detail">
-              {t(
-                `${campaignStats.openFollowThrough} channels still need follow-through and ${campaignStats.documentedSkips} have skip notes.`,
-                `${campaignStats.openFollowThrough} चैनलों पर अभी अनुवर्तन चाहिए और ${campaignStats.documentedSkips} पर स्किप नोट दर्ज है।`,
-              )}
-            </p>
-          </div>
-
-          <div className="prachar-command-card">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="shell-copy">{t('Closure readiness', 'पूर्णता तैयारी')}</p>
-                <p className="prachar-command-value">{campaignStats.completionRate}%</p>
-              </div>
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-            </div>
-            <p className="prachar-command-detail">
-              {permissions.canUpdatePrachar
-                ? t('Use the queue below to finish pending channels or record skips.', 'नीचे की कतार से बाकी चैनल पूरे करें या स्किप दर्ज करें।')
-                : t('Use the queue below to see which campaigns still need attention.', 'नीचे की कतार से देखें किन अभियानों को अभी ध्यान चाहिए।')}
-            </p>
-          </div>
-        </div>
-
-        {incompleteCount > 0 && (
-          <Alert className="border-warning/40 bg-[hsl(var(--warning)/.06)]">
-            <AlertCircle className="h-4 w-4 text-warning" />
-            <AlertDescription className="text-sm">
-              {t(
-                `${incompleteCount} published campaign${incompleteCount > 1 ? 's' : ''} still need dissemination closure.`,
-                `${incompleteCount} प्रकाशित अभियान अभी प्रसार पूर्णता की प्रतीक्षा में हैं।`,
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-      </section>
-
-      <div className="space-y-4">
-
-        {publishedEvents.length === 0 ? (
-          <Card className="institution-panel-muted">
-            <CardContent className="py-10 text-center text-muted-foreground text-sm">
-              {t('No published events are ready for Prachar yet. Approve events from the dashboard to activate this desk.', 'प्रचार के लिए अभी कोई प्रकाशित कार्यक्रम तैयार नहीं है। इस कक्ष को सक्रिय करने के लिए डैशबोर्ड से कार्यक्रम अनुमोदित करें।')}
-            </CardContent>
-          </Card>
-        ) : (
-          visiblePublishedEvents.map((event, i) => {
-            const status = getStatus(event.id);
-            const done = isDone(event.id);
-            const completedCount = Object.values(status.platforms).filter(Boolean).length;
-            const documentedSkips = platforms.filter(platform => status.skipReasons?.[platform.key]).length;
-            const openFollowThrough = platforms.filter(platform => !status.platforms[platform.key] && !status.skipReasons?.[platform.key]).length;
-
-            return (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-              >
-                <Card className={cn('prachar-campaign-card overflow-hidden', done ? 'border-success/40' : 'border-warning/35')}>
-                  <div className={cn('h-1.5', done ? 'bg-success' : 'bg-warning')} />
-                  <CardContent className="pt-5 space-y-4">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-2 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-[0.16em]">
-                            {t('Campaign Dossier', 'अभियान संलेख')}
-                          </Badge>
-                          {done
-                            ? <Badge className="bg-[hsl(var(--success)/.15)] text-success text-xs">
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> {t('Distribution Closed', 'वितरण पूर्ण')}
-                            </Badge>
-                            : <Badge className="bg-[hsl(var(--warning)/.15)] text-warning text-xs">
-                              <AlertCircle className="w-3 h-3 mr-1" /> {t('Reach Pending', 'पहुंच लंबित')}
-                            </Badge>
-                          }
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold tracking-tight">{event.title}</h3>
-                          <p className="text-sm text-muted-foreground">{event.unit} · {event.date}</p>
-                        </div>
-                        {event.description && (
-                          <p className="line-clamp-2 text-xs leading-5 text-muted-foreground md:text-sm md:leading-6">{event.description}</p>
-                        )}
-                      </div>
-
-                      <div className="prachar-progress-strip">
-                        <div className="prachar-progress-chip">
-                          <p className="shell-copy">{t('Channels done', 'पूर्ण चैनल')}</p>
-                          <p className="prachar-progress-value">{completedCount}/4</p>
-                        </div>
-                        <div className="prachar-progress-chip">
-                          <p className="shell-copy">{t('Open follow-through', 'खुला अनुवर्तन')}</p>
-                          <p className="prachar-progress-value">{openFollowThrough}</p>
-                        </div>
-                        <div className="prachar-progress-chip">
-                          <p className="shell-copy">{t('Documented skips', 'दर्ज स्किप')}</p>
-                          <p className="prachar-progress-value">{documentedSkips}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {platforms.map(platform => {
-                        const checked = status.platforms[platform.key];
-                        const skipKey = `${event.id}::${platform.key}`;
-                        const isPendingSkip = pendingSkipKey === skipKey;
-                        const existingReason = status.skipReasons?.[platform.key] ?? null;
-
-                        const handleToggle = (nextDone: boolean) => {
-                          if (!permissions.canUpdatePrachar) return;
-                          if (nextDone) {
-                            // Marking done — clear skip reason
-                            setPendingSkipKey(null);
-                            setPendingSkipText('');
-                            void updatePracharPlatform(event.id, platform.key, true, null);
-                          } else {
-                            // Unchecking — prompt for skip reason
-                            setPendingSkipKey(skipKey);
-                            setPendingSkipText(existingReason ?? '');
-                          }
-                        };
-
-                        const confirmSkip = () => {
-                          const reason = pendingSkipText.trim() || null;
-                          void updatePracharPlatform(event.id, platform.key, false, reason);
-                          setPendingSkipKey(null);
-                          setPendingSkipText('');
-                        };
-
-                        return (
-                          <div
-                            key={platform.key}
-                            className={cn(
-                              'prachar-platform-card',
-                              checked
-                                ? 'border-success/40 bg-[hsl(var(--success)/.08)]'
-                                : existingReason
-                                  ? 'border-primary/30 bg-primary/5'
-                                  : 'border-border/50 bg-muted/30 hover:border-border'
-                            )}
-                          >
-                            <div
-                              className="flex items-start gap-2 cursor-pointer"
-                              onClick={() => handleToggle(!checked)}
-                            >
-                              <Checkbox
-                                id={`${event.id}-${platform.key}`}
-                                checked={checked}
-                                disabled={!permissions.canUpdatePrachar}
-                                onClick={e => e.stopPropagation()}
-                                onCheckedChange={v => handleToggle(!!v)}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <platform.icon className={cn('w-3.5 h-3.5', platform.color)} />
-                                <Label
-                                  htmlFor={`${event.id}-${platform.key}`}
-                                  className="text-[10px] cursor-pointer block mt-0.5 leading-tight"
-                                >
-                                  {t(platform.label, platform.labelHi)}
-                                </Label>
-                                <p className="mt-1 text-[10px] leading-5 text-muted-foreground">
-                                  {checked
-                                    ? t('Channel marked complete.', 'चैनल पूर्ण दर्ज है।')
-                                    : existingReason
-                                      ? t(`Skip noted: ${existingReason}`, `स्किप नोट: ${existingReason}`)
-                                      : t('Waiting for dissemination confirmation.', 'प्रसार पुष्टि की प्रतीक्षा है।')}
-                                </p>
-                              </div>
-                            </div>
-                            {/* Inline skip-reason input */}
-                            {isPendingSkip && (
-                              <div className="space-y-2 border-t border-border/50 pt-3">
-                                <Input
-                                  value={pendingSkipText}
-                                  onChange={e => setPendingSkipText(e.target.value)}
-                                  placeholder={t('Why skip this channel?', 'यह चैनल क्यों छोड़ा गया?')}
-                                  className="h-8 text-xs px-2"
-                                  autoFocus
-                                  onKeyDown={e => { if (e.key === 'Enter') confirmSkip(); }}
-                                />
-                                <div className="flex gap-2">
-                                  <Button size="sm" className="h-7 text-[11px] px-3 flex-1" onClick={confirmSkip}>
-                                    {t('Save note', 'नोट सहेजें')}
-                                  </Button>
-                                  <Button size="sm" variant="ghost" className="h-7 text-[11px] px-3" onClick={() => { setPendingSkipKey(null); setPendingSkipText(''); }}>
-                                    {t('Cancel', 'रद्द')}
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex flex-col gap-3 border-t border-border/50 pt-4 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        {status.templateReference && (
-                          <p className="flex items-center gap-1">
-                            <FileText className="w-3 h-3 shrink-0" />
-                            {t('Template reference', 'टेम्पलेट संदर्भ')}: <span className="font-medium text-foreground/70">{status.templateReference}</span>
-                          </p>
-                        )}
-
-                        <p className="flex items-center gap-1">
-                          <Clock3 className="w-3 h-3 text-warning shrink-0" />
-                          {done
-                            ? t('Campaign closure is recorded across all required channels.', 'सभी जरूरी चैनलों पर अभियान पूर्ण दर्ज है।')
-                            : t('Complete the remaining channels or note why any were skipped.', 'बाकी चैनल पूरे करें या बताएं कौन-सा चैनल क्यों छोड़ा गया।')}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        {!done && (
-                          <Badge variant="outline" className="border-warning/40 bg-warning/5 text-warning">
-                            {t('Attention required', 'ध्यान आवश्यक')}
-                          </Badge>
-                        )}
-                        {canManageCampaigns && (
-                          <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => openEditCampaign(event)}>
-                            <Pencil className="mr-1 h-3 w-3" />
-                            {t('Edit Campaign', 'अभियान संपादित करें')}
-                          </Button>
-                        )}
-                        <Link href="/feed">
-                          <Button variant="outline" size="sm" className="text-xs w-full sm:w-auto">
-                            <CheckCircle2 className="w-3 h-3 mr-1" /> {t('View Published Feed', 'प्रकाशित फीड देखें')}
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })
-        )}
-        {publishedEvents.length > campaignPageSize && (
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1 text-xs"
-              disabled={currentCampaignPage === 1}
-              onClick={() => setCampaignPage((value) => Math.max(1, value - 1))}
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              {t('Previous', 'पिछला')}
-            </Button>
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              {t(`Campaign ${currentCampaignPage} of ${campaignPageCount}`, `अभियान ${currentCampaignPage}/${campaignPageCount}`)}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1 text-xs"
-              disabled={currentCampaignPage === campaignPageCount}
-              onClick={() => setCampaignPage((value) => Math.min(campaignPageCount, value + 1))}
-            >
-              {t('Next', 'अगला')}
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        )}
-      </div>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 
-      {pracharTab === 'create' && (
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <p className="section-seal">{t('Campaign Creative Studio', 'अभियान सृजन कक्ष')}</p>
-            <div className="space-y-1">
-              <h2 className="dashboard-section-heading">{t('Communication kits, posters, and publicity formats', 'संचार किट, पोस्टर और प्रचार प्रारूप')}</h2>
-              <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                {t(
-                  'Use these ready formats to package approved work for faster public reach. The studio keeps message discipline and campaign energy aligned.',
-                  'इन तैयार प्रारूपों से स्वीकृत कार्य को जल्दी सार्वजनिक पहुंच तक ले जाएं। यह कक्ष संदेश और अभियान ऊर्जा को एक दिशा में रखता है।',
-                )}
-              </p>
-            </div>
-          </div>
-          <div className="home-sequence-strip">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{t('Posters', 'पोस्टर')}</span>
-            <span>•</span>
-            <span>{t('Quote cards', 'उद्धरण कार्ड')}</span>
-            <span>•</span>
-            <span>{t('Invites', 'आमंत्रण')}</span>
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="prachar-command-card">
-            <p className="shell-copy">{t('Studio use', 'कक्ष उपयोग')}</p>
-            <p className="prachar-command-value">{t('Ready asset directions', 'तत्पर दृश्य दिशाएं')}</p>
-            <p className="prachar-command-detail">
-              {t('Pick the format that fits the campaign and keep the message consistent on every channel.', 'अभियान के अनुरूप प्रारूप चुनें और संदेश हर चैनल पर एक जैसा रखें।')}
-            </p>
-          </div>
-          <div className="prachar-command-card">
-            <p className="shell-copy">{t('Institutional discipline', 'संस्थागत अनुशासन')}</p>
-            <p className="prachar-command-value">{t('One message, many channels', 'एक संदेश, अनेक चैनल')}</p>
-            <p className="prachar-command-detail">
-              {t('Creative energy should still preserve factual clarity, tone, and organisational maryada.', 'सृजनात्मक ऊर्जा के साथ तथ्य स्पष्टता, स्वर और संगठनात्मक मर्यादा भी बनी रहनी चाहिए।')}
-            </p>
-          </div>
-          <div className="prachar-command-card">
-            <p className="shell-copy">{t('Next source', 'अगला स्रोत')}</p>
-            <p className="prachar-command-value">{t('Pull ideas from Vimarsh', 'विमर्श से विषय लें')}</p>
-            <p className="prachar-command-detail">
-              {t('When a campaign needs sharper framing, return to Vimarsh and tighten the narrative before distribution.', 'जब अभियान को और स्पष्ट कथ्य चाहिए, तो वितरण से पहले विमर्श पर लौटें और भाषा को सधा लें।')}
-            </p>
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="flex items-center justify-end gap-1 pb-3">
-            <button onClick={scrollPrev} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label={t('Previous template', 'पिछला टेम्पलेट')}>
-              <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button onClick={scrollNext} className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center hover:bg-accent transition-colors" aria-label={t('Next template', 'अगला टेम्पलेट')}>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </div>
-
-          <div className="absolute left-0 top-11 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-11 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4">
-              {templates.map((tmpl) => (
-                <div key={tmpl.id} className="flex-[0_0_78%] sm:flex-[0_0_48%] lg:flex-[0_0_30%] min-w-0">
-                  <Card className="prachar-studio-card h-full overflow-hidden">
-                    <div className={`h-24 bg-gradient-to-br ${tmpl.gradient} flex items-center justify-center`}>
-                      <tmpl.icon className="w-8 h-8 text-white/80" />
-                    </div>
-                    <CardContent className="pt-4 pb-5 space-y-3">
-                      <div>
-                        <p className="shell-copy">{t('Template lane', 'टेम्पलेट धारा')}</p>
-                        <h3 className="mt-1 text-sm font-semibold font-devanagari">{t(tmpl.name, tmpl.nameHi)}</h3>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{t(tmpl.desc, tmpl.descHi)}</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-8 w-full"
-                        onClick={() => previewTemplate(tmpl.name)}
-                      >
-                        <Copy className="mr-1 h-3 w-3" />
-                        {t('Generate copy', 'संदेश बनाएं')}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-1.5 mt-3">
-            {templates.map((_, i) => (
-              <button
-                key={i}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === selectedIndex ? 'bg-primary w-4' : 'bg-muted-foreground/30'}`}
-                onClick={() => emblaApi?.scrollTo(i)}
-                aria-label={`Go to template ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {generatedTemplate && (
-          <Card className="institution-panel-muted border-primary/20 bg-primary/5">
-            <CardContent className="space-y-3 py-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="shell-copy">{t('Generated campaign copy', 'निर्मित अभियान संदेश')}</p>
-                  <p className="text-sm text-muted-foreground">{t('Copied to clipboard. Edit before sending on the selected channel.', 'क्लिपबोर्ड में कॉपी हुआ। चयनित चैनल पर भेजने से पहले संपादित करें।')}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => void navigator.clipboard?.writeText(generatedTemplate)}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  {t('Copy again', 'फिर कॉपी करें')}
-                </Button>
-              </div>
-              <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-2xl border border-border/60 bg-background/70 p-4 text-xs leading-6 text-foreground/80">
-                {generatedTemplate}
-              </pre>
-            </CardContent>
-          </Card>
-        )}
-        <p className="text-xs text-muted-foreground text-center pt-1">
-          {t('Need sharper campaign language?', 'क्या अभियान की भाषा और स्पष्ट चाहिए?')} <Link href="/vimarsh" className="text-primary underline-offset-2 hover:underline">{t('Explore Vimarsh topics', 'विमर्श विषय देखें')}</Link>
-        </p>
-      </section>
-      )}
-
-      {pracharTab === 'analytics' && (
-        <section className="space-y-4">
-          <div className="institution-panel p-5">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-2">
-                <p className="section-seal">{t('Coverage Analytics', 'आच्छादन विश्लेषण')}</p>
-                <h2 className="dashboard-section-heading">{t('Review reach before the next campaign', 'अगले अभियान से पहले पहुँच देखें')}</h2>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                  {t(
-                    'Open the analytics desk to compare platform coverage, incomplete channels, and campaign closure patterns.',
-                    'मंच आच्छादन, अपूर्ण चैनल और अभियान पूर्णता के नमूने देखने के लिए विश्लेषण कक्ष खोलें।',
-                  )}
-                </p>
-              </div>
-              <Link href="/prachar-vishleshan">
-                <Button className="w-full gap-2 md:w-auto">
-                  <BarChart3 className="h-4 w-4" />
-                  {t('Open Coverage Analytics', 'आच्छादन विश्लेषण खोलें')}
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="prachar-command-card">
-              <p className="shell-copy">{t('Campaigns in motion', 'गतिमान अभियान')}</p>
-              <p className="prachar-command-value">{campaignStats.totalCampaigns}</p>
-              <p className="prachar-command-detail">{t('Published campaigns tracked by Prachar.', 'प्रचार द्वारा अनुशीलित प्रकाशित अभियान।')}</p>
-            </div>
-            <div className="prachar-command-card">
-              <p className="shell-copy">{t('Open follow-through', 'खुला अनुवर्तन')}</p>
-              <p className="prachar-command-value">{campaignStats.openFollowThrough}</p>
-              <p className="prachar-command-detail">{t('Channels that still need action or a skip note.', 'जिन चैनलों पर अभी कार्रवाई या स्किप नोट चाहिए।')}</p>
-            </div>
-            <div className="prachar-command-card">
-              <p className="shell-copy">{t('Closure readiness', 'पूर्णता तैयारी')}</p>
-              <p className="prachar-command-value">{campaignStats.completionRate}%</p>
-              <p className="prachar-command-detail">{t('Current dissemination completion rate.', 'वर्तमान प्रसार पूर्णता दर।')}</p>
-            </div>
-          </div>
-        </section>
-      )}
-      <Dialog open={!!editingEvent} onOpenChange={(open) => { if (!open) setEditingEventId(null); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('Edit Campaign', 'अभियान संपादित करें')}</DialogTitle>
-            <DialogDescription>
-              {t('Update the published event details used by this Prachar campaign.', 'इस प्रचार अभियान के प्रकाशित कार्यक्रम विवरण अद्यतन करें।')}
-            </DialogDescription>
-          </DialogHeader>
-          <CampaignFields
-            t={t}
-            value={campaignForm}
-            units={orgStructure?.units ?? []}
-            departments={orgStructure?.departments ?? []}
-            onChange={setCampaignForm}
-          />
-          {updateCampaignMutation.error && (
-            <p className="text-sm text-destructive">{updateCampaignMutation.error.message}</p>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingEventId(null)}>
-              {t('Cancel', 'रद्द करें')}
-            </Button>
-            <Button onClick={submitEditCampaign} disabled={updateCampaignMutation.isPending || !campaignForm.title.trim()}>
-              {updateCampaignMutation.isPending ? t('Saving...', 'सहेजा जा रहा है...') : t('Save Campaign', 'अभियान सहेजें')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CreateOutreachDialog open={createOpen} onOpenChange={setCreateOpen} />
     </motion.div>
   );
 }

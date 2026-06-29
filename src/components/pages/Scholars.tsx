@@ -17,6 +17,9 @@ import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
+import { VishaySelect } from '@/components/vishay/VishaySelect';
+import { VishayChips } from '@/components/vishay/VishayChips';
+import { useVishayLinks, useSetVishayLinks } from '@/hooks/api/use-vishayas';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -79,9 +82,11 @@ function ScholarAvatar({ photoUrl, name, className, textClass }: { photoUrl: str
 
 // ── Form Component ─────────────────────────────────────────────────────────
 
+type ScholarSaveData = Partial<Scholar> & { vishayIds?: string[] };
+
 interface ScholarFormProps {
   initial?: Scholar | null;
-  onSave: (data: Partial<Scholar>) => Promise<void>;
+  onSave: (data: ScholarSaveData) => Promise<void>;
   onCancel: () => void;
   t: (en: string, hi: string) => string;
   isHi: boolean;
@@ -101,8 +106,15 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
   const [expertise, setExpertise] = useState<string[]>(initial?.expertise ?? []);
   const [availableFor, setAvailableFor] = useState<string[]>(initial?.availableFor ?? []);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? true);
+  const [vishayIds, setVishayIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // On edit, load the scholar's existing vishay tags and seed the selector.
+  const { data: existingVishayIds } = useVishayLinks('scholar', initial?.id ?? null);
+  useEffect(() => {
+    if (existingVishayIds) setVishayIds(existingVishayIds);
+  }, [existingVishayIds]);
 
   function toggleExpertise(val: string) {
     setExpertise(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
@@ -136,6 +148,7 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
         availableFor,
         isPublished,
         slug: initial?.slug ?? name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        vishayIds,
       });
     } catch {
       setError(t("Failed to save scholar.", "विद्वान सहेजने में विफल।"));
@@ -226,6 +239,11 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
         </div>
       </div>
 
+      <div className="space-y-3">
+        <p className="shell-copy text-[10px]">{t('Vishay', 'विषय')} <span className="normal-case tracking-normal opacity-70">({t('subject areas, optional', 'विषय क्षेत्र, वैकल्पिक')})</span></p>
+        <VishaySelect value={vishayIds} onChange={setVishayIds} />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="shell-copy text-[10px]">{t('Bio (English)', 'जीवनी (अंग्रेज़ी)')}</label>
@@ -282,6 +300,7 @@ export default function Scholars() {
   const [editingScholar, setEditingScholar] = useState<Scholar | null>(null);
 
   const canManage = permissions.canManageUsers || false;
+  const setVishayLinks = useSetVishayLinks();
 
   useEffect(() => {
     let active = true;
@@ -325,28 +344,43 @@ export default function Scholars() {
     return ['All', ...Array.from(set).sort()];
   }, [scholarsList]);
 
-  async function handleCreate(data: Partial<Scholar>) {
+  // Persist vishay tags to the cross-module bridge once the scholar has an id.
+  // Best-effort: a failed link write must not undo a successful scholar save.
+  async function persistVishayLinks(scholarId: string, vishayIds: string[] | undefined) {
+    if (!vishayIds) return;
+    try {
+      await setVishayLinks.mutateAsync({ contentType: 'scholar', contentId: scholarId, vishayIds });
+    } catch {
+      /* swallow — scholar already saved */
+    }
+  }
+
+  async function handleCreate(data: ScholarSaveData) {
+    const { vishayIds, ...scholarData } = data;
     const res = await fetch('/api/v1/scholars', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(scholarData),
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.error?.message ?? 'Failed');
     setScholarsList(prev => [...prev, json.data]);
+    await persistVishayLinks(json.data.id, vishayIds);
     setShowForm(false);
   }
 
-  async function handleUpdate(data: Partial<Scholar>) {
+  async function handleUpdate(data: ScholarSaveData) {
     if (!editingScholar) return;
+    const { vishayIds, ...scholarData } = data;
     const res = await fetch(`/api/v1/scholars/${editingScholar.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(scholarData),
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.error?.message ?? 'Failed');
     setScholarsList(prev => prev.map(s => s.id === json.data.id ? json.data : s));
+    await persistVishayLinks(json.data.id, vishayIds);
     setEditingScholar(null);
     setSelectedScholar(null);
   }
@@ -759,6 +793,9 @@ export default function Scholars() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Vishay tags */}
+                    <VishayChips contentType="scholar" contentId={selectedScholar.id} />
 
                     {/* Bio */}
                     {(selectedScholar.bio || selectedScholar.bioHi) && (

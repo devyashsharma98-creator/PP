@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useAppContext, type ArticleStatus } from "@/context/AppContext";
 import { useArticles, useCreateArticle, useUpdateArticleStatus, useResubmitArticle, type ResubmitForm } from "@/hooks/api/use-aalekh";
 import { useVimarshTopics } from "@/hooks/api/use-vimarsh-topics";
+import { useSetVishayLinks } from "@/hooks/api/use-vishayas";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { emptyForm } from "./aalekh/shared";
@@ -73,6 +74,7 @@ export default function Aalekh() {
   const { role, lang, permissions } = useAppContext();
   const { data: articles = [], isLoading } = useArticles();
   const createArticleMutation = useCreateArticle();
+  const setVishayLinks = useSetVishayLinks();
   const updateStatusMutation = useUpdateArticleStatus();
   const resubmitMutation = useResubmitArticle();
   const searchParams = useSearchParams();
@@ -116,12 +118,25 @@ export default function Aalekh() {
 
   const handleSubmit = async (form: typeof emptyForm) => {
     try {
-      await createArticleMutation.mutateAsync({
+      const created = await createArticleMutation.mutateAsync({
         title: form.title,
         content: form.content,
         excerpt: form.summary || form.content.slice(0, 150),
         category: form.category,
       });
+      // Persist vishay tags once the article has an id. Tagging is best-effort:
+      // a failed link write must not invalidate a successfully created article.
+      if (form.vishayIds.length > 0 && created?.id) {
+        try {
+          await setVishayLinks.mutateAsync({
+            contentType: 'article',
+            contentId: String(created.id),
+            vishayIds: form.vishayIds,
+          });
+        } catch {
+          addToast(t('Article saved, but vishay tags failed', 'आलेख सहेजा गया, पर विषय टैग विफल'), 'error');
+        }
+      }
       addToast(t('Article submitted!', 'आलेख भेजा गया!'), 'success', t('Sent for Unit Head review', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया'));
       return true;
     } catch {

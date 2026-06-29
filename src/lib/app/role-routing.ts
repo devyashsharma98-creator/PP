@@ -63,6 +63,8 @@ const PROTECTED_ROUTE_ROLES: Array<{ prefix: string; roles: RoleCode[] }> = [
   { prefix: "/charcha", roles: DASHBOARD_ROLES },
   { prefix: "/smaran", roles: DASHBOARD_ROLES },
   { prefix: "/aalekh", roles: ["super_admin", "org_admin", "kshetra_reviewer", "prant_sanyojak", "prant_aayam_pramukh", "vibhag_pramukh", "aayam_pramukh", "unit_head", "karyakarta"] },
+  { prefix: "/prakashan", roles: DASHBOARD_ROLES },
+  { prefix: "/shodh", roles: DASHBOARD_ROLES },
 ];
 
 export function getHighestRole(roleCodes: readonly RoleCode[] | null | undefined): RoleCode {

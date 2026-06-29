@@ -125,6 +125,8 @@ export interface GatividhiEvent {
   unit: string;
   submittedBy: string;
   status: EventStatus;
+  /** Intellectual event type key (study_circle | shivir | ...), from metadata.eventType. */
+  eventType?: string | null;
   checklist: {
     designing: boolean;
     food: boolean;

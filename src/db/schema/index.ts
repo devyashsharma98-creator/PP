@@ -19,3 +19,8 @@ export * from "./library";
 export * from "./scholars";
 export * from "./campus";
 export * from "./vimarsh-charcha";
+export * from "./vishaya";
+export * from "./outreach";
+export * from "./publications";
+export * from "./research";
+export * from "./campus-workflows";

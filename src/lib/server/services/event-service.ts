@@ -123,6 +123,7 @@ export async function listEvents(
         departmentId: events.departmentId,
         submittedByNameSnapshot: events.submittedByNameSnapshot,
         checklist: events.checklist,
+        metadata: events.metadata,
         createdAt: events.createdAt,
         updatedAt: events.updatedAt,
       })

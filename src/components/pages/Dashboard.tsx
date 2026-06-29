@@ -19,6 +19,7 @@ import { VibhagDashboardView } from "@/components/pages/dashboard/VibhagDashboar
 import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardView";
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
+import { WorkflowIntelligence } from "@/components/pages/dashboard/WorkflowIntelligence";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
 import { cn } from "@/lib/utils";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
@@ -515,6 +516,7 @@ export default function Dashboard() {
       <>
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
+        <WorkflowIntelligence activeTab={dashboardTab} />
         <UnitDashboardView
           dashboardKind="super_admin"
           events={events}
@@ -543,6 +545,7 @@ export default function Dashboard() {
       <>
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
+        <WorkflowIntelligence activeTab={dashboardTab} />
         <VibhagDashboardView
           events={events}
           permissions={permissions}
@@ -568,6 +571,7 @@ export default function Dashboard() {
       <>
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
+        <WorkflowIntelligence activeTab={dashboardTab} />
         <AayamDashboardView
           dashboardKind={primaryRoleCode === "prant_aayam_pramukh" ? "prant_aayam_pramukh" : "aayam_pramukh"}
           events={events}
@@ -589,6 +593,7 @@ export default function Dashboard() {
     <>
       <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
       {tabBar}
+      <WorkflowIntelligence activeTab={dashboardTab} />
       <UnitDashboardView
         dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}
         events={events}

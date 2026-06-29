@@ -21,6 +21,8 @@ import {
   RotateCcw, Send, FileText, AlertTriangle, User, CalendarDays
 } from "lucide-react";
 import { AalekhAIPanel } from "@/components/pages/aalekh/AalekhAIPanel";
+import { VishaySelect } from "@/components/vishay/VishaySelect";
+import { VishayChips } from "@/components/vishay/VishayChips";
 import { cn } from "@/lib/utils";
 
 export const statusColors: Record<ArticleStatus, string> = {
@@ -59,7 +61,7 @@ export const valuesItems = [
 ];
 
 export const emptyValues = { rashtraPratham: false, culturallyGrounded: false, balancedTone: false, noDivisiveContent: false };
-export const emptyForm = { title: "", content: "", summary: "", category: "Shodh", socialUrl: "", documentUrl: "", valuesChecklist: emptyValues };
+export const emptyForm = { title: "", content: "", summary: "", category: "Shodh", socialUrl: "", documentUrl: "", valuesChecklist: emptyValues, vishayIds: [] as string[] };
 
 // ─── Article Card (expandable) ───────────────────────────────────────────────
 export function ArticleCard({
@@ -170,6 +172,7 @@ export function ArticleCard({
                   ))}
                 </div>
               </div>
+              <VishayChips contentType="article" contentId={article.id} enabled={open} />
               {actions && <div className="border-t border-border/50 pt-3">{actions}</div>}
               {article.status === "Published" && (
                 <div className="border-t border-border/50 pt-3">
@@ -243,6 +246,10 @@ export function WriteArticleDialog({ onSubmit, initialTitle, initialContent }: {
                 {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>{t("Vishay", "विषय")} <span className="text-muted-foreground text-xs">({t("subject areas, optional", "विषय क्षेत्र, वैकल्पिक")})</span></Label>
+            <VishaySelect value={form.vishayIds} onChange={ids => setForm(p => ({ ...p, vishayIds: ids }))} />
           </div>
           <div>
             <Label>{t("Content (Full Article)", "सामग्री (पूर्ण आलेख)")}</Label>

@@ -6,7 +6,7 @@ import { Masthead } from "@/components/Masthead";
 import { Card, CardContent } from "@/components/ui/card";
 import { PenLine } from "lucide-react";
 import type { AalekhArticle } from "@/context/AppContext";
-import { ArticleCard, WriteArticleDialog, ReviseArticleDialog } from "./shared";
+import { ArticleCard, WriteArticleDialog, ReviseArticleDialog, emptyForm } from "./shared";
 
 interface KaryakartaViewProps {
   articles: AalekhArticle[];
@@ -14,15 +14,7 @@ interface KaryakartaViewProps {
   initialTitle?: string;
   initialContent?: string;
   onResubmit: (id: string, form: { title: string; content: string; summary: string; socialUrl: string; documentUrl: string; valuesChecklist: { rashtraPratham: boolean; culturallyGrounded: boolean; balancedTone: boolean; noDivisiveContent: boolean } }) => Promise<boolean>;
-  handleSubmit: (form: {
-    title: string;
-    content: string;
-    summary: string;
-    category: string;
-    socialUrl: string;
-    documentUrl: string;
-    valuesChecklist: { rashtraPratham: boolean; culturallyGrounded: boolean; balancedTone: boolean; noDivisiveContent: boolean };
-  }) => Promise<boolean>;
+  handleSubmit: (form: typeof emptyForm) => Promise<boolean>;
 }
 
 export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitle, initialContent, onResubmit }: KaryakartaViewProps) {

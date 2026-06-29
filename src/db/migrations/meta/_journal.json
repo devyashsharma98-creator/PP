@@ -29,6 +29,20 @@
       "when": 1778500859626,
       "tag": "0003_dizzy_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782625655477,
+      "tag": "0004_light_zuras",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782632359679,
+      "tag": "0005_gapfix_modules",
+      "breakpoints": true
     }
   ]
 }

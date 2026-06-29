@@ -172,7 +172,12 @@ async function seedDemo() {
     await db.insert(schema.circulars).values({ orgId, title: "Prachar Abhiyan Guidelines", titleHi: "प्रचार अभियान दिशानिर्देश", body: "Updated guidelines for the upcoming outreach campaign have been published.", bodyHi: "आगामी प्रचार अभियान के लिए अद्यतन दिशानिर्देश प्रकाशित किए गए हैं।", priority: "urgent", scope: "org", authorUserId: adminId, publishedAt: new Date() });
     await db.insert(schema.circulars).values({ orgId, title: "Quarterly Progress Report", titleHi: "त्रैमासिक प्रगति रिपोर्ट", body: "All unit heads must submit their quarterly progress reports by 30th June.", bodyHi: "सभी इकाई प्रमुख 30 जून तक अपनी त्रैमासिक प्रगति रिपोर्ट प्रस्तुत करें।", priority: "normal", scope: "unit", scopeEntityId: unitId, authorUserId: adminId, publishedAt: new Date() });
 
-    await db.insert(schema.circularReads).values({ circularId: existingCirculars[0]?.id ?? "00000000-0000-0000-0000-000000000000", userId: adminId });
+    const firstCircular = await db.query.circulars.findFirst({
+      where: and(eq(schema.circulars.orgId, orgId), eq(schema.circulars.title, "Vibhag Sanyojan Baithak")),
+    });
+    if (!firstCircular) throw new Error("Failed to seed the initial circular");
+
+    await db.insert(schema.circularReads).values({ circularId: firstCircular.id, userId: adminId });
   }
 
   // ── 6. Projects & Tasks ──

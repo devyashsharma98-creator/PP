@@ -23,6 +23,9 @@ import { AAYAM_CONFIG as AAYAM, AAYAM_KIND_LABEL } from "@/lib/app/aayam-config"
 import type { LucideIcon } from "lucide-react";
 import type { GatividhiEvent } from "@/lib/app/contracts";
 import { useCalendarEvents } from "@/hooks/api/use-calendar";
+import { VishayChips } from "@/components/vishay/VishayChips";
+import { getEventType } from "@/lib/app/event-types";
+import { eventTypeColor, eventTypeIcon } from "@/lib/app/event-style";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS: Record<string, { label: string; labelHi: string; chip: string; icon: LucideIcon }> = {
@@ -54,6 +57,7 @@ interface CalEvent {
   note?: string;
   unit?: string;
   description?: string;
+  eventType?: string | null;
 }
 
 const MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -173,6 +177,18 @@ function EventDetailModal({ event, open, onClose, lang, role }: {
                 <StatusIcon className="w-3 h-3" />
                 {lang === "hi" ? status.labelHi : status.label}
               </Badge>
+              {(() => {
+                const def = getEventType(event.eventType);
+                if (!def) return null;
+                const ec = eventTypeColor(event.eventType);
+                const EIcon = eventTypeIcon(event.eventType);
+                return (
+                  <Badge variant="outline" className={cn("gap-1 text-[10px]", ec.bg, ec.border, ec.text)}>
+                    <EIcon className="h-3 w-3" />
+                    {lang === "hi" ? def.labelHi : def.labelEn}
+                  </Badge>
+                );
+              })()}
             </div>
             <DialogTitle className={cn("text-xl leading-snug", lang === "hi" && "font-devanagari")}>
               {lang === "hi" ? event.titleHi : event.title}
@@ -203,6 +219,10 @@ function EventDetailModal({ event, open, onClose, lang, role }: {
                   {event.description}
                 </p>
               </div>
+            )}
+
+            {event.rawId && (
+              <VishayChips contentType="event" contentId={event.rawId} enabled={open} />
             )}
           </div>
 
@@ -272,6 +292,7 @@ export default function AnnualCalendar() {
         location: e.unit,
         unit: e.unit,
         description: e.description ?? undefined,
+        eventType: e.eventType ?? null,
       };
     }), [events]);
 

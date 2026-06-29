@@ -21,7 +21,12 @@
     "db:seed:library": "dotenv -e .env.local -- npx tsx src/db/seed-library.ts",
 "db:seed:scholars": "dotenv -e .env.local -- npx tsx src/db/seed-scholars.ts",
 "db:seed:campus": "dotenv -e .env.local -- npx tsx src/db/seed-campus.ts",
-"db:seed:charcha": "dotenv -e .env.local -- npx tsx src/db/seed-vimarsh-charcha.ts"
+"db:seed:charcha": "dotenv -e .env.local -- npx tsx src/db/seed-vimarsh-charcha.ts",
+"db:seed:vishaya": "dotenv -e .env.local -- npx tsx src/db/seed-vishaya.ts",
+"db:seed:outreach": "dotenv -e .env.local -- npx tsx src/db/seed-outreach.ts",
+"db:seed:publications": "dotenv -e .env.local -- npx tsx src/db/seed-publications.ts",
+"db:seed:research": "dotenv -e .env.local -- npx tsx src/db/seed-research.ts",
+"db:seed:campus-workflows": "dotenv -e .env.local -- npx tsx src/db/seed-campus-workflows.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

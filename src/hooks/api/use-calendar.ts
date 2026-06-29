@@ -9,8 +9,10 @@ import { dbToUiEventStatus } from '@/lib/app/status-maps';
 export function mapApiEventToGatividhi(row: Record<string, unknown>): GatividhiEvent {
   const status = (dbToUiEventStatus[row.status as string] ?? "Draft") as EventStatus;
   const startsAt = row.startsAt ?? row.starts_at;
+  const metadata = (row.metadata ?? null) as Record<string, unknown> | null;
   return {
     id: row.id as string,
+    eventType: (metadata?.eventType as string | undefined) ?? null,
     title: row.title as string,
     description: (row.description as string) ?? "",
     date: "",

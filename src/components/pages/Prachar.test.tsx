@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
 import { createRoot } from "react-dom/client";
-import { act } from "react";
+import { act, createElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Prachar from "./Prachar";
 
+function withClient(node: ReactNode) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return createElement(QueryClientProvider, { client }, node);
+}
+
 const mockState = vi.hoisted(() => ({
   lang: "en" as "en" | "hi",
+  canUpdatePrachar: true,
 }));
 
 vi.mock("next/link", () => ({
@@ -21,138 +28,97 @@ vi.mock("framer-motion", () => ({
   },
 }));
 
-vi.mock("embla-carousel-react", () => ({
-  default: () => [
-    vi.fn(),
-    {
-      on: vi.fn(),
-      off: vi.fn(),
-      selectedScrollSnap: () => 0,
-      scrollPrev: vi.fn(),
-      scrollNext: vi.fn(),
-      scrollTo: vi.fn(),
-    },
-  ],
-}));
-
 vi.mock("@/lib/useT", () => ({
   useT: () => (en: string, hi?: string) => (mockState.lang === "hi" ? hi ?? en : en),
 }));
 
 vi.mock("@/context/AppContext", () => ({
   useAppContext: () => ({
-    role: "aayam_pramukh",
     lang: mockState.lang,
-    permissions: { canUpdatePrachar: true },
+    permissions: { canUpdatePrachar: mockState.canUpdatePrachar },
   }),
 }));
 
-vi.mock("@/hooks/api/use-dashboard", () => ({
-  useDashboardEvents: () => ({
+const sampleItem = {
+  id: "o1",
+  outreachType: "journal",
+  relatedType: null,
+  relatedId: null,
+  title: "Distribute Patrika Vol.3",
+  description: "Send the issue out.",
+  unitId: null,
+  departmentId: null,
+  status: "pending" as const,
+  assignedTo: null,
+  dueDate: null,
+  completedAt: null,
+  skipReason: null,
+  templateReference: null,
+  metadata: { issueName: "Vol.3" },
+  createdAt: "2026-06-01T00:00:00.000Z",
+  updatedAt: "2026-06-01T00:00:00.000Z",
+};
+
+vi.mock("@/hooks/api/use-outreach", () => ({
+  useOutreachItems: () => ({ data: [sampleItem], isLoading: false }),
+  useOutreachTypes: () => ({
     data: [
-      {
-        id: "event-1",
-        title: "Published Campaign",
-        description: "Outreach description",
-        date: "17 Jun 2026",
-        dateIso: "2026-06-17T09:00:00.000Z",
-        unit: "Delhi",
-        status: "Published",
-      },
+      { type: "journal", labelEn: "Journal Issue", labelHi: "पत्रिका अंक", icon: "BookOpen", color: "violet", descriptionEn: "", descriptionHi: "", fields: [] },
     ],
   }),
+  useOutreachAnalytics: () => ({ data: { total: 1, completed: 0, pending: 1, skipped: 0, completionRate: 0, statusTotals: {}, perType: [] } }),
+  useCreateOutreach: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateOutreach: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteOutreach: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
-vi.mock("@/hooks/api/use-org-structure", () => ({
-  useOrgStructure: () => ({
-    data: {
-      units: [{ id: "unit-1", name: "Delhi", nameHi: null, code: "delhi", unitKind: "unit" }],
-      departments: [{ id: "dept-1", name: "Prachar", nameHi: null, code: "prachar", departmentKind: "prachar", unitId: null }],
-    },
-  }),
+vi.mock("@/components/ToastProvider", () => ({
+  useToast: () => ({ addToast: vi.fn() }),
 }));
 
-vi.mock("@/hooks/api/use-prachar", () => ({
-  usePracharStatuses: () => ({ data: [] }),
-  useUpdatePracharPlatform: () => ({ mutateAsync: vi.fn() }),
-  useCreatePracharCampaign: () => ({ mutateAsync: vi.fn(), isPending: false, error: null }),
-  useUpdatePracharCampaign: () => ({ mutateAsync: vi.fn(), isPending: false, error: null }),
-}));
-
-describe("Prachar campaign controls", () => {
+describe("Prachar outreach workflow", () => {
   beforeEach(() => {
     mockState.lang = "en";
+    mockState.canUpdatePrachar = true;
   });
 
-  it("shows create and edit campaign controls for Prachar writers", () => {
+  it("renders the academic outreach masthead and an open item", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
 
     act(() => {
-      createRoot(host).render(<Prachar />);
+      createRoot(host).render(withClient(<Prachar />));
     });
 
-    expect(host.textContent).toContain("Create Campaign");
-    expect(host.textContent).toContain("Edit Campaign");
-  });
-
-  it("switches tabs into bounded Prachar work areas", () => {
-    const host = document.createElement("div");
-    document.body.appendChild(host);
-
-    act(() => {
-      createRoot(host).render(<Prachar />);
-    });
-
-    expect(host.textContent).toContain("Campaign Dissemination Queue");
-    expect(host.textContent).not.toContain("Communication kits, posters, and publicity formats");
-
-    const createTab = Array.from(host.querySelectorAll("button")).find((button) => button.textContent === "Create");
-    expect(createTab).toBeTruthy();
-    act(() => {
-      createTab?.click();
-    });
-
-    expect(host.textContent).toContain("Communication kits, posters, and publicity formats");
+    expect(host.textContent).toContain("Carry the Work into the World");
+    expect(host.textContent).toContain("Distribute Patrika Vol.3");
+    // No social-media campaign vocabulary should remain.
+    expect(host.textContent).not.toContain("WhatsApp");
     expect(host.textContent).not.toContain("Campaign Dissemination Queue");
-
-    const analyticsTab = Array.from(host.querySelectorAll("button")).find((button) => button.textContent === "Analytics");
-    expect(analyticsTab).toBeTruthy();
-    act(() => {
-      analyticsTab?.click();
-    });
-
-    expect(host.textContent).toContain("Coverage Analytics");
-    expect(host.textContent).not.toContain("Communication kits, posters, and publicity formats");
   });
 
-  it("uses Hindi copy for generated campaign output controls", () => {
-    mockState.lang = "hi";
+  it("offers the New Outreach action to Prachar writers", () => {
     const host = document.createElement("div");
     document.body.appendChild(host);
 
     act(() => {
-      createRoot(host).render(<Prachar />);
+      createRoot(host).render(withClient(<Prachar />));
     });
 
-    const createTab = Array.from(host.querySelectorAll('button[role="tab"]')).find((button) => button.textContent?.includes("बनाएँ"));
-    expect(createTab).toBeTruthy();
+    const newButton = Array.from(host.querySelectorAll("button")).find((b) => b.textContent?.includes("New Outreach"));
+    expect(newButton).toBeTruthy();
+  });
+
+  it("hides write controls for view-only roles", () => {
+    mockState.canUpdatePrachar = false;
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+
     act(() => {
-      createTab?.click();
+      createRoot(host).render(withClient(<Prachar />));
     });
 
-    const generateButton = Array.from(host.querySelectorAll("button")).find((button) => {
-      const text = button.textContent ?? "";
-      return text.includes("संदेश") || text.includes("Generate copy");
-    });
-    expect(generateButton).toBeTruthy();
-    act(() => {
-      generateButton?.click();
-    });
-
-    expect(host.textContent).toContain("निर्मित अभियान संदेश");
-    expect(host.textContent).toContain("फिर कॉपी करें");
-    expect(host.textContent).not.toContain("Generated campaign copy");
-    expect(host.textContent).not.toContain("Copy again");
+    const newButton = Array.from(host.querySelectorAll("button")).find((b) => b.textContent?.includes("New Outreach"));
+    expect(newButton).toBeFalsy();
   });
 });
