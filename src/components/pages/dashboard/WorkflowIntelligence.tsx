@@ -10,6 +10,7 @@ import { useT } from "@/lib/useT";
 import { useOutreachAnalytics } from "@/hooks/api/use-outreach";
 import { usePublicationArticles } from "@/hooks/api/use-publications";
 import { useResearchProjects } from "@/hooks/api/use-research";
+import { RoleKpiCards } from "@/components/pages/dashboard/RoleKpiCards";
 
 /**
  * Cross-module institutional pulse for the dashboard "Today" tab. Surfaces live
@@ -58,7 +59,10 @@ export function WorkflowIntelligence({ activeTab }: { activeTab: string }) {
   ];
 
   return (
-    <section className="mt-4 space-y-3">
+    <div className="mt-4 space-y-5">
+      <RoleKpiCards />
+
+      <section className="space-y-3">
       <div className="flex items-center gap-2">
         <p className="section-seal">{t("Across the Institution", "संस्थान भर में")}</p>
       </div>
@@ -83,6 +87,7 @@ export function WorkflowIntelligence({ activeTab }: { activeTab: string }) {
           </motion.div>
         ))}
       </div>
-    </section>
+      </section>
+    </div>
   );
 }
