@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
 import { requirePageSession } from "@/lib/server/require-page-session";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Overview from "@/components/pages/Overview";
 
 export default async function OverviewPage() {
   await requirePageSession("/overview");
-  redirect("/dashboard");
+  return <ErrorBoundary><Overview /></ErrorBoundary>;
 }
