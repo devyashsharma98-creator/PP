@@ -9,7 +9,9 @@ import { scholars, articles } from "@/db/schema/index";
 import { requirePageSession } from "@/lib/server/require-page-session";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, GraduationCap, FileText, CalendarDays } from "lucide-react";
+import { ArrowLeft, GraduationCap, FileText, CalendarDays, Clock } from "lucide-react";
+import { WeeklyAvailabilityDisplay } from "@/components/scholars/ScholarAvailability";
+import type { WeeklyAvailability } from "@/lib/validators/scholars";
 
 export const dynamic = "force-dynamic";
 
@@ -123,6 +125,21 @@ export default async function ScholarProfilePage({ params }: Params) {
           )}
         </CardContent>
       </Card>
+
+      {/* Weekly availability schedule */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-emerald-600" />
+          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
+            Weekly Availability
+          </h2>
+        </div>
+        <Card className="border-border/50 bg-background/40">
+          <CardContent className="py-5 px-6">
+            <WeeklyAvailabilityDisplay value={scholar.availability as WeeklyAvailability | null | undefined} />
+          </CardContent>
+        </Card>
+      </div>
 
       {authorArticles.length > 0 && (
         <div className="space-y-4">

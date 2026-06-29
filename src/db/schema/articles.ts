@@ -28,6 +28,7 @@ import { relations, sql } from "drizzle-orm";
 import { articleStatusEnum, articleReviewDecision } from "./enums";
 import { orgSettings, units, departmentsOrAayams } from "./org";
 import { profiles } from "./users";
+import { vimarshThreads } from "./vimarsh-charcha";
 
 // ── articles ──────────────────────────────────────────────────────────────────
 export const articles = pgTable(
@@ -59,6 +60,9 @@ export const articles = pgTable(
     // External URLs
     documentUrl: varchar("document_url", { length: 2048 }),  // Google Doc, PDF, etc.
     socialUrl: varchar("social_url", { length: 2048 }),      // Published social post URL
+
+    // Provenance — the Vimarsh charcha thread this article was drafted from (if any)
+    sourceThreadId: uuid("source_thread_id").references(() => vimarshThreads.id, { onDelete: "set null" }),
 
     // Values checklist — all four must be true for authorized_public
     // { rashtraPratham, culturallyGrounded, balancedTone, noDivisiveContent }
@@ -139,6 +143,7 @@ export const articlesRelations = relations(articles, ({ one, many }) => ({
   department: one(departmentsOrAayams, { fields: [articles.departmentId], references: [departmentsOrAayams.id] }),
   author: one(profiles, { fields: [articles.authorUserId], references: [profiles.id], relationName: "author" }),
   createdByProfile: one(profiles, { fields: [articles.createdBy], references: [profiles.id], relationName: "creator" }),
+  sourceThread: one(vimarshThreads, { fields: [articles.sourceThreadId], references: [vimarshThreads.id] }),
   reviews: many(articleReviews),
   publications: many(articlePublications),
 }));

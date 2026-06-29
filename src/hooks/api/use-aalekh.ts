@@ -39,7 +39,7 @@ export function useCreateArticle() {
   const queryClient = useQueryClient();
   const { refreshWorkspace } = useAppContext();
   return useMutation({
-    mutationFn: async (input: { title: string; excerpt: string; content: string; category: string; authorId?: string }) => {
+    mutationFn: async (input: { title: string; excerpt: string; content: string; category: string; authorId?: string; sourceThreadId?: string }) => {
       return fetchApi<AalekhArticle>('/articles', {
         method: 'POST',
         body: JSON.stringify(input),

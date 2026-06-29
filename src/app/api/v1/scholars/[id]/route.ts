@@ -5,6 +5,7 @@ import { withAuth, withPermission } from "@/lib/middleware/with-auth";
 import { apiSuccess, badRequest, notFound, serverError } from "@/lib/response";
 import { db } from "@/db/client";
 import { scholars } from "@/db/schema/index";
+import { weeklyAvailabilitySchema } from "@/lib/validators/scholars";
 
 export const GET = withAuth(async (_req: NextRequest, ctx, params) => {
   const p = params as { id: string };
@@ -48,6 +49,11 @@ export const PATCH = withPermission("canManageUsers", async (req: NextRequest, c
   }
   if (body.availableFor !== undefined) {
     updateData.availableFor = Array.isArray(body.availableFor) ? body.availableFor as string[] : [];
+  }
+  if (body.availability !== undefined) {
+    const parsed = weeklyAvailabilitySchema.safeParse(body.availability);
+    if (!parsed.success) return badRequest("Invalid availability schedule format.");
+    updateData.availability = parsed.data;
   }
   if (body.isPublished !== undefined) {
     updateData.isPublished = Boolean(body.isPublished);

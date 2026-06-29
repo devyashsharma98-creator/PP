@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import { orgSettings } from "./org";
@@ -22,6 +22,8 @@ export const scholars = pgTable(
     bio: text("bio").notNull().default(""),
     bioHi: text("bio_hi").notNull().default(""),
     availableFor: text("available_for").array().notNull().default(sql`'{}'::text[]`),
+    // Weekly recurring availability schedule — { monday: [{ from: "09:00", to: "11:00" }], ... }
+    availability: jsonb("availability").notNull().default(sql`'{}'::jsonb`),
     photoUrl: text("photo_url"),
     linkedProfileId: uuid("linked_profile_id").references(() => profiles.id, { onDelete: "set null" }),
     isPublished: boolean("is_published").notNull().default(true),

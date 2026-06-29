@@ -12,6 +12,7 @@ import {
   Search, GraduationCap, BookOpen, Users, Filter, X, Plus,
   MapPin, Briefcase, Mail, Phone, Star, Globe, ChevronRight,
   ChevronDown, Award, PenLine, Eye, EyeOff, Save, ExternalLink,
+  Clock,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
@@ -20,6 +21,9 @@ import { Masthead } from '@/components/Masthead';
 import { VishaySelect } from '@/components/vishay/VishaySelect';
 import { VishayChips } from '@/components/vishay/VishayChips';
 import { useVishayLinks, useSetVishayLinks } from '@/hooks/api/use-vishayas';
+import { WeeklyAvailabilityEditor, WeeklyAvailabilityDisplay } from '@/components/scholars/ScholarAvailability';
+import type { WeeklyAvailability } from '@/lib/validators/scholars';
+import { emptyWeeklyAvailability } from '@/lib/validators/scholars';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -38,6 +42,7 @@ interface Scholar {
   bio: string;
   bioHi: string;
   availableFor: string[];
+  availability: WeeklyAvailability;
   photoUrl: string | null;
   isPublished: boolean;
   sortOrder: number;
@@ -105,6 +110,7 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
   const [bioHi, setBioHi] = useState(initial?.bioHi ?? '');
   const [expertise, setExpertise] = useState<string[]>(initial?.expertise ?? []);
   const [availableFor, setAvailableFor] = useState<string[]>(initial?.availableFor ?? []);
+  const [availability, setAvailability] = useState<WeeklyAvailability>(initial?.availability ?? emptyWeeklyAvailability);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? true);
   const [vishayIds, setVishayIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -146,6 +152,7 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
         bioHi,
         expertise,
         availableFor,
+        availability,
         isPublished,
         slug: initial?.slug ?? name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         vishayIds,
@@ -237,6 +244,14 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <p className="shell-copy text-[10px]">{t('Weekly Schedule', 'साप्ताहिक समय')}</p>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          {t('Set recurring time slots when this scholar is typically available.', 'इस विद्वान के सामान्यतः उपलब्ध समय स्लॉट निर्धारित करें।')}
+        </p>
+        <WeeklyAvailabilityEditor value={availability} onChange={setAvailability} />
       </div>
 
       <div className="space-y-3">
@@ -792,6 +807,15 @@ export default function Scholars() {
                           ))}
                         </div>
                       </div>
+                    </div>
+
+                    {/* Weekly availability schedule */}
+                    <div className="space-y-3 py-4 border-b border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-emerald-600" />
+                        <p className="shell-copy text-[10px]">{t('Weekly Schedule', 'साप्ताहिक समय')}</p>
+                      </div>
+                      <WeeklyAvailabilityDisplay value={selectedScholar.availability} isHi={isHi} />
                     </div>
 
                     {/* Vishay tags */}

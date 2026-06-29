@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAppContext, type ArticleStatus } from "@/context/AppContext";
 import { useArticles, useCreateArticle, useUpdateArticleStatus, useResubmitArticle, type ResubmitForm } from "@/hooks/api/use-aalekh";
@@ -80,6 +80,7 @@ export default function Aalekh() {
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic");
   const topicId = searchParams.get("topicId");
+  const threadId = searchParams.get("threadId");
   const { data: topicGroups } = useVimarshTopics();
 
   const vimarshTopic = useMemo(() => {
@@ -91,14 +92,46 @@ export default function Aalekh() {
     return null;
   }, [topicId, topicGroups]);
 
+  // ── Vimarsh thread prefill ────────────────────────────────────────────────
+  // When ?threadId=<id> is present, fetch the charcha thread and build the
+  // initial article data from the thread body + formatted replies. The thread
+  // id is also captured as sourceThreadId so the article records its provenance.
+  const [threadInitial, setThreadInitial] = useState<{ title: string; content: string } | null>(null);
+  const [sourceThreadId, setSourceThreadId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!threadId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/v1/vimarsh/threads/${encodeURIComponent(threadId)}`);
+        const json = await res.json();
+        if (cancelled || !json.success) return;
+        const { thread, replies } = json.data as {
+          thread: { id: string; title: string; body: string };
+          replies: { body: string; authorName: string | null }[];
+        };
+        setSourceThreadId(thread.id);
+        const replyBlock = replies.length > 0
+          ? "\n\n---\n\nDiscussion replies:\n" + replies.map((r, i) => `${i + 1}. ${r.authorName ?? "Anonymous"}: ${r.body}`).join("\n")
+          : "";
+        setThreadInitial({ title: thread.title, content: thread.body + replyBlock });
+      } catch {
+        /* ignore — prefill is best-effort */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [threadId]);
+
   const initialArticleData = useMemo(() => {
+    if (threadInitial) return threadInitial;
     if (!vimarshTopic) return { title: topic ?? '', content: '' };
     const desc = vimarshTopic.description ?? '';
     const resourceList = vimarshTopic.resources.length > 0
       ? '\n\nReferences:\n' + vimarshTopic.resources.map((r) => `- ${r.title}: ${r.url}`).join('\n')
       : '';
     return { title: vimarshTopic.title, content: desc + resourceList };
-  }, [vimarshTopic, topic]);
+  }, [threadInitial, vimarshTopic, topic]);
   
   const { addToast } = useToast();
   const t = useT();
@@ -123,6 +156,7 @@ export default function Aalekh() {
         content: form.content,
         excerpt: form.summary || form.content.slice(0, 150),
         category: form.category,
+        sourceThreadId: sourceThreadId ?? undefined,
       });
       // Persist vishay tags once the article has an id. Tagging is best-effort:
       // a failed link write must not invalidate a successfully created article.

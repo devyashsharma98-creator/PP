@@ -5,6 +5,7 @@ import { withAuth, withPermission } from "@/lib/middleware/with-auth";
 import { apiSuccess, apiCreated, badRequest, serverError } from "@/lib/response";
 import { db } from "@/db/client";
 import { scholars } from "@/db/schema/index";
+import { weeklyAvailabilitySchema } from "@/lib/validators/scholars";
 
 export const GET = withAuth(async (_req: NextRequest, ctx) => {
   const orgId = ctx.session.orgId;
@@ -49,6 +50,7 @@ export const POST = withPermission("canManageUsers", async (req: NextRequest, ct
         bio: String(body.bio ?? ""),
         bioHi: String(body.bioHi ?? ""),
         availableFor: Array.isArray(body.availableFor) ? body.availableFor as string[] : [],
+        availability: body.availability ? weeklyAvailabilitySchema.parse(body.availability) : {},
         photoUrl: body.photoUrl ? String(body.photoUrl) : null,
         isPublished: body.isPublished !== false,
         sortOrder: Number(body.sortOrder ?? 0),

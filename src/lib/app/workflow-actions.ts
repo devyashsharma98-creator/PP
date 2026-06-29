@@ -18,6 +18,7 @@ export type WorkflowEntity =
   | "event"
   | "article"
   | "topic"
+  | "thread"
   | "scholar"
   | "user"
   | "library"
@@ -43,6 +44,8 @@ export interface WorkflowContext {
   topicId?: string;
   /** Vimarsh topic title (plain string, distinct from topicId) */
   topic?: string;
+  /** Vimarsh charcha thread id — for thread→Aalekh prefill handoff */
+  threadId?: string;
   /** Event id — for prachar/vritt/registrations handoffs */
   eventId?: string;
   /** User id — for directory→task-board assignment prefill */
@@ -278,6 +281,33 @@ function topicActions(ctx: WorkflowContext): WorkflowAction[] {
     icon: "BookOpen",
     priority: ACTION_PRIORITY.drilldown,
   });
+
+  return actions;
+}
+
+function threadActions(ctx: WorkflowContext): WorkflowAction[] {
+  const actions: WorkflowAction[] = [];
+  const id = ctx.id ?? ctx.threadId;
+
+  if (id) {
+    actions.push({
+      key: "thread-aalekh",
+      label: "Draft Aalekh",
+      labelHi: "आलेख लिखें",
+      href: buildWorkflowHref("/aalekh", { threadId: id }),
+      icon: "PenLine",
+      priority: ACTION_PRIORITY.primary,
+    });
+
+    actions.push({
+      key: "thread-reply",
+      label: "Reply in Charcha",
+      labelHi: "चर्चा में उत्तर दें",
+      href: buildWorkflowHref("/charcha", { topic: ctx.title, topicId: ctx.topicId }),
+      icon: "MessageSquare",
+      priority: ACTION_PRIORITY.handoff,
+    });
+  }
 
   return actions;
 }
@@ -543,6 +573,7 @@ const BUILDERS: Record<WorkflowEntity, (ctx: WorkflowContext) => WorkflowAction[
   event: eventActions,
   article: articleActions,
   topic: topicActions,
+  thread: threadActions,
   scholar: scholarActions,
   user: userActions,
   library: libraryActions,

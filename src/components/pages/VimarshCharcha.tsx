@@ -12,13 +12,14 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Search, MessagesSquare, MessageSquare, Pin, Lock, Plus,
   ArrowLeft, Send, Trash2, Clock, User, Filter, X,
-  MessageCircle, ThumbsUp, AlertCircle,
+  MessageCircle, ThumbsUp, AlertCircle, PenLine,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
 import { useVimarshTopics } from '@/hooks/api/use-vimarsh-topics';
+import { buildWorkflowHref } from '@/lib/app/workflow-actions';
 
 // Map vimarsh topic groups → charcha categories
 const GROUP_TO_CATEGORY: Record<string, string> = {
@@ -578,6 +579,16 @@ export default function VimarshCharcha() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Draft Aalekh from thread — prefill an article with this discussion */}
+                <div className="flex justify-end">
+                  <Link href={buildWorkflowHref("/aalekh", { threadId: selectedId })}>
+                    <Button variant="outline" className="min-h-[44px] text-[11px] font-bold uppercase tracking-widest">
+                      <PenLine className="w-4 h-4 mr-2" />
+                      {t("Draft Aalekh", "आलेख लिखें")}
+                    </Button>
+                  </Link>
+                </div>
 
                 {/* Replies */}
                 <div className="space-y-4">

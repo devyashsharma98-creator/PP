@@ -208,6 +208,7 @@ export async function createArticle(
       authorUserId: userId,
       authorNameSnapshot: displayName ?? email,
       status: "draft",
+      sourceThreadId: input.sourceThreadId ?? null,
       featuredImage: input.featuredImage ?? null,
       documentUrl: input.documentUrl ?? null,
       socialUrl: input.socialUrl ?? null,

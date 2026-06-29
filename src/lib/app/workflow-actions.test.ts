@@ -187,6 +187,36 @@ describe("buildEntityWorkflowActions", () => {
     });
   });
 
+  describe("thread actions", () => {
+    it("generates draft-aalekh with threadId handoff", () => {
+      const ctx: WorkflowContext = { entity: "thread", id: "th1", title: "Vedic Education discourse" };
+      const actions = buildEntityWorkflowActions(ctx);
+      const aalekh = actions.find((a) => a.key === "thread-aalekh");
+      expect(aalekh?.href).toBe("/aalekh?threadId=th1");
+    });
+
+    it("generates reply-in-charcha with topic handoff", () => {
+      const ctx: WorkflowContext = { entity: "thread", id: "th1", title: "Vedic", topicId: "t1" };
+      const actions = buildEntityWorkflowActions(ctx);
+      const reply = actions.find((a) => a.key === "thread-reply");
+      expect(reply?.href).toContain("topic=Vedic");
+      expect(reply?.href).toContain("topicId=t1");
+    });
+
+    it("uses ctx.threadId when ctx.id is absent", () => {
+      const ctx: WorkflowContext = { entity: "thread", threadId: "th2" };
+      const actions = buildEntityWorkflowActions(ctx);
+      const aalekh = actions.find((a) => a.key === "thread-aalekh");
+      expect(aalekh?.href).toBe("/aalekh?threadId=th2");
+    });
+
+    it("returns no actions when neither id nor threadId is present", () => {
+      const ctx: WorkflowContext = { entity: "thread", title: "Vedic" };
+      const actions = buildEntityWorkflowActions(ctx);
+      expect(actions).toHaveLength(0);
+    });
+  });
+
   describe("user actions", () => {
     it("generates task assign with userId", () => {
       const ctx: WorkflowContext = { entity: "user", userId: "u1", title: "Follow up", assigneeName: "Rajiv" };
