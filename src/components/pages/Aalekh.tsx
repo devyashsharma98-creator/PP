@@ -98,26 +98,35 @@ export default function Aalekh() {
   // id is also captured as sourceThreadId so the article records its provenance.
   const [threadInitial, setThreadInitial] = useState<{ title: string; content: string } | null>(null);
   const [sourceThreadId, setSourceThreadId] = useState<string | null>(null);
+  // Pending until the thread prefill resolves, so we show a loader instead of a
+  // flash of the empty desk before the draft dialog opens.
+  const [threadPending, setThreadPending] = useState<boolean>(!!threadId);
+  const [threadError, setThreadError] = useState(false);
 
   useEffect(() => {
     if (!threadId) return;
     let cancelled = false;
+    setThreadPending(true);
+    setThreadError(false);
     (async () => {
       try {
         const res = await fetch(`/api/v1/vimarsh/threads/${encodeURIComponent(threadId)}`);
         const json = await res.json();
-        if (cancelled || !json.success) return;
+        if (cancelled) return;
+        if (!json.success) { setThreadError(true); return; }
         const { thread, replies } = json.data as {
           thread: { id: string; title: string; body: string };
           replies: { body: string; authorName: string | null }[];
         };
         setSourceThreadId(thread.id);
         const replyBlock = replies.length > 0
-          ? "\n\n---\n\nDiscussion replies:\n" + replies.map((r, i) => `${i + 1}. ${r.authorName ?? "Anonymous"}: ${r.body}`).join("\n")
+          ? "\n\nDiscussion contributions:\n" + replies.map((r, i) => `${i + 1}. ${r.authorName ?? "Unknown contributor"}: ${r.body}`).join("\n")
           : "";
         setThreadInitial({ title: thread.title, content: thread.body + replyBlock });
       } catch {
-        /* ignore — prefill is best-effort */
+        if (!cancelled) setThreadError(true);
+      } finally {
+        if (!cancelled) setThreadPending(false);
       }
     })();
     return () => { cancelled = true; };
@@ -132,9 +141,24 @@ export default function Aalekh() {
       : '';
     return { title: vimarshTopic.title, content: desc + resourceList };
   }, [threadInitial, vimarshTopic, topic]);
-  
+
+  // Drafts that originate from Vimarsh (a charcha thread or a discourse topic)
+  // should default to the "Vimarsh" category, not the generic "Shodh".
+  const prefillCategory = (threadInitial || vimarshTopic || topic) ? "Vimarsh" : undefined;
+
   const { addToast } = useToast();
   const t = useT();
+
+  // Surface a thread-prefill failure instead of dropping the user on a bare page.
+  useEffect(() => {
+    if (threadError) {
+      addToast(
+        t("Couldn't load that discussion to prefill the draft.", "मसौदे हेतु वह चर्चा लोड नहीं हो सकी।"),
+        "error",
+      );
+    }
+  }, [threadError, addToast, t]);
+
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "gallery">("list");
   const [aalekhTab, setAalekhTab] = useState<string>(
@@ -171,7 +195,13 @@ export default function Aalekh() {
           addToast(t('Article saved, but vishay tags failed', 'आलेख सहेजा गया, पर विषय टैग विफल'), 'error');
         }
       }
-      addToast(t('Article submitted!', 'आलेख भेजा गया!'), 'success', t('Sent for Unit Head review', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया'));
+      addToast(
+        t('Article submitted!', 'आलेख भेजा गया!'),
+        'success',
+        sourceThreadId
+          ? t('Drafted from a Vimarsh discussion · sent for Unit Head review', 'विमर्श चर्चा से तैयार · यूनिट प्रमुख समीक्षा हेतु भेजा गया')
+          : t('Sent for Unit Head review', 'यूनिट प्रमुख समीक्षा के लिए भेजा गया'),
+      );
       return true;
     } catch {
       addToast(t('Failed to submit article', 'आलेख भेजने में विफल'), 'error');
@@ -201,10 +231,13 @@ export default function Aalekh() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || threadPending) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        {threadPending && (
+          <p className="text-xs text-muted-foreground">{t("Preparing a draft from the discussion…", "चर्चा से मसौदा तैयार किया जा रहा है…")}</p>
+        )}
       </div>
     );
   }
@@ -279,7 +312,7 @@ export default function Aalekh() {
       ) : viewMode === "gallery" ? (
         <GalleryView articles={articles} />
       ) : role === "karyakarta" ? (
-        <KaryakartaView articles={aalekhTab === "review" ? reviewArticles : articles} handleSubmit={handleSubmit} viewToggle={viewToggle} initialTitle={initialArticleData.title} initialContent={initialArticleData.content} onResubmit={handleResubmit} />
+        <KaryakartaView articles={aalekhTab === "review" ? reviewArticles : articles} handleSubmit={handleSubmit} viewToggle={viewToggle} initialTitle={initialArticleData.title} initialContent={initialArticleData.content} initialCategory={prefillCategory} onResubmit={handleResubmit} />
       ) : role === "unit_head" ? (
         <UnitHeadView articles={reviewArticles} updateArticleStatus={handleUpdateStatus} viewToggle={viewToggle} />
       ) : role === "aayam_pramukh" ? (

@@ -247,7 +247,7 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
       </div>
 
       <div className="space-y-3">
-        <p className="shell-copy text-[10px]">{t('Weekly Schedule', 'साप्ताहिक समय')}</p>
+        <p className="shell-copy text-[10px]">{t('Available Hours', 'उपलब्ध समय')}</p>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           {t('Set recurring time slots when this scholar is typically available.', 'इस विद्वान के सामान्यतः उपलब्ध समय स्लॉट निर्धारित करें।')}
         </p>
@@ -813,7 +813,7 @@ export default function Scholars() {
                     <div className="space-y-3 py-4 border-b border-border/50">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-emerald-600" />
-                        <p className="shell-copy text-[10px]">{t('Weekly Schedule', 'साप्ताहिक समय')}</p>
+                        <p className="shell-copy text-[10px]">{t('Available Hours', 'उपलब्ध समय')}</p>
                       </div>
                       <WeeklyAvailabilityDisplay value={selectedScholar.availability} isHi={isHi} />
                     </div>

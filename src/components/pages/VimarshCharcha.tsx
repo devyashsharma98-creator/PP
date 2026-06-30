@@ -265,7 +265,7 @@ function ReplyComposer({
 type ViewState = "list" | "detail" | "create";
 
 export default function VimarshCharcha() {
-  const { lang } = useAppContext();
+  const { lang, role } = useAppContext();
   const t = useT();
   const isHi = lang === 'hi';
   const searchParams = useSearchParams();
@@ -580,15 +580,18 @@ export default function VimarshCharcha() {
                   </CardContent>
                 </Card>
 
-                {/* Draft Aalekh from thread — prefill an article with this discussion */}
-                <div className="flex justify-end">
-                  <Link href={buildWorkflowHref("/aalekh", { threadId: selectedId })}>
-                    <Button variant="outline" className="min-h-[44px] text-[11px] font-bold uppercase tracking-widest">
-                      <PenLine className="w-4 h-4 mr-2" />
-                      {t("Draft Aalekh", "आलेख लिखें")}
-                    </Button>
-                  </Link>
-                </div>
+                {/* Draft Aalekh from thread — karyakarta only (only they have the
+                    write desk that consumes the prefill). */}
+                {role === "karyakarta" && (
+                  <div className="flex justify-end">
+                    <Link href={buildWorkflowHref("/aalekh", { threadId: selectedId })}>
+                      <Button variant="outline" className="min-h-[44px] gap-2 text-[11px] font-bold uppercase tracking-widest" title={t("Draft an article from this discussion", "इस चर्चा से आलेख का मसौदा बनाएँ")}>
+                        <PenLine className="w-4 h-4" />
+                        {t("Draft Aalekh from discussion", "चर्चा से आलेख मसौदा")}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
 
                 {/* Replies */}
                 <div className="space-y-4">

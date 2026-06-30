@@ -72,30 +72,43 @@ export function WeeklyAvailabilityEditor({
                   {t("No slots set", "कोई समय निर्धारित नहीं")}
                 </p>
               ) : (
-                slots.map((slot, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Input
-                      type="time"
-                      value={slot.from}
-                      onChange={(e) => updateSlot(day, i, "from", e.target.value)}
-                      className="h-9 w-32 rounded-lg text-xs"
-                    />
-                    <span className="text-muted-foreground text-xs">–</span>
-                    <Input
-                      type="time"
-                      value={slot.to}
-                      onChange={(e) => updateSlot(day, i, "to", e.target.value)}
-                      className="h-9 w-32 rounded-lg text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeSlot(day, i)}
-                      className="w-7 h-7 rounded-lg border border-border/60 bg-background flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors shrink-0"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                slots.map((slot, i) => {
+                  const invalid = Boolean(slot.from && slot.to && slot.from >= slot.to);
+                  return (
+                  <div key={i} className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Input
+                        type="time"
+                        value={slot.from}
+                        aria-label={t(`${labels.en} start time`, `${labels.hi} आरंभ समय`)}
+                        aria-invalid={invalid}
+                        onChange={(e) => updateSlot(day, i, "from", e.target.value)}
+                        className={cn("h-11 w-28 rounded-lg text-xs", invalid && "border-destructive/60")}
+                      />
+                      <span className="text-muted-foreground text-xs">–</span>
+                      <Input
+                        type="time"
+                        value={slot.to}
+                        aria-label={t(`${labels.en} end time`, `${labels.hi} समाप्ति समय`)}
+                        aria-invalid={invalid}
+                        onChange={(e) => updateSlot(day, i, "to", e.target.value)}
+                        className={cn("h-11 w-28 rounded-lg text-xs", invalid && "border-destructive/60")}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSlot(day, i)}
+                        aria-label={t(`Remove ${labels.en} slot`, `${labels.hi} समय हटाएँ`)}
+                        className="min-h-[44px] min-w-[44px] rounded-lg border border-border/60 bg-background flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    {invalid && (
+                      <p className="text-[10px] text-destructive">{t("End time must be after start time.", "समाप्ति समय आरंभ समय के बाद होना चाहिए।")}</p>
+                    )}
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
             <Button
@@ -103,7 +116,8 @@ export function WeeklyAvailabilityEditor({
               variant="ghost"
               size="sm"
               onClick={() => addSlot(day)}
-              className="h-8 shrink-0 text-[11px] font-bold uppercase tracking-widest text-primary hover:text-primary"
+              aria-label={t(`Add ${labels.en} slot`, `${labels.hi} समय जोड़ें`)}
+              className="min-h-[44px] shrink-0 text-[11px] font-bold uppercase tracking-widest text-primary hover:text-primary"
             >
               <Plus className="w-3.5 h-3.5 mr-1" /> {t("Add", "जोड़ें")}
             </Button>

@@ -13,11 +13,12 @@ interface KaryakartaViewProps {
   viewToggle?: React.ReactNode;
   initialTitle?: string;
   initialContent?: string;
+  initialCategory?: string;
   onResubmit: (id: string, form: { title: string; content: string; summary: string; socialUrl: string; documentUrl: string; valuesChecklist: { rashtraPratham: boolean; culturallyGrounded: boolean; balancedTone: boolean; noDivisiveContent: boolean } }) => Promise<boolean>;
   handleSubmit: (form: typeof emptyForm) => Promise<boolean>;
 }
 
-export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitle, initialContent, onResubmit }: KaryakartaViewProps) {
+export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitle, initialContent, initialCategory, onResubmit }: KaryakartaViewProps) {
   const t = useT();
   const mine = articles.filter(a => a.author === "Current User");
 
@@ -29,7 +30,7 @@ export function KaryakartaView({ articles, handleSubmit, viewToggle, initialTitl
         sealHi="आलेख लेखन कक्ष"
         title="Draft and Submit Aalekh"
         titleHi="आलेख लिखें और समीक्षा हेतु भेजें"
-        actions={<WriteArticleDialog onSubmit={handleSubmit} initialTitle={initialTitle} initialContent={initialContent} />}
+        actions={<WriteArticleDialog onSubmit={handleSubmit} initialTitle={initialTitle} initialContent={initialContent} initialCategory={initialCategory} />}
         contexts={[
           {
             labelEn: "Current lane",

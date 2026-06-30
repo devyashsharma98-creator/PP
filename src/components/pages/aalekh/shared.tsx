@@ -193,11 +193,11 @@ export function ArticleCard({
 }
 
 // ─── Write Article Form ───────────────────────────────────────────────────────
-export function WriteArticleDialog({ onSubmit, initialTitle, initialContent }: { onSubmit: (form: typeof emptyForm) => Promise<boolean>; initialTitle?: string; initialContent?: string }) {
+export function WriteArticleDialog({ onSubmit, initialTitle, initialContent, initialCategory }: { onSubmit: (form: typeof emptyForm) => Promise<boolean>; initialTitle?: string; initialContent?: string; initialCategory?: string }) {
   const t = useT();
   const { lang } = useAppContext();
   const [open, setOpen] = useState(!!initialTitle);
-  const [form, setForm] = useState(initialTitle ? { ...emptyForm, title: initialTitle, ...(initialContent ? { content: initialContent, summary: initialContent.slice(0, 150) } : {}) } : emptyForm);
+  const [form, setForm] = useState(initialTitle ? { ...emptyForm, title: initialTitle, category: initialCategory ?? emptyForm.category, ...(initialContent ? { content: initialContent, summary: initialContent.slice(0, 150) } : {}) } : emptyForm);
 
   const allValuesChecked = Object.values(form.valuesChecklist).every(Boolean);
 
