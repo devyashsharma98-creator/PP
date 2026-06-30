@@ -246,13 +246,18 @@ function ScholarForm({ initial, onSave, onCancel, t, isHi }: ScholarFormProps) {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <p className="shell-copy text-[10px]">{t('Available Hours', 'उपलब्ध समय')}</p>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">
-          {t('Set recurring time slots when this scholar is typically available.', 'इस विद्वान के सामान्यतः उपलब्ध समय स्लॉट निर्धारित करें।')}
-        </p>
-        <WeeklyAvailabilityEditor value={availability} onChange={setAvailability} />
-      </div>
+      <details open={Object.keys(availability ?? {}).length > 0} className="group rounded-xl border border-border/50 bg-background/30">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 min-h-[44px]">
+          <span className="shell-copy text-[10px]">{t('Available Hours', 'उपलब्ध समय')} <span className="normal-case tracking-normal opacity-70">({t('optional', 'वैकल्पिक')})</span></span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="space-y-3 px-4 pb-4">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {t('Set recurring time slots when this scholar is typically available.', 'इस विद्वान के सामान्यतः उपलब्ध समय स्लॉट निर्धारित करें।')}
+          </p>
+          <WeeklyAvailabilityEditor value={availability} onChange={setAvailability} />
+        </div>
+      </details>
 
       <div className="space-y-3">
         <p className="shell-copy text-[10px]">{t('Vishay', 'विषय')} <span className="normal-case tracking-normal opacity-70">({t('subject areas, optional', 'विषय क्षेत्र, वैकल्पिक')})</span></p>

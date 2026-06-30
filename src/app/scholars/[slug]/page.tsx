@@ -131,7 +131,7 @@ export default async function ScholarProfilePage({ params }: Params) {
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-emerald-600" />
           <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
-            Weekly Availability
+            Available Hours <span className="font-devanagari text-muted-foreground">· उपलब्ध समय</span>
           </h2>
         </div>
         <Card className="border-border/50 bg-background/40">

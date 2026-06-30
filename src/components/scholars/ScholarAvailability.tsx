@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Plus, X, CalendarDays } from "lucide-react";
+import { Clock, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +61,7 @@ export function WeeklyAvailabilityEditor({
         return (
           <div key={day} className="flex flex-col gap-2 rounded-xl border border-border/50 bg-background/40 p-3 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2 sm:w-32 shrink-0">
-              <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
+              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">
                 {t(labels.en, labels.hi)}
               </span>
@@ -132,12 +132,14 @@ export function WeeklyAvailabilityEditor({
 
 export function WeeklyAvailabilityDisplay({
   value,
-  isHi = false,
+  isHi,
 }: {
   value: WeeklyAvailability | null | undefined;
+  /** Optional override; when omitted, language is derived from the active locale. */
   isHi?: boolean;
 }) {
   const t = useT();
+  const resolvedHi = isHi ?? t("en", "hi") === "hi";
 
   const hasSlots = WEEKDAYS.some((day) => ensureSlots(value, day).length > 0);
 
@@ -160,8 +162,8 @@ export function WeeklyAvailabilityDisplay({
         const labels = WEEKDAY_LABELS[day];
         return (
           <div key={day} className="flex items-center gap-3">
-            <span className={cn("text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-24 shrink-0", isHi && "font-devanagari")}>
-              {isHi ? labels.hi : labels.en}
+            <span className={cn("text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-24 shrink-0", resolvedHi && "font-devanagari")}>
+              {resolvedHi ? labels.hi : labels.en}
             </span>
             <div className="flex flex-wrap gap-1.5">
               {slots.map((slot, i) => (

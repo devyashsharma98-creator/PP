@@ -580,19 +580,6 @@ export default function VimarshCharcha() {
                   </CardContent>
                 </Card>
 
-                {/* Draft Aalekh from thread — karyakarta only (only they have the
-                    write desk that consumes the prefill). */}
-                {role === "karyakarta" && (
-                  <div className="flex justify-end">
-                    <Link href={buildWorkflowHref("/aalekh", { threadId: selectedId })}>
-                      <Button variant="outline" className="min-h-[44px] gap-2 text-[11px] font-bold uppercase tracking-widest" title={t("Draft an article from this discussion", "इस चर्चा से आलेख का मसौदा बनाएँ")}>
-                        <PenLine className="w-4 h-4" />
-                        {t("Draft Aalekh from discussion", "चर्चा से आलेख मसौदा")}
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-
                 {/* Replies */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -635,6 +622,22 @@ export default function VimarshCharcha() {
                   onReply={addReply}
                   t={t}
                 />
+
+                {/* Next step: draft an Aalekh from this discussion — karyakarta only
+                    (only they have the write desk that consumes the prefill). */}
+                {role === "karyakarta" && (
+                  <div className="flex flex-col items-start gap-2 rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      {t("Take this discussion further — turn it into a draft article.", "इस चर्चा को आगे ले जाएँ — इसे आलेख मसौदे में बदलें।")}
+                    </p>
+                    <Link href={buildWorkflowHref("/aalekh", { threadId: selectedId })} className="shrink-0">
+                      <Button variant="outline" className="min-h-[44px] gap-2 text-[11px] font-bold uppercase tracking-widest" title={t("Draft an article from this discussion", "इस चर्चा से आलेख का मसौदा बनाएँ")}>
+                        <PenLine className="w-4 h-4" />
+                        {t("Draft Aalekh from discussion", "चर्चा से आलेख मसौदा")}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-16 text-muted-foreground">{t("Thread not found.", "सूत्र नहीं मिला।")}</div>
