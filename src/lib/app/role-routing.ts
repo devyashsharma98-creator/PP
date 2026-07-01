@@ -74,8 +74,9 @@ export function getHighestRole(roleCodes: readonly RoleCode[] | null | undefined
 }
 
 export function getRoleLandingPath(roleCodes: readonly RoleCode[] | null | undefined, primaryRoleCode?: RoleCode | null) {
-  void roleCodes;
-  void primaryRoleCode;
+  const role = primaryRoleCode ?? getHighestRole(roleCodes);
+  if (role === "super_admin" || role === "org_admin") return "/users";
+  if (role === "kshetra_reviewer" || role === "prant_sanyojak") return "/overview";
   return "/dashboard";
 }
 

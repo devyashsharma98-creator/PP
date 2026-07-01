@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const STATUS_COLUMNS = [
   { key: "todo", label: "To Do", labelHi: "करना है", icon: Circle, color: "text-muted-foreground" },
@@ -208,6 +209,9 @@ export function TaskBoardPanel() {
     }
   }, [deleteProjectMutation, selectedProjectId, addToast, t]);
 
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState<string | null>(null);
+  const [confirmDeleteTask, setConfirmDeleteTask] = useState<string | null>(null);
+
   const openEditTask = useCallback((task: Task) => {
     setEditTask({
       title: task.title,
@@ -306,7 +310,7 @@ export function TaskBoardPanel() {
                     )}
                     {selectedProjectId === project.id && permissions.canUpdateProject && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteProject(project.id); }}
+                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteProject(project.id); }}
                         className="p-1 rounded hover:bg-muted transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5 text-destructive/60 hover:text-destructive" />
@@ -420,7 +424,7 @@ export function TaskBoardPanel() {
                                       )}
                                       {permissions.canUpdateTask && (
                                         <button
-                                          onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteTask(task.id); }}
                                           className="p-1 rounded hover:bg-muted transition-colors"
                                         >
                                           <Trash2 className="h-3.5 w-3.5 text-destructive/60 hover:text-destructive" />
@@ -822,6 +826,47 @@ export function TaskBoardPanel() {
             </div>
           </DialogContent>
         </Dialog>
+        {/* Confirm delete project */}
+        <AlertDialog open={!!confirmDeleteProject} onOpenChange={(o) => { if (!o) setConfirmDeleteProject(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("Delete project?", "परियोजना हटाएँ?")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("This will permanently delete the project and all its tasks. This cannot be undone.", "यह परियोजना और उसके सभी कार्य स्थायी रूप से हट जाएँगे। यह वापस नहीं हो सकता।")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("Cancel", "रद्द करें")}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => { if (confirmDeleteProject) handleDeleteProject(confirmDeleteProject); setConfirmDeleteProject(null); }}
+              >
+                {t("Delete", "हटाएँ")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Confirm delete task */}
+        <AlertDialog open={!!confirmDeleteTask} onOpenChange={(o) => { if (!o) setConfirmDeleteTask(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("Delete task?", "कार्य हटाएँ?")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("This task will be permanently deleted.", "यह कार्य स्थायी रूप से हटा दिया जाएगा।")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("Cancel", "रद्द करें")}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => { if (confirmDeleteTask) handleDeleteTask(confirmDeleteTask); setConfirmDeleteTask(null); }}
+              >
+                {t("Delete", "हटाएँ")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

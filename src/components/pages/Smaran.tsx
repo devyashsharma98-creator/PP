@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useT } from '@/lib/useT';
+import { useReminders } from '@/hooks/api/use-reminders';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
 
@@ -25,16 +25,6 @@ interface ReminderItem {
   href: string;
 }
 
-interface ReminderData {
-  overdue: ReminderItem[];
-  dueThisWeek: ReminderItem[];
-  upcoming: ReminderItem[];
-  counts: {
-    overdue: number;
-    dueThisWeek: number;
-    upcoming: number;
-  };
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -178,25 +168,7 @@ export default function Smaran() {
   const t = useT();
   const isHi = lang === 'hi';
 
-  const [data, setData] = useState<ReminderData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const fetchReminders = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const r = await fetch("/api/v1/reminders");
-      const json = await r.json();
-      if (json.success) setData(json.data as ReminderData);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchReminders(); }, [fetchReminders]);
+  const { data, isLoading: loading, isError: error, refetch } = useReminders();
 
   const contexts = data ? [
     {
@@ -249,7 +221,7 @@ export default function Smaran() {
           <p className="text-lg font-bold text-muted-foreground/60 font-devanagari">
             {t('Unable to load reminders.', 'स्मरण लोड करने में असमर्थ।')}
           </p>
-          <button onClick={fetchReminders} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px] min-h-[44px]">
+          <button onClick={() => refetch()} className="mt-2 text-primary font-bold uppercase tracking-widest text-[10px] min-h-[44px]">
             {t('Retry', 'पुनः प्रयास करें')}
           </button>
         </div>

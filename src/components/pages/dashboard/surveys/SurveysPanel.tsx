@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -93,6 +94,8 @@ export function SurveysPanel() {
       addToast(t("Survey closed!", "सर्वेक्षण बंद!"), "success");
     } catch { addToast(t("Failed to close survey", "बंद करने में विफल"), "error"); }
   }, [updateMutation, addToast, t]);
+
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const handleDelete = useCallback(async (id: string) => {
     try {
@@ -177,7 +180,7 @@ export function SurveysPanel() {
                       {STATUS_LABELS[s.status]?.[lang === "hi" ? "hi" : "en"] ?? s.status}
                     </Badge>
                     {permissions.canManageSurvey && (
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }} className="text-destructive/60 hover:text-destructive">
+                      <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(s.id); }} className="text-destructive/60 hover:text-destructive">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     )}
@@ -353,6 +356,26 @@ export function SurveysPanel() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!confirmDeleteId} onOpenChange={(o) => { if (!o) setConfirmDeleteId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("Delete survey?", "सर्वेक्षण हटाएँ?")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("This survey and all its responses will be permanently deleted.", "यह सर्वेक्षण और उसकी सभी प्रतिक्रियाएँ स्थायी रूप से हटा दी जाएँगी।")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("Cancel", "रद्द करें")}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => { if (confirmDeleteId) handleDelete(confirmDeleteId); setConfirmDeleteId(null); }}
+              >
+                {t("Delete", "हटाएँ")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

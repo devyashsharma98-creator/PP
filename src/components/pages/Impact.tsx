@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { useT } from '@/lib/useT';
 import { cn } from '@/lib/utils';
 import { Masthead } from '@/components/Masthead';
 import { SCORE_WEIGHTS, getLevel, computeScore } from '@/lib/contributions';
+import { useMyContributions, useLeaderboard, type MyImpactData, type LeaderboardEntry } from '@/hooks/api/use-contributions';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -24,26 +25,6 @@ interface ContributionMetrics {
   reviews: number;
   events: number;
   circulars: number;
-}
-
-interface MyImpactData {
-  userId: string;
-  metrics: ContributionMetrics;
-  score: number;
-  level: string;
-  levelHi: string;
-  rank: number;
-  totalContributors: number;
-}
-
-interface LeaderboardEntry {
-  userId: string;
-  name: string | null;
-  nameHi: string | null;
-  metrics: ContributionMetrics;
-  score: number;
-  level: string;
-  levelHi: string;
 }
 
 type Tab = "my-impact" | "leaderboard";
@@ -216,36 +197,14 @@ export default function Impact() {
   const isHi = lang === 'hi';
 
   const [tab, setTab] = useState<Tab>("my-impact");
-  const [myData, setMyData] = useState<MyImpactData | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  const currentUserId = null as string | null; // populated from leaderboard data
+  const { data: myData, isLoading: myLoading, isError: myError } = useMyContributions();
+  const { data: leaderboardData, isLoading: lbLoading, isError: lbError } = useLeaderboard();
+  const leaderboard = leaderboardData ?? [];
+  const loading = myLoading || lbLoading;
+  const error = myError || lbError;
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError(false);
-
-    Promise.all([
-      fetch("/api/v1/contributions/me").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/v1/contributions/leaderboard").then((r) => (r.ok ? r.json() : null)),
-    ])
-      .then(([meJson, lbJson]) => {
-        if (!active) return;
-        if (meJson?.success && meJson.data) setMyData(meJson.data as MyImpactData);
-        if (lbJson?.success && Array.isArray(lbJson.data)) setLeaderboard(lbJson.data as LeaderboardEntry[]);
-      })
-      .catch(() => {
-        if (active) setError(true);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => { active = false; };
-  }, []);
+  const currentUserId = myData?.userId ?? null;
 
   const levelColors: Record<string, string> = {
     "Pravah Ratna": "bg-amber-500/10 border-amber-400/30 text-amber-600",

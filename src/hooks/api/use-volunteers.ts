@@ -69,3 +69,14 @@ export function useVolunteerSummary() {
     staleTime: 60000,
   });
 }
+
+export function useEnrollVolunteer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (profileId: string) => api.enrollVolunteer(profileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['volunteers'] });
+      queryClient.invalidateQueries({ queryKey: ['volunteers', 'summary'] });
+    },
+  });
+}

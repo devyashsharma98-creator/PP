@@ -205,7 +205,7 @@ export default function Dayitv() {
 
     // Other vibhags from units — now includes their aayams
     const otherVibhags = orgData.units
-      .filter((u) => u.unitKind === 'vibhag' || u.unitKind === 'other')
+      .filter((u) => ['vibhag', 'prant', 'shakha', 'other'].includes(u.unitKind))
       .map((u) => ({
         name: u.name,
         nameHi: u.nameHi ?? u.name,

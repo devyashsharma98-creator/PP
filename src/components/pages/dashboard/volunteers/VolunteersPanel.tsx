@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Users, Plus, Clock, Activity, Trash2 } from "lucide-react";
+import { Users, Plus, Clock, Activity, Trash2, Search, X } from "lucide-react";
 
 import { useAppContext } from "@/context/AppContext";
-import { useVolunteers, useVolunteerSummary, useCreateActivity, useDeleteActivity, useVolunteerActivities } from "@/hooks/api/use-volunteers";
+import { useVolunteers, useVolunteerSummary, useCreateActivity, useDeleteActivity, useVolunteerActivities, useEnrollVolunteer } from "@/hooks/api/use-volunteers";
+import { useUsers } from "@/hooks/api/use-users";
 import { useT } from "@/lib/useT";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface Volunteer {
   id: string;
@@ -53,12 +55,21 @@ export function VolunteersPanel() {
   const { data: volunteers = [], isLoading, isError } = useVolunteers();
   const { data: summary } = useVolunteerSummary();
   const typedVolunteers = volunteers as Volunteer[];
+  const enrollMutation = useEnrollVolunteer();
 
   const [selectedVolunteer, setSelectedVolunteer] = useState<string | null>(null);
+  const [showEnroll, setShowEnroll] = useState(false);
+  const [enrollSearch, setEnrollSearch] = useState("");
   const [showLogActivity, setShowLogActivity] = useState(false);
   const [newActivity, setNewActivity] = useState({
     activityType: "event_duty", description: "", hoursLogged: 2, date: new Date().toISOString().slice(0, 16),
   });
+
+  const { data: users = [] } = useUsers({ limit: 100 });
+  const enrolledProfileIds = new Set(typedVolunteers.map((v) => v.profileId));
+  const filteredEnrollCandidates = (users as Array<{ id: string; displayName: string | null; email: string | null }>)
+    .filter((u) => !enrolledProfileIds.has(u.id))
+    .filter((u) => !enrollSearch || (u.displayName ?? u.email ?? "").toLowerCase().includes(enrollSearch.toLowerCase()));
 
   const { data: activities = [], isLoading: activitiesLoading } = useVolunteerActivities(selectedVolunteer ?? "");
   const typedActivities = activities as Activity[];
@@ -82,6 +93,20 @@ export function VolunteersPanel() {
     }
   }, [selectedVolunteer, newActivity, createActivityMutation, t, addToast]);
 
+  const handleEnroll = useCallback(async (profileId: string) => {
+    if (enrollMutation.isPending) return;
+    try {
+      await enrollMutation.mutateAsync(profileId);
+      setShowEnroll(false);
+      setEnrollSearch("");
+      addToast(t("Volunteer enrolled!", "स्वयंसेवक नामांकित!"), "success");
+    } catch {
+      addToast(t("Failed to enroll volunteer", "स्वयंसेवक नामांकन विफल"), "error");
+    }
+  }, [enrollMutation, addToast, t]);
+
+  const [confirmDeleteActivity, setConfirmDeleteActivity] = useState<string | null>(null);
+
   const handleDeleteActivity = useCallback(async (activityId: string) => {
     try {
       await deleteActivityMutation.mutateAsync(activityId);
@@ -104,6 +129,12 @@ export function VolunteersPanel() {
             </Badge>
           )}
         </div>
+        {permissions.canManageVolunteers && (
+          <Button size="sm" onClick={() => setShowEnroll(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            {t("Enroll Volunteer", "स्वयंसेवक जोड़ें")}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -171,7 +202,7 @@ export function VolunteersPanel() {
                                 {a.hoursLogged && <span className="text-xs text-muted-foreground">({a.hoursLogged}h)</span>}
                               </div>
                               {permissions.canManageVolunteers && (
-                                <button onClick={() => handleDeleteActivity(a.id)} className="text-destructive/60 hover:text-destructive">
+                                <button onClick={() => setConfirmDeleteActivity(a.id)} className="text-destructive/60 hover:text-destructive">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               )}
@@ -186,6 +217,58 @@ export function VolunteersPanel() {
             ))}
           </div>
         )}
+
+        {/* Enroll Volunteer Dialog */}
+        <Dialog open={showEnroll} onOpenChange={(open) => { setShowEnroll(open); if (!open) setEnrollSearch(""); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("Enroll Volunteer", "स्वयंसेवक नामांकित करें")}</DialogTitle>
+              <DialogDescription>
+                {t("Select a member to enroll as a volunteer.", "किसी सदस्य को स्वयंसेवक के रूप में नामांकित करें।")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder={t("Search members…", "सदस्य खोजें…")}
+                  value={enrollSearch}
+                  onChange={(e) => setEnrollSearch(e.target.value)}
+                />
+                {enrollSearch && (
+                  <button className="absolute right-2 top-2.5" onClick={() => setEnrollSearch("")}>
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto border rounded-md divide-y">
+                {filteredEnrollCandidates.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">
+                    {enrolledProfileIds.size > 0 && !enrollSearch
+                      ? t("All members are already enrolled.", "सभी सदस्य पहले से नामांकित हैं।")
+                      : t("No matching members found.", "कोई मिलान सदस्य नहीं मिला।")}
+                  </p>
+                ) : (
+                  filteredEnrollCandidates.map((u) => (
+                    <button
+                      key={u.id}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center justify-between gap-2"
+                      onClick={() => handleEnroll(u.id)}
+                      disabled={enrollMutation.isPending}
+                    >
+                      <span className="font-medium">{u.displayName ?? u.email ?? u.id.slice(0, 8)}</span>
+                      {u.email && <span className="text-xs text-muted-foreground truncate">{u.email}</span>}
+                    </button>
+                  ))
+                )}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowEnroll(false)}>{t("Cancel", "रद्द करें")}</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showLogActivity} onOpenChange={setShowLogActivity}>
           <DialogContent>
@@ -228,6 +311,26 @@ export function VolunteersPanel() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!confirmDeleteActivity} onOpenChange={(o) => { if (!o) setConfirmDeleteActivity(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("Delete activity?", "गतिविधि हटाएँ?")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("This activity record will be permanently deleted.", "यह गतिविधि रिकॉर्ड स्थायी रूप से हटा दिया जाएगा।")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("Cancel", "रद्द करें")}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => { if (confirmDeleteActivity) handleDeleteActivity(confirmDeleteActivity); setConfirmDeleteActivity(null); }}
+              >
+                {t("Delete", "हटाएँ")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

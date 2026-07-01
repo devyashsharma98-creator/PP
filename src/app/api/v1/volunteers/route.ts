@@ -18,3 +18,15 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   if (!result.ok) return result.response;
   return apiSuccess(result.data.rows, { meta: paginationMeta(page, limit, result.data.total) });
 });
+
+export const POST = withPermission("canManageVolunteers", async (req: NextRequest, ctx) => {
+  const ip = getClientIp(req); const rateRes = withApiRateLimit(ip); if (rateRes) return rateRes;
+  let body: unknown;
+  try { body = await req.json(); } catch { return badRequest("Request body must be valid JSON."); }
+  const parsed = (body as Record<string, unknown>);
+  const profileId = typeof parsed.profileId === "string" ? parsed.profileId.trim() : null;
+  if (!profileId) return badRequest("profileId is required.");
+  const result = await volunteerService.getOrCreateVolunteerProfile(profileId, ctx.session.orgId, ctx);
+  if (!result.ok) return result.response;
+  return apiSuccess(result.data);
+});

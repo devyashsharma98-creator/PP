@@ -83,3 +83,10 @@ export async function deleteActivity(activityId: string) {
 export async function fetchVolunteerSummary() {
   return fetchApi<{ total: number; recentActivities: number }>('/volunteers/summary');
 }
+
+export async function enrollVolunteer(profileId: string) {
+  return fetchApi<{ id: string }>('/volunteers', {
+    method: 'POST',
+    body: JSON.stringify({ profileId }),
+  });
+}

@@ -559,7 +559,7 @@ export default function ELibrary() {
                               <Eye className="w-4 h-4" /> {t('Read Online', 'ऑनलाइन पढ़ें')}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                          <TooltipContent className="bg-navy text-white border-navy-light">{t('No link provided', 'लिंक उपलब्ध नहीं')}</TooltipContent>
                         </Tooltip>
                       )}
                       {selectedBook.downloadUrl ? (
@@ -575,7 +575,7 @@ export default function ELibrary() {
                               <Download className="w-4 h-4" /> {t('Download PDF', 'PDF डाउनलोड')}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent className="bg-navy text-white border-navy-light">{t('Coming soon', 'जल्द आ रहा है')}</TooltipContent>
+                          <TooltipContent className="bg-navy text-white border-navy-light">{t('No link provided', 'लिंक उपलब्ध नहीं')}</TooltipContent>
                         </Tooltip>
                       )}
                     </TooltipProvider>

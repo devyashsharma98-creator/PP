@@ -7,6 +7,7 @@ import { Bell, Plus, Megaphone, Trash2, CheckCheck, AlertCircle, ArrowUp } from 
 
 import { useAppContext } from "@/context/AppContext";
 import { useCirculars, useCreateCircular, useDeleteCircular, useAcknowledgeCircular, useUnreadCirculars } from "@/hooks/api/use-circulars";
+import { useOrgStructure } from "@/hooks/api/use-org-structure";
 import { useT } from "@/lib/useT";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,8 +52,10 @@ export function CircularsPanel() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [newCircular, setNewCircular] = useState({
     title: "", titleHi: "", body: "", bodyHi: "",
-    priority: "normal", scope: "org",
+    priority: "normal", scope: "org", scopeEntityId: "",
   });
+
+  const { data: structure } = useOrgStructure();
 
   const filters = activeTab === "unread" ? { unreadOnly: "true" } : undefined;
   const { data: circulars = [], isLoading, isError } = useCirculars(filters);
@@ -73,9 +76,10 @@ export function CircularsPanel() {
         bodyHi: newCircular.bodyHi.trim() || undefined,
         priority: newCircular.priority,
         scope: newCircular.scope,
+        scopeEntityId: newCircular.scopeEntityId || undefined,
       });
       setShowCreate(false);
-      setNewCircular({ title: "", titleHi: "", body: "", bodyHi: "", priority: "normal", scope: "org" });
+      setNewCircular({ title: "", titleHi: "", body: "", bodyHi: "", priority: "normal", scope: "org", scopeEntityId: "" });
       addToast(t("Circular published!", "परिपत्र प्रकाशित!"), "success");
     } catch {
       addToast(t("Failed to create circular", "परिपत्र बनाने में विफल"), "error");
@@ -187,16 +191,42 @@ export function CircularsPanel() {
                 </div>
                 <div className="space-y-2">
                   <Label>{t("Scope", "दायरा")}</Label>
-                  <Select value={newCircular.scope} onValueChange={(v) => setNewCircular(p => ({ ...p, scope: v }))}>
+                  <Select value={newCircular.scope} onValueChange={(v) => setNewCircular(p => ({ ...p, scope: v, scopeEntityId: "" }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="org">{t("Entire Org", "पूरा संगठन")}</SelectItem>
                       <SelectItem value="unit">{t("Unit", "इकाई")}</SelectItem>
-                      <SelectItem value="department">{t("Department", "विभाग")}</SelectItem>
+                      <SelectItem value="department">{t("Department / Aayam", "विभाग / आयाम")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+              {newCircular.scope === "unit" && (
+                <div className="space-y-2">
+                  <Label>{t("Select Unit", "इकाई चुनें")}</Label>
+                  <Select value={newCircular.scopeEntityId} onValueChange={(v) => setNewCircular(p => ({ ...p, scopeEntityId: v }))}>
+                    <SelectTrigger><SelectValue placeholder={t("Choose unit…", "इकाई चुनें…")} /></SelectTrigger>
+                    <SelectContent>
+                      {(structure?.units ?? []).map((u) => (
+                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {newCircular.scope === "department" && (
+                <div className="space-y-2">
+                  <Label>{t("Select Aayam", "आयाम चुनें")}</Label>
+                  <Select value={newCircular.scopeEntityId} onValueChange={(v) => setNewCircular(p => ({ ...p, scopeEntityId: v }))}>
+                    <SelectTrigger><SelectValue placeholder={t("Choose aayam…", "आयाम चुनें…")} /></SelectTrigger>
+                    <SelectContent>
+                      {(structure?.departments ?? []).map((d) => (
+                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowCreate(false)}>
                   {t("Cancel", "रद्द करें")}
