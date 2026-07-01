@@ -20,6 +20,7 @@ import { AayamDashboardView } from "@/components/pages/dashboard/AayamDashboardV
 import { UnitDashboardView } from "@/components/pages/dashboard/UnitDashboardView";
 import { DashboardReviewOverlays } from "@/components/pages/dashboard/DashboardReviewOverlays";
 import { WorkflowIntelligence } from "@/components/pages/dashboard/WorkflowIntelligence";
+import { DashboardBriefingStrip } from "@/components/pages/dashboard/DashboardBriefingStrip";
 import { uiToDbEventStatus } from "@/lib/app/status-maps";
 import { cn } from "@/lib/utils";
 import { getCanonicalRoleFromUiRole, getDashboardLane } from "@/lib/app/dashboard-lane";
@@ -511,9 +512,19 @@ export default function Dashboard() {
     </Tabs>
   );
 
+  const briefingStrip = (
+    <DashboardBriefingStrip
+      onQuickCreate={(what) => {
+        if (what === "event") handleTabChange("create");
+        else if (what === "task") handleTabChange("queue");
+      }}
+    />
+  );
+
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
     return (
       <>
+        {briefingStrip}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
         <WorkflowIntelligence activeTab={dashboardTab} />
@@ -543,6 +554,7 @@ export default function Dashboard() {
   if (dashboardLane === "vibhag") {
     return (
       <>
+        {briefingStrip}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
         <WorkflowIntelligence activeTab={dashboardTab} />
@@ -569,6 +581,7 @@ export default function Dashboard() {
   if (dashboardLane === "aayam") {
     return (
       <>
+        {briefingStrip}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
         {tabBar}
         <WorkflowIntelligence activeTab={dashboardTab} />
@@ -591,6 +604,7 @@ export default function Dashboard() {
   }
   return (
     <>
+      {briefingStrip}
       <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
       {tabBar}
       <WorkflowIntelligence activeTab={dashboardTab} />
