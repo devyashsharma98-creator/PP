@@ -96,6 +96,8 @@ export interface CreateUserInput {
   responsibility?: string;
   responsibilityHi?: string;
   roleCode: CanonicalRoleCode;
+  unitId?: string;
+  departmentId?: string;
 }
 
 export interface UpdateUserInput {

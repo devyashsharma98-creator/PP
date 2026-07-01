@@ -213,7 +213,10 @@ export default function UserManagement() {
     responsibility: "",
     responsibilityHi: "",
     roleCode: "karyakarta",
+    unitId: undefined,
+    departmentId: undefined,
   });
+  const [createScopeType, setCreateScopeType] = useState<"org" | "unit" | "department">("org");
   const [profileForm, setProfileForm] = useState<UpdateUserInput>({
     displayName: "",
     displayNameHi: "",
@@ -310,7 +313,10 @@ export default function UserManagement() {
         responsibility: "",
         responsibilityHi: "",
         roleCode: "karyakarta",
+        unitId: undefined,
+        departmentId: undefined,
       });
+      setCreateScopeType("org");
       addToast(t("Account created", "खाता बनाया गया"), "success");
     },
     onError: (error) => {
@@ -645,32 +651,109 @@ export default function UserManagement() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="new-role">{t("Initial access role", "प्रारम्भिक प्रवेश भूमिका")}</Label>
-                    <Select
-                      value={createForm.roleCode}
-                      onValueChange={(value: CanonicalRoleCode) =>
-                        setCreateForm((current) => ({ ...current, roleCode: value }))
-                      }
-                    >
-                      <SelectTrigger id="new-role">
-                        <SelectValue placeholder={t("Choose an access role", "प्रवेश भूमिका चुनें")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {roleOptions.map((role) => (
-                          <SelectItem key={role.id} value={role.code}>
-                            {getRoleLabel(role.code, lang)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-role">{t("Initial access role", "प्रारम्भिक प्रवेश भूमिका")}</Label>
+                      <Select
+                        value={createForm.roleCode}
+                        onValueChange={(value: CanonicalRoleCode) =>
+                          setCreateForm((current) => ({ ...current, roleCode: value }))
+                        }
+                      >
+                        <SelectTrigger id="new-role">
+                          <SelectValue placeholder={t("Choose an access role", "प्रवेश भूमिका चुनें")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {roleOptions.map((role) => (
+                            <SelectItem key={role.id} value={role.code}>
+                              {getRoleLabel(role.code, lang)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-scope-type">{t("Scope", "क्षेत्र")}</Label>
+                      <Select
+                        value={createScopeType}
+                        onValueChange={(value: "org" | "unit" | "department") => {
+                          setCreateScopeType(value);
+                          setCreateForm((current) => ({ ...current, unitId: undefined, departmentId: undefined }));
+                        }}
+                      >
+                        <SelectTrigger id="new-scope-type">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="org">{t("Whole organisation", "पूरी संस्था")}</SelectItem>
+                          <SelectItem value="unit">{t("Specific unit / vibhag", "विशिष्ट इकाई / विभाग")}</SelectItem>
+                          <SelectItem value="department">{t("Specific aayam", "विशिष्ट आयाम")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+
+                  {createScopeType === "unit" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="new-unit">{t("Unit / Vibhag", "इकाई / विभाग")}</Label>
+                      <Select
+                        value={createForm.unitId ?? ""}
+                        onValueChange={(value) =>
+                          setCreateForm((current) => ({ ...current, unitId: value || undefined }))
+                        }
+                      >
+                        <SelectTrigger id="new-unit">
+                          <SelectValue placeholder={t("Choose unit", "इकाई चुनें")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {displayBilingualHi(unit.name, unit.nameHi, lang)}
+                              <span className="ml-1 text-xs text-muted-foreground uppercase tracking-widest">· {unit.unitKind}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {createScopeType === "department" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="new-department">{t("Aayam / Department", "आयाम / विभाग")}</Label>
+                      <Select
+                        value={createForm.departmentId ?? ""}
+                        onValueChange={(value) =>
+                          setCreateForm((current) => ({ ...current, departmentId: value || undefined }))
+                        }
+                      >
+                        <SelectTrigger id="new-department">
+                          <SelectValue placeholder={t("Choose aayam", "आयाम चुनें")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departments.map((department) => (
+                            <SelectItem key={department.id} value={department.id}>
+                              {displayBilingualHi(department.name, department.nameHi, lang)}
+                              {department.unitId ? ` — ${unitNameById.get(department.unitId) ?? ""}` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="institution-panel-muted space-y-4 p-4">
                   <div className="space-y-1">
                     <p className="shell-copy">{t("Access preview", "प्रवेश पूर्वावलोकन")}</p>
                     <h3 className="text-sm font-semibold">{getRoleLabel(createForm.roleCode, lang)}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {t("Scope", "क्षेत्र")}:{" "}
+                      {createScopeType === "unit" && createForm.unitId
+                        ? unitNameById.get(createForm.unitId) ?? t("Selected unit", "चयनित इकाई")
+                        : createScopeType === "department" && createForm.departmentId
+                          ? departmentNameById.get(createForm.departmentId) ?? t("Selected aayam", "चयनित आयाम")
+                          : t("Whole organisation", "पूरी संस्था")}
+                    </p>
                     <p className="text-xs leading-5 text-muted-foreground">
                       {t(
                         "This preview is calculated from the current role matrix so the account scope is explicit before creation.",

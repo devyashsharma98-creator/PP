@@ -203,14 +203,22 @@ export default function Dayitv() {
         })),
     };
 
-    // Other vibhags from units
-    const otherVibhags = orgData.units.map((u) => ({
-      name: u.name,
-      nameHi: u.nameHi ?? u.name,
-      sanyojak: orgData.heads[u.id] ?? 'Assign coordinator',
-      isCurrent: u.id === viewerUnitId,
-      aayams: [] as { name: string; pramukh: string; contact: string }[],
-    }));
+    // Other vibhags from units — now includes their aayams
+    const otherVibhags = orgData.units
+      .filter((u) => u.unitKind === 'vibhag' || u.unitKind === 'other')
+      .map((u) => ({
+        name: u.name,
+        nameHi: u.nameHi ?? u.name,
+        sanyojak: orgData.heads[u.id] ?? 'Assign coordinator',
+        isCurrent: u.id === viewerUnitId,
+        aayams: orgData.departments
+          .filter((d) => d.unitId === u.id && ['yuva', 'mahila', 'shodh', 'prachar', 'vimarsh'].includes(d.departmentKind))
+          .map((d) => ({
+            name: AAYAM_KIND_LABEL[d.departmentKind] ?? d.name,
+            pramukh: orgData.heads[d.id] ?? '[Name]',
+            contact: '[Contact]',
+          })),
+      }));
 
     return [currentVibhag, ...otherVibhags];
   }, [orgData, viewerName, viewerUnitId]);
@@ -433,23 +441,47 @@ export default function Dayitv() {
         </div>
 
         <div className="space-y-6 relative max-w-4xl mx-auto">
-          {/* Kshetra */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-            <Card className="institution-panel border-t-4 border-t-amber-500 shadow-lg bg-background/40">
-              <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shrink-0 shadow-sm">
-                  <Crown className="w-8 h-8 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="space-y-1.5">
-                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
-                    {t('Kshetra Level', 'क्षेत्र स्तर')}
-                  </Badge>
-                  <h3 className="font-bold text-xl tracking-tight">{t('Kshetriya Pramukh', 'क्षेत्रीय प्रमुख')}</h3>
-                  <p className="text-sm text-muted-foreground font-medium">{t('Regional leadership record · Madhya Kshetra', 'Regional leadership record · Madhya Kshetra')}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          {/* Kshetra — live from DB */}
+          {orgData?.units.filter((u) => u.unitKind === 'kshetra').map((u, i) => (
+            <motion.div key={u.id} initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
+              <Card className="institution-panel border-t-4 border-t-amber-500 shadow-lg bg-background/40">
+                <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shrink-0 shadow-sm">
+                    <Crown className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
+                      {t('Kshetra Level', 'क्षेत्र स्तर')}
+                    </Badge>
+                    <h3 className="font-bold text-xl tracking-tight">{isHi ? (u.nameHi ?? u.name) : u.name}</h3>
+                    <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" />
+                      {orgData.heads[u.id] ?? t('Kshetriya Pramukh not assigned', 'क्षेत्रीय प्रमुख नियुक्त नहीं')}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+          {/* Fallback if no kshetra units in DB */}
+          {orgData && orgData.units.filter((u) => u.unitKind === 'kshetra').length === 0 && (
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+              <Card className="institution-panel border-t-4 border-t-amber-500/40 shadow-md bg-background/30">
+                <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shrink-0 shadow-sm">
+                    <Crown className="w-8 h-8 text-amber-600/50 dark:text-amber-400/50" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Badge className="bg-amber-500/10 text-amber-700/60 dark:text-amber-300/60 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
+                      {t('Kshetra Level', 'क्षेत्र स्तर')}
+                    </Badge>
+                    <h3 className="font-bold text-xl tracking-tight text-muted-foreground">{t('Kshetriya Pramukh', 'क्षेत्रीय प्रमुख')}</h3>
+                    <p className="text-sm text-muted-foreground/70">{t('No Kshetra unit configured yet', 'क्षेत्र इकाई अभी तक कॉन्फ़िगर नहीं की गई')}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           <div className="flex justify-center py-2">
             <div className="flex flex-col items-center gap-2">
@@ -458,23 +490,47 @@ export default function Dayitv() {
             </div>
           </div>
 
-          {/* Prant */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-            <Card className="institution-panel border-t-4 border-t-blue-500 shadow-lg bg-background/40">
-              <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
-                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center shrink-0 shadow-sm">
-                  <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="space-y-1.5">
-                  <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-300 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
-                    {t('Prant Level', 'प्रांत स्तर')}
-                  </Badge>
-                  <h3 className="font-bold text-xl tracking-tight">{t('Prant Sanyojak', 'प्रांत संयोजक')}</h3>
-                  <p className="text-sm text-muted-foreground font-medium">{t('Shri Digvijay Chaturvedi · Madhya Bharat Prant', 'श्री दिग्विजय चतुर्वेदी · मध्यभारत प्रांत')}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          {/* Prant — live from DB */}
+          {orgData?.units.filter((u) => u.unitKind === 'prant').map((u, i) => (
+            <motion.div key={u.id} initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
+              <Card className="institution-panel border-t-4 border-t-blue-500 shadow-lg bg-background/40">
+                <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center shrink-0 shadow-sm">
+                    <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-300 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
+                      {t('Prant Level', 'प्रांत स्तर')}
+                    </Badge>
+                    <h3 className="font-bold text-xl tracking-tight">{isHi ? (u.nameHi ?? u.name) : u.name}</h3>
+                    <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" />
+                      {orgData.heads[u.id] ?? t('Prant Sanyojak not assigned', 'प्रांत संयोजक नियुक्त नहीं')}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+          {/* Fallback if no prant units in DB */}
+          {orgData && orgData.units.filter((u) => u.unitKind === 'prant').length === 0 && (
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+              <Card className="institution-panel border-t-4 border-t-blue-500/40 shadow-md bg-background/30">
+                <CardContent className="pt-8 pb-8 flex items-center gap-6 px-8">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center shrink-0 shadow-sm">
+                    <Shield className="w-8 h-8 text-blue-600/50 dark:text-blue-400/50" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Badge className="bg-blue-500/10 text-blue-700/60 dark:text-blue-300/60 mb-1.5 text-[10px] tracking-[0.2em] uppercase border-0 font-bold px-2 py-0.5">
+                      {t('Prant Level', 'प्रांत स्तर')}
+                    </Badge>
+                    <h3 className="font-bold text-xl tracking-tight text-muted-foreground">{t('Prant Sanyojak', 'प्रांत संयोजक')}</h3>
+                    <p className="text-sm text-muted-foreground/70">{t('No Prant unit configured yet', 'प्रांत इकाई अभी तक कॉन्फ़िगर नहीं की गई')}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           <div className="flex justify-center py-2">
             <div className="flex flex-col items-center gap-2">
