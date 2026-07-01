@@ -5,7 +5,7 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, or, isNotNull } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
@@ -60,11 +60,20 @@ export const GET = withAuth(async (_req: NextRequest, ctx) => {
     )
     .orderBy(departmentsOrAayams.name);
 
-  // 4. Simplified heads query — aayam pramukhs mapped to departments
+  // 4. Unified heads query — covers all unit-scoped and dept-scoped head roles
+  const HEAD_ROLE_CODES = [
+    "aayam_pramukh",
+    "vibhag_pramukh",
+    "prant_sanyojak",
+    "kshetra_reviewer",
+    "prant_aayam_pramukh",
+    "unit_head",
+  ];
+
   const headRows = await db
     .select({
-      userId: profiles.id,
       displayName: profiles.displayName,
+      unitId: userRoleAssignments.unitId,
       departmentId: userRoleAssignments.departmentId,
     })
     .from(userRoleAssignments)
@@ -74,14 +83,20 @@ export const GET = withAuth(async (_req: NextRequest, ctx) => {
       and(
         eq(profiles.orgId, orgId),
         eq(profiles.isActive, true),
-        eq(roles.code, "aayam_pramukh")
+        inArray(roles.code, HEAD_ROLE_CODES),
+        or(isNotNull(userRoleAssignments.unitId), isNotNull(userRoleAssignments.departmentId))
       )
     );
 
-  const headsByDepartment = new Map<string, string>();
+  // Single heads map: unitId → name  and  departmentId → name
+  const headsMap = new Map<string, string>();
   for (const row of headRows) {
-    if (row.departmentId) {
-      headsByDepartment.set(row.departmentId, row.displayName ?? "[Name]");
+    const name = row.displayName ?? "[Name]";
+    if (row.unitId && !headsMap.has(row.unitId)) {
+      headsMap.set(row.unitId, name);
+    }
+    if (row.departmentId && !headsMap.has(row.departmentId)) {
+      headsMap.set(row.departmentId, name);
     }
   }
 
@@ -89,6 +104,6 @@ export const GET = withAuth(async (_req: NextRequest, ctx) => {
     org: org ?? { name: null, nameHi: null, orgCode: null },
     units: unitRows,
     departments: deptRows,
-    heads: Object.fromEntries(headsByDepartment),
+    heads: Object.fromEntries(headsMap),
   });
 });
