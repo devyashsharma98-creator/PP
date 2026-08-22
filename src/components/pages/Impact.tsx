@@ -332,26 +332,26 @@ export default function Impact() {
             <Card className="institution-panel-muted border-primary/20 bg-primary/5">
               <CardContent className="flex flex-col gap-4 py-5 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="shell-copy">{t('Start next contribution', 'Start next contribution')}</p>
-                  <p className="text-sm text-muted-foreground">{t('Add work that directly moves this score: write, organise, or distribute.', 'Add work that directly moves this score: write, organise, or distribute.')}</p>
+                  <p className="shell-copy">{t('Start next contribution', 'अगला योगदान शुरू करें')}</p>
+                  <p className="text-sm text-muted-foreground">{t('Add work that directly moves this score: write, organise, or distribute.', 'वह कार्य जोड़ें जो सीधे इस स्कोर को बढ़ाता है — लिखें, आयोजन करें, या प्रसार करें।')}</p>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <Link href="/aalekh" className="w-full sm:w-auto">
                     <Button className="w-full sm:w-auto gap-2" size="sm">
                       <FileText className="h-4 w-4" />
-                      {t('Write Aalekh', 'Write Aalekh')}
+                      {t('Write Aalekh', 'आलेख लिखें')}
                     </Button>
                   </Link>
                   <Link href="/dashboard" className="w-full sm:w-auto">
                     <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
                       <Calendar className="h-4 w-4" />
-                      {t('Create Event', 'Create Event')}
+                      {t('Create Event', 'कार्यक्रम बनाएँ')}
                     </Button>
                   </Link>
                   <Link href="/prachar" className="w-full sm:w-auto">
                     <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
                       <Megaphone className="h-4 w-4" />
-                      {t('Close Prachar', 'Close Prachar')}
+                      {t('Close Prachar', 'प्रसार पूर्ण करें')}
                     </Button>
                   </Link>
                 </div>
@@ -456,13 +456,13 @@ export default function Impact() {
                   <Link href="/aalekh" className="w-full sm:w-auto">
                     <Button className="w-full sm:w-auto gap-2" size="sm">
                       <FileText className="h-4 w-4" />
-                      {t('Create first contribution', 'Create first contribution')}
+                      {t('Create first contribution', 'पहला योगदान करें')}
                     </Button>
                   </Link>
                   <Link href="/dashboard" className="w-full sm:w-auto">
                     <Button variant="outline" className="w-full sm:w-auto gap-2" size="sm">
                       <Calendar className="h-4 w-4" />
-                      {t('Plan event', 'Plan event')}
+                      {t('Plan event', 'कार्यक्रम योजना बनाएँ')}
                     </Button>
                   </Link>
                 </div>

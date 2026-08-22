@@ -30,7 +30,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { displayBilingualHi, useT } from "@/lib/useT";
 import type { FormConfig, GatividhiEvent } from "@/lib/app/contracts";
 
-import { checklistItems, eventTemplates, expertPool, suggestedQuestions, type SuggestedExpert } from "./config";
+import { checklistItems, eventTemplates, suggestedQuestions } from "./config";
+import { useDirectory } from "@/hooks/api/use-directory";
 import type { UnitDashboardViewProps } from "./types";
 
 export function UnitDashboardView({
@@ -70,7 +71,8 @@ export function UnitDashboardView({
   const [pollResultsEvent, setPollResultsEvent] = useState<GatividhiEvent | null>(null);
   const [pollCreateEvent, setPollCreateEvent] = useState<GatividhiEvent | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [suggestedExperts, setSuggestedExperts] = useState<SuggestedExpert[]>([]);
+  const { data: directoryMembers = [] } = useDirectory();
+  const [suggestedExperts, setSuggestedExperts] = useState<Array<{ name: string; nameHi: string; vakshe: string[] }>>([]);
   const [localFormConfig, setLocalFormConfig] = useState<FormConfig>({
     fields: { phone: true, city: true, attendingCount: true, specialNeeds: true },
     customQuestions: [],
@@ -170,7 +172,12 @@ export function UnitDashboardView({
       nextChecklist[key] = true;
     });
 
-    setSuggestedExperts(expertPool.filter((expert) => expert.keywords.includes(type)));
+    const experts = directoryMembers.slice(0, 4).map((m) => ({
+      name: m.displayName ?? m.email,
+      nameHi: m.displayNameHi ?? m.displayName ?? m.email,
+      vakshe: [m.primaryRoleName ?? "", m.departmentName ?? ""].filter(Boolean),
+    }));
+    setSuggestedExperts(experts);
     setForm((previous) => ({ ...previous, checklist: nextChecklist }));
   };
 
@@ -686,7 +693,7 @@ export function UnitDashboardView({
                       {suggestedExperts.map((expert, index) => (
                         <div key={index} className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 p-2">
                           <div className="saffron-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                            <span className="text-[10px] font-bold text-white">{expert.name.charAt(0)}</span>
+                            <span className="text-[10px] font-bold text-white">{(expert.name ?? "?").charAt(0)}</span>
                           </div>
                           <div className="min-w-0">
                             <p className="truncate text-xs font-bold">{displayBilingualHi(expert.name, expert.nameHi, lang)}</p>

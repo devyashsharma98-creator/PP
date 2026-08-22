@@ -19,15 +19,7 @@ import { useOrgStructure } from '@/hooks/api/use-org-structure';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/components/ToastProvider';
 import { AAYAM_CONFIG, AAYAM_KIND_LABEL } from '@/lib/app/aayam-config';
-
-// ── Data ────────────────────────────────────────────────────────────────────
-
-
-const vishayas = [
-  'समाजशास्त्र', 'राजनीति शास्त्र', 'अर्थशास्त्र', 'इतिहास', 'दर्शन',
-  'मत पंथ अध्ययन', 'विधि', 'भूगोल', 'पर्यावरण', 'मीडिया एवं पत्रकारिता',
-  'अंतर्राष्ट्रीय संबंध', 'सामाजिक सहकार', 'भारतीय भाषाएँ', 'वैश्विक भाषाएँ', 'अनुवाद',
-];
+import { useVishayas } from '@/hooks/api/use-vishayas';
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -166,6 +158,7 @@ export default function Dayitv() {
   const t = useT();
   const isHi = t('en', 'hi') === 'hi';
   const { data: orgData, isLoading, error } = useOrgStructure();
+  const { data: vishayaList = [] } = useVishayas();
   const { viewer } = useAppContext();
   const { addToast } = useToast();
 
@@ -417,11 +410,13 @@ export default function Dayitv() {
             </h3>
           </div>
           <div className="flex flex-wrap gap-2.5">
-            {vishayas.map((v, i) => (
-              <Badge key={i} variant="outline" className="font-devanagari text-xs px-4 py-1.5 bg-background/60 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-default">
-                {v}
+            {vishayaList.length > 0 ? vishayaList.map((v) => (
+              <Badge key={v.id} variant="outline" className="font-devanagari text-xs px-4 py-1.5 bg-background/60 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-default">
+                {isHi ? v.nameHi : v.nameEn}
               </Badge>
-            ))}
+            )) : (
+              <p className="text-xs text-muted-foreground">{t('No subject areas defined yet.', 'अभी कोई विषय परिभाषित नहीं।')}</p>
+            )}
           </div>
         </Card>
       </section>

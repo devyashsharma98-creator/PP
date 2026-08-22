@@ -98,13 +98,3 @@ export const suggestedQuestions: {
   { question: "Any special requirements?", questionHi: "कोई विशेष आवश्यकता?", type: "textarea" },
 ];
 
-export const expertPool = [
-  { name: "Anil Verma", nameHi: "अनिल वर्मा", vakshe: ["History", "Colonialism"], keywords: ["seminar", "study_circle"] },
-  { name: "Kavita Singh", nameHi: "कविता सिंह", vakshe: ["IKS", "Archaeology"], keywords: ["seminar", "workshop"] },
-  { name: "Pradeep Yadav", nameHi: "प्रदीप यादव", vakshe: ["Public Speaking", "Campus Connect"], keywords: ["protest", "outreach"] },
-  { name: "Meena Joshi", nameHi: "मीना जोशी", vakshe: ["Education Policy"], keywords: ["seminar", "workshop"] },
-  { name: "Deepak Kumar", nameHi: "दीपक कुमार", vakshe: ["Social Media"], keywords: ["outreach", "protest"] },
-  { name: "Rajesh Tiwari", nameHi: "राजेश तिवारी", vakshe: ["Sanskrit", "Manuscripts"], keywords: ["seminar", "study_circle"] },
-];
-
-export type SuggestedExpert = (typeof expertPool)[number];

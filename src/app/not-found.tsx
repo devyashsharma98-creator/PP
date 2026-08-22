@@ -42,15 +42,12 @@ export default function NotFound() {
           </h1>
           <p className="text-sm text-muted-foreground font-devanagari leading-relaxed">
             {t(
-              "The page you're looking for doesn't exist or has been moved.",
-              "जो पृष्ठ आप खोज रहे हैं वह मौजूद नहीं है या स्थानांतरित कर दिया गया है।"
+              "This path does not exist or has been moved. Return to your workspace.",
+              "यह पथ उपलब्ध नहीं है अथवा स्थानांतरित कर दिया गया है। अपने कार्यक्षेत्र पर लौटें।"
             )}
           </p>
-          <p className="text-xs text-muted-foreground/60 italic font-devanagari">
-            {t(
-              '"Not all who wander are lost." — but this page definitely is.',
-              '"भटकने वाले सभी खोए नहीं होते" — पर यह पृष्ठ जरूर खो गया है।'
-            )}
+          <p className="text-xs text-muted-foreground/50 font-devanagari tracking-wide uppercase">
+            {t("Pragya Pravah — Bhopal Vibhag", "प्रज्ञा प्रवाह — भोपाल विभाग")}
           </p>
         </div>
 

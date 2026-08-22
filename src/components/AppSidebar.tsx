@@ -210,7 +210,7 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-sidebar-border px-2 pb-3 pt-2">
+      <div className="border-t border-sidebar-border px-2 pb-3 pt-2 space-y-1">
         {collapsed ? (
           <button
             type="button"
@@ -220,6 +220,42 @@ export function AppSidebar() {
           >
             <ChevronRight className="h-4 w-4" />
           </button>
+        ) : null}
+        {authReady && viewer ? (
+          collapsed ? (
+            <div
+              title={`${viewer.displayName ?? viewer.email}`}
+              className="mx-auto flex h-8 w-8 items-center justify-center rounded-full saffron-gradient text-[11px] font-bold text-white shadow-sm"
+            >
+              {(viewer.displayName ?? viewer.email ?? "?").charAt(0).toUpperCase()}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full saffron-gradient text-[11px] font-bold text-white shadow-sm">
+                {(viewer.displayName ?? viewer.email ?? "?").charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className={cn("truncate text-xs font-semibold text-sidebar-foreground/90", lang === "hi" && "font-devanagari")}>
+                  {viewer.displayName ?? viewer.email}
+                </p>
+                {viewer.primaryRoleCode ? (
+                  <p className="truncate text-[10px] text-sidebar-foreground/45">
+                    {{
+                      super_admin: "Super Admin",
+                      org_admin: "Org Admin",
+                      kshetra_reviewer: "Kshetra Reviewer",
+                      prant_sanyojak: "Prant Sanyojak",
+                      prant_aayam_pramukh: "Prant Aayam Pramukh",
+                      vibhag_pramukh: "Vibhag Pramukh",
+                      aayam_pramukh: "Aayam Pramukh",
+                      unit_head: "Unit Head",
+                      karyakarta: "Karyakarta",
+                    }[viewer.primaryRoleCode] ?? viewer.primaryRoleCode}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          )
         ) : null}
         {authReady ? (
           <button

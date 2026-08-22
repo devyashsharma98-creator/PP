@@ -68,7 +68,7 @@ export const GET = withAuth(async (_req: NextRequest, ctx) => {
     "kshetra_reviewer",
     "prant_aayam_pramukh",
     "unit_head",
-  ];
+  ] as const;
 
   const headRows = await db
     .select({

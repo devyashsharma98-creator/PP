@@ -490,7 +490,7 @@ export default function Dashboard() {
     setDashboardTab(tab);
   };
 
-  const tabBar = (
+  const renderTabBar = () => (
     <Tabs value={dashboardTab} onValueChange={handleTabChange} className="mt-4">
       <TabsList className="mb-4 h-9 w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border/50 bg-muted/30 p-1">
         <TabsTrigger value="today" className="h-7 rounded-lg px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
@@ -512,7 +512,7 @@ export default function Dashboard() {
     </Tabs>
   );
 
-  const briefingStrip = (
+  const renderBriefingStrip = () => (
     <DashboardBriefingStrip
       onQuickCreate={(what) => {
         if (what === "event") handleTabChange("create");
@@ -524,9 +524,9 @@ export default function Dashboard() {
   if (dashboardLane === "super_admin" || dashboardLane === "prant") {
     return (
       <>
-        {briefingStrip}
+        {renderBriefingStrip()}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
-        {tabBar}
+        {renderTabBar()}
         <WorkflowIntelligence activeTab={dashboardTab} />
         <UnitDashboardView
           dashboardKind="super_admin"
@@ -554,9 +554,9 @@ export default function Dashboard() {
   if (dashboardLane === "vibhag") {
     return (
       <>
-        {briefingStrip}
+        {renderBriefingStrip()}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
-        {tabBar}
+        {renderTabBar()}
         <WorkflowIntelligence activeTab={dashboardTab} />
         <VibhagDashboardView
           events={events}
@@ -581,9 +581,9 @@ export default function Dashboard() {
   if (dashboardLane === "aayam") {
     return (
       <>
-        {briefingStrip}
+        {renderBriefingStrip()}
         <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
-        {tabBar}
+        {renderTabBar()}
         <WorkflowIntelligence activeTab={dashboardTab} />
         <AayamDashboardView
           dashboardKind={primaryRoleCode === "prant_aayam_pramukh" ? "prant_aayam_pramukh" : "aayam_pramukh"}
@@ -604,9 +604,9 @@ export default function Dashboard() {
   }
   return (
     <>
-      {briefingStrip}
+      {renderBriefingStrip()}
       <DashboardActionQueue items={actionItems} t={t} lang={lang} onCardClick={handleTabChange} />
-      {tabBar}
+      {renderTabBar()}
       <WorkflowIntelligence activeTab={dashboardTab} />
       <UnitDashboardView
         dashboardKind={dashboardLane === "karyakarta" ? "karyakarta" : "unit_head"}

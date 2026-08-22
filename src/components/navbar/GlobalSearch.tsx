@@ -43,9 +43,9 @@ export function GlobalSearch() {
   }, [showPanel]);
 
   const typeConfig: Record<string, { icon: typeof CalendarDays; href: (id: string) => string; labelEn: string; labelHi: string }> = {
-    event: { icon: CalendarDays, href: () => "/dashboard", labelEn: "Event", labelHi: "कार्यक्रम" },
-    article: { icon: PenLine, href: () => "/aalekh", labelEn: "Article", labelHi: "आलेख" },
-    user: { icon: User, href: () => "/directory", labelEn: "Member", labelHi: "सदस्य" },
+    event: { icon: CalendarDays, href: (id) => `/dashboard?event=${id}`, labelEn: "Event", labelHi: "कार्यक्रम" },
+    article: { icon: PenLine, href: (id) => `/aalekh?article=${id}`, labelEn: "Article", labelHi: "आलेख" },
+    user: { icon: User, href: (id) => `/directory?member=${id}`, labelEn: "Member", labelHi: "सदस्य" },
   };
 
   const grouped = results.reduce<Record<string, typeof results>>((acc, r) => {

@@ -1,6 +1,5 @@
 import {
   Activity,
-  BarChart3,
   Bell,
   BellRing,
   BookMarked,
@@ -56,16 +55,29 @@ const workflowNavItems: NavItem[] = [
   { label: "Prakashan", sublabel: "प्रकाशन", icon: BookMarked, path: "/prakashan", description: "Editorial & publishing", descriptionHi: "संपादकीय एवं प्रकाशन" },
   { label: "Shodh", sublabel: "शोध", icon: FlaskConical, path: "/shodh", description: "Research projects", descriptionHi: "शोध परियोजनाएँ" },
   { label: "Prachar", sublabel: "शैक्षिक प्रसार", icon: Megaphone, path: "/prachar", description: "Academic outreach", descriptionHi: "पत्रिका, सम्मेलन एवं परिसर प्रसार" },
-  { label: "Prachar Vishleshan", sublabel: "प्रसार विश्लेषण", icon: BarChart3, path: "/prachar-vishleshan", description: "Outreach analytics", descriptionHi: "प्रसार पूर्णता विश्लेषण" },
   { label: "Calendar", sublabel: "योजना व तिथियाँ", icon: Calendar, path: "/calendar", description: "Events & planning", descriptionHi: "कार्यक्रम और योजना" },
   { label: "My Impact", sublabel: "मेरा योगदान", icon: Trophy, path: "/impact", description: "Your contribution & recognition", descriptionHi: "आपका योगदान एवं सम्मान" },
 ];
 
-const mobilePrimaryNavItems: NavItem[] = [
+const mobilePrimaryNavBase: NavItem[] = [
   { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Aalekh", sublabel: "आलेख", icon: PenLine, path: "/aalekh" },
   { label: "Prachar", sublabel: "प्रचार", icon: Megaphone, path: "/prachar" },
   { label: "Calendar", sublabel: "कैलेंडर", icon: Calendar, path: "/calendar" },
+];
+
+const mobilePrimaryNavOversight: NavItem[] = [
+  { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Overview", sublabel: "अवलोकन", icon: Activity, path: "/overview" },
+  { label: "Shodh", sublabel: "शोध", icon: FlaskConical, path: "/shodh" },
+  { label: "Calendar", sublabel: "कैलेंडर", icon: Calendar, path: "/calendar" },
+];
+
+const mobilePrimaryNavAdmin: NavItem[] = [
+  { label: "Users", sublabel: "उपयोगकर्ता", icon: Users, path: "/users" },
+  { label: "Overview", sublabel: "अवलोकन", icon: Activity, path: "/overview" },
+  { label: "Dashboard", sublabel: "डैशबोर्ड", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Aalekh", sublabel: "आलेख", icon: PenLine, path: "/aalekh" },
 ];
 
 const dashboardModuleNavItems: NavItem[] = [
@@ -96,10 +108,13 @@ const referenceNavItems: NavItem[] = [
   { label: "Guide", sublabel: "उपयोगकर्ता मार्गदर्शिका", icon: Hash, path: "/guide", description: "User guide & help", descriptionHi: "उपयोगकर्ता मार्गदर्शिका" },
 ];
 
+const oversightNavItems: NavItem[] = [
+  { label: "Overview", sublabel: "सिस्टम अवलोकन", icon: Activity, path: "/overview", description: "System-wide activity overview", descriptionHi: "सिस्टम-व्यापी गतिविधि अवलोकन" },
+];
+
 const adminNavItems: NavItem[] = [
   { label: "System Access", sublabel: "प्रवेश नियंत्रण", icon: ShieldCheck, path: "/super-admin", description: "Console & configuration", descriptionHi: "कंसोल और कॉन्फ़िगरेशन" },
   { label: "Users", sublabel: "उपयोगकर्ता प्रबंधन", icon: Users, path: "/users", description: "Accounts & role assignments", descriptionHi: "खाते और भूमिका आवंटन" },
-  { label: "Overview", sublabel: "सिस्टम अवलोकन", icon: Activity, path: "/overview", description: "System-wide activity overview", descriptionHi: "सिस्टम-व्यापी गतिविधि अवलोकन" },
 ];
 
 function filterItemsByRole(items: NavItem[], roleCodes?: readonly RoleCode[] | null) {
@@ -119,6 +134,8 @@ export function getNavGroups(showAdminControls: boolean, roleCodes?: readonly Ro
   // visibility, so non-admin dashboard roles keep access they had pre-split.
   groups.splice(1, 0, { title: "Modules", titleHi: "मॉड्यूल", icon: Activity, items: dashboardModuleNavItems });
 
+  groups.push({ title: "Oversight", titleHi: "निरीक्षण", icon: Activity, items: oversightNavItems });
+
   if (showAdminControls) {
     groups.push({ title: "Admin", titleHi: "प्रशासन", icon: Cog, items: adminNavItems });
   }
@@ -133,7 +150,16 @@ export function getNavItems(showAdminControls: boolean, roleCodes?: readonly Rol
 }
 
 export function getMobilePrimaryNav(roleCodes?: readonly RoleCode[] | null) {
-  return filterItemsByRole(mobilePrimaryNavItems, roleCodes);
+  const isAdmin = roleCodes?.some((r) => r === "super_admin" || r === "org_admin");
+  const isOversight = roleCodes?.some((r) =>
+    r === "kshetra_reviewer" || r === "prant_sanyojak" || r === "vibhag_pramukh" || r === "prant_aayam_pramukh",
+  );
+  const base = isAdmin
+    ? mobilePrimaryNavAdmin
+    : isOversight
+      ? mobilePrimaryNavOversight
+      : mobilePrimaryNavBase;
+  return filterItemsByRole(base, roleCodes);
 }
 
 export function getOverflowNavItems(showAdminControls: boolean, roleCodes?: readonly RoleCode[] | null) {

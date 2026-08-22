@@ -233,7 +233,7 @@ export default function Smaran() {
             <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-border/60">
               <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground/20" />
               <p className="text-xl font-bold text-muted-foreground/60 font-devanagari">
-                {t('Nothing on your plate! 🎉', 'कोई कार्य नहीं! 🎉')}
+                {t('All tasks are clear.', 'सभी कार्य पूर्ण हैं।')}
               </p>
               <p className="text-sm text-muted-foreground/40 mt-2">
                 {t('All caught up. Enjoy the peace.', 'सब व्यवस्थित है। शांति का आनंद लें।')}
@@ -248,8 +248,8 @@ export default function Smaran() {
                   icon={<AlertCircle className="w-5 h-5 text-red-500" />}
                   items={data.overdue}
                   accent="bg-red-500/10 text-red-600"
-                  emptyMsg="Nothing overdue 🎉"
-                  emptyMsgHi="कोई विलंब नहीं 🎉"
+                  emptyMsg="Nothing overdue"
+                  emptyMsgHi="कोई विलंब नहीं"
                   t={t}
                   isHi={isHi}
                 />
@@ -262,8 +262,8 @@ export default function Smaran() {
                   icon={<Clock className="w-5 h-5 text-amber-500" />}
                   items={data.dueThisWeek}
                   accent="bg-amber-500/10 text-amber-600"
-                  emptyMsg="Nothing due this week 🎉"
-                  emptyMsgHi="इस सप्ताह कुछ नहीं 🎉"
+                  emptyMsg="Nothing due this week"
+                  emptyMsgHi="इस सप्ताह कुछ नहीं"
                   t={t}
                   isHi={isHi}
                 />
