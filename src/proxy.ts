@@ -66,7 +66,9 @@ export async function proxy(req: NextRequest) {
   // If no session cookie AND demo fallback is disabled, redirect to login
   if (!sessionCookie && !demoFallback) {
     const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("returnTo", pathname);
+    // Keep the query string: deep links from reminders carry the record to open
+    // (?projectId=…&taskId=…) and would otherwise be lost across sign-in.
+    loginUrl.searchParams.set("returnTo", `${pathname}${req.nextUrl.search}`);
     return noStore(NextResponse.redirect(loginUrl));
   }
 

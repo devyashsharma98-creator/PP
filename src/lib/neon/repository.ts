@@ -689,6 +689,20 @@ export async function getBootstrapPayload(ctx: NeonAuthContext) {
   };
 }
 
+/**
+ * Raised when a legacy action has been retired because an authorized,
+ * atomic replacement exists under /api/v1. Carries the replacement so the
+ * caller is told where to go rather than simply failing.
+ */
+export class LegacyActionRetiredError extends Error {
+  constructor(readonly action: string, readonly replacement: string) {
+    super(
+      `The '${action}' action has been retired. Use ${replacement} instead.`,
+    );
+    this.name = "LegacyActionRetiredError";
+  }
+}
+
 export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionRequest) {
   const orgId = resolveActorOrgId(ctx);
   const actorId = ctx.user.id;
@@ -755,52 +769,17 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       return { ok: true, id: newEventId };
     }
 
+    /**
+     * Retired. Updated `events.status` unconditionally and then wrote history
+     * as a separate statement, so a concurrent transition could overwrite a
+     * newer state and a failed history write left a committed status change.
+     * The atomic replacement lives in transitionEventWorkflow().
+     */
     case "updateEventStatus": {
-      // ── Fetch current event (scope check + current status) ──────────────
-      const evtRows = await sql`
-        select id, status, title, unit_id, department_id, created_by
-        from public.events
-        where id = ${input.payload.id} and org_id = ${orgId}
-        limit 1
-      `;
-      const evt = (evtRows as unknown as EventScopeRow[])[0];
-      if (!evt || !rowMatchesScope(scopedAccess, evt, actorId)) {
-        throw new Error("You do not have access to this event scope.");
-      }
-
-      const evtTargetDbStatus = uiToDbEventStatus[input.payload.status];
-      if (!evtTargetDbStatus) throw new Error("Unknown event status.");
-      const evtCurrentDbStatus = evt.status as string;
-
-      // ── Validate transition using existing workflow state machine ───────
-      const evtTransitionError = validateEventTransition(
-        evtCurrentDbStatus as EventStatus,
-        evtTargetDbStatus as EventStatus,
-        ctx.effectiveRoles as RoleCode[],
+      throw new LegacyActionRetiredError(
+        "updateEventStatus",
+        "POST /api/v1/events/{eventId}/workflow",
       );
-      if (evtTransitionError) {
-        throw new Error(`Workflow violation: ${evtTransitionError}`);
-      }
-
-      // ── Perform the update ──────────────────────────────────────────────
-      await sql`
-        update public.events
-        set status = ${evtTargetDbStatus}, updated_by = ${actorId}, updated_at = now(),
-            published_at = case when ${evtTargetDbStatus} in ('authorized_public','published') then now() else published_at end
-        where id = ${input.payload.id}
-      `;
-
-      // ── Audit trail ────────────────────────────────────────────────────
-      await writeEventStatusHistory(
-        input.payload.id, evtCurrentDbStatus, evtTargetDbStatus, actorId,
-      );
-      await writeAuditLog({
-        orgId, actorUserId: actorId, action: "event.status_changed",
-        entityType: "event", entityId: input.payload.id,
-        changeSummary: { from: evtCurrentDbStatus, to: evtTargetDbStatus },
-      });
-
-      return { ok: true };
     }
 
     case "updateFormConfig": {
@@ -939,77 +918,17 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       return { ok: true };
     }
 
+    /**
+     * Retired for the same reason as updateEventStatus: a bare UPDATE plus a
+     * separate review row, with none of the compare-and-swap guarantees of
+     * transitionArticleWorkflow(). The Aalekh UI already posts to the v1
+     * workflow route.
+     */
     case "updateArticleStatus": {
-      // ── Fetch current article (scope check + current status) ────────────
-      const artRows = await sql`
-        select id, status, title, unit_id, department_id, author_user_id, created_by, values_checklist
-        from public.articles
-        where id = ${input.payload.id} and org_id = ${orgId}
-        limit 1
-      `;
-      const art = (artRows as unknown as ArticleScopeRow[])[0];
-      if (!art || !rowMatchesScope(scopedAccess, art, actorId)) {
-        throw new Error("You do not have access to this article scope.");
-      }
-
-      const artTargetDbStatus = uiToDbArticleStatus[input.payload.status];
-      if (!artTargetDbStatus) throw new Error("Unknown article status.");
-      const artCurrentDbStatus = art.status as string;
-
-      // ── Validate transition using existing article workflow state machine ──
-      const artChecklist = asObject(art.values_checklist);
-      const artTransitionError = validateArticleTransition(
-        artCurrentDbStatus as ArticleStatus,
-        artTargetDbStatus as ArticleStatus,
-        ctx.effectiveRoles as RoleCode[],
-        {
-          note: input.payload.reviewNotes ?? undefined,
-          valuesChecklist: {
-            rashtraPratham: toBool(artChecklist.rashtraPratham),
-            culturallyGrounded: toBool(artChecklist.culturallyGrounded),
-            balancedTone: toBool(artChecklist.balancedTone),
-            noDivisiveContent: toBool(artChecklist.noDivisiveContent),
-          },
-        },
+      throw new LegacyActionRetiredError(
+        "updateArticleStatus",
+        "POST /api/v1/articles/{articleId}/workflow",
       );
-      if (artTransitionError) {
-        throw new Error(`Workflow violation: ${artTransitionError}`);
-      }
-
-      // ── Perform the update ──────────────────────────────────────────────
-      await sql`
-        update public.articles
-        set
-          status = ${artTargetDbStatus},
-          title = coalesce(${input.payload.edits?.title ?? null}, title),
-          content = coalesce(${input.payload.edits?.content ?? null}, content),
-          summary = coalesce(${input.payload.edits?.summary ?? null}, summary),
-          document_url = coalesce(${input.payload.documentUrl ?? null}, document_url),
-          updated_by = ${actorId},
-          updated_at = now(),
-          published_at = case when ${artTargetDbStatus} in ('authorized_public','published') then now() else published_at end
-        where id = ${input.payload.id}
-      `;
-      await sql`
-        insert into public.article_reviews (article_id, reviewer_user_id, review_step, decision, review_notes, edits)
-        values (
-          ${input.payload.id},
-          ${actorId},
-          'app_action',
-          ${input.payload.status === "Published" ? "approved" : "forwarded"},
-          ${input.payload.reviewNotes ?? null},
-          ${JSON.stringify(input.payload.edits ?? {})}::jsonb
-        )
-      `;
-
-      // ── Audit trail ────────────────────────────────────────────────────
-      await writeAuditLog({
-        orgId, actorUserId: actorId, action: "article.status_changed",
-        entityType: "article", entityId: input.payload.id,
-        changeSummary: { from: artCurrentDbStatus, to: artTargetDbStatus },
-      });
-
-      return { ok: true };
     }
 
     case "updatePracharPlatform": {
@@ -1062,44 +981,22 @@ export async function runNeonAppAction(ctx: NeonAuthContext, input: AppActionReq
       return { ok: true };
     }
 
+    /**
+     * Retired. This action wrote a vritt with only an event-scope check: it
+     * allowed any event editor to set `reviewed`, stamped `submitted_by` with
+     * the actor regardless of the status, and had no content lock — every
+     * protection added to POST /api/v1/events/[eventId]/vritt was bypassable
+     * through here with the same session cookie.
+     *
+     * No caller in this repository (web or Android) uses it, so it is closed
+     * rather than half-ported: a second write path is exactly how the two
+     * rule sets drift apart again.
+     */
     case "updateVritt": {
-      await assertEventScope(input.payload.eventId);
-      const serializedMediaUrls = input.payload.vrittMediaUrls
-        ? JSON.stringify(input.payload.vrittMediaUrls)
-        : null;
-      await sql`
-        insert into public.event_vritt (
-          event_id,
-          attendance_count,
-          media_urls,
-          content,
-          status,
-          submitted_by,
-          updated_at
-        )
-        values (
-          ${input.payload.eventId},
-          ${input.payload.vrittAttendanceCount ?? null},
-          ${serializedMediaUrls}::jsonb,
-          ${input.payload.vrittContent ?? null},
-          ${input.payload.vrittStatus ?? "draft"},
-          ${actorId},
-          now()
-        )
-        on conflict (event_id)
-        do update set
-          attendance_count = coalesce(excluded.attendance_count, public.event_vritt.attendance_count),
-          media_urls = coalesce(excluded.media_urls, public.event_vritt.media_urls),
-          content = coalesce(excluded.content, public.event_vritt.content),
-          status = coalesce(excluded.status, public.event_vritt.status),
-          submitted_by = excluded.submitted_by,
-          updated_at = now()
-      `;
-      await writeAuditLog({
-        orgId, actorUserId: actorId, action: "event.vritt_updated",
-        entityType: "event", entityId: input.payload.eventId,
-      });
-      return { ok: true };
+      throw new LegacyActionRetiredError(
+        "updateVritt",
+        "POST /api/v1/events/{eventId}/vritt",
+      );
     }
 
     case "markAttendance": {

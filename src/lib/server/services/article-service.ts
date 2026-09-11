@@ -6,11 +6,12 @@
  */
 import "server-only";
 
-import { and, eq, ilike, or, count, desc, inArray, type SQL } from "drizzle-orm";
+import { and, eq, ilike, or, count, desc, inArray, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { articles, articleReviews, articlePublications, notifications } from "@/db/schema/index";
 import { auditAndActivity, writeAuditLog } from "@/lib/audit";
+import { commitCriticalTransition } from "@/lib/app/critical-transition";
 import type { ScopedAccess } from "@/lib/app/scope";
 import {
   validateArticleTransition,
@@ -72,6 +73,8 @@ export interface WorkflowResult {
 export type TransitionResult =
   | { kind: "success"; data: WorkflowResult }
   | { kind: "forbidden"; message: string }
+  /** The article moved out of the expected prior status before this write landed. */
+  | { kind: "stale"; message: string }
   | { kind: "server_error"; message: string };
 
 export interface CreatedReview {
@@ -85,6 +88,7 @@ export interface WorkflowArticle {
   status: string;
   authorUserId: string | null;
   valuesChecklist: unknown;
+  publishedAt?: Date | null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -318,63 +322,123 @@ export async function transitionArticleWorkflow(
 
   const now = new Date();
   const isPublishing = toStatus === "authorized_public";
+  const fromStatus = article.status as ArticleStatus;
+  const reviewerName = displayName ?? email;
 
-  // Update article
-  const [updated] = await db
-    .update(articles)
-    .set({
-      status: toStatus as ArticleStatus,
-      ...(valuesChecklist && { valuesChecklist: checklistForValidation }),
-      ...(isPublishing && { publishedAt: now }),
-      updatedBy: userId,
-      updatedAt: now,
-    })
-    .where(eq(articles.id, articleId))
-    .returning({ id: articles.id, title: articles.title, status: articles.status });
-
-  if (!updated) {
-    return { kind: "server_error", message: "Failed to update article status." };
-  }
-
-  // Record review step if transitioning from a review stage
   const reviewStages: ArticleStatus[] = [
     "pending_unit_head_review",
     "pending_aayam_review",
     "pending_vibhag_review",
     "pending_prant_authorization",
   ];
+  const recordsReview = reviewStages.includes(fromStatus);
+  const decision =
+    toStatus === "returned_for_revision"
+      ? "returned_for_revision"
+      : toStatus === "rejected"
+      ? "rejected"
+      : "approved";
 
-  if (reviewStages.includes(article.status as ArticleStatus)) {
-    const decision =
-      toStatus === "returned_for_revision"
-        ? "returned_for_revision"
-        : toStatus === "rejected"
-        ? "rejected"
-        : "approved";
+  const recipientId = article.authorUserId && article.authorUserId !== userId ? article.authorUserId : null;
+  const notificationTitle = `Article status: ${toStatus.replace(/_/g, " ")}`;
+  const notificationBody = `Your article "${article.title}" has moved to: ${toStatus.replace(/_/g, " ")}${notes ? ` — ${notes}` : ""}`;
+  const notificationMetadata = JSON.stringify({ fromStatus, toStatus, notes: notes ?? null });
+  const checklistJson = JSON.stringify(checklistForValidation);
 
-    await db.insert(articleReviews).values({
-      articleId,
-      reviewStep: article.status,
-      reviewerUserId: userId,
-      reviewerNameSnapshot: displayName ?? email,
-      decision,
-      reviewNotes: notes ?? null,
-      valuesChecklistSnapshot: checklistForValidation,
-    });
+  const outcome = await commitCriticalTransition<{
+    id: string;
+    title: string;
+    status: string;
+    review_rows: number;
+    notification_rows: number;
+  }>({
+    expectedFrom: fromStatus,
+
+    /**
+     * One statement, as for events: the compare-and-swap UPDATE decides whether
+     * anything happens, and the review and notification rows select FROM it, so
+     * a review can never be recorded for a transition that did not take, nor a
+     * transition committed without its review.
+     */
+    run: async () => {
+      const result = await db.execute(sql`
+        WITH updated AS (
+          UPDATE ${articles}
+             SET status = ${toStatus}::article_status,
+                 values_checklist = CASE WHEN ${valuesChecklist !== undefined}
+                                         THEN ${checklistJson}::jsonb
+                                         ELSE values_checklist END,
+                 published_at = CASE WHEN ${isPublishing} THEN ${now.toISOString()}::timestamptz
+                                     ELSE published_at END,
+                 updated_by = ${userId}::uuid,
+                 updated_at = now()
+           WHERE id = ${articleId}::uuid
+             AND status = ${fromStatus}::article_status
+          RETURNING id, title, status
+        ),
+        review AS (
+          INSERT INTO article_reviews
+            (article_id, review_step, reviewer_user_id, reviewer_name_snapshot,
+             decision, review_notes, values_checklist_snapshot)
+          SELECT updated.id,
+                 ${fromStatus},
+                 ${userId}::uuid,
+                 ${reviewerName},
+                 ${decision}::article_review_decision,
+                 ${notes ?? null},
+                 ${checklistJson}::jsonb
+            FROM updated
+           WHERE ${recordsReview}
+          RETURNING id
+        ),
+        notification AS (
+          INSERT INTO notifications
+            (org_id, recipient_user_id, kind, title, body, entity_type, entity_id, metadata)
+          SELECT ${orgId}::uuid,
+                 ${recipientId}::uuid,
+                 'article_status_change'::notification_kind,
+                 ${notificationTitle},
+                 ${notificationBody},
+                 'article',
+                 updated.id,
+                 ${notificationMetadata}::jsonb
+            FROM updated
+           WHERE ${recipientId}::uuid IS NOT NULL
+          RETURNING id
+        )
+        SELECT updated.id,
+               updated.title,
+               updated.status,
+               (SELECT count(*) FROM review)::int       AS review_rows,
+               (SELECT count(*) FROM notification)::int AS notification_rows
+          FROM updated
+      `);
+
+      const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown as unknown[]);
+      return (Array.isArray(rows) ? rows[0] : undefined) as never;
+    },
+
+    wroteNotification: (row) => Number(row.notification_rows) > 0,
+  });
+
+  if (outcome.status === "stale") {
+    return {
+      kind: "stale",
+      message: `This article is no longer in '${fromStatus}'. Someone else has already reviewed it — reload and try again.`,
+    };
   }
 
-  // Notify author if they're not the actor
-  if (article.authorUserId && article.authorUserId !== userId) {
-    await db.insert(notifications).values({
-      orgId,
-      recipientUserId: article.authorUserId,
-      kind: "article_status_change",
-      title: `Article status: ${toStatus.replace(/_/g, " ")}`,
-      body: `Your article "${article.title}" has moved to: ${toStatus.replace(/_/g, " ")}${notes ? ` — ${notes}` : ""}`,
-      entityType: "article",
-      entityId: articleId,
-      metadata: { fromStatus: article.status, toStatus, notes },
+  if (outcome.status === "failed") {
+    console.error("[article.workflow] transition failed", {
+      articleId,
+      fromStatus,
+      toStatus,
+      error: outcome.error,
     });
+    return {
+      kind: "server_error",
+      message: "The status change could not be completed. No change was saved.",
+    };
   }
 
   await auditAndActivity(
@@ -386,13 +450,20 @@ export async function transitionArticleWorkflow(
       actorIp: ip ?? undefined,
       entityType: "article",
       entityId: articleId,
-      payload: { fromStatus: article.status, toStatus, notes },
-      changeSummary: `Article "${article.title}" moved from '${article.status}' to '${toStatus}'.`,
+      payload: {
+        fromStatus,
+        toStatus,
+        notes,
+        reviewRecorded: Number(outcome.row.review_rows) > 0,
+        notificationWritten: outcome.notificationWritten,
+        notificationExpected: recipientId !== null,
+      },
+      changeSummary: `Article "${article.title}" moved from '${fromStatus}' to '${toStatus}'.`,
     },
     {
-      summary: `${displayName ?? email} moved article "${article.title}" to ${toStatus.replace(/_/g, " ")}.`,
-      actorNameSnapshot: displayName ?? email,
-      payload: { fromStatus: article.status, toStatus },
+      summary: `${reviewerName} moved article "${article.title}" to ${toStatus.replace(/_/g, " ")}.`,
+      actorNameSnapshot: reviewerName,
+      payload: { fromStatus, toStatus },
     },
   );
 
@@ -400,7 +471,7 @@ export async function transitionArticleWorkflow(
     kind: "success",
     data: {
       articleId,
-      fromStatus: article.status,
+      fromStatus,
       toStatus,
       publishedAt: isPublishing ? now : null,
       updatedAt: now,

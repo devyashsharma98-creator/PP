@@ -7,7 +7,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { and, eq, gte, lte, ilike, count, desc, inArray, or, type SQL } from "drizzle-orm";
+import { and, eq, gte, lte, ilike, count, desc, inArray, or, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
@@ -26,6 +26,8 @@ import { auditAndActivity, writeAuditLog } from "@/lib/audit";
 import type { EventStatus } from "@/lib/permissions/event-workflow";
 import { validateEventTransition } from "@/lib/permissions/event-workflow";
 import type { ScopedAccess } from "@/lib/app/scope";
+import { vrittFieldPolicy } from "@/lib/app/vritt-access";
+import { commitCriticalTransition } from "@/lib/app/critical-transition";
 import type { AuthContext } from "@/lib/middleware/with-auth";
 import {
   hasRoleOrAbove,
@@ -126,9 +128,12 @@ export async function listEvents(
         metadata: events.metadata,
         createdAt: events.createdAt,
         updatedAt: events.updatedAt,
+        // Status only — content is fetched per event when the report is opened.
+        vrittStatus: eventVritt.status,
       })
       .from(events)
       .leftJoin(units, eq(events.unitId, units.id))
+      .leftJoin(eventVritt, eq(eventVritt.eventId, events.id))
       .where(whereClause)
       .orderBy(desc(events.createdAt))
       .limit(limit)
@@ -432,8 +437,13 @@ export async function finalizeEventPoll(
 }
 
 /**
- * Cyclomatic: 3, Cognitive: 5
- * Upsert a vritt (report) for an event.
+ * Write a vritt, conditional on the status the caller was authorized against.
+ *
+ * `expectedCurrent` is the status the authorization decision was made on (null
+ * when no vritt existed). It is part of the statement's WHERE clause, so a
+ * report that a reviewer submitted or signed off in the meantime cannot be
+ * overwritten by a write authorized against the older state. A stale write
+ * matches no row and is reported as a conflict rather than silently winning.
  */
 export async function upsertEventVritt(
   eventId: string,
@@ -443,48 +453,77 @@ export async function upsertEventVritt(
     attendanceCount?: number;
     mediaUrls?: string[];
     status: "draft" | "submitted" | "reviewed";
+    reviewNotes?: string;
   },
   eventTitle: string,
   ctx: AuthContext,
   ip: string,
+  expectedCurrent: "draft" | "submitted" | "reviewed" | null,
 ): Promise<Result<unknown>> {
-  const existing = await db.query.eventVritt.findFirst({
-    where: eq(eventVritt.eventId, eventId),
-  });
+  const policy = vrittFieldPolicy(expectedCurrent, input.status);
 
-  let updated;
-  const submittedBy = input.status === "submitted" ? ctx.session.userId : undefined;
+  // Which content fields this request actually carries. A field the caller did
+  // not send must survive the write: submitting a report used to null out its
+  // own text, attendance and media because the payload only named a status.
+  const hasContent = policy.contentWritable && input.content !== undefined;
+  const hasContentHi = policy.contentWritable && input.contentHi !== undefined;
+  const hasAttendance = policy.contentWritable && input.attendanceCount !== undefined;
+  const hasMedia = policy.contentWritable && input.mediaUrls !== undefined;
+  const hasReviewNotes = policy.reviewNotesWritable && input.reviewNotes !== undefined;
 
-  if (existing) {
-    [updated] = await db
-      .update(eventVritt)
-      .set({
-        content: input.content,
-        contentHi: input.contentHi,
-        attendanceCount: input.attendanceCount,
-        mediaUrls: input.mediaUrls,
-        status: input.status,
-        updatedAt: new Date(),
-        ...(submittedBy && { submittedBy }),
-      })
-      .where(eq(eventVritt.eventId, eventId))
-      .returning();
-  } else {
-    [updated] = await db
-      .insert(eventVritt)
-      .values({
-        eventId,
-        content: input.content,
-        contentHi: input.contentHi,
-        attendanceCount: input.attendanceCount,
-        mediaUrls: input.mediaUrls,
-        status: input.status,
-        ...(submittedBy && { submittedBy }),
-      })
-      .returning();
+  const result = await db.execute(sql`
+    INSERT INTO event_vritt
+      (event_id, content, content_hi, attendance_count, media_urls, status,
+       submitted_by, reviewed_by, review_notes)
+    SELECT ${eventId}::uuid,
+           ${hasContent ? input.content : null},
+           ${hasContentHi ? input.contentHi : null},
+           ${hasAttendance ? input.attendanceCount : null},
+           ${JSON.stringify(hasMedia ? input.mediaUrls : [])}::jsonb,
+           ${input.status}::vritt_status,
+           ${policy.setSubmittedBy ? ctx.session.userId : null}::uuid,
+           ${policy.setReviewedBy ? ctx.session.userId : null}::uuid,
+           ${hasReviewNotes ? input.reviewNotes : null}
+     -- The candidate row must exist for ON CONFLICT to be reached at all.
+     -- When no vritt exists yet we insert; when one does, we fall through to
+     -- the guarded update below. If the caller expected a vritt that has since
+     -- vanished, neither branch runs and the write is reported as a conflict.
+     WHERE ${expectedCurrent === null}
+        OR EXISTS (SELECT 1 FROM event_vritt WHERE event_id = ${eventId}::uuid)
+    ON CONFLICT (event_id) DO UPDATE
+       -- Each column is written only when this request both may change it and
+       -- actually supplied it; otherwise the stored value is kept.
+       SET content          = CASE WHEN ${hasContent}     THEN EXCLUDED.content
+                                   ELSE event_vritt.content END,
+           content_hi       = CASE WHEN ${hasContentHi}   THEN EXCLUDED.content_hi
+                                   ELSE event_vritt.content_hi END,
+           attendance_count = CASE WHEN ${hasAttendance}  THEN EXCLUDED.attendance_count
+                                   ELSE event_vritt.attendance_count END,
+           media_urls       = CASE WHEN ${hasMedia}       THEN EXCLUDED.media_urls
+                                   ELSE event_vritt.media_urls END,
+           status           = EXCLUDED.status,
+           submitted_by     = CASE WHEN ${policy.setSubmittedBy} THEN EXCLUDED.submitted_by
+                                   ELSE event_vritt.submitted_by END,
+           reviewed_by      = CASE WHEN ${policy.setReviewedBy}  THEN EXCLUDED.reviewed_by
+                                   ELSE event_vritt.reviewed_by END,
+           review_notes     = CASE WHEN ${hasReviewNotes} THEN EXCLUDED.review_notes
+                                   ELSE event_vritt.review_notes END,
+           updated_at       = now()
+     WHERE event_vritt.status = ${expectedCurrent}::vritt_status
+    RETURNING id, event_id, content, content_hi, attendance_count, media_urls,
+              status, submitted_by, reviewed_by, review_notes, created_at, updated_at
+  `);
+
+  const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown as unknown[]);
+  const updated = Array.isArray(rows) ? rows[0] : undefined;
+
+  if (!updated) {
+    return err(
+      conflict(
+        "This vritt has changed since you opened it. Reload the report and try again.",
+      ),
+    );
   }
-
-  if (!updated) return err(serverError("Failed to update vritt."));
 
   await auditAndActivity(
     {
@@ -495,8 +534,8 @@ export async function upsertEventVritt(
       actorIp: ip,
       entityType: "event",
       entityId: eventId,
-      payload: input as Record<string, unknown>,
-      changeSummary: `Vritt ${existing ? "updated" : "created"} for event: "${eventTitle}". Status: ${input.status}.`,
+      payload: { fromStatus: expectedCurrent, toStatus: input.status, contentChanged: hasContent || hasContentHi },
+      changeSummary: `Vritt ${expectedCurrent === null ? "created" : "updated"} for event: "${eventTitle}". Status: ${input.status}.`,
     },
     {
       summary: `${ctx.session.displayName ?? ctx.session.email} updated event vritt for "${eventTitle}".`,
@@ -534,39 +573,103 @@ export async function transitionEventWorkflow(
   );
   if (transitionError) return err(forbidden(transitionError));
 
-  const now = new Date();
-  const [updated] = await db
-    .update(events)
-    .set({
-      status: toStatus as EventStatus,
-      updatedBy: ctx.session.userId,
-      updatedAt: now,
-    })
-    .where(eq(events.id, eventId))
-    .returning({ id: events.id, title: events.title, status: events.status, updatedAt: events.updatedAt });
+  const fromStatus = event.status as EventStatus;
+  const actorName = ctx.session.displayName ?? ctx.session.email;
 
-  if (!updated) return err(serverError("Failed to update event status."));
+  // Notify the event's creator, unless they are the one acting.
+  const recipientId =
+    event.createdBy && event.createdBy !== ctx.session.userId ? event.createdBy : null;
+  const notificationTitle = `Event status updated: ${toStatus.replace(/_/g, " ")}`;
+  const notificationBody = `Your event "${event.title}" has moved to: ${toStatus.replace(/_/g, " ")}${notes ? ` — ${notes}` : ""}`;
+  const notificationMetadata = JSON.stringify({ fromStatus, toStatus, notes: notes ?? null });
 
-  await db.insert(eventStatusHistory).values({
-    eventId,
-    fromStatus: event.status as EventStatus,
-    toStatus: toStatus as EventStatus,
-    actorUserId: ctx.session.userId,
-    actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-    notes: notes ?? null,
+  const outcome = await commitCriticalTransition<{
+    id: string;
+    title: string;
+    status: string;
+    updated_at: Date;
+    history_rows: number;
+    notification_rows: number;
+  }>({
+    expectedFrom: fromStatus,
+
+    /**
+     * One statement. The UPDATE carries the expected prior status, so a
+     * concurrent transition out of the same state matches no row; the history
+     * and notification INSERTs select FROM that UPDATE, so they cannot fire
+     * without it and cannot be left behind if it fails. Postgres commits or
+     * aborts the whole statement together.
+     */
+    run: async () => {
+      const result = await db.execute(sql`
+        WITH updated AS (
+          UPDATE ${events}
+             SET status = ${toStatus}::event_status,
+                 updated_by = ${ctx.session.userId}::uuid,
+                 updated_at = now()
+           WHERE id = ${eventId}::uuid
+             AND status = ${fromStatus}::event_status
+          RETURNING id, title, status, updated_at
+        ),
+        history AS (
+          INSERT INTO event_status_history
+            (event_id, from_status, to_status, actor_user_id, actor_name_snapshot, notes)
+          SELECT updated.id,
+                 ${fromStatus}::event_status,
+                 ${toStatus}::event_status,
+                 ${ctx.session.userId}::uuid,
+                 ${actorName},
+                 ${notes ?? null}
+            FROM updated
+          RETURNING id
+        ),
+        notification AS (
+          INSERT INTO notifications
+            (org_id, recipient_user_id, kind, title, body, entity_type, entity_id, metadata)
+          SELECT ${ctx.session.orgId}::uuid,
+                 ${recipientId}::uuid,
+                 'event_status_change'::notification_kind,
+                 ${notificationTitle},
+                 ${notificationBody},
+                 'event',
+                 updated.id,
+                 ${notificationMetadata}::jsonb
+            FROM updated
+           WHERE ${recipientId}::uuid IS NOT NULL
+          RETURNING id
+        )
+        SELECT updated.id,
+               updated.title,
+               updated.status,
+               updated.updated_at,
+               (SELECT count(*) FROM history)::int      AS history_rows,
+               (SELECT count(*) FROM notification)::int AS notification_rows
+          FROM updated
+      `);
+
+      const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown as unknown[]);
+      return (Array.isArray(rows) ? rows[0] : undefined) as never;
+    },
+
+    wroteNotification: (row) => Number(row.notification_rows) > 0,
   });
 
-  if (event.createdBy && event.createdBy !== ctx.session.userId) {
-    await db.insert(notifications).values({
-      orgId: ctx.session.orgId,
-      recipientUserId: event.createdBy,
-      kind: "event_status_change",
-      title: `Event status updated: ${toStatus.replace(/_/g, " ")}`,
-      body: `Your event "${event.title}" has moved to: ${toStatus.replace(/_/g, " ")}${notes ? ` — ${notes}` : ""}`,
-      entityType: "event",
-      entityId: eventId,
-      metadata: { fromStatus: event.status, toStatus, notes },
+  if (outcome.status === "stale") {
+    return err(
+      conflict(
+        `This event is no longer in '${fromStatus}'. Someone else has already moved it — reload and try again.`,
+      ),
+    );
+  }
+
+  if (outcome.status === "failed") {
+    console.error("[event.workflow] transition failed", {
+      eventId,
+      fromStatus,
+      toStatus,
+      error: outcome.error,
     });
+    return err(serverError("The status change could not be completed. No change was saved."));
   }
 
   await auditAndActivity(
@@ -578,21 +681,28 @@ export async function transitionEventWorkflow(
       actorIp: ip,
       entityType: "event",
       entityId: eventId,
-      payload: { fromStatus: event.status, toStatus, notes },
-      changeSummary: `Event "${event.title}" moved from '${event.status}' to '${toStatus}'.`,
+      payload: {
+        fromStatus,
+        toStatus,
+        notes,
+        // Reports what the statement actually wrote, not what was intended.
+        notificationWritten: outcome.notificationWritten,
+        notificationExpected: recipientId !== null,
+      },
+      changeSummary: `Event "${event.title}" moved from '${fromStatus}' to '${toStatus}'.`,
     },
     {
-      summary: `${ctx.session.displayName ?? ctx.session.email} moved event "${event.title}" to ${toStatus.replace(/_/g, " ")}.`,
-      actorNameSnapshot: ctx.session.displayName ?? ctx.session.email,
-      payload: { fromStatus: event.status, toStatus },
+      summary: `${actorName} moved event "${event.title}" to ${toStatus.replace(/_/g, " ")}.`,
+      actorNameSnapshot: actorName,
+      payload: { fromStatus, toStatus },
     }
   );
 
   return ok({
     eventId,
-    fromStatus: event.status,
+    fromStatus,
     toStatus,
-    updatedAt: updated.updatedAt,
+    updatedAt: outcome.row.updated_at,
     notes: notes ?? null,
   });
 }

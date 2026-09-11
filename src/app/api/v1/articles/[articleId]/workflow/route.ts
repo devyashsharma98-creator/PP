@@ -11,7 +11,7 @@ import { NextRequest } from "next/server";
 import { withAuth, getClientIp } from "@/lib/middleware/with-auth";
 import { withApiRateLimit } from "@/lib/middleware/rate-limit";
 import { articleWorkflowSchema } from "@/lib/validators/articles";
-import { apiSuccess, badRequest, notFound, forbidden, serverError } from "@/lib/response";
+import { apiSuccess, badRequest, notFound, forbidden, serverError, conflict } from "@/lib/response";
 import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
 import {
   getArticleForWorkflow,
@@ -61,6 +61,7 @@ export const POST = withAuth(async (req: NextRequest, ctx, params) => {
   );
 
   if (result.kind === "forbidden") return forbidden(result.message);
+  if (result.kind === "stale") return conflict(result.message);
   if (result.kind === "server_error") return serverError(result.message);
 
   return apiSuccess(result.data);
