@@ -14,7 +14,12 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   if (rateRes) return rateRes;
 
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
-  const result = await taskService.getTaskboardData(ctx.session.orgId, scopedAccess, ctx.session.userId);
+  const result = await taskService.getTaskboardData(
+    ctx.session.orgId,
+    scopedAccess,
+    ctx.session.userId,
+    ctx.session.effectiveRoleCodes,
+  );
   if (!result.ok) return result.response;
 
   return apiSuccess(result.data);

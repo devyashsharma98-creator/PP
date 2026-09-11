@@ -46,14 +46,28 @@ export function useUpdateProject() {
   });
 }
 
-export function useDeleteProject() {
+/**
+ * Removes a project. Without options this archives it; a permanent delete must
+ * pass hardDelete plus the exact task count it is destroying.
+ */
+export function useRemoveProject() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (projectId: string) => api.deleteProject(projectId),
+    mutationFn: ({ projectId, ...options }: { projectId: string; hardDelete?: boolean; expectedTaskCount?: number }) =>
+      api.removeProject(projectId, options),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['taskboard'] });
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
     },
+  });
+}
+
+export function useMyTasks(filters: { status?: string; search?: string } = {}) {
+  return useQuery({
+    queryKey: queryKeys.myTasks(filters as Record<string, unknown>),
+    queryFn: () => api.fetchMyTasks(filters),
+    staleTime: 30000,
   });
 }
 
@@ -75,6 +89,7 @@ export function useCreateTask(projectId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projectTasks(projectId) });
       queryClient.invalidateQueries({ queryKey: ['taskboard'] });
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
     },
   });
 }
@@ -87,6 +102,7 @@ export function useUpdateTask(projectId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projectTasks(projectId) });
       queryClient.invalidateQueries({ queryKey: ['taskboard'] });
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
     },
   });
 }
@@ -98,6 +114,7 @@ export function useDeleteTask(projectId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projectTasks(projectId) });
       queryClient.invalidateQueries({ queryKey: ['taskboard'] });
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
     },
   });
 }

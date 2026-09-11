@@ -52,9 +52,8 @@ export interface UnitDashboardViewProps {
   activeTab?: string;
 }
 
-export interface VrittEditorState {
-  content: string;
-  attendanceCount: number;
-  mediaUrls: string[];
-  status: "draft" | "submitted" | "reviewed";
-}
+/**
+ * The editable part of a vritt. Status is deliberately not part of it: status
+ * changes are separate actions (submit, review, reopen), never a form field.
+ */
+export type { VrittFormState as VrittEditorState } from "@/lib/app/vritt-payload";

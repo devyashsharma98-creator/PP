@@ -22,7 +22,16 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   const { page, limit, offset } = parsePagination(sp, { page: q.page, limit: q.limit });
   const scopedAccess = resolveScopedAccess(ctx.session.assignments);
 
-  const result = await taskService.listProjects(q, ctx.session.orgId, scopedAccess, ctx.session.userId, page, limit, offset);
+  const result = await taskService.listProjects(
+    q,
+    ctx.session.orgId,
+    scopedAccess,
+    ctx.session.userId,
+    page,
+    limit,
+    offset,
+    ctx.session.effectiveRoleCodes,
+  );
   if (!result.ok) return result.response;
 
   return apiSuccess(result.data.rows, { meta: paginationMeta(page, limit, result.data.total) });

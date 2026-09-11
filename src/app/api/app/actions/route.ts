@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requireNeonAuthContext, isNeonAuthRequiredError } from "@/lib/neon/auth";
-import { runNeonAppAction } from "@/lib/neon/repository";
+import { runNeonAppAction, LegacyActionRetiredError } from "@/lib/neon/repository";
 import { isDatabaseConfigured } from "@/lib/neon/env";
 import type { AppActionRequest } from "@/lib/app/contracts";
 import { appActionSchema } from "@/lib/validators/app-actions";
@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (isNeonAuthRequiredError(error)) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    }
+    // A retired action is gone for good, not a transient failure.
+    if (error instanceof LegacyActionRetiredError) {
+      return NextResponse.json(
+        { error: error.message, replacement: error.replacement },
+        { status: 410 },
+      );
     }
     const message = error instanceof Error ? error.message : "App action failed.";
     console.error("Action error:", message);

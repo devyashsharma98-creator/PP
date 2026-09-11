@@ -17,11 +17,35 @@ export interface TaskboardProject {
   status: string;
   ownerUserId?: string | null;
   deadline?: string | null;
+  /** False when the project is visible only because a task in it is assigned to you. */
+  canManage: boolean;
   taskCounts: { todo: number; in_progress: number; done: number; blocked: number };
+}
+
+export interface TaskCapabilities {
+  canEditDetails: boolean;
+  canChangeStatus: boolean;
+  canReassign: boolean;
+  canDelete: boolean;
+}
+
+export interface MyTask {
+  id: string;
+  projectId: string;
+  projectName: string;
+  projectNameHi?: string | null;
+  title: string;
+  titleHi?: string | null;
+  description?: string | null;
+  status: string;
+  priority: string;
+  dueDate?: string | null;
+  capabilities?: TaskCapabilities;
 }
 
 export interface TaskboardData {
   projects: TaskboardProject[];
+  myTasks: MyTask[];
   unassignedTasks: Array<{
     id: string;
     projectId: string;
@@ -77,8 +101,43 @@ export async function updateProject(projectId: string, input: {
   });
 }
 
+export interface RemoveProjectResult {
+  projectId: string;
+  mode: 'archived' | 'deleted';
+  affectedTasks: number;
+}
+
+/**
+ * Archives by default. Permanent deletion must name the exact number of tasks it
+ * will destroy; the server answers 409 if that count is stale or missing.
+ */
+export async function removeProject(
+  projectId: string,
+  options: { hardDelete?: boolean; expectedTaskCount?: number } = {},
+): Promise<RemoveProjectResult> {
+  const qs = new URLSearchParams();
+  if (options.hardDelete) qs.set('hardDelete', 'true');
+  if (options.expectedTaskCount !== undefined) {
+    qs.set('expectedTaskCount', String(options.expectedTaskCount));
+  }
+  const query = qs.toString();
+  return fetchApi<RemoveProjectResult>(
+    '/projects/' + projectId + (query ? '?' + query : ''),
+    { method: 'DELETE' },
+  );
+}
+
+/** Back-compatible alias — archives the project rather than destroying it. */
 export async function deleteProject(projectId: string) {
-  await fetch(`${API_BASE}/projects/${projectId}`, { method: 'DELETE' });
+  return removeProject(projectId);
+}
+
+export async function fetchMyTasks(filters: { status?: string; search?: string } = {}): Promise<MyTask[]> {
+  const qs = new URLSearchParams();
+  if (filters.status) qs.set('status', filters.status);
+  if (filters.search) qs.set('search', filters.search);
+  const query = qs.toString();
+  return fetchApi<MyTask[]>('/tasks/mine' + (query ? '?' + query : ''));
 }
 
 export async function fetchTasks(projectId: string, filters?: Record<string, string>) {
@@ -97,6 +156,7 @@ export async function fetchTasks(projectId: string, filters?: Record<string, str
     sortOrder: number;
     completedAt?: string | null;
     createdAt: string;
+    capabilities?: TaskCapabilities;
   }>>(`/projects/${projectId}/tasks${params}`);
 }
 
@@ -112,7 +172,9 @@ export async function createTask(projectId: string, input: {
 
 export async function updateTask(projectId: string, taskId: string, input: {
   title?: string; titleHi?: string; description?: string; status?: string;
-  priority?: string; assigneeUserId?: string; dueDate?: string; sortOrder?: number;
+  priority?: string;
+  // null clears the field; undefined leaves it untouched.
+  assigneeUserId?: string | null; dueDate?: string | null; sortOrder?: number;
   completedAt?: string | null; metadata?: Record<string, unknown>;
 }) {
   return fetchApi<{ id: string; title: string; status: string }>(`/projects/${projectId}/tasks/${taskId}`, {
@@ -122,5 +184,11 @@ export async function updateTask(projectId: string, taskId: string, input: {
 }
 
 export async function deleteTask(projectId: string, taskId: string) {
-  await fetch(`${API_BASE}/projects/${projectId}/tasks/${taskId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE}/projects/${projectId}/tasks/${taskId}`, { method: 'DELETE' });
+  // A refused delete used to resolve silently, leaving the card on screen with
+  // no explanation.
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error?.message ?? 'The task could not be deleted.');
+  }
 }

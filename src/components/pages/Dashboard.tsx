@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ElementType } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppContext, GatividhiEvent, VrittStatus } from "@/context/AppContext";
-import { useDashboardEvents, useUpdateEventStatus, useUpdateVritt } from "@/hooks/api/use-dashboard";
+import { useDashboardEvents, useUpdateEventStatus, useVrittEditor } from "@/hooks/api/use-dashboard";
 import { useToast } from '@/components/ToastProvider';
 import { useT } from '@/lib/useT';
 import { Badge } from "@/components/ui/badge";
@@ -243,12 +243,14 @@ export default function Dashboard() {
   }, [dashboardLane, events, t]);
 
   const updateEventStatusMutation = useUpdateEventStatus();
-  const updateVrittMutation = useUpdateVritt();
 
   const isApiConnected = !eventsError && !eventsLoading;
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [vrittEvent, setVrittEvent] = useState<GatividhiEvent | null>(null);
-  const [vrittForm, setVrittForm] = useState({ content: '', attendanceCount: 0, mediaUrls: [''], status: 'draft' as VrittStatus });
+  // Everything the report sheet needs — stored report, allowed actions, edits,
+  // and the per-action requests — lives in one hook so it can be tested on its own.
+  const vritt = useVrittEditor(vrittEvent);
+  const resetVritt = vritt.reset;
   const [qrEvent, setQrEvent] = useState<GatividhiEvent | null>(null);
 
   // ── Consume ?event=&action=&tab= from calendar handoffs ───────────────────
@@ -264,14 +266,22 @@ export default function Dashboard() {
 
   // For action=view on a published event, open the Vritt overlay (the dashboard's
   // closest equivalent to "view details" for a published event).
+  // Handled once per link. `events` refetches every minute and after every
+  // action; re-running this on each refetch reset the open sheet, wiping the
+  // person's unsaved edits and any error on screen.
+  const handledFocus = useRef<string | null>(null);
   useEffect(() => {
     if (!focusEventId || !focusAction || events.length === 0) return;
+    const key = `${focusEventId}:${focusAction}`;
+    if (handledFocus.current === key) return;
     const target = events.find((e) => e.id === focusEventId);
     if (!target) return;
+    handledFocus.current = key;
     if (focusAction === "view" && target.status === "Published") {
-      openVrittEditor(target);
+      resetVritt();
+      setVrittEvent(target);
     }
-  }, [focusEventId, focusAction, events]);
+  }, [focusEventId, focusAction, events, resetVritt]);
 
   // Loading state
   if (eventsLoading) {
@@ -307,12 +317,7 @@ export default function Dashboard() {
   };
 
   const openVrittEditor = (event: GatividhiEvent) => {
-    setVrittForm({
-      content: event.vrittContent ?? '',
-      attendanceCount: event.vrittAttendanceCount ?? 0,
-      mediaUrls: event.vrittMediaUrls?.length ? [...event.vrittMediaUrls] : [''],
-      status: event.vrittStatus ?? 'draft',
-    });
+    resetVritt();
     setVrittEvent(event);
   };
 
@@ -348,10 +353,10 @@ export default function Dashboard() {
         maxTokens: 500,
         temperature: 0.5,
         onToken: (_token, full) =>
-          setVrittForm(p => ({ ...p, content: full })),
+          vritt.setForm(p => ({ ...p, content: full })),
       });
       if (result) {
-        setVrittForm(p => ({
+        vritt.setForm(p => ({
           ...p,
           content: result,
           attendanceCount: checkedIn || totalPeople || p.attendanceCount,
@@ -395,7 +400,7 @@ export default function Dashboard() {
     }
     lines.push(isHi ? "निष्कर्ष / आगामी योजना:" : "Conclusion / Next Steps:");
     lines.push(isHi ? "[कार्यक्रम का सारांश और आगामी कार्ययोजना यहाँ लिखें]" : "[Write event summary and future action points here]");
-    setVrittForm(p => ({
+    vritt.setForm(p => ({
       ...p,
       content: lines.join("\n"),
       attendanceCount: checkedIn || totalPeople || p.attendanceCount,
@@ -452,36 +457,22 @@ export default function Dashboard() {
     }
   };
 
-  const saveVritt = async () => {
-    if (!vrittEvent) return;
-    if (updateVrittMutation.isPending) return;
-    const urls = vrittForm.mediaUrls.filter((url) => url.trim());
-    try {
-      await updateVrittMutation.mutateAsync({
-        eventId: vrittEvent.id,
-        content: vrittForm.content,
-        attendanceCount: vrittForm.attendanceCount,
-        mediaUrls: urls.length > 0 ? urls : [],
-        status: vrittForm.status,
-      });
-      addToast(t("Vritt saved!", "वृत्त सहेजा गया!"), "success");
-      setVrittEvent(null);
-    } catch {
-      addToast(t("Failed to save vritt", "वृत्त सहेजा मरने में विफल"), "error");
-    }
-  };
-
   const reviewOverlays = (
     <DashboardReviewOverlays
       vrittEvent={vrittEvent}
       qrEvent={qrEvent}
-      vrittForm={vrittForm}
-      setVrittForm={setVrittForm}
+      vrittForm={vritt.form}
+      setVrittForm={vritt.setForm}
+      vrittView={vritt.view}
+      reviewNotes={vritt.reviewNotes}
+      setReviewNotes={vritt.setReviewNotes}
+      isVrittDirty={vritt.isDirty}
+      pendingVrittAction={vritt.pendingAction}
+      vrittActionError={vritt.actionError}
+      onVrittAction={vritt.runAction}
       onCloseVritt={() => setVrittEvent(null)}
       onCloseQr={() => setQrEvent(null)}
       onGenerateSmartDraft={generateSmartDraft}
-      onSaveVritt={saveVritt}
-      isSavingVritt={updateVrittMutation.isPending}
     />
   );
 

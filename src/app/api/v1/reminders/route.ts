@@ -1,10 +1,21 @@
+/**
+ * GET /api/v1/reminders — Deadlines the caller is entitled to be reminded about.
+ *
+ * Rows and counts are derived from the same authorized query, so the counts can
+ * never hint at records the list withholds. Each row carries an exact deep link
+ * back to the record it names.
+ */
 import "server-only";
+
 import { NextRequest } from "next/server";
-import { eq, and, ne, isNotNull } from "drizzle-orm";
+import { and, eq, ne, isNotNull, inArray, or, type SQL } from "drizzle-orm";
+
 import { withAuth } from "@/lib/middleware/with-auth";
 import { apiSuccess } from "@/lib/response";
 import { db } from "@/db/client";
-import { projectTasks, projects, events } from "@/db/schema/index";
+import { events } from "@/db/schema/index";
+import { resolveScopedAccess, rowMatchesScope } from "@/lib/app/scope";
+import * as taskService from "@/lib/server/services/task-service";
 
 type ReminderItem = {
   type: "task" | "event";
@@ -30,93 +41,88 @@ function computeUrgency(dateStr: string): UrgencyBucket | null {
   return null;
 }
 
+function toIso(value: Date | string | null): string | null {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : value;
+}
+
 export const GET = withAuth(async (_req: NextRequest, ctx) => {
   const orgId = ctx.session.orgId;
+  const scopedAccess = resolveScopedAccess(ctx.session.assignments);
 
-  const [rawTasks, rawEvents] = await Promise.all([
-    db
-      .select({
-        id: projectTasks.id,
-        title: projectTasks.title,
-        titleHi: projectTasks.titleHi,
-        dueDate: projectTasks.dueDate,
-        status: projectTasks.status,
-      })
-      .from(projectTasks)
-      .innerJoin(projects, eq(projectTasks.projectId, projects.id))
-      .where(
-        and(
-          eq(projects.orgId, orgId),
-          isNotNull(projectTasks.dueDate),
-          ne(projectTasks.status, "done"),
-        ),
-      ),
+  const eventConditions: SQL<unknown>[] = [
+    eq(events.orgId, orgId),
+    isNotNull(events.startsAt),
+    ne(events.status, "cancelled"),
+  ];
 
+  if (!scopedAccess.orgWide) {
+    const reach: SQL<unknown>[] = [eq(events.createdBy, ctx.session.userId)];
+    if (scopedAccess.unitIds.size > 0) reach.push(inArray(events.unitId, [...scopedAccess.unitIds]));
+    if (scopedAccess.departmentIds.size > 0) {
+      reach.push(inArray(events.departmentId, [...scopedAccess.departmentIds]));
+    }
+    if (scopedAccess.eventIds.size > 0) reach.push(inArray(events.id, [...scopedAccess.eventIds]));
+    const reachClause = or(...reach);
+    if (reachClause) eventConditions.push(reachClause);
+  }
+
+  const [taskRows, rawEvents] = await Promise.all([
+    taskService.listReminderTasks(orgId, scopedAccess, ctx.session.userId, ctx.session.effectiveRoleCodes),
     db
       .select({
         id: events.id,
         title: events.title,
         startsAt: events.startsAt,
         status: events.status,
+        unitId: events.unitId,
+        departmentId: events.departmentId,
+        createdBy: events.createdBy,
       })
       .from(events)
-      .where(
-        and(
-          eq(events.orgId, orgId),
-          isNotNull(events.startsAt),
-          ne(events.status, "cancelled"),
-        ),
-      ),
+      .where(and(...eventConditions)),
   ]);
 
-  const taskRows = rawTasks as Array<{
-    id: string;
-    title: string;
-    titleHi: string | null;
-    dueDate: string | null;
-    status: string;
-  }>;
-
-  const eventRows = rawEvents as Array<{
-    id: string;
-    title: string;
-    startsAt: string | null;
-    status: string;
-  }>;
+  // Authoritative re-check on each row, mirroring the service-side task filter.
+  const eventRows = rawEvents.filter((e) => rowMatchesScope(scopedAccess, e, ctx.session.userId));
 
   const overdue: ReminderItem[] = [];
   const dueThisWeek: ReminderItem[] = [];
   const upcoming: ReminderItem[] = [];
 
+  const bucketFor = (urgency: UrgencyBucket) =>
+    urgency === "overdue" ? overdue : urgency === "dueThisWeek" ? dueThisWeek : upcoming;
+
   for (const t of taskRows) {
-    if (!t.dueDate) continue;
-    const urgency = computeUrgency(t.dueDate);
+    const due = toIso(t.dueDate);
+    if (!due) continue;
+    const urgency = computeUrgency(due);
     if (!urgency) continue;
-    const bucket = urgency === "overdue" ? overdue : urgency === "dueThisWeek" ? dueThisWeek : upcoming;
-    bucket.push({
+    bucketFor(urgency).push({
       type: "task",
       id: t.id,
       title: t.title,
       titleHi: t.titleHi,
-      date: t.dueDate,
+      date: due,
       status: t.status,
-      href: "/task-board",
+      // Exact deep link: opens the owning project with this task selected.
+      href: `/task-board?projectId=${t.projectId}&taskId=${t.id}`,
     });
   }
 
   for (const e of eventRows) {
-    if (!e.startsAt) continue;
-    const urgency = computeUrgency(e.startsAt);
+    const startsAt = toIso(e.startsAt);
+    if (!startsAt) continue;
+    const urgency = computeUrgency(startsAt);
     if (!urgency) continue;
-    const bucket = urgency === "overdue" ? overdue : urgency === "dueThisWeek" ? dueThisWeek : upcoming;
-    bucket.push({
+    bucketFor(urgency).push({
       type: "event",
       id: e.id,
       title: e.title,
       titleHi: null,
-      date: e.startsAt,
+      date: startsAt,
       status: e.status,
-      href: "/calendar",
+      href: `/calendar?eventId=${e.id}`,
     });
   }
 
